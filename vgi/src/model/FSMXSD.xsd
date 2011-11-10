@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://vaucanson.lrde.epita.fr"
+xmlns="http://vaucanson.lrde.epita.fr"
+elementFormDefault="qualified">
+
+<!--
+vaucanson.xsd version 0.5
+-->
+
+
+<!--
+<geometry> tag properties. Used to set the geometry properties of each
+element.
+-->
+<xs:complexType name="geometryState">
+  <xs:attribute name="x" type="xs:decimal"/>
+  <xs:attribute name="y" type="xs:decimal"/>
+</xs:complexType>
+
+<xs:complexType name="geometryTrans">
+  <xs:attribute name="transitionType">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+	<xs:pattern value="EdgeL|EdgeR|ArcL|ArcR|Loop"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="loopDir">
+    <xs:simpleType>
+      <xs:restriction base="xs:decimal">
+	<xs:minInclusive value="0"/>
+	<xs:maxExclusive value="360"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="labelPos">
+    <xs:simpleType>
+      <xs:restriction base="xs:decimal">
+	<xs:minInclusive value="0"/>
+	<xs:maxInclusive value="100"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="labelDist" type="xs:decimal"/>
+</xs:complexType>
+
+<xs:complexType name="geometryInitial">
+  <xs:attribute name="initialDir">
+    <xs:simpleType>
+      <xs:restriction base="xs:decimal">
+	<xs:minInclusive value="0"/>
+	<xs:maxExclusive value="360"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="labelPos">
+    <xs:simpleType>
+      <xs:restriction base="xs:decimal">
+	<xs:minInclusive value="0"/>
+	<xs:maxInclusive value="100"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="labelDist" type="xs:decimal"/>
+</xs:complexType>
+
+<xs:complexType name="geometryFinal">
+  <xs:attribute name="finalDir">
+    <xs:simpleType>
+      <xs:restriction base="xs:decimal">
+	<xs:minInclusive value="0"/>
+	<xs:maxExclusive value="360"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="finalMod">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+	<xs:pattern value="circle|arrow"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="labelPos">
+    <xs:simpleType>
+      <xs:restriction base="xs:decimal">
+	<xs:minInclusive value="0"/>
+	<xs:maxInclusive value="100"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="labelDist" type="xs:decimal"/>
+</xs:complexType>
+
+<xs:complexType name="geometryAut">
+  <xs:attribute name="x" type="xs:decimal"/>
+  <xs:attribute name="y" type="xs:decimal"/>
+</xs:complexType>
+
+
+
+<!--
+<drawing> tag properties.
+This tag has not been specified yet.
+-->
+<xs:complexType name="drawing" mixed="true">
+</xs:complexType>
+
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  valueType
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+<!--
+<monCompGen> describes an item of a "tuple" generator in a "simple" monoid
+-->
+<xs:complexType name="monCompGen">
+  <xs:attribute name="value" type="xs:string"/>
+</xs:complexType>
+
+<!--
+<monGen> describes a generator of a "simple" monoid
+-->
+<xs:complexType name="monGen">
+  <xs:sequence>
+    <!-- maxOccurs=minOccurs=genDim if genKind="tuple" -->
+    <xs:element name="monCompGen" type="monCompGen" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+  <xs:attribute name="value" type="xs:string"/> <!-- use="required" if genKind="simple" -->
+</xs:complexType>
+
+<xs:simpleType name="genSortValue">
+  <xs:restriction base="xs:string">
+    <xs:pattern value="letters|digits|alphanums|integers"/>
+  </xs:restriction>
+</xs:simpleType>
+<!--
+<genCompSort> describes the sort of one item of a <monGen> tuple.
+-->
+<xs:complexType name="genCompSort">
+  <xs:attribute name="value" type="genSortValue" use="required"/>
+</xs:complexType>
+<!--
+<genSort> describes the sort of each item of a <monGen> tuple.
+-->
+<xs:complexType name="genSort">
+  <xs:sequence>
+    <xs:element name="genCompSort" type="genCompSort" minOccurs="2" maxOccurs="unbounded"/> <!-- minOccurs=maxOccurs=genDim -->
+  </xs:sequence>
+</xs:complexType>
+<!--
+<monoid> describes a monoid.
+Can be a "unit", a "free" or a "product" monoid.
+-->
+<xs:complexType name="monoid">
+  <xs:sequence>
+    <xs:element name="writingData" minOccurs="0">
+      <xs:complexType>
+	<xs:attribute name="identitySymbol" use="required"/>
+      </xs:complexType>
+    </xs:element>
+    <xs:element name="genSort" type="genSort" minOccurs="0"/>
+      <!-- should be used only if type="free" and genKind="tuple" -->
+    <xs:element name="monGen" type="monGen" minOccurs="0" maxOccurs="unbounded"/>
+      <!-- should be used only if type="product" -->
+    <xs:element name="monoid" type="monoid" minOccurs="0" maxOccurs="unbounded"/> <!-- minOccurs=maxOccurs=prodDim -->
+  </xs:sequence>
+  <xs:attribute name="type" use="required">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+	<xs:pattern value="unit|free|product"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="genKind">
+    <!-- should be used only if type="free". -->
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+	<xs:pattern value="simple|tuple"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="genDescrip">
+    <!-- should be used only if "type" is set to "free". -->
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+	<xs:pattern value="enum|range|set"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="genSort" type="genSortValue"/>
+    <!-- should be used only if type="free", gen Descrip="enum" and genKind="simple" -->
+  <xs:attribute name="prodDim" type="xs:integer"/> <!-- should be used only if type="product" -->
+  <xs:attribute name="genDim" type="xs:integer"/> <!-- should be used only if type="free" and genKind="tuple" -->
+</xs:complexType>
+<!--
+<semiring> describes a semiring.
+Can be either a "numerical" or "series" semiring.
+Writing data can be added.
+-->
+<xs:complexType name="semiring">
+  <xs:sequence>
+    <xs:element name="writingData" minOccurs="0">
+      <xs:complexType>
+	<xs:attribute name="identitySymbol" use="required"/>
+	<xs:attribute name="zeroSymbol" use="required"/>
+      </xs:complexType>
+    </xs:element>
+    <xs:element name="semiring" type="semiring" minOccurs="0"/>
+      <!-- if type="series" then minOccurs="1" else "0" -->
+    <xs:element name="monoid" type="monoid" minOccurs="0"/>
+      <!-- if type="series" then minOccurs="1" else "0" -->
+  </xs:sequence>
+  <xs:attribute name="type" use="required">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+	<xs:pattern value="numerical|series"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="set">
+    <!-- if type="numerical" then use="required" else shouldn't be use -->
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+	<xs:pattern value="B|N|Z|Q|R"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="operations">
+    <!-- if type="numerical" then use="required" else shouldn't be use -->
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+	<xs:pattern value="classical|minPlus|maxPlus|minMax"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+</xs:complexType>
+<!--
+<valueType> describes the algebraic structure of an automaton or a regular expression.
+-->
+<xs:complexType name="valueType">
+  <xs:sequence>
+    <xs:element name="semiring" type="semiring"/>
+    <xs:element name="monoid" type="monoid"/>
+  </xs:sequence>
+</xs:complexType>
+
+
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  RegExp
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+<!--
+  <weight>
+-->
+
+<xs:complexType name="weight">
+  <xs:sequence>
+    <xs:group ref="typedRegExpGroup" minOccurs="0"/>
+  </xs:sequence>
+  <xs:attribute name="value" type="xs:string"/>
+</xs:complexType>
+
+<!--
+ Terminal tags of the expression grammar.
+-->
+<xs:complexType name="monElmt">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:choice>
+      <!-- if monoid type="product" , minOccurs=maxOccurs=prodDim -->
+      <xs:element name="monElmt" type="monElmt"/>
+      <xs:element name="one" type="one"/>
+      <!-- else monoid type="free" -->
+      <xs:element name="monGen" type="monGen"/>
+    </xs:choice>
+  </xs:sequence>
+ </xs:complexType>
+<xs:complexType name="zero">
+</xs:complexType>
+<xs:complexType name="one">
+</xs:complexType>
+<!--
+ <star> tag properties. Used to add a star in the regular expression.
+ The expression of a star can be any tag out of those defined in the
+ typedRegExp group.
+-->
+<xs:complexType name="star">
+  <xs:group ref="typedRegExpGroup"/>
+</xs:complexType>
+<!--
+ <sum> tag properties. Used to represent a sum in the regular expression.
+ The members of a product can be any tag out of those defined in the
+ typedRegExp group.
+-->
+<xs:complexType name="sum">
+   <xs:sequence minOccurs="2" maxOccurs="2">
+     <xs:group ref="typedRegExpGroup"/>
+   </xs:sequence>
+</xs:complexType>
+<!--
+ <product> tag properties. Used to represent a product in the regular expression.
+ The members of a product can be any tag out of those defined in the
+ typedRegExp group.
+-->
+<xs:complexType name="product">
+   <xs:sequence minOccurs="2" maxOccurs="2">
+     <xs:group ref="typedRegExpGroup"/>
+   </xs:sequence>
+</xs:complexType>
+<!--
+ <xxxExtMul> tag properties. Used to represent a product in the regular expression.
+ The second member of a product can be any tag out of those defined in the
+ typedRegExp group.
+-->
+<xs:complexType name="ExtMul">
+  <xs:sequence>
+    <xs:element name="weight" type="weight"/>
+    <xs:group ref="typedRegExpGroup"/>
+  </xs:sequence>
+</xs:complexType>
+<!--
+ <typedRegExp> or <label> describes a regular expression.
+-->
+<xs:group name="typedRegExpGroup">
+  <xs:choice>
+    <xs:element name="star" type="star"/>
+    <xs:element name="sum" type="sum"/>
+    <xs:element name="product" type="product"/>
+    <xs:element name="zero" type="zero"/>
+    <xs:element name="one" type="one"/>
+    <xs:element name="leftExtMul" type="ExtMul"/>
+    <xs:element name="rightExtMul" type="ExtMul"/>
+    <xs:element name="monElmt" type="monElmt"/>
+  </xs:choice>
+</xs:group>
+
+<xs:complexType name="typedRegExp">
+  <xs:group ref="typedRegExpGroup"/>
+</xs:complexType>
+
+<!--
+  genSortValue gives the Sort of (an item of) a generator
+-->
+
+<!--
+<regExp> describes a regular expression.
+It takes its type (semiring, monoid) and its content (operations and atoms)
+-->
+<xs:complexType name="regExp">
+  <xs:sequence>
+    <xs:element name="valueType" type="valueType"/>
+    <xs:element name="typedRegExp" type="typedRegExp"/>
+  </xs:sequence>
+  <xs:attribute name="name" type="xs:string"/>
+</xs:complexType>
+
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  Automaton
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+<!--
+<states> lists states in the automaton.
+-->
+<xs:complexType name="states">
+  <xs:sequence>
+    <xs:element name="state" type="state" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+</xs:complexType>
+<!--
+<state> describes a state in the automaton.
+It takes a id.
+It can take a name (more explicit than an id)
+It can take a key (to list in which orders the states can be processed in some algorithms)
+Geometry and drawing data can be added.
+-->
+<xs:complexType name="state">
+  <xs:sequence>
+    <xs:element name="geometricData" type="geometryState" minOccurs="0"/>
+    <xs:element name="drawingData" type="drawing" minOccurs="0"/>
+  </xs:sequence>
+  <xs:attribute name="id" type="xs:string" use="required"/>
+  <xs:attribute name="name" type="xs:string"/>
+  <xs:attribute name="key" type="xs:integer"/>
+</xs:complexType>
+
+
+<!--
+<transitions> lists transitions and final/initial states.
+-->
+<xs:complexType name="transitions">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:choice>
+      <xs:element name="transition" type="transition"/>
+      <xs:element name="initial" type="initial"/>
+      <xs:element name="final" type="final"/>
+    </xs:choice>
+  </xs:sequence>
+</xs:complexType>
+<!--
+<transition> describes a transition between two states.
+Geometry and drawing data can be added.
+-->
+<xs:complexType name="transition">
+  <xs:sequence>
+    <xs:element name="geometricData" type="geometryTrans" minOccurs="0"/>
+    <xs:element name="drawingData" type="drawing" minOccurs="0"/>
+    <xs:element name="label" type="typedRegExp"/>
+  </xs:sequence>
+  <xs:attribute name="src" type="xs:string" use="required"/>
+  <xs:attribute name="target" type="xs:string" use="required"/>
+</xs:complexType>
+<!--
+<initial> describes the initial properties of a state.
+Geometry and drawing data can be added.
+-->
+<xs:complexType name="initial">
+  <xs:sequence>
+    <xs:element name="geometricData" type="geometryInitial" minOccurs="0"/>
+    <xs:element name="drawingData" type="drawing" minOccurs="0"/>
+    <xs:element name="label" type="typedRegExp" minOccurs="0"/>
+  </xs:sequence>
+  <xs:attribute name="state" type="xs:string" use="required"/>
+</xs:complexType>
+<!--
+<final> describes the final properties of a state.
+Geometry and drawing data can be added.
+-->
+<xs:complexType name="final">
+  <xs:sequence>
+    <xs:element name="geometricData" type="geometryFinal" minOccurs="0"/>
+    <xs:element name="drawingData" type="drawing" minOccurs="0"/>
+    <xs:element name="label" type="typedRegExp" minOccurs="0"/>
+  </xs:sequence>
+  <xs:attribute name="state" type="xs:string" use="required"/>
+</xs:complexType>
+
+
+<!--
+<automatonStruct> describes an automaton content (states, transitions).
+-->
+<xs:complexType name="automatonStruct">
+  <xs:sequence>
+    <xs:element name="states" type="states"/>
+    <xs:element name="transitions" type="transitions"/>
+  </xs:sequence>
+</xs:complexType>
+
+
+<!--
+<automaton> describes an automaton.
+It takes its type (semiring, monoid) and its content (states, transitions).
+It can takes geometry and drawing data.
+-->
+<xs:complexType name="automaton">
+  <xs:sequence>
+    <xs:element name="geometricData" type="geometryAut" minOccurs="0"/>
+    <xs:element name="drawingData" type="drawing" minOccurs="0"/>
+    <xs:element name="valueType" type="valueType"/>
+    <xs:element name="automatonStruct" type="automatonStruct"/>
+  </xs:sequence>
+  <xs:attribute name="name" type="xs:string"/>
+  <xs:attribute name="readingDir">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+	<xs:pattern value="left|right"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+</xs:complexType>
+
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  FSMXML
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+<!--
+<fsmxml> is the document root.
+It contains global informations about the format.
+And list a set of automata and regular expressions.
+-->
+<xs:complexType name="fsmxml">
+  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+    <xs:choice>
+      <xs:element name="regExp" type="regExp"/>
+      <xs:element name="automaton" type="automaton"/>
+    </xs:choice>
+  </xs:sequence>
+  <xs:attribute name="version" type="xs:string" use="required"/>
+</xs:complexType>
+
+<xs:element name="fsmxml" type="fsmxml"/>
+
+</xs:schema>

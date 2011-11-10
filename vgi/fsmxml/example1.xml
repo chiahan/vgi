@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fsmxml version="1.0" xmlns="http://vaucanson.lrde.epita.fr">
+    <automaton>
+        <valueType>
+            <semiring operations="classical" set="B" type="numerical"/>
+            <monoid genDescrip="enum" genKind="simple" genSort="letters" type="free">
+                <monGen value="a"/>
+            </monoid>
+        </valueType>
+        <automatonStruct>
+            <states>
+                <state id="19" name="s19">
+                    <geometricData x="669.0" y="750.0"/>
+                </state>
+                <state id="18" name="s18">
+                    <geometricData x="355.0" y="749.0"/>
+                </state>
+                <state id="17" name="s17">
+                    <geometricData x="243.0" y="752.0"/>
+                </state>
+                <state id="16" name="s16">
+                    <geometricData x="135.0" y="755.0"/>
+                </state>
+                <state id="15" name="s15">
+                    <geometricData x="441.0" y="689.0"/>
+                </state>
+                <state id="14" name="s14">
+                    <geometricData x="347.0" y="686.0"/>
+                </state>
+                <state id="13" name="s13">
+                    <geometricData x="204.0" y="679.0"/>
+                </state>
+                <state id="12" name="s12">
+                    <geometricData x="119.0" y="682.0"/>
+                </state>
+                <state id="11" name="s11">
+                    <geometricData x="654.0" y="602.0"/>
+                </state>
+                <state id="10" name="s10">
+                    <geometricData x="340.0" y="607.0"/>
+                </state>
+                <state id="9" name="s9">
+                    <geometricData x="210.0" y="593.0"/>
+                </state>
+                <state id="8" name="s8">
+                    <geometricData x="636.0" y="512.0"/>
+                </state>
+                <state id="7" name="s7">
+                    <geometricData x="283.0" y="509.0"/>
+                </state>
+                <state id="6" name="s6">
+                    <geometricData x="626.0" y="410.0"/>
+                </state>
+                <state id="5" name="s5">
+                    <geometricData x="421.0" y="401.0"/>
+                </state>
+                <state id="4" name="s4">
+                    <geometricData x="616.0" y="299.0"/>
+                </state>
+                <state id="3" name="s3">
+                    <geometricData x="419.0" y="313.0"/>
+                </state>
+                <state id="2" name="s2">
+                    <geometricData x="610.0" y="229.0"/>
+                </state>
+                <state id="22" name="s22">
+                    <geometricData x="482.0" y="810.0"/>
+                </state>
+                <state id="1" name="s1">
+                    <geometricData x="705.0" y="147.0"/>
+                </state>
+                <state id="21" name="s21">
+                    <geometricData x="379.0" y="786.0"/>
+                </state>
+                <state id="0" name="s0">
+                    <geometricData x="255.0" y="144.0"/>
+                </state>
+                <state id="20" name="s20">
+                    <geometricData x="254.0" y="790.0"/>
+                </state>
+            </states>
+            <transitions>
+                <transition src="15" target="19">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="9" target="12">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="2" target="22">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="13" target="16">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="9" target="13">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="7" target="10">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="7" target="9">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="5" target="22">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="5" target="15">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="11" target="19">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="8" target="11">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="6" target="8">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="5" target="7">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="4" target="6">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="20" target="22">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="3" target="5">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="21" target="22">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="2" target="4">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="18" target="21">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="2" target="3">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="15" target="18">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="1" target="19">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="15" target="17">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="1" target="2">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="9" target="14">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="0" target="2">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="10" target="14">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="0" target="3">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="17" target="20">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="0" target="20">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="13" target="17">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="0" target="12">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="12" target="16">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+            </transitions>
+        </automatonStruct>
+    </automaton>
+</fsmxml>

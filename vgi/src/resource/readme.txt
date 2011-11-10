@@ -1,0 +1,1 @@
+this folder contains several icons used for VGI interface visualizations

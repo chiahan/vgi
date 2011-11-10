@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fsmxml version="1.0" xmlns="http://vaucanson.lrde.epita.fr">
+    <automaton>
+        <valueType>
+            <semiring operations="classical" set="B" type="numerical"/>
+            <monoid genDescrip="enum" genKind="simple" genSort="letters" type="free">
+                <monGen value="a"/>
+                <monGen value="b"/>
+            </monoid>
+        </valueType>
+        <automatonStruct>
+            <states>
+                <state id="19" name="s19">
+                    <geometricData x="95.0" y="440.0"/>
+                </state>
+                <state id="18" name="s18">
+                    <geometricData x="363.0" y="388.0"/>
+                </state>
+                <state id="17" name="s17">
+                    <geometricData x="491.0" y="448.0"/>
+                </state>
+                <state id="16" name="s16">
+                    <geometricData x="739.0" y="472.0"/>
+                </state>
+                <state id="15" name="s15">
+                    <geometricData x="341.0" y="196.0"/>
+                </state>
+                <state id="14" name="s14">
+                    <geometricData x="825.0" y="50.0"/>
+                </state>
+                <state id="13" name="s13">
+                    <geometricData x="278.0" y="400.0"/>
+                </state>
+                <state id="12" name="s12">
+                    <geometricData x="503.0" y="318.0"/>
+                </state>
+                <state id="11" name="s11">
+                    <geometricData x="894.0" y="227.0"/>
+                </state>
+                <state id="10" name="s10">
+                    <geometricData x="130.0" y="231.0"/>
+                </state>
+                <state id="9" name="s9">
+                    <geometricData x="337.0" y="385.0"/>
+                </state>
+                <state id="8" name="s8">
+                    <geometricData x="280.0" y="217.0"/>
+                </state>
+                <state id="7" name="s7">
+                    <geometricData x="480.0" y="226.0"/>
+                </state>
+                <state id="6" name="s6">
+                    <geometricData x="490.0" y="518.0"/>
+                </state>
+                <state id="5" name="s5">
+                    <geometricData x="917.0" y="183.0"/>
+                </state>
+                <state id="4" name="s4">
+                    <geometricData x="836.0" y="349.0"/>
+                </state>
+                <state id="3" name="s3">
+                    <geometricData x="18.0" y="416.0"/>
+                </state>
+                <state id="2" name="s2">
+                    <geometricData x="803.0" y="447.0"/>
+                </state>
+                <state id="1" name="s1">
+                    <geometricData x="144.0" y="167.0"/>
+                </state>
+                <state id="0" name="s0">
+                    <geometricData x="655.0" y="249.0"/>
+                </state>
+            </states>
+            <transitions>
+                <transition src="9" target="11">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="18" target="4">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="5" target="9">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="17" target="11">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="15" target="6">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="16" target="0">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="15" target="19">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="13" target="4">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="9" target="10">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="12" target="15">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="3" target="2">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="4" target="17">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="0" target="19">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="19" target="13">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="17" target="14">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="7" target="9">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="7" target="8">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="2" target="14">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="6" target="1">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+                <transition src="5" target="19">
+                    <label>
+                        <one/>
+                    </label>
+                </transition>
+            </transitions>
+        </automatonStruct>
+    </automaton>
+</fsmxml>
