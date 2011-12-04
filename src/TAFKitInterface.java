@@ -1,6 +1,6 @@
 
-import java.io.File;
-import java.util.ArrayList;
+import java.io.FileNotFoundException;
+import java.util.List;
 
 /**
  *
@@ -20,16 +20,28 @@ public interface TAFKitInterface {
 			String context;
 		}  // End public class InputOutput
 		public String name;
-		public ArrayList<IoInfo> inputs;
-		public ArrayList<IoInfo> outputs;
+		public List<IoInfo> inputsInfo;
+		public List<IoInfo> outputsInfo;
 		public String description;
 	}  // End public class VcsnAlgorithm
 
-	public File getTafKitFolder();
+	public String getTafKitPathString();
 
-	public void setTafKitFolder(String tafKitFolderPathStr);
+	public void setTafKitPathString(
+			String tafKitFolderPathStr)
+			throws
+			FileNotFoundException;
 
-	public ArrayList<VcsnAlgorithm> listVcsnAlgorithms(String tafKitSuffix);
+	public List<VcsnAlgorithm> listVcsnAlgorithms(
+			String tafKitSuffix)
+			throws
+			FileNotFoundException;
 
-	public ArrayList<Object> runVcsnAlgorithm(String tafKitSuffix, VcsnAlgorithm algorithm, ArrayList<Object> inputs);
+	public List<Object> runVcsnAlgorithm(
+			String tafKitSuffix,
+			VcsnAlgorithm algorithm,
+			List<Object> inputs)
+			throws
+			FileNotFoundException,
+			IllegalArgumentException;
 }  // End public interface TAFKitInterface
