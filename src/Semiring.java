@@ -19,7 +19,8 @@ public class Semiring {
     private SemiringSet set;
     private SemiringOperation operation;
     private String writingData;
-    private ArrayList<Semiring> subsemiring;
+    private ArrayList<Semiring> subSemiring;
+    private ArrayList<Monoid> subMonoid;
     
     public Semiring() {
         identitySymbol = new String();
@@ -28,7 +29,8 @@ public class Semiring {
         set = SemiringSet.B;
         operation = SemiringOperation.CLASSICAL;
         writingData = new String();
-        subsemiring = new ArrayList<Semiring>();
+        subSemiring = new ArrayList<Semiring>();
+        subMonoid = new ArrayList<Monoid>();
     }
     
     public void setSet(SemiringSet set) {

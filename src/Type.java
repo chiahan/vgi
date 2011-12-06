@@ -7,6 +7,11 @@
  * @author wkren
  */
 public class Type {
-    Semiring semiring;
-    Monoid monoid;
+    private Semiring semiring;
+    private Monoid monoid;
+    
+    public Type() {
+        semiring = new Semiring();
+        monoid = new Monoid();
+    }
 }
