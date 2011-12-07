@@ -10,7 +10,10 @@ import java.util.ArrayList;
  */
 public class Monoid {
     private String identitySymbol;
-    
+    private int dimension;
+    private String writingData;
+    private int productDim;
+    private Monoid nextMonoid;
     public enum MonoidType {
         unit, free, product
     }
@@ -30,18 +33,80 @@ public class Monoid {
         GeneratorKind kind;
         GeneratorDescript descript;
         GeneratorSort sort;
-        int dim;
-        int prodDim;
     }
     private Generator generator;
-    private String writingData;
-    private ArrayList<Monoid> subMonoid;
-    
+
     public Monoid() {
         identitySymbol = new String();
-        generator = new Generator();
+        dimension = 0;
         writingData = new String();
-        subMonoid = new ArrayList<Monoid>();
+        productDim = 0;
+        nextMonoid = null;
+    }
+    
+    public Monoid(String identitySymbol, int dimension, String writingData,
+                  int productDim, Monoid nextMonoid) {
+        this.identitySymbol = identitySymbol;
+        this.dimension = dimension;
+        this.writingData = writingData;
+        this.productDim = productDim;
+        this.nextMonoid = nextMonoid;
+    }
+    
+    /**
+     * @return the identitySymbol
+     */
+    public String getIdentitySymbol() {
+        return identitySymbol;
+    }
+
+    /**
+     * @param identitySymbol the identitySymbol to set
+     */
+    public void setIdentitySymbol(String identitySymbol) {
+        this.identitySymbol = identitySymbol;
+    }
+
+    /**
+     * @return the dimension
+     */
+    public int getDimension() {
+        return dimension;
+    }
+
+    /**
+     * @param dimension the dimension to set
+     */
+    public void setDimension(int dimension) {
+        this.dimension = dimension;
+    }
+
+    /**
+     * @return the writingData
+     */
+    public String getWritingData() {
+        return writingData;
+    }
+
+    /**
+     * @return the prodcutDim
+     */
+    public int getProdcutDim() {
+        return productDim;
+    }
+
+    /**
+     * @param prodcutDim the prodcutDim to set
+     */
+    public void setProdcutDim(int prodcutDim) {
+        this.productDim = prodcutDim;
+    }
+
+    /**
+     * @return the subMonoid
+     */
+    public Monoid getNextMonoid() {
+        return nextMonoid;
     }
     
     public void setType(MonoidType type) {
@@ -62,16 +127,5 @@ public class Monoid {
         if ((this.type == MonoidType.free ) && 
             (this.generator.kind == GeneratorKind.simple))
             generator.sort = sort;
-    }
-    
-    public void setGeneratorDim(int dim) {
-        if ((this.type == MonoidType.free ) && 
-            (this.generator.kind == GeneratorKind.tuple))
-            generator.dim = dim;
-    }
-    
-    public void setGeneratorProdDim(int dim) {
-        if (this.generator.kind == GeneratorKind.tuple)
-            generator.prodDim = dim;
     }
 }

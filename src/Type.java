@@ -7,6 +7,16 @@
  * @author wkren
  */
 public class Type {
-    Semiring semiring;
-    Monoid monoid;
+    private Semiring semiring;
+    private Monoid monoid;
+    
+    public Type() {
+        semiring = new Semiring();
+        monoid = new Monoid();
+    }
+    
+    public Type(Semiring semiring, Monoid monoid) {
+        this.semiring = semiring;
+        this.monoid = monoid;
+    }
 }
