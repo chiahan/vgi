@@ -17,136 +17,142 @@ import org.json.JSONTokener;
  * @author JLiu
  */
 public class TAFKit implements TAFKitInterface {
-	
+
 	private File pmTafKitPath;
-	
-	public TAFKit(String tafKitPathString) throws FileNotFoundException {
-		this.setTafKitPathString(tafKitPathString);
+
+	public TAFKit(String tafKitPath)
+			throws
+			FileNotFoundException {
+		this.setTafKitPath(tafKitPath);
 	}  // End public TAFKit(String tafKitFolderPathStr)
 
-	public String getTafKitPathString() {
+	public String getTafKitPath() {
 		return pmTafKitPath.getAbsolutePath();
 	}  // End public File getTafKitFolder ()
 
-	public void setTafKitPathString(
-			String tafKitFolderPathStr)
+	public void setTafKitPath(
+			String tafKitFolderPath)
 			throws
 			FileNotFoundException {
-		File folder = new File(tafKitFolderPathStr);
+
+		File folder = new File(tafKitFolderPath);
 		if (!folder.exists()) {
-			throw new FileNotFoundException("The specified TAF-Kit path \"" + tafKitFolderPathStr + "\" does not exist!");
+			throw new FileNotFoundException("The specified TAF-Kit path \"" + tafKitFolderPath + "\" does not exist!");
 		}
 		if (!folder.isDirectory()) {
-			throw new FileNotFoundException("The specified TAF-Kit path \"" + tafKitFolderPathStr + "\" is not a folder!");
+			throw new FileNotFoundException("The specified TAF-Kit path \"" + tafKitFolderPath + "\" is not a folder!");
 		}
 		File file = new File(folder, "vcsn-char-b");
-		if (!file.exists()) {
-			throw new FileNotFoundException("The specified TAF-Kit path \"" + tafKitFolderPathStr + "\" does not have the most basic TAF-Kit executable \"vcsn-char-b\" so it is probably an incorrect TAF-Kit path.");
+		if (!file.isFile()) {
+			throw new FileNotFoundException("The specified TAF-Kit path \"" + tafKitFolderPath + "\" does not have the most basic TAF-Kit executable \"vcsn-char-b\" so it is probably an incorrect TAF-Kit path.");
 		}
 		pmTafKitPath = folder;
-	}  /* End public void setTafKitPathString(
-	 * String tafKitFolderPathStr)
-	 * throws
-	 * FileNotFoundException
-	 */
-	
-	
+
+	}  // End public void setTafKitPath(...)
+
 	public List<VcsnAlgorithm> listVcsnAlgorithms(
 			String tafKitSuffix)
 			throws
-			FileNotFoundException {
-		
+			FileNotFoundException,
+			TAFKitException {
+
 		if (!(new File(pmTafKitPath, "vcsn-" + tafKitSuffix).exists())) {
-			throw new FileNotFoundException("The specified TAF-Kit executable \"" + this.getTafKitPathString() + File.separator + "vcsn-" + tafKitSuffix + "\" does not exist!");
+			throw new FileNotFoundException("The specified TAF-Kit executable \"" + this.getTafKitPath() + File.separator + "vcsn-" + tafKitSuffix + "\" does not exist!");
 		}
-		
+
 		Process process;
+		int exitValue;
 		try {
 			process = Runtime.getRuntime().exec("./vcsn-" + tafKitSuffix + " --list-all-commands-json",
 					null, pmTafKitPath);
-			int exitValue = process.waitFor();
-			
-			switch (exitValue) {
-				case 0:
-					break;
-				default:
-					InputStream inputStream = process.getErrorStream();
-					Error error = new Error(convertInputStreamToString(inputStream));
-					inputStream.close();
-					throw error;
-			}  // End switch (exitValue)
-
-			
-		} catch (Exception exception) {
-			throw new Error(exception);
+			exitValue = process.waitFor();
+		} catch (IOException ioException) {
+			throw new Error(ioException);
+		} catch (InterruptedException interruptedException) {
+			throw new Error(interruptedException);
 		}
-		
+
+
+		switch (exitValue) {
+			case 0:
+				break;
+			default:
+				InputStream inputStream = process.getErrorStream();
+				TAFKitException tafKitException = new TAFKitException(convertInputStreamToString(inputStream));
+				try {
+					inputStream.close();
+				} catch (IOException ioException) {
+					throw new Error(ioException);
+				}
+				throw tafKitException;
+		}  // End switch (exitValue)
+
 		JSONArray jaCategories;
 		try {
 			jaCategories = new JSONArray(new JSONTokener(process.getInputStream()));
 		} catch (JSONException jsonException) {
-			throw new Error("Output format of --list-all-commands-json probably changed.", jsonException);
+			throw new TAFKitException("Output format of --list-all-commands-json probably changed.", jsonException);
 		}
-		
+
 		ArrayList<VcsnAlgorithm> vcsnAlgorithmsList = new ArrayList<VcsnAlgorithm>();
-		
+
 		for (int index = 0; index < jaCategories.length(); index++) {
-			
+
 			JSONObject joCategory = jaCategories.optJSONObject(index);
 			if (joCategory == null) {
-				throw new Error("Output format of --list-all-commands-json probably changed.");
+				throw new TAFKitException("Output format of --list-all-commands-json probably changed.");
 			}
-			
+
 			String string = joCategory.optString("category", null);
 			if (string == null) {
-				throw new Error("Output format of --list-all-commands-json probably changed.");
+				throw new TAFKitException("Output format of --list-all-commands-json probably changed.");
 			}
 			if (string.toLowerCase().contains("input/output")) {
 				continue;
 			}
-			
+
 			JSONArray jaAlgorithms = joCategory.optJSONArray("algorithms");
 			if (jaAlgorithms == null) {
-				throw new Error("Output format of --list-all-commands-json probably changed.");
+				throw new TAFKitException("Output format of --list-all-commands-json probably changed.");
 			}
-			
+
 			VcsnAlgorithm vcsnAlgorithm = new VcsnAlgorithm();
 			vcsnAlgorithm.name = "category";
 			vcsnAlgorithm.inputsInfo = null;
 			vcsnAlgorithm.outputsInfo = null;
 			vcsnAlgorithm.description = string;
 			vcsnAlgorithmsList.add(vcsnAlgorithm);
-			
+
 			for (int index2 = 0; index2 < jaAlgorithms.length(); index2++) {
-				
+
 				JSONObject joAlgorithm = jaAlgorithms.optJSONObject(index2);
 				if (joAlgorithm == null) {
-					throw new Error("Output format of --list-all-commands-json probably changed.");
+					throw new TAFKitException("Output format of --list-all-commands-json probably changed.");
 				}
-				
+
 				boolean expert = joAlgorithm.optBoolean("expert", false);
 				if (expert) {
 					continue;
 				}
-				
+
 				vcsnAlgorithm = new VcsnAlgorithm();
 				vcsnAlgorithm.name = joAlgorithm.optString("name", null);
 				vcsnAlgorithm.description = joAlgorithm.optString("description", null);
-				
+
 				JSONArray jaInputs = joAlgorithm.optJSONArray("input");
 				if (jaInputs == null) {
-					throw new Error("Output format of --list-all-commands-json probably changed.");
+					throw new TAFKitException("Output format of --list-all-commands-json probably changed.");
 				}
-				
+
 				ArrayList<VcsnAlgorithm.IoInfo> ioInfos = new ArrayList<VcsnAlgorithm.IoInfo>();
-				
+
 				for (int index3 = 0; index3 < jaInputs.length(); index3++) {
-					
+
 					JSONObject joInput = jaInputs.optJSONObject(index3);
 					if (joInput == null) {
-						throw new Error("Output format of --list-all-commands-json probably changed.");
+						throw new TAFKitException("Output format of --list-all-commands-json probably changed.");
 					}
-					
+
 					VcsnAlgorithm.IoInfo ioInfo = new VcsnAlgorithm.IoInfo();
 					ioInfo.context = joInput.optString("context", null);
 					string = joInput.optString("type", null);
@@ -168,24 +174,24 @@ public class TAFKit implements TAFKitInterface {
 						ioInfo.type = VcsnAlgorithm.IoInfo.Type.UNKNOWN;
 					}
 					ioInfos.add(ioInfo);
-					
+
 				}  // End for (int index3 = 0; index3 < jaInputs.length(); index3++)
 
 				vcsnAlgorithm.inputsInfo = ioInfos;
 				JSONArray jaOutputs = joAlgorithm.optJSONArray("output");
 				if (jaOutputs == null) {
-					throw new Error("Output format of --list-all-commands-json probably changed.");
+					throw new TAFKitException("Output format of --list-all-commands-json probably changed.");
 				}
-				
+
 				ioInfos = new ArrayList<VcsnAlgorithm.IoInfo>();
-				
+
 				for (int index3 = 0; index3 < jaOutputs.length(); index3++) {
-					
+
 					JSONObject joOutput = jaOutputs.optJSONObject(index3);
 					if (joOutput == null) {
-						throw new Error("Output format of --list-all-commands-json probably changed.");
+						throw new TAFKitException("Output format of --list-all-commands-json probably changed.");
 					}
-					
+
 					VcsnAlgorithm.IoInfo ioInfo = new VcsnAlgorithm.IoInfo();
 					ioInfo.context = joOutput.optString("context", null);
 					string = joOutput.optString("type", null);
@@ -207,49 +213,38 @@ public class TAFKit implements TAFKitInterface {
 						ioInfo.type = VcsnAlgorithm.IoInfo.Type.UNKNOWN;
 					}
 					ioInfos.add(ioInfo);
-					
+
 				}  // End for (int index3 = 0; index3 < jaOutputs.length(); index3++)
 
 				vcsnAlgorithm.outputsInfo = ioInfos;
 				vcsnAlgorithmsList.add(vcsnAlgorithm);
-				
+
 			}  // End for (int index2 = 0; index2 < jaAlgorithms.length(); index2++)
 
 		}  // End for (int index = 0; index < jaCategories.length(); index++)
 
 		return vcsnAlgorithmsList;
-	}  /* End public List<VcsnAlgorithm> listVcsnAlgorithms(
-	 * String tafKitSuffix)
-	 * throws
-	 * FileNotFoundException
-	 */
-	
-	
+
+	}	// End public List<VcsnAlgorithm> listVcsnAlgorithms(...)
+
 	public List<Object> runVcsnAlgorithm(
 			String tafKitSuffix,
 			VcsnAlgorithm algorithm,
 			List<Object> inputs)
 			throws
 			FileNotFoundException,
-			IllegalArgumentException {
-		
+			IllegalArgumentException,
+			TAFKitException {
+
 		throw new UnsupportedOperationException("Not supported yet.");
-		
-	}  /* End public List<Object> runVcsnAlgorithm(
-	 *	String tafKitSuffix,
-	 *	VcsnAlgorithm algorithm,
-	 *	List<Object> inputs)
-	 *	throws
-	 *	FileNotFoundException,
-	 *	IllegalArgumentException
-	 */
-	
-	
+
+	}  // End public List<Object> runVcsnAlgorithm(...)
+
 	public static String convertInputStreamToString(InputStream inputSream) {
-		
+
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputSream));
 		StringBuilder stringBuilder = new StringBuilder();
-		
+
 		while (true) {
 			Integer integer;
 			try {
@@ -264,14 +259,14 @@ public class TAFKit implements TAFKitInterface {
 		}  // End while (true)
 
 		return stringBuilder.toString();
-		
+
 	}  // End public static String convertInputStreamToString(InputStream inputSream)
 
 	/**
 	 * @param args the command line arguments
 	 */
 	public static void main(String args[]) {
-		
+
 		TAFKit tafKit = null;
 		try {
 			tafKit = new TAFKit("/Users/JLiu/vaucanson-1.4a/taf-kit/tests");
@@ -279,7 +274,7 @@ public class TAFKit implements TAFKitInterface {
 			exception.printStackTrace();
 			return;
 		}
-		
+
 		List<VcsnAlgorithm> vcsnAlgorithmsList;
 		try {
 			vcsnAlgorithmsList = tafKit.listVcsnAlgorithms("char-b");
@@ -290,9 +285,9 @@ public class TAFKit implements TAFKitInterface {
 			exception.printStackTrace();
 			return;
 		}
-		
+
 		for (int index = 0; index < vcsnAlgorithmsList.size(); index++) {
-			
+
 			VcsnAlgorithm vcsnAlgorithm = vcsnAlgorithmsList.get(index);
 			if (vcsnAlgorithm.name.compareToIgnoreCase("category") == 0) {
 				System.out.println();
@@ -300,10 +295,10 @@ public class TAFKit implements TAFKitInterface {
 				System.out.println();
 			} else {  // End if (vcsnAlgorithm.name.compareToIgnoreCase("category") == 0)
 				System.out.println(vcsnAlgorithm.name + ":  " + vcsnAlgorithm.description);
-				
+
 				List<VcsnAlgorithm.IoInfo> ioInfos = vcsnAlgorithm.inputsInfo;
 				System.out.print("  Input: ");
-				
+
 				for (int index2 = 0; index2 < ioInfos.size(); index2++) {
 					VcsnAlgorithm.IoInfo ioInfo = ioInfos.get(index2);
 					System.out.print((index2 + 1) + ". ");
@@ -314,10 +309,10 @@ public class TAFKit implements TAFKitInterface {
 				}  // End for (int index2 = 0; index2 < ioInfos.size(); index2++)
 
 				System.out.println();
-				
+
 				ioInfos = vcsnAlgorithm.outputsInfo;
 				System.out.print("  Output: ");
-				
+
 				for (int index2 = 0; index2 < ioInfos.size(); index2++) {
 					VcsnAlgorithm.IoInfo ioInfo = ioInfos.get(index2);
 					System.out.print((index2 + 1) + ". ");
@@ -328,11 +323,10 @@ public class TAFKit implements TAFKitInterface {
 				}  // End for (int index2 = 0; index2 < ioInfos.size(); index2++)
 
 				System.out.println();
-				
+
 			}  // End else part of if (vcsnAlgorithm.name.compareToIgnoreCase("category") == 0)
 
 		}  // End for (int index = 0; index < vcsnAlgorithmsList.size(); index++)
 
 	}  // End public static void main(String args[])
 }  // End public class TAFKit
-

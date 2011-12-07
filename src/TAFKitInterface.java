@@ -25,17 +25,37 @@ public interface TAFKitInterface {
 		public String description;
 	}  // End public class VcsnAlgorithm
 
-	public String getTafKitPathString();
+	public class TAFKitException extends Exception {
 
-	public void setTafKitPathString(
-			String tafKitFolderPathStr)
+		public TAFKitException() {
+			super();
+		}
+
+		public TAFKitException(String message) {
+			super(message);
+		}
+
+		public TAFKitException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public TAFKitException(Throwable cause) {
+			super(cause);
+		}
+	}  // End public class TAFKitException extends Exception
+
+	public String getTafKitPath();
+
+	public void setTafKitPath(
+			String tafKitFolderPath)
 			throws
 			FileNotFoundException;
 
 	public List<VcsnAlgorithm> listVcsnAlgorithms(
 			String tafKitSuffix)
 			throws
-			FileNotFoundException;
+			FileNotFoundException,
+			TAFKitException;
 
 	public List<Object> runVcsnAlgorithm(
 			String tafKitSuffix,
@@ -43,5 +63,6 @@ public interface TAFKitInterface {
 			List<Object> inputs)
 			throws
 			FileNotFoundException,
-			IllegalArgumentException;
+			IllegalArgumentException,
+			TAFKitException;
 }  // End public interface TAFKitInterface
