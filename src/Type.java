@@ -14,4 +14,9 @@ public class Type {
         semiring = new Semiring();
         monoid = new Monoid();
     }
+    
+    public Type(Semiring semiring, Monoid monoid) {
+        this.semiring = semiring;
+        this.monoid = monoid;
+    }
 }

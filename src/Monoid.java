@@ -12,9 +12,47 @@ public class Monoid {
     private String identitySymbol;
     private int dimension;
     private String writingData;
-    private int prodcutDim;
-    private ArrayList<Monoid> subMonoid;
+    private int productDim;
+    private Monoid nextMonoid;
+    public enum MonoidType {
+        unit, free, product
+    }
+    MonoidType type;
+    
+    public enum GeneratorKind {
+        simple, tuple
+    }
+    public enum GeneratorDescript{
+        enumeration, range, set
+    }
+    public enum GeneratorSort {
+        letter, digit, integer, alphanum
+    }
+    
+    public class Generator{
+        GeneratorKind kind;
+        GeneratorDescript descript;
+        GeneratorSort sort;
+    }
+    private Generator generator;
 
+    public Monoid() {
+        identitySymbol = new String();
+        dimension = 0;
+        writingData = new String();
+        productDim = 0;
+        nextMonoid = null;
+    }
+    
+    public Monoid(String identitySymbol, int dimension, String writingData,
+                  int productDim, Monoid nextMonoid) {
+        this.identitySymbol = identitySymbol;
+        this.dimension = dimension;
+        this.writingData = writingData;
+        this.productDim = productDim;
+        this.nextMonoid = nextMonoid;
+    }
+    
     /**
      * @return the identitySymbol
      */
@@ -54,51 +92,21 @@ public class Monoid {
      * @return the prodcutDim
      */
     public int getProdcutDim() {
-        return prodcutDim;
+        return productDim;
     }
 
     /**
      * @param prodcutDim the prodcutDim to set
      */
     public void setProdcutDim(int prodcutDim) {
-        this.prodcutDim = prodcutDim;
+        this.productDim = prodcutDim;
     }
 
     /**
      * @return the subMonoid
      */
-    public ArrayList<Monoid> getSubMonoid() {
-        return subMonoid;
-    }
-    
-    public enum MonoidType {
-        unit, free, product
-    }
-    MonoidType type;
-    
-    public enum GeneratorKind {
-        simple, tuple
-    }
-    public enum GeneratorDescript{
-        enumeration, range, set
-    }
-    public enum GeneratorSort {
-        letter, digit, integer, alphanum
-    }
-    
-    public class Generator{
-        GeneratorKind kind;
-        GeneratorDescript descript;
-        GeneratorSort sort;
-    }
-    private Generator generator;
-
-    public Monoid() {
-        identitySymbol = new String();
-        dimension = 0;
-        writingData = new String();
-        prodcutDim = 0;
-        subMonoid = new ArrayList<Monoid>();
+    public Monoid getNextMonoid() {
+        return nextMonoid;
     }
     
     public void setType(MonoidType type) {
