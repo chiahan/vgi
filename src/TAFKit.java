@@ -77,8 +77,16 @@ public class TAFKit implements TAFKitInterface {
 			case 0:
 				break;
 			default:
-				InputStream inputStream = process.getErrorStream();
-				TAFKitException tafKitException = new TAFKitException(convertInputStreamToString(inputStream));
+				InputStream inputStream = process.getInputStream();
+				String string = convertInputStreamToString(inputStream);
+				try {
+					inputStream.close();
+				} catch (IOException ioException) {
+					throw new Error(ioException);
+				}
+				inputStream = process.getErrorStream();
+				string = string + convertInputStreamToString(inputStream);
+				TAFKitException tafKitException = new TAFKitException(string);
 				try {
 					inputStream.close();
 				} catch (IOException ioException) {
@@ -236,7 +244,189 @@ public class TAFKit implements TAFKitInterface {
 			IllegalArgumentException,
 			TAFKitException {
 
-		throw new UnsupportedOperationException("Not supported yet.");
+		if (!(new File(pmTafKitPath, "vcsn-" + tafKitSuffix).exists())) {
+			throw new FileNotFoundException("The specified TAF-Kit executable \"" + this.getTafKitPath() + File.separator + "vcsn-" + tafKitSuffix + "\" does not exist!");
+		}
+
+		if ((algorithm == null)
+				|| (algorithm.name == null)
+				|| (algorithm.name.isEmpty())
+				|| (algorithm.inputsInfo == null)
+				|| (algorithm.inputsInfo.isEmpty())
+				|| (algorithm.outputsInfo == null)
+				|| (algorithm.outputsInfo.isEmpty())
+				|| (inputs == null)
+				|| (inputs.size() != algorithm.inputsInfo.size())) {
+			throw new IllegalArgumentException("The VcsnAlgorithm algorithm argument is invalid.");
+		}
+
+		String commandStr = "./vcsn-" + tafKitSuffix + " -v " + algorithm.name;
+
+		for (int index = 0; index < inputs.size(); index++) {
+
+			Object object = inputs.get(index);
+			switch (algorithm.inputsInfo.get(index).type) {
+
+				case AUTOMATON:
+					if (object instanceof Automata) {
+						// TODO:  Prepare temporary XML file and append the file name to command.
+					} else if (object instanceof String) {
+						String string = (String) object;
+						if (!(string.toLowerCase().endsWith(".xml"))) {
+							throw new IllegalArgumentException("The " + (index + 1) + "th argument should be an XML file representing an automaton, but it is not!");
+						}
+						commandStr = commandStr + " " + string;
+					} else {
+						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be an automaton, but it is not!");
+					}
+					break;
+
+				case BOOLEAN:
+					throw new IllegalArgumentException("The " + (index + 1) + "th argument is boolean, but no argument should be boolean.");
+
+				case INTEGER:
+					if (object instanceof Integer) {
+						Integer integer = (Integer) object;
+						commandStr = commandStr + " " + integer.toString();
+					} else {
+						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be an integer, but it is not!");
+					}
+					break;
+
+				case REGULAR_EXPRESSION:
+					if (object instanceof String) {
+						String string = (String) object;
+						commandStr = commandStr + " " + string;
+					} else {
+						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be a regular expression, but it is not!");
+					}
+					break;
+
+				case TEXT:
+					if (object instanceof String) {
+						String string = (String) object;
+						commandStr = commandStr + " " + string;
+					} else {
+						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be text, but it is not!");
+					}
+					break;
+
+				case WEIGHT:
+					throw new UnsupportedOperationException("The " + (index + 1) + "th argument should be a weight, but VGI does not support weight arguments yet!");
+
+				case WORD:
+					if (object instanceof String) {
+						String string = (String) object;
+						commandStr = commandStr + " " + string;
+					} else {
+						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be a word, but it is not!");
+					}
+					break;
+
+				default:
+					throw new IllegalArgumentException("The " + (index + 1) + "th argument does not have a recognizable type.");
+
+			}  // End switch (algorithm.inputsInfo.get(index).type)
+
+		}  // End for (int index = 0; index < inputs.size(); index++)
+
+		Process process;
+		int exitValue;
+		try {
+			process = Runtime.getRuntime().exec(commandStr, null, pmTafKitPath);
+			exitValue = process.waitFor();
+		} catch (IOException ioException) {
+			throw new Error(ioException);
+		} catch (InterruptedException interruptedException) {
+			throw new Error(interruptedException);
+		}
+
+		switch (exitValue) {
+			case 0:
+				break;
+			default:
+				boolean AtLeastOneOutputIsBoolean = false;
+				for (int index = 0; index < algorithm.outputsInfo.size(); index++) {
+					if (algorithm.outputsInfo.get(index).type == VcsnAlgorithm.IoInfo.Type.BOOLEAN) {
+						AtLeastOneOutputIsBoolean = true;
+						break;  // Leave for loop
+					}
+				}  // End for (int index = 0; index < algorithm.outputsInfo.size(); index++)
+				if (AtLeastOneOutputIsBoolean) {
+					break;  // Leave switch block
+				}
+				InputStream inputStream = process.getInputStream();
+				String string = convertInputStreamToString(inputStream);
+				try {
+					inputStream.close();
+				} catch (IOException ioException) {
+					throw new Error(ioException);
+				}
+				inputStream = process.getErrorStream();
+				string = string + convertInputStreamToString(inputStream);
+				TAFKitException tafKitException = new TAFKitException(string);
+				try {
+					inputStream.close();
+				} catch (IOException ioException) {
+					throw new Error(ioException);
+				}
+				throw tafKitException;
+		}  // End switch (exitValue)
+
+		InputStream stream = process.getInputStream();
+		ArrayList<Object> outputs = new ArrayList<Object>();
+
+		for (int index = 0; index < algorithm.outputsInfo.size(); index++) {
+
+			switch (algorithm.outputsInfo.get(index).type) {
+
+				case AUTOMATON:
+					// TODO:  Convert stream to Automata.
+					break;
+
+				case BOOLEAN:
+					if (exitValue == 0) {
+						outputs.add(new Boolean(true));
+					} else {
+						outputs.add(new Boolean(false));
+					}
+					break;
+
+				case INTEGER:
+					throw new TAFKitException("The " + (index + 1) + "th output is an integer, but no output should be an integer.");
+
+				case REGULAR_EXPRESSION:
+					String string = this.convertInputStreamToString(stream);
+					outputs.add(string);
+					break;
+
+				case TEXT:
+					string = this.convertInputStreamToString(stream);
+					outputs.add(string);
+					break;
+
+				case WEIGHT:
+					throw new UnsupportedOperationException("The " + (index + 1) + "th output should be a weight, but VGI does not support weight outputs yet!");
+
+				case WORD:
+					string = this.convertInputStreamToString(stream);
+					outputs.add(string);
+					break;
+
+				default:
+					throw new TAFKitException("The " + (index + 1) + "th output does not have a recognizable type.");
+
+			}  // End switch (algorithm.outputsInfo.get(index).type)
+
+		}  // End for (int index = 0; index < algorithm.outputsInfo.size(); index++)
+
+		try {
+			stream.close();
+		} catch (IOException ioException) {
+			throw new Error(ioException);
+		}
+
+		return outputs;
 
 	}  // End public List<Object> runVcsnAlgorithm(...)
 
@@ -269,15 +459,16 @@ public class TAFKit implements TAFKitInterface {
 
 		TAFKit tafKit = null;
 		try {
-			tafKit = new TAFKit("/Users/JLiu/vaucanson-1.4a/taf-kit/tests");
+			tafKit = new TAFKit("../../vaucanson-1.4a/taf-kit/tests");
 		} catch (Exception exception) {
 			exception.printStackTrace();
 			return;
 		}
 
 		List<VcsnAlgorithm> vcsnAlgorithmsList;
+		String tafKitSuffix = "char-b";
 		try {
-			vcsnAlgorithmsList = tafKit.listVcsnAlgorithms("char-b");
+			vcsnAlgorithmsList = tafKit.listVcsnAlgorithms(tafKitSuffix);
 			if (vcsnAlgorithmsList == null) {
 				return;
 			}
@@ -285,6 +476,8 @@ public class TAFKit implements TAFKitInterface {
 			exception.printStackTrace();
 			return;
 		}
+
+		VcsnAlgorithm algorithmToRun = null;
 
 		for (int index = 0; index < vcsnAlgorithmsList.size(); index++) {
 
@@ -294,6 +487,11 @@ public class TAFKit implements TAFKitInterface {
 				System.out.println(vcsnAlgorithm.name + ":  " + vcsnAlgorithm.description);
 				System.out.println();
 			} else {  // End if (vcsnAlgorithm.name.compareToIgnoreCase("category") == 0)
+
+				if (vcsnAlgorithm.name.equals("eval")) {
+					algorithmToRun = vcsnAlgorithm;
+				}
+
 				System.out.println(vcsnAlgorithm.name + ":  " + vcsnAlgorithm.description);
 
 				List<VcsnAlgorithm.IoInfo> ioInfos = vcsnAlgorithm.inputsInfo;
@@ -327,6 +525,81 @@ public class TAFKit implements TAFKitInterface {
 			}  // End else part of if (vcsnAlgorithm.name.compareToIgnoreCase("category") == 0)
 
 		}  // End for (int index = 0; index < vcsnAlgorithmsList.size(); index++)
+
+		List<Object> outputs;
+		try {
+			ArrayList<Object> inputs = new ArrayList<Object>();
+			inputs.add("a1.xml");
+			inputs.add("ab");
+			outputs = tafKit.runVcsnAlgorithm(tafKitSuffix, algorithmToRun, inputs);
+		} catch (Exception exception) {
+			exception.printStackTrace();
+			return;
+		}
+
+		for (int index = 0; index < algorithmToRun.outputsInfo.size(); index++) {
+
+			Object object = outputs.get(index);
+			switch (algorithmToRun.outputsInfo.get(index).type) {
+
+				case AUTOMATON:
+					// TODO:  Convert stream to a FSM XML file and open it in VGI.
+					break;
+
+				case BOOLEAN:
+					if (object instanceof Boolean) {
+						Boolean bool = (Boolean) object;
+						System.out.println(bool);
+					} else {
+						throw new IllegalArgumentException("The " + (index + 1) + "th output should be an integer, but it is not!");
+					}
+					break;
+
+				case INTEGER:
+					if (object instanceof Integer) {
+						Integer integer = (Integer) object;
+						System.out.println(integer);
+					} else {
+						throw new IllegalArgumentException("The " + (index + 1) + "th output should be an integer, but it is not!");
+					}
+					break;
+
+				case REGULAR_EXPRESSION:
+					if (object instanceof String) {
+						String string = (String) object;
+						System.out.println(string);
+					} else {
+						throw new IllegalArgumentException("The " + (index + 1) + "th output should be a regular expression, but it is not!");
+					}
+					break;
+
+				case TEXT:
+					if (object instanceof String) {
+						String string = (String) object;
+						System.out.println(string);
+					} else {
+						throw new IllegalArgumentException("The " + (index + 1) + "th output should be text, but it is not!");
+					}
+					break;
+
+				case WEIGHT:
+					throw new UnsupportedOperationException("The " + (index + 1) + "th output should be a weight, but VGI does not support weight outputs yet!");
+
+				case WORD:
+					if (object instanceof String) {
+						String string = (String) object;
+						System.out.println(string);
+					} else {
+						throw new IllegalArgumentException("The " + (index + 1) + "th output should be a word, but it is not!");
+					}
+					break;
+
+				default:
+					throw new IllegalArgumentException("The " + (index + 1) + "th output does not have a recognizable type.");
+
+			}  // End switch (algorithmToRun.outputsInfo.get(index).type)
+
+		}  // End for (int index = 0; index < algorithmToRun.outputsInfo.size(); index++)
 
 	}  // End public static void main(String args[])
 }  // End public class TAFKit
