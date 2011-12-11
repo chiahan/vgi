@@ -28,18 +28,226 @@ public class VGI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        toolBar = new javax.swing.JToolBar();
+        addStateButton = new javax.swing.JButton();
+        addTransitionButton = new javax.swing.JButton();
+        deleteButton = new javax.swing.JButton();
+        toolBarSeparator1 = new javax.swing.JToolBar.Separator();
+        fitWindowButton = new javax.swing.JButton();
+        zoomInButton = new javax.swing.JButton();
+        zoomOutButton = new javax.swing.JButton();
+        actualSizeButton = new javax.swing.JButton();
+        toolBarSeparator2 = new javax.swing.JToolBar.Separator();
+        setAsInitialStateButton = new javax.swing.JButton();
+        setAsFinalStateButton = new javax.swing.JButton();
+        menuBar = new javax.swing.JMenuBar();
+        fileMenu = new javax.swing.JMenu();
+        newMenuItem = new javax.swing.JMenuItem();
+        openMenuItem = new javax.swing.JMenuItem();
+        closeMenuItem = new javax.swing.JMenuItem();
+        saveMenuItem = new javax.swing.JMenuItem();
+        saveAsMenuItem = new javax.swing.JMenuItem();
+        fileMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
+        exitMenuItem = new javax.swing.JMenuItem();
+        editMenu = new javax.swing.JMenu();
+        deleteMenuItem = new javax.swing.JMenuItem();
+        editMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
+        setAsInitialStateMenuItem = new javax.swing.JMenuItem();
+        setAsFinalStateMenuItem = new javax.swing.JMenuItem();
+        viewMenu = new javax.swing.JMenu();
+        fitWindowMenuItem = new javax.swing.JMenuItem();
+        zoomInMenuItem = new javax.swing.JMenuItem();
+        zoomOutMenuItem = new javax.swing.JMenuItem();
+        actualSizeMenuItem = new javax.swing.JMenuItem();
+        viewMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
+        displayAutomataPropertiesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        displayStatusBarCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        algorithmsMenu = new javax.swing.JMenu();
+        setExecutablePathMenuItem = new javax.swing.JMenuItem();
+        algorithmsMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
+        helpMenu = new javax.swing.JMenu();
+        rationalExpressionSymbolsMenuItem = new javax.swing.JMenuItem();
+        aboutMenuItem = new javax.swing.JMenuItem();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("VGI");
+
+        toolBar.setFloatable(false);
+        toolBar.setRollover(true);
+
+        addStateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/add.png"))); // NOI18N
+        addStateButton.setFocusable(false);
+        addStateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        addStateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(addStateButton);
+
+        addTransitionButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/arrow_right.png"))); // NOI18N
+        addTransitionButton.setFocusable(false);
+        addTransitionButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        addTransitionButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(addTransitionButton);
+
+        deleteButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/close.png"))); // NOI18N
+        deleteButton.setFocusable(false);
+        deleteButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        deleteButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(deleteButton);
+        toolBar.add(toolBarSeparator1);
+
+        fitWindowButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/zoom.png"))); // NOI18N
+        fitWindowButton.setFocusable(false);
+        fitWindowButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        fitWindowButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(fitWindowButton);
+
+        zoomInButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/zoomin.png"))); // NOI18N
+        zoomInButton.setFocusable(false);
+        zoomInButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        zoomInButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(zoomInButton);
+
+        zoomOutButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/zoomout.png"))); // NOI18N
+        zoomOutButton.setFocusable(false);
+        zoomOutButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        zoomOutButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(zoomOutButton);
+
+        actualSizeButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/refresh.png"))); // NOI18N
+        actualSizeButton.setFocusable(false);
+        actualSizeButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        actualSizeButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(actualSizeButton);
+        toolBar.add(toolBarSeparator2);
+
+        setAsInitialStateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/object_07.png"))); // NOI18N
+        setAsInitialStateButton.setFocusable(false);
+        setAsInitialStateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        setAsInitialStateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(setAsInitialStateButton);
+
+        setAsFinalStateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/object_06.png"))); // NOI18N
+        setAsFinalStateButton.setFocusable(false);
+        setAsFinalStateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        setAsFinalStateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBar.add(setAsFinalStateButton);
+
+        fileMenu.setMnemonic('F');
+        fileMenu.setText("File");
+
+        newMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
+        newMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/Forward.png"))); // NOI18N
+        newMenuItem.setText("New");
+        fileMenu.add(newMenuItem);
+
+        openMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+        openMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/open.png"))); // NOI18N
+        openMenuItem.setText("Open...");
+        fileMenu.add(openMenuItem);
+
+        closeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_W, java.awt.event.InputEvent.CTRL_MASK));
+        closeMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/stop.png"))); // NOI18N
+        closeMenuItem.setText("Close");
+        fileMenu.add(closeMenuItem);
+
+        saveMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        saveMenuItem.setText("Save");
+        fileMenu.add(saveMenuItem);
+
+        saveAsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
+        saveAsMenuItem.setText("Save As...");
+        fileMenu.add(saveAsMenuItem);
+        fileMenu.add(fileMenuSeparator1);
+
+        exitMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/door.png"))); // NOI18N
+        exitMenuItem.setText("Exit");
+        fileMenu.add(exitMenuItem);
+
+        menuBar.add(fileMenu);
+
+        editMenu.setMnemonic('E');
+        editMenu.setText("Edit");
+
+        deleteMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DELETE, 0));
+        deleteMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/close.png"))); // NOI18N
+        deleteMenuItem.setText("Delete");
+        editMenu.add(deleteMenuItem);
+        editMenu.add(editMenuSeparator1);
+
+        setAsInitialStateMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/object_07.png"))); // NOI18N
+        setAsInitialStateMenuItem.setText("Set As Initial State");
+        editMenu.add(setAsInitialStateMenuItem);
+
+        setAsFinalStateMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/object_06.png"))); // NOI18N
+        setAsFinalStateMenuItem.setText("Set As Final State");
+        editMenu.add(setAsFinalStateMenuItem);
+
+        menuBar.add(editMenu);
+
+        viewMenu.setMnemonic('V');
+        viewMenu.setText("View");
+
+        fitWindowMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoom.png"))); // NOI18N
+        fitWindowMenuItem.setText("Fit Window");
+        viewMenu.add(fitWindowMenuItem);
+
+        zoomInMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoomin.png"))); // NOI18N
+        zoomInMenuItem.setText("Zoom In");
+        viewMenu.add(zoomInMenuItem);
+
+        zoomOutMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoomout.png"))); // NOI18N
+        zoomOutMenuItem.setText("Zoom Out");
+        viewMenu.add(zoomOutMenuItem);
+
+        actualSizeMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/refresh.png"))); // NOI18N
+        actualSizeMenuItem.setText("Actual Size");
+        viewMenu.add(actualSizeMenuItem);
+        viewMenu.add(viewMenuSeparator1);
+
+        displayAutomataPropertiesCheckBoxMenuItem.setSelected(true);
+        displayAutomataPropertiesCheckBoxMenuItem.setText("Display Automata Properties");
+        viewMenu.add(displayAutomataPropertiesCheckBoxMenuItem);
+
+        displayStatusBarCheckBoxMenuItem.setSelected(true);
+        displayStatusBarCheckBoxMenuItem.setText("Display Status Bar");
+        viewMenu.add(displayStatusBarCheckBoxMenuItem);
+
+        menuBar.add(viewMenu);
+
+        algorithmsMenu.setMnemonic('A');
+        algorithmsMenu.setText("Algorithms");
+
+        setExecutablePathMenuItem.setText("Set Executable Path...");
+        algorithmsMenu.add(setExecutablePathMenuItem);
+        algorithmsMenu.add(algorithmsMenuSeparator1);
+
+        menuBar.add(algorithmsMenu);
+
+        helpMenu.setMnemonic('H');
+        helpMenu.setText("Help");
+
+        rationalExpressionSymbolsMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/question.png"))); // NOI18N
+        rationalExpressionSymbolsMenuItem.setText("Rational Expression Symbols");
+        helpMenu.add(rationalExpressionSymbolsMenuItem);
+
+        aboutMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/about.png"))); // NOI18N
+        aboutMenuItem.setText("About");
+        helpMenu.add(aboutMenuItem);
+
+        menuBar.add(helpMenu);
+
+        setJMenuBar(menuBar);
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 400, Short.MAX_VALUE)
+            .add(toolBar, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 300, Short.MAX_VALUE)
+            .add(layout.createSequentialGroup()
+                .add(toolBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 25, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(246, Short.MAX_VALUE))
         );
 
         pack();
@@ -81,5 +289,45 @@ public class VGI extends javax.swing.JFrame {
 		});
 	}
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem aboutMenuItem;
+    private javax.swing.JButton actualSizeButton;
+    private javax.swing.JMenuItem actualSizeMenuItem;
+    private javax.swing.JButton addStateButton;
+    private javax.swing.JButton addTransitionButton;
+    private javax.swing.JMenu algorithmsMenu;
+    private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator1;
+    private javax.swing.JMenuItem closeMenuItem;
+    private javax.swing.JButton deleteButton;
+    private javax.swing.JMenuItem deleteMenuItem;
+    private javax.swing.JCheckBoxMenuItem displayAutomataPropertiesCheckBoxMenuItem;
+    private javax.swing.JCheckBoxMenuItem displayStatusBarCheckBoxMenuItem;
+    private javax.swing.JMenu editMenu;
+    private javax.swing.JPopupMenu.Separator editMenuSeparator1;
+    private javax.swing.JMenuItem exitMenuItem;
+    private javax.swing.JMenu fileMenu;
+    private javax.swing.JPopupMenu.Separator fileMenuSeparator1;
+    private javax.swing.JButton fitWindowButton;
+    private javax.swing.JMenuItem fitWindowMenuItem;
+    private javax.swing.JMenu helpMenu;
+    private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem newMenuItem;
+    private javax.swing.JMenuItem openMenuItem;
+    private javax.swing.JMenuItem rationalExpressionSymbolsMenuItem;
+    private javax.swing.JMenuItem saveAsMenuItem;
+    private javax.swing.JMenuItem saveMenuItem;
+    private javax.swing.JButton setAsFinalStateButton;
+    private javax.swing.JMenuItem setAsFinalStateMenuItem;
+    private javax.swing.JButton setAsInitialStateButton;
+    private javax.swing.JMenuItem setAsInitialStateMenuItem;
+    private javax.swing.JMenuItem setExecutablePathMenuItem;
+    private javax.swing.JToolBar toolBar;
+    private javax.swing.JToolBar.Separator toolBarSeparator1;
+    private javax.swing.JToolBar.Separator toolBarSeparator2;
+    private javax.swing.JMenu viewMenu;
+    private javax.swing.JPopupMenu.Separator viewMenuSeparator1;
+    private javax.swing.JButton zoomInButton;
+    private javax.swing.JMenuItem zoomInMenuItem;
+    private javax.swing.JButton zoomOutButton;
+    private javax.swing.JMenuItem zoomOutMenuItem;
     // End of variables declaration//GEN-END:variables
 }
