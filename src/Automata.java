@@ -118,20 +118,20 @@ public class Automata {
     }
     
     public static void main(String args[]) {
-        System.out.println("Staring from 'Automata Class'");
-        System.out.println("Creating Monoid");
-        Monoid monoid = new Monoid("0", 1, "a", 0, null);
-        System.out.println("Creating Semiring");
-        Semiring semiring = new Semiring("1", "0",
-                                         Semiring.SemiringType.NUMERICAL,
-                                         Semiring.SemiringSet.B,
-                                         Semiring.SemiringOperation.CLASSICAL,
-                                         "1", null, null);
-        System.out.println("Creating Type");
-        Type type = new Type(semiring, monoid);
-        System.out.println("Creating empty Automata");
-        Automata automata = new Automata();
-        System.out.println("Creating Automata with TYPE");
-        Automata automataWithType = new Automata(type);
+//        System.out.println("Staring from 'Automata Class'");
+//        System.out.println("Creating Monoid");
+//        Monoid monoid = new Monoid("0", 1, "a", 0, null);
+//        System.out.println("Creating Semiring");
+//        Semiring semiring = new Semiring("1", "0",
+//                                         Semiring.SemiringType.NUMERICAL,
+//                                         Semiring.SemiringSet.B,
+//                                         Semiring.SemiringOperation.CLASSICAL,
+//                                         "1", null, null);
+//        System.out.println("Creating Type");
+//        Type type = new Type(semiring, monoid);
+//        System.out.println("Creating empty Automata");
+//        Automata automata = new Automata();
+//        System.out.println("Creating Automata with TYPE");
+//        Automata automataWithType = new Automata(type);
     }
 }

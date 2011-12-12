@@ -2,7 +2,8 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-import java.util.ArrayList;
+import java.util.Hashtable;
+import javax.swing.ComboBoxModel;
 
 /**
  *
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 public class Monoid {
     private String identitySymbol;
     private int dimension;
-    private String writingData;
+    private Hashtable writingData;
     private int productDim;
     private Monoid nextMonoid;
     public enum MonoidType {
@@ -39,16 +40,19 @@ public class Monoid {
     public Monoid() {
         identitySymbol = new String();
         dimension = 0;
-        writingData = new String();
+        writingData = new Hashtable();
         productDim = 0;
         nextMonoid = null;
     }
     
-    public Monoid(String identitySymbol, int dimension, String writingData,
+    public Monoid(String identitySymbol, int dimension, ComboBoxModel model,
                   int productDim, Monoid nextMonoid) {
         this.identitySymbol = identitySymbol;
         this.dimension = dimension;
-        this.writingData = writingData;
+        this.writingData = new Hashtable();
+        for (int i=0; i<dimension; i++) {
+            this.writingData.put(i, model.getElementAt(i));
+        }
         this.productDim = productDim;
         this.nextMonoid = nextMonoid;
     }
@@ -84,7 +88,7 @@ public class Monoid {
     /**
      * @return the writingData
      */
-    public String getWritingData() {
+    public Hashtable getWritingData() {
         return writingData;
     }
 
