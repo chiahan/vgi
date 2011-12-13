@@ -168,9 +168,18 @@
             <Property name="text" type="java.lang.String" value="Algorithms"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="setExecutablePathMenuItem">
+            <MenuItem class="javax.swing.JMenuItem" name="setTAFKitPathMenuItem">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Set Executable Path..."/>
+                <Property name="text" type="java.lang.String" value="Set TAF-Kit Path..."/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="setTAFKitPathMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="currentPathMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Current setting:  N/A"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="algorithmsMenuSeparator1">

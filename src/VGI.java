@@ -1,3 +1,6 @@
+
+import javax.swing.JFileChooser;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -63,7 +66,8 @@ public class VGI extends javax.swing.JFrame {
         displayAutomataPropertiesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         displayStatusBarCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
-        setExecutablePathMenuItem = new javax.swing.JMenuItem();
+        setTAFKitPathMenuItem = new javax.swing.JMenuItem();
+        currentPathMenuItem = new javax.swing.JMenuItem();
         algorithmsMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
         helpMenu = new javax.swing.JMenu();
         rationalExpressionSymbolsMenuItem = new javax.swing.JMenuItem();
@@ -216,8 +220,17 @@ public class VGI extends javax.swing.JFrame {
         algorithmsMenu.setMnemonic('A');
         algorithmsMenu.setText("Algorithms");
 
-        setExecutablePathMenuItem.setText("Set Executable Path...");
-        algorithmsMenu.add(setExecutablePathMenuItem);
+        setTAFKitPathMenuItem.setText("Set TAF-Kit Path...");
+        setTAFKitPathMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                setTAFKitPathMenuItemActionPerformed(evt);
+            }
+        });
+        algorithmsMenu.add(setTAFKitPathMenuItem);
+
+        currentPathMenuItem.setText("Current setting:  N/A");
+        currentPathMenuItem.setEnabled(false);
+        algorithmsMenu.add(currentPathMenuItem);
         algorithmsMenu.add(algorithmsMenuSeparator1);
 
         menuBar.add(algorithmsMenu);
@@ -252,6 +265,20 @@ public class VGI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void setTAFKitPathMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setTAFKitPathMenuItemActionPerformed
+
+		JFileChooser tafKitPathChooser = new JFileChooser();
+		tafKitPathChooser.setDialogTitle(this.setTAFKitPathMenuItem.getText());
+		tafKitPathChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		tafKitPathChooser.setMultiSelectionEnabled(false);
+
+		int returnValue = tafKitPathChooser.showOpenDialog(this);
+		if (returnValue == JFileChooser.APPROVE_OPTION) {
+			this.currentPathMenuItem.setText("Current setting:  " + tafKitPathChooser.getSelectedFile().getAbsolutePath());
+		}  // End switch (returnValue)
+
+    }//GEN-LAST:event_setTAFKitPathMenuItemActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -297,6 +324,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenu algorithmsMenu;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator1;
     private javax.swing.JMenuItem closeMenuItem;
+    private javax.swing.JMenuItem currentPathMenuItem;
     private javax.swing.JButton deleteButton;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JCheckBoxMenuItem displayAutomataPropertiesCheckBoxMenuItem;
@@ -319,7 +347,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem setAsFinalStateMenuItem;
     private javax.swing.JButton setAsInitialStateButton;
     private javax.swing.JMenuItem setAsInitialStateMenuItem;
-    private javax.swing.JMenuItem setExecutablePathMenuItem;
+    private javax.swing.JMenuItem setTAFKitPathMenuItem;
     private javax.swing.JToolBar toolBar;
     private javax.swing.JToolBar.Separator toolBarSeparator1;
     private javax.swing.JToolBar.Separator toolBarSeparator2;
