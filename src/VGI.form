@@ -176,7 +176,7 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="setTAFKitPathMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="currentPathMenuItem">
+            <MenuItem class="javax.swing.JMenuItem" name="currentSettingMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Current setting:  N/A"/>
                 <Property name="enabled" type="boolean" value="false"/>

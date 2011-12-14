@@ -1,5 +1,7 @@
 
+import java.io.FileNotFoundException;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 /*
  * To change this template, choose Tools | Templates
@@ -67,7 +69,7 @@ public class VGI extends javax.swing.JFrame {
         displayStatusBarCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
-        currentPathMenuItem = new javax.swing.JMenuItem();
+        currentSettingMenuItem = new javax.swing.JMenuItem();
         algorithmsMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
         helpMenu = new javax.swing.JMenu();
         rationalExpressionSymbolsMenuItem = new javax.swing.JMenuItem();
@@ -228,9 +230,9 @@ public class VGI extends javax.swing.JFrame {
         });
         algorithmsMenu.add(setTAFKitPathMenuItem);
 
-        currentPathMenuItem.setText("Current setting:  N/A");
-        currentPathMenuItem.setEnabled(false);
-        algorithmsMenu.add(currentPathMenuItem);
+        currentSettingMenuItem.setText("Current setting:  N/A");
+        currentSettingMenuItem.setEnabled(false);
+        algorithmsMenu.add(currentSettingMenuItem);
         algorithmsMenu.add(algorithmsMenuSeparator1);
 
         menuBar.add(algorithmsMenu);
@@ -270,13 +272,38 @@ public class VGI extends javax.swing.JFrame {
 
 		JFileChooser tafKitPathChooser = new JFileChooser();
 		tafKitPathChooser.setDialogTitle(this.setTAFKitPathMenuItem.getText());
-		tafKitPathChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		tafKitPathChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		tafKitPathChooser.setMultiSelectionEnabled(false);
 
-		int returnValue = tafKitPathChooser.showOpenDialog(this);
-		if (returnValue == JFileChooser.APPROVE_OPTION) {
-			this.currentPathMenuItem.setText("Current setting:  " + tafKitPathChooser.getSelectedFile().getAbsolutePath());
-		}  // End switch (returnValue)
+		TAFKit tafKit = null;
+
+		while (true) {
+
+			int returnValue = tafKitPathChooser.showOpenDialog(this);
+			if (returnValue != JFileChooser.APPROVE_OPTION) {
+				break;
+			}
+
+			try {
+				tafKit = new TAFKit(tafKitPathChooser.getSelectedFile().getAbsolutePath());
+				break;
+			} catch (FileNotFoundException fileNotFoundException) {
+				returnValue = JOptionPane.showConfirmDialog(
+						this,
+						fileNotFoundException.getMessage() + "\nDo you want to try setting TAF-Kit path again?",
+						"Invalid TAF-Kit path",
+						JOptionPane.YES_NO_OPTION,
+						JOptionPane.WARNING_MESSAGE);
+				if (returnValue != JOptionPane.YES_OPTION) {
+					break;
+				}
+			}
+
+		}  // End while (true)
+
+		if (tafKit != null) {
+			this.currentSettingMenuItem.setText("Current setting:  " + tafKit.getTafKitPath());
+		}
 
     }//GEN-LAST:event_setTAFKitPathMenuItemActionPerformed
 
@@ -324,7 +351,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenu algorithmsMenu;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator1;
     private javax.swing.JMenuItem closeMenuItem;
-    private javax.swing.JMenuItem currentPathMenuItem;
+    private javax.swing.JMenuItem currentSettingMenuItem;
     private javax.swing.JButton deleteButton;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JCheckBoxMenuItem displayAutomataPropertiesCheckBoxMenuItem;
