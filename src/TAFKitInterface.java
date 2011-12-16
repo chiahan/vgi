@@ -1,4 +1,5 @@
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 
@@ -44,12 +45,12 @@ public interface TAFKitInterface {
 		}
 	}  // End public class TAFKitException extends Exception
 
-	public String getTafKitPath();
+	public File getTafKitPath();
 
 	public void setTafKitPath(
-			String tafKitFolderPath)
+			File tafKitFolderPath)
 			throws
-			FileNotFoundException;
+			IllegalArgumentException;
 
 	public List<VcsnAlgorithm> listVcsnAlgorithms(
 			String tafKitSuffix)

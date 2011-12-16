@@ -20,33 +20,32 @@ public class TAFKit implements TAFKitInterface {
 
 	private File pmTafKitPath;
 
-	public TAFKit(String tafKitPath)
+	public TAFKit(File tafKitPath)
 			throws
-			FileNotFoundException {
+			IllegalArgumentException {
 		this.setTafKitPath(tafKitPath);
 	}  // End public TAFKit(String tafKitFolderPathStr)
 
-	public String getTafKitPath() {
-		return pmTafKitPath.getAbsolutePath();
-	}  // End public File getTafKitFolder ()
+	public File getTafKitPath() {
+		return pmTafKitPath;
+	}  // End public File getTafKitPath()
 
 	public void setTafKitPath(
-			String tafKitFolderPath)
+			File tafKitFolderPath)
 			throws
-			FileNotFoundException {
+			IllegalArgumentException {
 
-		File folder = new File(tafKitFolderPath);
-		if (!folder.exists()) {
-			throw new FileNotFoundException("The specified TAF-Kit path \"" + tafKitFolderPath + "\" does not exist!");
+		if (!tafKitFolderPath.exists()) {
+			throw new IllegalArgumentException("The specified path \"" + tafKitFolderPath.getAbsolutePath() + "\" does not exist!");
 		}
-		if (!folder.isDirectory()) {
-			throw new FileNotFoundException("The specified TAF-Kit path \"" + tafKitFolderPath + "\" is not a folder!");
+		if (!tafKitFolderPath.isDirectory()) {
+			throw new IllegalArgumentException("The specified path \"" + tafKitFolderPath.getAbsolutePath() + "\" is not a folder!");
 		}
-		File file = new File(folder, "vcsn-char-b");
-		if (!file.isFile()) {
-			throw new FileNotFoundException("The specified TAF-Kit path \"" + tafKitFolderPath + "\" does not have the most basic TAF-Kit executable \"vcsn-char-b\" so it is probably an incorrect TAF-Kit path.");
+		File file = new File(tafKitFolderPath, "vcsn-char-b");
+		if ((!file.isFile()) || (!file.canExecute())) {
+			throw new IllegalArgumentException("The specified path \"" + tafKitFolderPath.getAbsolutePath() + "\" does not have the most basic TAF-Kit executable \"vcsn-char-b\" so it is probably an incorrect TAF-Kit path.");
 		}
-		pmTafKitPath = folder;
+		pmTafKitPath = tafKitFolderPath;
 
 	}  // End public void setTafKitPath(...)
 
@@ -459,7 +458,7 @@ public class TAFKit implements TAFKitInterface {
 
 		TAFKit tafKit = null;
 		try {
-			tafKit = new TAFKit("../../vaucanson-1.4a/taf-kit/tests");
+			tafKit = new TAFKit(new File("../../vaucanson-1.4a/taf-kit/tests"));
 		} catch (Exception exception) {
 			exception.printStackTrace();
 			return;

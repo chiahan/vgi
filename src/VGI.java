@@ -1,6 +1,9 @@
 
 import java.io.FileNotFoundException;
+import java.util.List;
 import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 /*
@@ -18,6 +21,8 @@ import javax.swing.JOptionPane;
  * @author JLiu
  */
 public class VGI extends javax.swing.JFrame {
+
+	private TAFKit pmTAFKit = null;
 
 	/** Creates new form VGI */
 	public VGI() {
@@ -271,11 +276,12 @@ public class VGI extends javax.swing.JFrame {
     private void setTAFKitPathMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setTAFKitPathMenuItemActionPerformed
 
 		JFileChooser tafKitPathChooser = new JFileChooser();
+		if (pmTAFKit != null) {
+			tafKitPathChooser.setCurrentDirectory(pmTAFKit.getTafKitPath());
+		}
 		tafKitPathChooser.setDialogTitle(this.setTAFKitPathMenuItem.getText());
 		tafKitPathChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		tafKitPathChooser.setMultiSelectionEnabled(false);
-
-		TAFKit tafKit = null;
 
 		while (true) {
 
@@ -285,12 +291,12 @@ public class VGI extends javax.swing.JFrame {
 			}
 
 			try {
-				tafKit = new TAFKit(tafKitPathChooser.getSelectedFile().getAbsolutePath());
+				pmTAFKit = new TAFKit(tafKitPathChooser.getSelectedFile());
 				break;
-			} catch (FileNotFoundException fileNotFoundException) {
+			} catch (IllegalArgumentException illegalArgumentException) {
 				returnValue = JOptionPane.showConfirmDialog(
 						this,
-						fileNotFoundException.getMessage() + "\nDo you want to try setting TAF-Kit path again?",
+						illegalArgumentException.getMessage() + "\nDo you want to try setting TAF-Kit path again?",
 						"Invalid TAF-Kit path",
 						JOptionPane.YES_NO_OPTION,
 						JOptionPane.WARNING_MESSAGE);
@@ -301,9 +307,42 @@ public class VGI extends javax.swing.JFrame {
 
 		}  // End while (true)
 
-		if (tafKit != null) {
-			this.currentSettingMenuItem.setText("Current setting:  " + tafKit.getTafKitPath());
-		}
+		if (pmTAFKit != null) {
+			this.currentSettingMenuItem.setText("Current setting:  " + pmTAFKit.getTafKitPath());
+			try {
+				List<TAFKitInterface.VcsnAlgorithm> vcsnAlgorithms = pmTAFKit.listVcsnAlgorithms("char-b");
+				if (this.algorithmsMenu.getMenuComponentCount() > 3) {
+					this.algorithmsMenu.removeAll();
+					this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
+					this.algorithmsMenu.add(this.currentSettingMenuItem);
+					this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
+				}
+				JMenu submenu = null;
+				for (int index = 0; index < vcsnAlgorithms.size(); index++) {
+					TAFKitInterface.VcsnAlgorithm vcsnAlgorithm = vcsnAlgorithms.get(index);
+					JMenuItem menuItem;
+					if (vcsnAlgorithm.name.equalsIgnoreCase("category")) {
+						submenu = new JMenu(vcsnAlgorithm.description);
+						this.algorithmsMenu.add(submenu);
+					} else {
+						menuItem = new JMenuItem(vcsnAlgorithm.name);
+						submenu.add(menuItem);
+					}
+				}  // End for (int index = 0; index < vcsnAlgorithms.size(); index ++)
+			} catch (FileNotFoundException fileNotFoundException) {
+				JOptionPane.showMessageDialog(
+						this,
+						fileNotFoundException.getMessage(),
+						null,
+						JOptionPane.WARNING_MESSAGE);
+			} catch (TAFKitInterface.TAFKitException tafKitException) {
+				JOptionPane.showMessageDialog(
+						this,
+						tafKitException.getMessage(),
+						null,
+						JOptionPane.WARNING_MESSAGE);
+			}
+		}  // End if (pmTAFKit != null)
 
     }//GEN-LAST:event_setTAFKitPathMenuItemActionPerformed
 
