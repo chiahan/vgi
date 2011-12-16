@@ -1,5 +1,5 @@
 /**
- * $Id: mxGraphHandler.java,v 1.74 2011-11-04 12:46:37 gaudenz Exp $
+ * $Id: mxGraphHandler.java,v 1.75 2011-11-29 13:40:08 gaudenz Exp $
  * Copyright (c) 2008, Gaudenz Alder
  * 
  * Known issue: Drag image size depends on the initial position and may sometimes
@@ -40,6 +40,7 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.util.mxGraphTransferable;
 import com.mxgraph.swing.util.mxMouseAdapter;
@@ -47,9 +48,10 @@ import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
-import com.mxgraph.util.mxEventSource.mxIEventListener;
+import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 
@@ -251,20 +253,21 @@ public class mxGraphHandler extends mxMouseAdapter implements
 
 		// Listens to dropped graph cells
 		installDropTargetHandler();
-		
+
 		// Listens to changes of the transferhandler
 		graphComponent.addPropertyChangeListener(new PropertyChangeListener()
 		{
-			
+
 			public void propertyChange(PropertyChangeEvent evt)
 			{
 				if (evt.getPropertyName().equals("transferHandler"))
 				{
 					if (currentDropTarget != null)
 					{
-						currentDropTarget.removeDropTargetListener(mxGraphHandler.this);
+						currentDropTarget
+								.removeDropTargetListener(mxGraphHandler.this);
 					}
-					
+
 					installDropTargetHandler();
 				}
 			}
@@ -438,6 +441,7 @@ public class mxGraphHandler extends mxMouseAdapter implements
 			 */
 			public Object getCell(MouseEvent e)
 			{
+				mxIGraphModel model = graphComponent.getGraph().getModel();
 				TransferHandler th = graphComponent.getTransferHandler();
 				boolean isLocal = th instanceof mxGraphTransferHandler
 						&& ((mxGraphTransferHandler) th).isLocalDrag();
@@ -447,6 +451,20 @@ public class mxGraphHandler extends mxMouseAdapter implements
 				Object[] cells = (isLocal) ? graph.getSelectionCells()
 						: dragCells;
 				cell = graph.getDropTarget(cells, e.getPoint(), cell);
+
+				// Checks if parent is dropped into child
+				Object parent = cell;
+
+				while (parent != null)
+				{
+					if (mxUtils.contains(cells, parent))
+					{
+						return null;
+					}
+					
+					parent = model.getParent(parent);
+				}
+
 				boolean clone = graphComponent.isCloneEvent(e) && cloneEnabled;
 
 				if (isLocal && cell != null && cells.length > 0 && !clone
@@ -537,7 +555,7 @@ public class mxGraphHandler extends mxMouseAdapter implements
 	{
 		markerEnabled = value;
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -545,7 +563,7 @@ public class mxGraphHandler extends mxMouseAdapter implements
 	{
 		return marker;
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -978,7 +996,7 @@ public class mxGraphHandler extends mxMouseAdapter implements
 		if (graphComponent.isAutoScroll())
 		{
 			graphComponent.getGraphControl().scrollRectToVisible(
-				new Rectangle(e.getPoint()));
+					new Rectangle(e.getPoint()));
 		}
 
 		if (!e.isConsumed())

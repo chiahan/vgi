@@ -1,5 +1,5 @@
 /**
- * $Id: mxGraphView.java,v 1.154 2011-03-23 13:30:21 gaudenz Exp $
+ * $Id: mxGraphView.java,v 1.155 2011-11-17 14:10:53 gaudenz Exp $
  * Copyright (c) 2007-2010, Gaudenz Alder, David Benson
  */
 package com.mxgraph.view;
@@ -1481,38 +1481,35 @@ public class mxGraphView extends mxEventSource
 				segment = segments[index++];
 			}
 
-			if (segment != 0)
+			double factor = (segment == 0) ? 0 : (dist - length) / segment;
+			mxPoint p0 = state.getAbsolutePoint(index - 1);
+			mxPoint pe = state.getAbsolutePoint(index);
+
+			if (p0 != null && pe != null)
 			{
-				double factor = (dist - length) / segment;
-				mxPoint p0 = state.getAbsolutePoint(index - 1);
-				mxPoint pe = state.getAbsolutePoint(index);
+				double gy = 0;
+				double offsetX = 0;
+				double offsetY = 0;
 
-				if (p0 != null && pe != null)
+				if (geometry != null)
 				{
-					double gy = 0;
-					double offsetX = 0;
-					double offsetY = 0;
+					gy = geometry.getY();
+					mxPoint offset = geometry.getOffset();
 
-					if (geometry != null)
+					if (offset != null)
 					{
-						gy = geometry.getY();
-						mxPoint offset = geometry.getOffset();
-
-						if (offset != null)
-						{
-							offsetX = offset.getX();
-							offsetY = offset.getY();
-						}
+						offsetX = offset.getX();
+						offsetY = offset.getY();
 					}
-
-					double dx = pe.getX() - p0.getX();
-					double dy = pe.getY() - p0.getY();
-					double nx = dy / segment;
-					double ny = dx / segment;
-
-					x = p0.getX() + dx * factor + (nx * gy + offsetX) * scale;
-					y = p0.getY() + dy * factor - (ny * gy - offsetY) * scale;
 				}
+
+				double dx = pe.getX() - p0.getX();
+				double dy = pe.getY() - p0.getY();
+				double nx = (segment == 0) ? 0 : dy / segment;
+				double ny = (segment == 0) ? 0 : dx / segment;
+
+				x = p0.getX() + dx * factor + (nx * gy + offsetX) * scale;
+				y = p0.getY() + dy * factor - (ny * gy - offsetY) * scale;
 			}
 		}
 		else if (geometry != null)

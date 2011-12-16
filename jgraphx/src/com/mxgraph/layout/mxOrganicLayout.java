@@ -1,5 +1,5 @@
 /**
- * $Id: mxOrganicLayout.java,v 1.9 2011-11-01 07:37:51 mate Exp $
+ * $Id: mxOrganicLayout.java,v 1.11 2011-12-02 15:19:01 mate Exp $
  * Copyright (c) 2007-2009, JGraph Ltd
  */
 
@@ -153,7 +153,7 @@ public class mxOrganicLayout extends mxGraphLayout
 	 * is not set this value mutiplied by the number of nodes to find
 	 * the total graph area. The graph is assumed square.
 	 */
-	protected double averageNodeArea = 40000;
+	protected double averageNodeArea = 160000;
 
 	/**
 	 * The radius below which fine tuning of the layout should start
@@ -567,13 +567,13 @@ public class mxOrganicLayout extends mxGraphLayout
 			performRound();
 		}
 
-		// Obtain the final positions post them to the facade
+		// Obtain the final positions
 		double[][] result = new double[v.length][2];
 		for (int i = 0; i < v.length; i++)
 		{
 			vertices[i] = v[i].cell;
-			bounds = graph.getCellBounds(vertices[i]);
-			// Convert from vertex center points to top left points
+			bounds = getVertexBounds(vertices[i]);
+
 			result[i][0] = v[i].x - bounds.getWidth() / 2;
 			result[i][1] = v[i].y - bounds.getHeight() / 2;
 		}
