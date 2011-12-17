@@ -1,10 +1,14 @@
 
+import java.awt.event.ActionEvent;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
 
 /*
  * To change this template, choose Tools | Templates
@@ -22,10 +26,206 @@ import javax.swing.JOptionPane;
  */
 public class VGI extends javax.swing.JFrame {
 
-	private TAFKit pmTAFKit = null;
+	private VGI pmVGI;
+	private TAFKit pmTAFKit;
+	private String pmTAFKitSuffix;
+
+	private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener {
+
+		public TAFKitInterface.VcsnAlgorithm vcsnAlgorithm;
+
+		public AlgorithmMenuItemActionListener(TAFKitInterface.VcsnAlgorithm vcsnAlgorithm) {
+			if (vcsnAlgorithm == null) {
+				throw new IllegalArgumentException("Input argument vcsnAlgorithm cannot be null!");
+			}
+			this.vcsnAlgorithm = vcsnAlgorithm;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent actionEvent) {
+
+			ArrayList<Object> inputs = new ArrayList<Object>();
+
+			for (int index = 0; index < this.vcsnAlgorithm.inputsInfo.size(); index++) {
+				TAFKitInterface.VcsnAlgorithm.IoInfo inputInfo = this.vcsnAlgorithm.inputsInfo.get(index);
+				switch (inputInfo.type) {
+
+					case AUTOMATON:
+						JFileChooser fileChooser = new JFileChooser();
+						fileChooser.setDialogTitle("Please choose a FSM XML file");
+						fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+						fileChooser.setMultiSelectionEnabled(false);
+						fileChooser.setFileFilter(new FileFilter() {
+
+							@Override
+							public boolean accept(File file) {
+								return ((file.getName().toLowerCase().endsWith(".xml"))
+										|| (file.isDirectory()));
+							}
+
+							@Override
+							public String getDescription() {
+								return "FSM XML file";
+							}
+						});
+						int returnValue = fileChooser.showOpenDialog(pmVGI);
+						if (returnValue != JFileChooser.APPROVE_OPTION) {
+							return;
+						}
+						inputs.add(fileChooser.getSelectedFile());
+						break;
+
+					case BOOLEAN:
+						throw new IllegalArgumentException("The " + (index + 1) + "th argument is boolean, but no argument should be boolean.");
+
+					case INTEGER:
+						String string = JOptionPane.showInputDialog("Please input an integer.");
+						if ((string == null) || (string.isEmpty())) {
+							return;
+						}
+						inputs.add(Integer.decode(string));
+						break;
+
+					case REGULAR_EXPRESSION:
+						string = JOptionPane.showInputDialog("Please input a regular expression.");
+						if ((string == null) || (string.isEmpty())) {
+							return;
+						}
+						inputs.add(string);
+						break;
+
+					case TEXT:
+						throw new IllegalArgumentException("The " + (index + 1) + "th argument is text, but no argument should be text.");
+
+					case WEIGHT:
+						string = JOptionPane.showInputDialog("Please input a weight value.");
+						if ((string == null) || (string.isEmpty())) {
+							return;
+						}
+						inputs.add(string);
+						break;
+
+					case WORD:
+						string = JOptionPane.showInputDialog("Please input a word.");
+						if ((string == null) || (string.isEmpty())) {
+							return;
+						}
+						inputs.add(string);
+						break;
+
+					default:
+						break;
+
+				}  // End switch (inputInfo.type)
+			}  // End for (int index = 0; index < this.vcsnAlgorithm.inputsInfo.size(); index++)
+
+			List<Object> outputs;
+			try {
+				outputs = pmTAFKit.runVcsnAlgorithm(pmTAFKitSuffix, this.vcsnAlgorithm, inputs);
+			} catch (Exception exception) {
+				exception.printStackTrace();
+				return;
+			}
+
+			for (int index = 0; index < this.vcsnAlgorithm.outputsInfo.size(); index++) {
+
+				TAFKitInterface.VcsnAlgorithm.IoInfo outputInfo = this.vcsnAlgorithm.outputsInfo.get(index);
+				Object object = outputs.get(index);
+
+				switch (outputInfo.type) {
+
+					case AUTOMATON:
+						// TODO:  Convert stream to a FSM XML file and open it in VGI.
+						JOptionPane.showMessageDialog(
+								pmVGI,
+								"Output of \"" + this.vcsnAlgorithm.name + "\" is an automaton, but we cannot display it yet.",
+								null,
+								JOptionPane.INFORMATION_MESSAGE);
+						break;
+
+					case BOOLEAN:
+						if (object instanceof Boolean) {
+							Boolean bool = (Boolean) object;
+							JOptionPane.showMessageDialog(
+									pmVGI,
+									"Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + bool,
+									null,
+									JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							throw new IllegalArgumentException("The " + (index + 1) + "th output should be an integer, but it is not!");
+						}
+						break;
+
+					case INTEGER:
+						if (object instanceof Integer) {
+							Integer integer = (Integer) object;
+							JOptionPane.showMessageDialog(
+									pmVGI,
+									"Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + integer,
+									null,
+									JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							throw new IllegalArgumentException("The " + (index + 1) + "th output should be an integer, but it is not!");
+						}
+						break;
+
+					case REGULAR_EXPRESSION:
+						if (object instanceof String) {
+							String string = (String) object;
+							JOptionPane.showMessageDialog(
+									pmVGI,
+									"Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + string,
+									null,
+									JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							throw new IllegalArgumentException("The " + (index + 1) + "th output should be a regular expression, but it is not!");
+						}
+						break;
+
+					case TEXT:
+						if (object instanceof String) {
+							String string = (String) object;
+							JOptionPane.showMessageDialog(
+									pmVGI,
+									"Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + string,
+									null,
+									JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							throw new IllegalArgumentException("The " + (index + 1) + "th output should be text, but it is not!");
+						}
+						break;
+
+					case WEIGHT:
+						throw new UnsupportedOperationException("The " + (index + 1) + "th output should be a weight, but VGI does not support weight outputs yet!");
+
+					case WORD:
+						if (object instanceof String) {
+							String string = (String) object;
+							JOptionPane.showMessageDialog(
+									pmVGI,
+									"Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + string,
+									null,
+									JOptionPane.INFORMATION_MESSAGE);
+						} else {
+							throw new IllegalArgumentException("The " + (index + 1) + "th output should be a word, but it is not!");
+						}
+						break;
+
+					default:
+						throw new IllegalArgumentException("The " + (index + 1) + "th output does not have a recognizable type.");
+
+				}  // End switch (outputInfo.type)
+
+			}  // End for (int index = 0; index < this.vcsnAlgorithm.outputsInfo.size(); index++)
+
+		}  // End public void actionPerformed(ActionEvent actionEvent)
+	}  // End private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener
 
 	/** Creates new form VGI */
 	public VGI() {
+		pmVGI = this;
+		pmTAFKit = null;
+		pmTAFKitSuffix = "char-b";
 		initComponents();
 	}
 
@@ -309,42 +509,65 @@ public class VGI extends javax.swing.JFrame {
 
 		if (pmTAFKit != null) {
 			this.currentSettingMenuItem.setText("Current setting:  " + pmTAFKit.getTafKitPath());
-			try {
-				List<TAFKitInterface.VcsnAlgorithm> vcsnAlgorithms = pmTAFKit.listVcsnAlgorithms("char-b");
-				if (this.algorithmsMenu.getMenuComponentCount() > 3) {
-					this.algorithmsMenu.removeAll();
-					this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
-					this.algorithmsMenu.add(this.currentSettingMenuItem);
-					this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
-				}
-				JMenu submenu = null;
-				for (int index = 0; index < vcsnAlgorithms.size(); index++) {
-					TAFKitInterface.VcsnAlgorithm vcsnAlgorithm = vcsnAlgorithms.get(index);
-					JMenuItem menuItem;
-					if (vcsnAlgorithm.name.equalsIgnoreCase("category")) {
-						submenu = new JMenu(vcsnAlgorithm.description);
-						this.algorithmsMenu.add(submenu);
-					} else {
-						menuItem = new JMenuItem(vcsnAlgorithm.name);
-						submenu.add(menuItem);
-					}
-				}  // End for (int index = 0; index < vcsnAlgorithms.size(); index ++)
-			} catch (FileNotFoundException fileNotFoundException) {
-				JOptionPane.showMessageDialog(
-						this,
-						fileNotFoundException.getMessage(),
-						null,
-						JOptionPane.WARNING_MESSAGE);
-			} catch (TAFKitInterface.TAFKitException tafKitException) {
-				JOptionPane.showMessageDialog(
-						this,
-						tafKitException.getMessage(),
-						null,
-						JOptionPane.WARNING_MESSAGE);
-			}
+			this.updateAlgorithmMenuItems();
 		}  // End if (pmTAFKit != null)
 
     }//GEN-LAST:event_setTAFKitPathMenuItemActionPerformed
+
+	private void updateAlgorithmMenuItems() {
+
+		if (pmTAFKitSuffix == null) {
+			return;
+		}
+
+		List<TAFKitInterface.VcsnAlgorithm> vcsnAlgorithms = null;
+
+		try {
+			vcsnAlgorithms = pmTAFKit.listVcsnAlgorithms(pmTAFKitSuffix);
+		} catch (FileNotFoundException fileNotFoundException) {
+			if (this.algorithmsMenu.getMenuComponentCount() > 3) {
+				this.algorithmsMenu.removeAll();
+				this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
+				this.algorithmsMenu.add(this.currentSettingMenuItem);
+				this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
+			}
+			JMenuItem menuItem = new JMenuItem();
+			menuItem.setText("TAF-Kit currently does not support this type of automata, \"vcsn-" + pmTAFKitSuffix + "\".");
+			menuItem.setEnabled(false);
+			this.algorithmsMenu.add(menuItem);
+			return;
+		} catch (TAFKitInterface.TAFKitException tafKitException) {
+			JOptionPane.showMessageDialog(
+					this,
+					tafKitException.getMessage(),
+					null,
+					JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+
+		if (this.algorithmsMenu.getMenuComponentCount() > 3) {
+			this.algorithmsMenu.removeAll();
+			this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
+			this.algorithmsMenu.add(this.currentSettingMenuItem);
+			this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
+		}
+
+		JMenu submenu = null;
+
+		for (int index = 0; index < vcsnAlgorithms.size(); index++) {
+			TAFKitInterface.VcsnAlgorithm vcsnAlgorithm = vcsnAlgorithms.get(index);
+			JMenuItem menuItem;
+			if (vcsnAlgorithm.name.equalsIgnoreCase("category")) {
+				submenu = new JMenu(vcsnAlgorithm.description);
+				this.algorithmsMenu.add(submenu);
+			} else {
+				menuItem = new JMenuItem(vcsnAlgorithm.name);
+				AlgorithmMenuItemActionListener algorithmMenuItemActionListener = new AlgorithmMenuItemActionListener(vcsnAlgorithm);
+				menuItem.addActionListener(algorithmMenuItemActionListener);
+				submenu.add(menuItem);
+			}
+		}  // End for (int index = 0; index < vcsnAlgorithms.size(); index ++)
+	}  // End private void updateAlgorithmMenuItems()
 
 	/**
 	 * @param args the command line arguments

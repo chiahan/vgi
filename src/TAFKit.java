@@ -45,6 +45,19 @@ public class TAFKit implements TAFKitInterface {
 		if ((!file.isFile()) || (!file.canExecute())) {
 			throw new IllegalArgumentException("The specified path \"" + tafKitFolderPath.getAbsolutePath() + "\" does not have the most basic TAF-Kit executable \"vcsn-char-b\" so it is probably an incorrect TAF-Kit path.");
 		}
+		Process process;
+		int exitValue;
+		try {
+			process = Runtime.getRuntime().exec("./vcsn-char-b data a1.xml", null, tafKitFolderPath);
+			exitValue = process.waitFor();
+		} catch (IOException ioException) {
+			throw new Error(ioException);
+		} catch (InterruptedException interruptedException) {
+			throw new Error(interruptedException);
+		}
+		if (exitValue != 0) {
+			throw new IllegalArgumentException("The most basic TAF-Kit executable \"vcsn-char-b\" in the specified path \"" + tafKitFolderPath.getAbsolutePath() + "\" did not execute successfully so this is probably an incorrect TAF-Kit path.");
+		}
 		pmTafKitPath = tafKitFolderPath;
 
 	}  // End public void setTafKitPath(...)
@@ -269,6 +282,12 @@ public class TAFKit implements TAFKitInterface {
 				case AUTOMATON:
 					if (object instanceof Automata) {
 						// TODO:  Prepare temporary XML file and append the file name to command.
+					} else if (object instanceof File) {
+						String string = ((File) object).getAbsolutePath();
+						if (!(string.toLowerCase().endsWith(".xml"))) {
+							throw new IllegalArgumentException("The " + (index + 1) + "th argument should be an XML file representing an automaton, but it is not!");
+						}
+						commandStr = commandStr + " " + string;
 					} else if (object instanceof String) {
 						String string = (String) object;
 						if (!(string.toLowerCase().endsWith(".xml"))) {
@@ -381,6 +400,7 @@ public class TAFKit implements TAFKitInterface {
 
 				case AUTOMATON:
 					// TODO:  Convert stream to Automata.
+					outputs.add("an automaton");
 					break;
 
 				case BOOLEAN:
