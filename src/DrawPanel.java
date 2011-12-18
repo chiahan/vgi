@@ -41,7 +41,7 @@ import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
-
+import com.mxgraph.model.mxCell;
 
 import drawpackage.*;
 
@@ -60,6 +60,8 @@ public class DrawPanel extends JPanel {
     protected mxRubberband rubberband;
     protected mxKeyboardHandler keyboardHandler;
    
+    protected Hashtable<Integer,mxCell> cellTable;
+    
     final mxGraph graph;
     
     public DrawPanel(mxGraphComponent component){
@@ -69,6 +71,10 @@ public class DrawPanel extends JPanel {
         graphOutline = new mxGraphOutline(graphComponent);
         libraryPane = new JPanel();
         libraryPane.setSize(300, 300);
+        
+        
+        cellTable=new Hashtable<Integer,mxCell>();
+        
         
      /*   JPanel eButtons=new JPanel();
         JButton edgeB=new JButton("edge");
@@ -329,8 +335,10 @@ public class DrawPanel extends JPanel {
     //}
     
     void paintAut(Automata aut){
-            
-          /*  Object parent = graph.getDefaultParent();
+        
+        graph.getModel().beginUpdate();
+	try{ 
+           Object parent = graph.getDefaultParent();
              
             ArrayList<State> statelist=aut.getAllStates();
             for(int i=0;i<statelist.size();++i){
@@ -341,19 +349,29 @@ public class DrawPanel extends JPanel {
                 Point2D y=(statelist.get(i)).getGeometriData().y;
                 
                 //x,y???
-                graph.insertVertex(parent,Integer.toString(i),name,x.getX(),y.getY(),50,50,"shape=ellipse");
-            
+                Object newv=graph.insertVertex(parent,Integer.toString(i),name,x.getX(),y.getY(),50,50,"shape=ellipse");
+                cellTable.put((Integer)id, (mxCell)newv);
             }
             
             
             ArrayList<Transition> translist=aut.getAllTransitions();
             for(int i=0;i<translist.size();++i){
                 
+                int sourceId=translist.get(i).getSourceID();
+                int targetId=translist.get(i).getTargetID();
+                
+                mxCell source=cellTable.get(sourceId);
+                mxCell target=cellTable.get(targetId);
+                
+                Object e2=graph.insertEdge(parent, null, "", source, target);
                 
             }
             
-            */
-            
+        }
+	finally{
+            graph.getModel().endUpdate();
+        }    
+        graphComponent=new mxGraphComponent(graph);    
    }
     
 }
