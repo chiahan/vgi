@@ -504,7 +504,7 @@ public class DrawPanel extends JPanel {
 	try{ 
            Object parent = graph.getDefaultParent();
              
-            ArrayList<State> statelist=aut.getAllStates();
+            List<State> statelist=aut.getAllStates();
             for(int i=0;i<statelist.size();++i){
                 int id=statelist.get(i).getId();
                 String name=(statelist.get(i)).getName();
@@ -518,7 +518,7 @@ public class DrawPanel extends JPanel {
             }
             
             
-            ArrayList<Transition> translist=aut.getAllTransitions();
+            List<Transition> translist=aut.getAllTransitions();
             for(int i=0;i<translist.size();++i){
                 
                 int sourceId=translist.get(i).getSourceID();
