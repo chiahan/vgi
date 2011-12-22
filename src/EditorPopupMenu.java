@@ -1,3 +1,5 @@
+
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -57,12 +59,12 @@ public class EditorPopupMenu extends JPopupMenu
                 addSeparator();
                 
                 
-                add(
+                /*add(
 				editor.bind(mxResources.get("cut"), TransferHandler
 						.getCutAction(),
 						"/drawcomp/images/cut.gif"))
 				.setEnabled(selected);
-		/*add(
+		add(
 				editor.bind(mxResources.get("copy"), TransferHandler
 						.getCopyAction(),
 						"/drawcomp/images/copy.gif"))
