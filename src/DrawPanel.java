@@ -1,4 +1,4 @@
-package drawcomp;
+//package drawcomp;
 
 /*
  * To change this template, choose Tools | Templates
@@ -9,6 +9,11 @@ package drawcomp;
  *
  * @author reng
  */
+
+import drawpackage.EditorPalette;
+import drawpackage.EdgePalette;
+
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
