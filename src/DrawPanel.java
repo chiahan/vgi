@@ -1,4 +1,4 @@
-
+package drawcomp;
 
 /*
  * To change this template, choose Tools | Templates
@@ -9,9 +9,9 @@
  *
  * @author reng
  */
-import java.util.*;
-
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -19,8 +19,14 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.geom.Point2D;
+import java.awt.Point;
 
+import java.util.Hashtable;
+import java.util.List;
+import java.util.ArrayList;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.BorderFactory;
@@ -30,6 +36,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JFrame;
 import javax.swing.JButton;
 import javax.swing.ImageIcon;
+import javax.swing.SwingUtilities;
 
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.mxGraphOutline;
@@ -42,9 +49,11 @@ import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.model.mxCell;
-
-import drawpackage.*;
-
+import com.mxgraph.model.mxGeometry;
+import com.mxgraph.util.mxPoint;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class DrawPanel extends JPanel {
     
@@ -54,16 +63,17 @@ public class DrawPanel extends JPanel {
     protected JLabel statusBar;
     protected JPanel libraryPane;
     protected mxGraphOutline graphOutline;
+    final mxGraph graph;
     
     protected boolean modified = false;
 
     protected mxRubberband rubberband;
     protected mxKeyboardHandler keyboardHandler;
-   
+    
+    
     protected Hashtable<Integer,mxCell> cellTable;
-    
-    final mxGraph graph;
-    
+    protected mxCell trans_source,trans_target;
+    protected int PopMouseX,PopMouseY;
     public DrawPanel(mxGraphComponent component){
     
         graphComponent=component;
@@ -74,7 +84,6 @@ public class DrawPanel extends JPanel {
         
         
         cellTable=new Hashtable<Integer,mxCell>();
-        
         
      /*   JPanel eButtons=new JPanel();
         JButton edgeB=new JButton("edge");
@@ -150,7 +159,7 @@ public class DrawPanel extends JPanel {
 	}
     protected void installHandlers()
 	{
-		rubberband = new mxRubberband(graphComponent);
+		//rubberband = new mxRubberband(graphComponent);
 		//keyboardHandler = new EditorKeyboardHandler(graphComponent);
 	}
     protected void installListeners()
@@ -176,32 +185,7 @@ public class DrawPanel extends JPanel {
 		graphOutline.addMouseWheelListener(wheelTracker);
 		graphComponent.addMouseWheelListener(wheelTracker);
 
-		// Installs the popup menu in the outline
-		graphOutline.addMouseListener(new MouseAdapter()
-		{
-
-			/**
-			 * 
-			 */
-			public void mousePressed(MouseEvent e)
-			{
-				// Handles context menu on the Mac where the trigger is on mousepressed
-				mouseReleased(e);
-			}
-
-			/**
-			 * 
-			 */
-			public void mouseReleased(MouseEvent e)
-			{
-				if (e.isPopupTrigger())
-				{
-					//showOutlinePopupMenu(e);
-				}
-			}
-
-		});
-
+		
 		// Installs the popup menu in the graph component
 		graphComponent.getGraphControl().addMouseListener(new MouseAdapter()
 		{
@@ -222,9 +206,45 @@ public class DrawPanel extends JPanel {
 			{
 				if (e.isPopupTrigger())
 				{
-					//showGraphPopupMenu(e);
+					showGraphPopupMenu(e);
+                                        PopMouseX=e.getX();
+                                        PopMouseY=e.getY();
 				}
 			}
+                        
+                        //--------------click to add state & transition
+                        public void mouseClicked(MouseEvent e)
+                        {
+                            Object cell = graphComponent.getCellAt(e.getX(), e.getY());
+                            if(e.getButton()==MouseEvent.BUTTON1){
+                          
+				if (cell != null){
+                                    if(((mxCell)cell).isVertex()){
+                                    
+					//System.out.println("add transition");
+                                        if(trans_source!=null){
+                                            
+                                            trans_target=(mxCell)cell;
+                                            addTrans(trans_source,trans_target);
+                                            
+                                            trans_source=null;
+                                            trans_target=null;
+                                            System.out.println("Target!");
+                                        }
+                                    }    
+				}
+                            }
+                            if(e.isPopupTrigger()){
+                                
+                                showGraphPopupMenu(e);
+                                
+                                if (cell != null && ((mxCell)cell).isEdge()){
+                                    PopMouseX=e.getX();
+                                    PopMouseY=e.getY();
+                                }
+                                
+                            }
+                        }
 
 		});
 
@@ -320,21 +340,160 @@ public class DrawPanel extends JPanel {
 
 		return palette;
     }
-   // public JFrame createFrame()
-  //  {
-	//	JFrame frame = new JFrame();
-	//	frame.getContentPane().add(this);
-	//	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    
+    public mxGraphComponent getGraphComponent()
+    {
+		return graphComponent;
+    }
+    
+    public Action bind(String name, final Action action)
+    {
+		return bind(name, action, null);
+    }
+    
+    @SuppressWarnings("serial")
+    public Action bind(String name, final Action action, String iconUrl)
+    {
+		return new AbstractAction(name, (iconUrl != null) ? new ImageIcon(
+				DrawPanel.class.getResource(iconUrl)) : null)
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				action.actionPerformed(new ActionEvent(getGraphComponent(), e
+						.getID(), e.getActionCommand()));
+			}
+		};
+    }
+    protected void showGraphPopupMenu(MouseEvent e)
+    {
+		Point pt = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(),
+				graphComponent);
+		EditorPopupMenu menu = new EditorPopupMenu(DrawPanel.this);
+		menu.show(graphComponent, pt.x, pt.y);
+
+		e.consume();
+    }
+    public JFrame createFrame()
+    {
+		JFrame frame = new JFrame();
+		frame.getContentPane().add(this);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//frame.setJMenuBar(menuBar);
-	//	frame.setSize(870, 640);
-	//	frame.setVisible(true);
+		frame.setSize(870, 640);
+		frame.setVisible(true);
 		// Updates the frame title
 		//updateTitle();
 
-	//	return frame;
-    //}
+		return frame;
+    }
+
+    public void addState(int x,int y)
+    {
+        Object parent = graph.getDefaultParent();
+        int id=cellTable.size();
+        Object newv=graph.insertVertex(parent,Integer.toString(id),"",x-25,y-25,50,50,"shape=ellipse");
+        cellTable.put((Integer)id, (mxCell)newv);
+        System.out.println("add state at"+x+","+y);
+        
+    }
+    public void addTrans(mxCell source,mxCell target)
+    {
+        Object parent = graph.getDefaultParent();
+        Object e=graph.insertEdge(parent, null, "", source, target,"shape=curve");
+        ArrayList<mxPoint> points=new ArrayList<mxPoint>();
+        
+        //System.out.println("source pt"+((mxCell)e).getGeometry().);
+        //System.out.println("target pt"+((mxCell)e).getGeometry().getTargetPoint());
+        
+        //points.add(((mxCell)e).getGeometry().getSourcePoint());
+        //points.add(((mxCell)e).getGeometry().getTargetPoint());
+        
+        ((mxCell)e).getGeometry().setPoints(points);
+        
+    }
+    public void addControlPt()
+    {
+            addControlPt((mxCell)graphComponent.getCellAt(PopMouseX,PopMouseY),PopMouseX,PopMouseY);    
+    }
+    public void addControlPt(mxCell cell,int x,int y)
+    {
+        
+        System.out.println("add Ctrl pt at"+x+","+y);
+        ArrayList<mxPoint> points=(ArrayList)cell.getGeometry().getPoints();
+        //ArrayList<mxPoint> points1=new ArrayList<mxPoint>();
+        
+        points.add(new mxPoint(x,y)); 
+        
+        //to sort
+        if(points.size()>1){
+            Collections.sort(points,new CompareCtrlPt());
+            if(cell.getSource().getGeometry().getX()>cell.getTarget().getGeometry().getX())
+                Collections.reverse(points);
+        }
+      
+              
+        cell.getGeometry().setPoints(points);
+        graphComponent.refresh();
+        
+       
+    }
+    public class CompareCtrlPt implements Comparator{
+
+        @Override
+        public int compare(Object t, Object t1) {
+            //throw new UnsupportedOperationException("Not supported yet.");
+            
+            Integer tX=(int)((mxPoint)t).getX();
+            Integer tY=(int)((mxPoint)t).getY();
+            Integer t1X=(int)((mxPoint)t1).getX();
+            Integer t1Y=(int)((mxPoint)t1).getY();
+            
+            int flag=tX.compareTo(t1X);
+            if(flag==0) return tY.compareTo(t1Y);
+            else return flag;
+           
+        }
+        
+        
+    } 
+     public Action bind_addControlPt(String name, String iconUrl)
+    {
+		return new AbstractAction(name, (iconUrl != null) ? new ImageIcon(
+				DrawPanel.class.getResource(iconUrl)) : null)
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				addControlPt();
+			}
+		};
+    }
+     public Action bind_addTransition(String name, String iconUrl)
+    {
+		return new AbstractAction(name, (iconUrl != null) ? new ImageIcon(
+				DrawPanel.class.getResource(iconUrl)) : null)
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				//addControlPt();
+                                trans_source=(mxCell)graphComponent.getCellAt(PopMouseX,PopMouseY);
+                                System.out.println("source");
+			}
+		};
+    }
+     public Action bind_addState(String name, String iconUrl)
+    {
+		return new AbstractAction(name, (iconUrl != null) ? new ImageIcon(
+				DrawPanel.class.getResource(iconUrl)) : null)
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				//addControlPt();
+                                addState(PopMouseX,PopMouseY);
+			}
+		};
+    }
     
-    void paintAut(Automata aut){
+    /* void paintAut(Automata aut){
         
         graph.getModel().beginUpdate();
 	try{ 
@@ -372,7 +531,16 @@ public class DrawPanel extends JPanel {
             graph.getModel().endUpdate();
         }    
         graphComponent=new mxGraphComponent(graph);    
-   }
+   }*/
     
+    
+     public static void main(String[] args) {
+        // TODO code application logic here
+    
+        mxGraphComponent comp=new mxGraphComponent(new mxGraph());
+        DrawPanel drawpanel=new DrawPanel(comp);
+        drawpanel.createFrame();
+    
+    }
 }
 
