@@ -56,6 +56,7 @@ import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.util.mxPoint;
+import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -506,27 +507,28 @@ public class DrawPanel extends JPanel {
         return (new addCtrlPtAction());
     }
     
-    /* void paintAut(Automata aut){
-        
+    void paintAutomata(Automata automata) {
         graph.getModel().beginUpdate();
-	try{ 
-           Object parent = graph.getDefaultParent();
-             
-            ArrayList<State> statelist=aut.getAllStates();
-            for(int i=0;i<statelist.size();++i){
-                int id=statelist.get(i).getId();
-                String name=(statelist.get(i)).getName();
-                
-                Point2D x=(statelist.get(i)).getGeometriData().x;
-                Point2D y=(statelist.get(i)).getGeometriData().y;
+
+        try {
+            Object parent = graph.getDefaultParent();
+
+            List<State> stateList = automata.getAllStates();
+            int size = stateList.size();
+            for (int i = 0; i < size; i++) {
+                State state = stateList.get(i);
+                int id = state.getId();
+                String name = state.getName();
+                Point2D location = state.getLocation();
                 
                 //x,y???
-                Object newv=graph.insertVertex(parent,Integer.toString(i),name,x.getX(),y.getY(),50,50,"shape=ellipse");
-                cellTable.put((Integer)id, (mxCell)newv);
+                Object vertex = graph.insertVertex(parent, Integer.toString(i), 
+                        name, location.getX(), location.getY(), 50, 50, 
+                        "shape=ellipse");
+                cellTable.put((Integer) id, (mxCell) vertex);
             }
-            
-            
-            ArrayList<Transition> translist=aut.getAllTransitions();
+
+            List<Transition> translist=automata.getAllTransitions();
             for(int i=0;i<translist.size();++i){
                 
                 int sourceId=translist.get(i).getSourceID();
@@ -536,15 +538,13 @@ public class DrawPanel extends JPanel {
                 mxCell target=cellTable.get(targetId);
                 
                 Object e2=graph.insertEdge(parent, null, "", source, target);
-                
             }
-            
-        }
-	finally{
+
+        } finally {
             graph.getModel().endUpdate();
-        }    
-        graphComponent=new mxGraphComponent(graph);    
-   }*/
+        }
+        graphComponent = new mxGraphComponent(graph);
+    }
     
     
      public static void main(String[] args) {

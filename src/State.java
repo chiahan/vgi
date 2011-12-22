@@ -11,18 +11,38 @@ import java.awt.geom.Point2D;
 public class State {
 
     /**
-     * @return the geometriData
+     * @return the geometricData
      */
-    public Geometry getGeometriData() {
+    public Geometry getGeometricData() {
         return geometricData;
     }
 
     /**
-     * @param geometriData the geometriData to set
+     * @param geometricData the geometriData to set
      */
-    public void setGeometriData(Point2D x, Point2D y) {
-        this.geometricData.x = x;
-        this.geometricData.y = y;
+    public void setGeometricData(Geometry geometricData) {
+        this.geometricData = geometricData;
+    }
+    
+    /**
+     * @return the location
+     */
+    public Point2D getLocation() {
+        return this.geometricData.getLocation();
+    }
+    
+    /**
+     * @param location the location to set
+     */
+    public void setLocation(int x, int y) {
+        this.geometricData.setLocation(x, y);
+    }
+    
+    /**
+     * @param location the location to set
+     */
+    public void setLocation(Point2D p) {
+        this.geometricData.setLocation(p);
     }
 
     /**
@@ -80,10 +100,7 @@ public class State {
     public void setFinal(boolean finalFlag) {
         this.finalFlag = finalFlag;
     }
-    public class Geometry {
-        Point2D x;
-        Point2D y;
-    }
+    
     private Geometry geometricData;
     Drawing drawingData;
     
