@@ -38,21 +38,31 @@ public class EditorPopupMenu extends JPopupMenu
                 //add(editor.bind(mxResources.get("undo"), new HistoryAction(true),
 		//		"/com/mxgraph/examples/swing/images/undo.gif"));
                 
-                add(editor.bind_addState("add State","")).setEnabled(!selected);
-                add(editor.bind_addTransition("add Trans","")).setEnabled(vertexSelected);
-		add(editor.bind_addControlPt("add CtrlPt","")).setEnabled(edgeSelected);
+                
+                add(
+				editor.bind("add State", editor.getAddStateAction(),
+						""))
+				.setEnabled(!selected);
+                add(
+				editor.bind("add Trans", editor.getAddTransAction(),
+						""))
+				.setEnabled(vertexSelected);
+                add(
+				editor.bind("add CtrlPt", editor.getAddCtrlPtAction(),
+						""))
+				.setEnabled(edgeSelected);
                 
                 
                 
                 addSeparator();
                 
                 
-                /*add(
+                add(
 				editor.bind(mxResources.get("cut"), TransferHandler
 						.getCutAction(),
 						"/drawcomp/images/cut.gif"))
 				.setEnabled(selected);
-		add(
+		/*add(
 				editor.bind(mxResources.get("copy"), TransferHandler
 						.getCopyAction(),
 						"/drawcomp/images/copy.gif"))

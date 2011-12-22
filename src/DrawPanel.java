@@ -461,41 +461,49 @@ public class DrawPanel extends JPanel {
         
         
     } 
-     public Action bind_addControlPt(String name, String iconUrl)
+
+    class addStateAction extends AbstractAction
     {
-		return new AbstractAction(name, (iconUrl != null) ? new ImageIcon(
-				DrawPanel.class.getResource(iconUrl)) : null)
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				addControlPt();
-			}
-		};
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            //throw new UnsupportedOperationException("Not supported yet.");
+            addState(PopMouseX,PopMouseY);
+        }
+        
+        
     }
-     public Action bind_addTransition(String name, String iconUrl)
+    class addTransAction extends AbstractAction
     {
-		return new AbstractAction(name, (iconUrl != null) ? new ImageIcon(
-				DrawPanel.class.getResource(iconUrl)) : null)
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				//addControlPt();
-                                trans_source=(mxCell)graphComponent.getCellAt(PopMouseX,PopMouseY);
-                                System.out.println("source");
-			}
-		};
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            //throw new UnsupportedOperationException("Not supported yet.");
+            trans_source=(mxCell)graphComponent.getCellAt(PopMouseX,PopMouseY);
+            System.out.println("source");
+        }
+        
+        
     }
-     public Action bind_addState(String name, String iconUrl)
+    class addCtrlPtAction extends AbstractAction
     {
-		return new AbstractAction(name, (iconUrl != null) ? new ImageIcon(
-				DrawPanel.class.getResource(iconUrl)) : null)
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				//addControlPt();
-                                addState(PopMouseX,PopMouseY);
-			}
-		};
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            //throw new UnsupportedOperationException("Not supported yet.");
+            addControlPt();
+        }
+        
+        
+    }
+    public Action getAddStateAction(){
+        return (new addStateAction());
+    }
+    public Action getAddTransAction(){
+        return (new addTransAction());
+    }
+    public Action getAddCtrlPtAction(){
+        return (new addCtrlPtAction());
     }
     
     /* void paintAut(Automata aut){
