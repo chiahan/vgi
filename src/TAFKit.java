@@ -63,19 +63,20 @@ public class TAFKit implements TAFKitInterface {
 	}  // End public void setTafKitPath(...)
 
 	public List<VcsnAlgorithm> listVcsnAlgorithms(
-			String tafKitSuffix)
+			AutomataType automataType)
 			throws
 			FileNotFoundException,
 			TAFKitException {
 
-		if (!(new File(pmTafKitPath, "vcsn-" + tafKitSuffix).exists())) {
-			throw new FileNotFoundException("The specified TAF-Kit executable \"" + this.getTafKitPath() + File.separator + "vcsn-" + tafKitSuffix + "\" does not exist!");
+		String tafKitExecutableFileName = automataType.toExecutableFileName();
+		if (!(new File(pmTafKitPath, tafKitExecutableFileName).exists())) {
+			throw new FileNotFoundException("The specified TAF-Kit executable \"" + this.getTafKitPath() + File.separator + tafKitExecutableFileName + "\" does not exist!");
 		}
 
 		Process process;
 		int exitValue;
 		try {
-			process = Runtime.getRuntime().exec("./vcsn-" + tafKitSuffix + " --list-all-commands-json",
+			process = Runtime.getRuntime().exec("./" + tafKitExecutableFileName + " --list-all-commands-json",
 					null, pmTafKitPath);
 			exitValue = process.waitFor();
 		} catch (IOException ioException) {
@@ -248,7 +249,7 @@ public class TAFKit implements TAFKitInterface {
 	}	// End public List<VcsnAlgorithm> listVcsnAlgorithms(...)
 
 	public List<Object> runVcsnAlgorithm(
-			String tafKitSuffix,
+			AutomataType automataType,
 			VcsnAlgorithm algorithm,
 			List<Object> inputs)
 			throws
@@ -256,8 +257,9 @@ public class TAFKit implements TAFKitInterface {
 			IllegalArgumentException,
 			TAFKitException {
 
-		if (!(new File(pmTafKitPath, "vcsn-" + tafKitSuffix).exists())) {
-			throw new FileNotFoundException("The specified TAF-Kit executable \"" + this.getTafKitPath() + File.separator + "vcsn-" + tafKitSuffix + "\" does not exist!");
+		String tafKitExecutableFileName = automataType.toExecutableFileName();
+		if (!(new File(pmTafKitPath, tafKitExecutableFileName).exists())) {
+			throw new FileNotFoundException("The specified TAF-Kit executable \"" + this.getTafKitPath() + File.separator + tafKitExecutableFileName + "\" does not exist!");
 		}
 
 		if ((algorithm == null)
@@ -272,7 +274,7 @@ public class TAFKit implements TAFKitInterface {
 			throw new IllegalArgumentException("The VcsnAlgorithm algorithm argument is invalid.");
 		}
 
-		String commandStr = "./vcsn-" + tafKitSuffix + " -v " + algorithm.name;
+		String commandStr = "./" + tafKitExecutableFileName + " -v " + algorithm.name;
 
 		for (int index = 0; index < inputs.size(); index++) {
 
@@ -485,9 +487,13 @@ public class TAFKit implements TAFKitInterface {
 		}
 
 		List<VcsnAlgorithm> vcsnAlgorithmsList;
-		String tafKitSuffix = "char-b";
+		AutomataType automataType = new AutomataType(
+				AutomataType.Semiring.B_BOOLEAN,
+				AutomataType.AlphabetDataType.CHAR,
+				null,
+				false);
 		try {
-			vcsnAlgorithmsList = tafKit.listVcsnAlgorithms(tafKitSuffix);
+			vcsnAlgorithmsList = tafKit.listVcsnAlgorithms(automataType);
 			if (vcsnAlgorithmsList == null) {
 				return;
 			}
@@ -550,7 +556,7 @@ public class TAFKit implements TAFKitInterface {
 			ArrayList<Object> inputs = new ArrayList<Object>();
 			inputs.add("a1.xml");
 			inputs.add("ab");
-			outputs = tafKit.runVcsnAlgorithm(tafKitSuffix, algorithmToRun, inputs);
+			outputs = tafKit.runVcsnAlgorithm(automataType, algorithmToRun, inputs);
 		} catch (Exception exception) {
 			exception.printStackTrace();
 			return;

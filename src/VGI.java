@@ -12,7 +12,6 @@ import javax.swing.filechooser.FileFilter;
 
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
-import javax.swing.JButton;
 
 /*
  * To change this template, choose Tools | Templates
@@ -32,7 +31,7 @@ public class VGI extends javax.swing.JFrame {
 
     private VGI pmVGI;
     private TAFKit pmTAFKit;
-    private String pmTAFKitSuffix;
+    private TAFKitInterface.AutomataType pmAutomataType;
 
     private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener {
 
@@ -125,7 +124,7 @@ public class VGI extends javax.swing.JFrame {
 
             List<Object> outputs;
             try {
-                outputs = pmTAFKit.runVcsnAlgorithm(pmTAFKitSuffix, this.vcsnAlgorithm, inputs);
+                outputs = pmTAFKit.runVcsnAlgorithm(pmAutomataType, this.vcsnAlgorithm, inputs);
             } catch (Exception exception) {
                 exception.printStackTrace();
                 return;
@@ -229,7 +228,11 @@ public class VGI extends javax.swing.JFrame {
     public VGI() {
         pmVGI = this;
         pmTAFKit = null;
-        pmTAFKitSuffix = "char-b";
+        pmAutomataType = new TAFKitInterface.AutomataType(
+				TAFKitInterface.AutomataType.Semiring.B_BOOLEAN,
+				TAFKitInterface.AutomataType.AlphabetDataType.CHAR,
+				null,
+				false);
         initComponents();
     }
 
@@ -601,14 +604,14 @@ public class VGI extends javax.swing.JFrame {
 
     private void updateAlgorithmMenuItems() {
 
-        if (pmTAFKitSuffix == null) {
+        if (pmAutomataType == null) {
             return;
         }
 
         List<TAFKitInterface.VcsnAlgorithm> vcsnAlgorithms = null;
 
         try {
-            vcsnAlgorithms = pmTAFKit.listVcsnAlgorithms(pmTAFKitSuffix);
+            vcsnAlgorithms = pmTAFKit.listVcsnAlgorithms(pmAutomataType);
         } catch (FileNotFoundException fileNotFoundException) {
             if (this.algorithmsMenu.getMenuComponentCount() > 3) {
                 this.algorithmsMenu.removeAll();
@@ -617,7 +620,7 @@ public class VGI extends javax.swing.JFrame {
                 this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
             }
             JMenuItem menuItem = new JMenuItem();
-            menuItem.setText("TAF-Kit currently does not support this type of automata, \"vcsn-" + pmTAFKitSuffix + "\".");
+            menuItem.setText("TAF-Kit currently does not support this type of automata, \"" + pmAutomataType.toExecutableFileName() + "\".");
             menuItem.setEnabled(false);
             this.algorithmsMenu.add(menuItem);
             return;
