@@ -519,7 +519,7 @@ public class DrawPanel extends JPanel {
                 State state = stateList.get(i);
                 int id = state.getId();
                 String name = state.getName();
-                Point2D location = state.getLocation();
+                Point2D location = state.getGeometricData().location;
                 
                 //x,y???
                 Object vertex = graph.insertVertex(parent, Integer.toString(i), 
@@ -531,8 +531,8 @@ public class DrawPanel extends JPanel {
             List<Transition> translist=automata.getAllTransitions();
             for(int i=0;i<translist.size();++i){
                 
-                int sourceId=translist.get(i).getSourceID();
-                int targetId=translist.get(i).getTargetID();
+                int sourceId=translist.get(i).getSourceState().getId();
+                int targetId=translist.get(i).getTargetState().getId();
                 
                 mxCell source=cellTable.get(sourceId);
                 mxCell target=cellTable.get(targetId);

@@ -2,136 +2,86 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+
 /**
  *
  * @author wkren
  */
-public class Transition {
+public class Transition implements TransitionInterface {
 
-    /**
-     * @return the geometricData
-     */
-    public Geometry getGeometricData() {
-        return geometricData;
-    }
+	/**
+	 * @return the source state
+	 */
+	@Override
+	public State getSourceState() {
+		return this.pmSourceState;
+	}
 
-    /**
-     * @param geometricData the geometricData to set
-     */
-    public void setGeometricData(Geometry geometricData) {
-        this.geometricData = geometricData;
-    }
+	/**
+	 * @param sourceState the source state to set
+	 */
+	@Override
+	public void setSourceState(State sourceState) {
+		this.pmSourceState = sourceState;
+	}
 
-    /**
-     * @return the drawingData
-     */
-    public Drawing getDrawingData() {
-        return drawingData;
-    }
+	/**
+	 * @return the target state
+	 */
+	@Override
+	public State getTargetState() {
+		return this.pmTargetState;
+	}
 
-    /**
-     * @param drawingData the drawingData to set
-     */
-    public void setDrawingData(Drawing drawingData) {
-        this.drawingData = drawingData;
-    }
+	/**
+	 * @param targetState the target state to set
+	 */
+	@Override
+	public void setTargetState(State targetState) {
+		this.pmTargetState = targetState;
+	}
 
-    /**
-     * @return the initialFlag
-     */
-    public boolean isInitialFlag() {
-        return initialFlag;
-    }
+	/**
+	 * @return the label
+	 */
+	@Override
+	public String getLabel() {
+		return this.pmLabel;
+	}
 
-    /**
-     * @param initialFlag the initialFlag to set
-     */
-    public void setInitial(boolean initialFlag) {
-        this.initialFlag = initialFlag;
-    }
+	/**
+	 * @param label the label to set
+	 */
+	@Override
+	public void setLabel(String label) {
+		this.pmLabel = label;
+	}
 
-    /**
-     * @return the finalFlag
-     */
-    public boolean isFinal() {
-        return finalFlag;
-    }
+	/**
+	 * @return the geometricData
+	 */
+	@Override
+	public GeometricData getGeometricData() {
+		return this.pmGeometricData;
+	}
 
-    /**
-     * @param finalFlag the finalFlag to set
-     */
-    public void setFinal(boolean finalFlag) {
-        this.finalFlag = finalFlag;
-    }
+	/**
+	 * @param geometricData the geometricData to set
+	 */
+	@Override
+	public void setGeometricData(GeometricData geometricData) {
+		this.pmGeometricData = geometricData;
+	}
 
-    /**
-     * @return the sourceID
-     */
-    public int getSourceID() {
-        return sourceID;
-    }
+	private State pmSourceState;
+	private State pmTargetState;
+	private String pmLabel;
+	private GeometricData pmGeometricData;
 
-    /**
-     * @param sourceID the sourceID to set
-     */
-    public void setSourceID(int sourceID) {
-        this.sourceID = sourceID;
-    }
-
-    /**
-     * @return the targetID
-     */
-    public int getTargetID() {
-        return targetID;
-    }
-
-    /**
-     * @param targetID the targetID to set
-     */
-    public void setTargetID(int targetID) {
-        this.targetID = targetID;
-    }
-
-    /**
-     * @return the label
-     */
-    public String getLabel() {
-        return label;
-    }
-
-    /**
-     * @param label the label to set
-     */
-    public void setLabel(String label) {
-        this.label = label;
-    }
-    public enum TransitionType {
-        EdgeL, EdgeR, ArcL, ArcR, Loop
-    }
-    public class Geometry {
-        TransitionType transitionType;
-        int loopDirection;
-        int labelPosition;
-        int labelDistance;
-        int initialDirection;
-        int finalDirection;
-    }
-    private Geometry geometricData;
-    private Drawing drawingData;
-    
-    private boolean initialFlag;
-    private boolean finalFlag;
-    private int sourceID;
-    private int targetID;
-    private String label;
-    
-    public Transition() {
-        geometricData = new Geometry();
-        drawingData = new Drawing();
-        initialFlag = false;
-        finalFlag = false;
-        sourceID = -1;
-        targetID = -1;
-        label = new String();
-    }
-}
+	public Transition() {
+		this.pmSourceState = null;
+		this.pmTargetState = null;
+		this.pmLabel = new String();
+		this.pmGeometricData = new GeometricData();
+	}
+}  // End public class Transition implements TransitionInterface
