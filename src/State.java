@@ -16,7 +16,7 @@ public class State implements StateInterface {
 	 * @return the id
 	 */
 	@Override
-	public int getId() {
+	public String getId() {
 		return this.pmId;
 	}
 
@@ -24,7 +24,7 @@ public class State implements StateInterface {
 	 * @param id the id to set
 	 */
 	@Override
-	public void setId(int id) {
+	public void setId(String id) {
 		this.pmId = id;
 	}
 
@@ -101,7 +101,7 @@ public class State implements StateInterface {
 	public void setTransitions(List<Transition> transitions) {
 		this.pmTransitions = transitions;
 	}
-	private int pmId;
+	private String pmId;
 	private String pmName;
 	private Object pmInitialWeight;
 	private Object pmFinalWeight;
@@ -109,7 +109,7 @@ public class State implements StateInterface {
 	private GeometricData pmGeometricData;
 
 	public State() {
-		this.pmId = -1;
+		this.pmId = null;
 		this.pmName = new String();
 		this.pmInitialWeight = null;
 		this.pmFinalWeight = null;

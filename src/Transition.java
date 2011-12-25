@@ -81,7 +81,7 @@ public class Transition implements TransitionInterface {
 	public Transition() {
 		this.pmSourceState = null;
 		this.pmTargetState = null;
-		this.pmLabel = new String();
+		this.pmLabel = null;
 		this.pmGeometricData = new GeometricData();
 	}
 }  // End public class Transition implements TransitionInterface

@@ -76,6 +76,17 @@ public class Automata implements AutomataInterface {
 		this.pmAllStates = allStates;
 	}
 
+	public State getStateById(String id) {
+		Iterator<State> iterator = this.pmAllStates.iterator();
+		while (iterator.hasNext()) {
+			State state = iterator.next();
+			if (state.getId().equals(id)) {
+				return state;
+			}
+		}  // End while (iterator.hasNext())
+		return null;
+	}  // End public State getStateById(String id)
+
 	public void addState(State s) {
 		pmAllStates.add(s);
 	}
