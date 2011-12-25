@@ -220,6 +220,7 @@ public class VGI extends javax.swing.JFrame {
 				null,
 				false);
 		initComponents();
+                this.infoPanel.setVisible(false);
 	}
 
 	/** This method is called from within the constructor to
@@ -587,7 +588,7 @@ public class VGI extends javax.swing.JFrame {
 		/* Create draw panel for new automata */
 		mxGraph graph = new mxGraph();
 		mxGraphComponent graphComponent = new mxGraphComponent(graph);
-		this.drawPanel = new DrawPanel(graphComponent);
+		this.drawPanel = new DrawJgraphXPanel(graphComponent);
 		this.mainSplitPane.setLeftComponent(this.drawPanel);
 		this.validate();
 		System.out.println("adding DrawPanel is done! ");
