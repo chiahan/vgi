@@ -21,9 +21,9 @@ public interface StateInterface {
 		}
 	}  // End public class GeometricData
 
-	public int getId();
+	public String getId();
 
-	public void setId(int id);
+	public void setId(String id);
 
 	public String getName();
 

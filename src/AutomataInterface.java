@@ -1,4 +1,5 @@
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,6 +39,12 @@ public interface AutomataInterface {
 		public TAFKitInterface.AutomataType.AlphabetDataType dataType;
 		public List<Object> allSymbols;
 		public Object identitySymbol;
+
+		public Alphabet() {
+			this.dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR;
+			this.allSymbols = new ArrayList<Object>();
+			this.identitySymbol = null;
+		}
 	}  // End public class Alphabet
 
 	public WritingData getWritingData();
@@ -63,6 +70,8 @@ public interface AutomataInterface {
 	public List<State> getAllStates();
 
 	public void setAllStates(List<State> allStates);
+
+	public State getStateById(String id);
 
 	public List<Transition> getAllTransitions();
 

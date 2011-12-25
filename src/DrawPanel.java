@@ -77,7 +77,7 @@ public class DrawPanel extends JPanel {
     protected mxKeyboardHandler keyboardHandler;
     
     
-    protected Hashtable<Integer,mxCell> cellTable;
+    protected Hashtable<String,mxCell> cellTable;
     protected mxCell trans_source,trans_target;
     protected int PopMouseX,PopMouseY;
     public DrawPanel(mxGraphComponent component){
@@ -89,7 +89,7 @@ public class DrawPanel extends JPanel {
         libraryPane.setSize(300, 300);
         
         
-        cellTable=new Hashtable<Integer,mxCell>();
+        cellTable=new Hashtable<String,mxCell>();
         
      /*   JPanel eButtons=new JPanel();
         JButton edgeB=new JButton("edge");
@@ -396,9 +396,9 @@ public class DrawPanel extends JPanel {
     public void addState(int x,int y)
     {
         Object parent = graph.getDefaultParent();
-        int id=cellTable.size();
-        Object newv=graph.insertVertex(parent,Integer.toString(id),"",x-25,y-25,50,50,"shape=ellipse");
-        cellTable.put((Integer)id, (mxCell)newv);
+        String id = String.valueOf(cellTable.size());
+        Object newv=graph.insertVertex(parent,id,"",x-25,y-25,50,50,"shape=ellipse");
+        cellTable.put((String)id, (mxCell)newv);
         System.out.println("add state at"+x+","+y);
         
     }
@@ -517,7 +517,7 @@ public class DrawPanel extends JPanel {
             int size = stateList.size();
             for (int i = 0; i < size; i++) {
                 State state = stateList.get(i);
-                int id = state.getId();
+                String id = state.getId();
                 String name = state.getName();
                 Point2D location = state.getGeometricData().location;
                 
@@ -525,14 +525,14 @@ public class DrawPanel extends JPanel {
                 Object vertex = graph.insertVertex(parent, Integer.toString(i), 
                         name, location.getX(), location.getY(), 50, 50, 
                         "shape=ellipse");
-                cellTable.put((Integer) id, (mxCell) vertex);
+                cellTable.put((String) id, (mxCell) vertex);
             }
 
             List<Transition> translist=automata.getAllTransitions();
             for(int i=0;i<translist.size();++i){
                 
-                int sourceId=translist.get(i).getSourceState().getId();
-                int targetId=translist.get(i).getTargetState().getId();
+                String sourceId=translist.get(i).getSourceState().getId();
+                String targetId=translist.get(i).getTargetState().getId();
                 
                 mxCell source=cellTable.get(sourceId);
                 mxCell target=cellTable.get(targetId);
