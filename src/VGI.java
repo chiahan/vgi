@@ -363,7 +363,7 @@ public class VGI extends javax.swing.JFrame {
         statusLabel.setText("status:");
         mainPanel.add(statusLabel, java.awt.BorderLayout.SOUTH);
 
-        mainSplitPane.setOneTouchExpandable(true);
+        mainSplitPane.setDividerSize(20);
 
         drawPanel.setPreferredSize(new java.awt.Dimension(800, 600));
 
@@ -371,11 +371,11 @@ public class VGI extends javax.swing.JFrame {
         drawPanel.setLayout(drawPanelLayout);
         drawPanelLayout.setHorizontalGroup(
             drawPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 0, Short.MAX_VALUE)
+            .add(0, 899, Short.MAX_VALUE)
         );
         drawPanelLayout.setVerticalGroup(
             drawPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 0, Short.MAX_VALUE)
+            .add(0, 776, Short.MAX_VALUE)
         );
 
         mainSplitPane.setLeftComponent(drawPanel);
@@ -391,27 +391,28 @@ public class VGI extends javax.swing.JFrame {
                 "Type", "Value"
             }
         ));
+        infoTable1.setEnabled(false);
         tableScrollPane.setViewportView(infoTable1);
 
         org.jdesktop.layout.GroupLayout infoPanelLayout = new org.jdesktop.layout.GroupLayout(infoPanel);
         infoPanel.setLayout(infoPanelLayout);
         infoPanelLayout.setHorizontalGroup(
             infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 0, Short.MAX_VALUE)
+            .add(0, 510, Short.MAX_VALUE)
             .add(infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(infoPanelLayout.createSequentialGroup()
                     .add(12, 12, 12)
                     .add(tableScrollPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 375, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addContainerGap(123, Short.MAX_VALUE)))
         );
         infoPanelLayout.setVerticalGroup(
             infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 267, Short.MAX_VALUE)
+            .add(0, 776, Short.MAX_VALUE)
             .add(infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(infoPanelLayout.createSequentialGroup()
                     .add(0, 0, 0)
                     .add(tableScrollPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 267, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addContainerGap(509, Short.MAX_VALUE)))
         );
 
         mainSplitPane.setRightComponent(infoPanel);
@@ -596,7 +597,8 @@ public class VGI extends javax.swing.JFrame {
         /* Create draw panel for new automata */
         mxGraph graph = new mxGraph();
         mxGraphComponent graphComponent = new mxGraphComponent(graph);
-        this.drawPanel = new DrawPanel(graphComponent);
+//        this.drawPanel = new DrawPanel(graphComponent);
+        this.drawPanel = new DrawJgraphXPanel(graphComponent);
         this.mainSplitPane.setLeftComponent(this.drawPanel);
         this.validate();
         System.out.println("adding DrawPanel is done! ");
