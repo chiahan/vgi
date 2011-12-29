@@ -91,6 +91,10 @@ public class DrawPanel extends JPanel {
         
         cellTable=new Hashtable<String,mxCell>();
         
+        graph.setCellsDisconnectable(false);
+        graphComponent.setConnectable(false);
+        
+        
      /*   JPanel eButtons=new JPanel();
         JButton edgeB=new JButton("edge");
         edgeB.setIcon(new ImageIcon(DrawComp.class.getResource("/drawcomp/images/straight.png")));
@@ -156,6 +160,8 @@ public class DrawPanel extends JPanel {
 									+ (int) (dirty.getWidth()) + " h="
 									+ (int) (dirty.getHeight()) + buffer);
 						}
+                                                
+                                                 graph.repaint(graph.getGraphBounds());
 					}
 				});
 	}
@@ -397,7 +403,7 @@ public class DrawPanel extends JPanel {
     {
         Object parent = graph.getDefaultParent();
         String id = String.valueOf(cellTable.size());
-        Object newv=graph.insertVertex(parent,id,"",x-25,y-25,50,50,"shape=ellipse");
+        Object newv=graph.insertVertex(parent,id,"",x-25,y-25,50,50,"shape=ellipse;perimeter=ellipsePerimeter;");
         cellTable.put((String)id, (mxCell)newv);
         System.out.println("add state at"+x+","+y);
         
@@ -441,6 +447,7 @@ public class DrawPanel extends JPanel {
         cell.getGeometry().setPoints(points);
         graphComponent.refresh();
         
+       // graph.repaint(graph.getGraphBounds());
        
     }
     public class CompareCtrlPt implements Comparator{
