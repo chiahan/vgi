@@ -13,22 +13,6 @@ import java.util.List;
 public class State implements StateInterface {
 
 	/**
-	 * @return the id
-	 */
-	@Override
-	public String getId() {
-		return this.pmId;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	@Override
-	public void setId(String id) {
-		this.pmId = id;
-	}
-
-	/**
 	 * @return the name
 	 */
 	@Override

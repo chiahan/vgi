@@ -524,7 +524,7 @@ public class DrawPanel extends JPanel {
             int size = stateList.size();
             for (int i = 0; i < size; i++) {
                 State state = stateList.get(i);
-                String id = state.getId();
+                String id = "s" + i;
                 String name = state.getName();
                 Point2D location = state.getGeometricData().location;
                 
@@ -537,9 +537,10 @@ public class DrawPanel extends JPanel {
 
             List<Transition> translist=automata.getAllTransitions();
             for(int i=0;i<translist.size();++i){
+		        Transition transition = translist.get(i);
                 
-                String sourceId=translist.get(i).getSourceState().getId();
-                String targetId=translist.get(i).getTargetState().getId();
+                String sourceId = "s" + stateList.indexOf(transition.getSourceState());
+                String targetId = "s" + stateList.indexOf(transition.getTargetState());
                 
                 mxCell source=cellTable.get(sourceId);
                 mxCell target=cellTable.get(targetId);
