@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -89,8 +91,9 @@ public class FsmXml implements FsmXmlInterface {
 	private static final String TAG_INITIAL = "initial";
 	private static final String TAG_FINAL = "final";
 	private static final String ATR_STATE = "state";
-	private List<Automata> pmAutomataList;
 	private Deque<Tag> pmTagStack;
+	private List<Automata> pmAutomataList;
+	private Map<String, State> pmMapIdState;
 
 	public FsmXml() {
 		this.pmAutomataList = null;
@@ -115,11 +118,11 @@ public class FsmXml implements FsmXmlInterface {
 			}
 		}  // End if (this.pmTagStack.isEmpty())
 
-		System.out.print(localName + " start");
-		for (int index = 0; index < xmlStreamReader.getAttributeCount(); index++) {
-			System.out.print("; " + xmlStreamReader.getAttributeLocalName(index) + " = " + xmlStreamReader.getAttributeValue(index));
-		}  // End for (int index = 0; index < xmlStreamReader.getAttributeCount(); index++)
-		System.out.println();
+//		System.out.print(localName + " start");
+//		for (int index = 0; index < xmlStreamReader.getAttributeCount(); index++) {
+//			System.out.print("; " + xmlStreamReader.getAttributeLocalName(index) + " = " + xmlStreamReader.getAttributeValue(index));
+//		}  // End for (int index = 0; index < xmlStreamReader.getAttributeCount(); index++)
+//		System.out.println();
 
 		Tag tag = new Tag(localName);
 		Tag parentTag = this.pmTagStack.peek();
@@ -169,7 +172,9 @@ public class FsmXml implements FsmXmlInterface {
 			} else if (set.equals(VAL_Z)) {
 
 
-				if (operations.equals(VAL_MIN_PLUS)) {
+				if (operations.equals(VAL_CLASSICAL)) {
+					weight.semiring = TAFKitInterface.AutomataType.Semiring.Z_INTEGER;
+				} else if (operations.equals(VAL_MIN_PLUS)) {
 					weight.semiring = TAFKitInterface.AutomataType.Semiring.ZMIN_MIN_TROPICAL;
 				} else if (operations.equals(VAL_MAX_PLUS)) {
 					weight.semiring = TAFKitInterface.AutomataType.Semiring.ZMAX_MAX_TROPICAL;
@@ -228,7 +233,7 @@ public class FsmXml implements FsmXmlInterface {
 			}
 
 			State state = new State();
-			state.setId(id);
+			this.pmMapIdState.put(id, state);
 			tag.object = state;
 
 		} // End if (localName.equals(TAG_STATE))
@@ -246,11 +251,11 @@ public class FsmXml implements FsmXmlInterface {
 				throw new FsmXmlException("Unexpected parent tag.object type.");
 			}
 			Automata automata = (Automata) parentTag.object;
-			State sourceState = automata.getStateById(sourceId);
+			State sourceState = this.pmMapIdState.get(sourceId);
 			if (sourceState == null) {
 				throw new FsmXmlException("Missing state with id \"" + sourceId + "\", which is referenced by a transition.");
 			}
-			State targetState = automata.getStateById(targetId);
+			State targetState = this.pmMapIdState.get(targetId);
 			if (targetState == null) {
 				throw new FsmXmlException("Missing state with id \"" + targetId + "\", which is referenced by a transition.");
 			}
@@ -276,14 +281,14 @@ public class FsmXml implements FsmXmlInterface {
 				throw new FsmXmlException("Unexpected parent tag.object type.");
 			}
 			Automata automata = (Automata) parentTag.object;
-			State state = automata.getStateById(id);
+			State state = this.pmMapIdState.get(id);
 			if (state == null) {
 				throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + localName + "\" tag.");
 			}
 
 			tag.object = state;
 
-		}  // End if (localName.equals(TAG_INITIAL))
+		} // End if (localName.equals(TAG_INITIAL))
 		else if (localName.equals(TAG_FINAL)) {
 
 			String id = xmlStreamReader.getAttributeValue(null, ATR_STATE);
@@ -294,14 +299,14 @@ public class FsmXml implements FsmXmlInterface {
 				throw new FsmXmlException("Unexpected parent tag.object type.");
 			}
 			Automata automata = (Automata) parentTag.object;
-			State state = automata.getStateById(id);
+			State state = this.pmMapIdState.get(id);
 			if (state == null) {
 				throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + localName + "\" tag.");
 			}
 
 			tag.object = state;
 
-		}  // End if (localName.equals(TAG_FINAL))
+		} // End if (localName.equals(TAG_FINAL))
 		else if (parentTag != null) {
 
 			tag.object = parentTag.object;
@@ -315,7 +320,7 @@ public class FsmXml implements FsmXmlInterface {
 			throws FsmXmlException {
 
 		String localName = xmlStreamReader.getLocalName();
-		System.out.println(localName + " end");
+//		System.out.println(localName + " end");
 
 		Tag tag = this.pmTagStack.pop();
 		if (!(tag.localName.equals(localName))) {
@@ -331,31 +336,26 @@ public class FsmXml implements FsmXmlInterface {
 			}
 
 			this.pmAutomataList.add((Automata) tag.object);
+			this.pmMapIdState.clear();
 
 		} // End if (localName.equals(TAG_AUTOMATON))
 		else if (localName.equals(TAG_WRITING_DATA)) {
 
 			if (parentTag.localName.equals(TAG_MONOID)) {
 
-				if (!(parentTag.object instanceof AutomataInterface.Alphabet)) {
-					throw new FsmXmlException("Unexpected parent tag.object type.");
+				if (parentTag.object instanceof AutomataInterface.Alphabet) {
+					AutomataInterface.Alphabet alphabet = (AutomataInterface.Alphabet) parentTag.object;
+					alphabet.identitySymbol = tag.object;
 				}
-
-				AutomataInterface.Alphabet alphabet = (AutomataInterface.Alphabet) parentTag.object;
-				alphabet.identitySymbol = tag.object;
 
 			} else {  // End if (parentTag.localName.equals(TAG_MONOID))
 
 				if (!(tag.object instanceof AutomataInterface.WritingData)) {
 					throw new FsmXmlException("Mismatched tag.object type.");
-				} else if (!(parentTag.localName.equals(TAG_VALUE_TYPE))) {
-					throw new FsmXmlException("Unexpected parent tag.");
-				} else if (!(parentTag.object instanceof Automata)) {
-					throw new FsmXmlException("Unexpected parent tag.object type.");
+				} else if (parentTag.object instanceof Automata) {
+					Automata automata = (Automata) parentTag.object;
+					automata.setWritingData((AutomataInterface.WritingData) tag.object);
 				}
-
-				Automata automata = (Automata) parentTag.object;
-				automata.setWritingData((AutomataInterface.WritingData) tag.object);
 
 			}  // End else part of if (parentTag.localName.equals(TAG_MONOID))
 
@@ -376,18 +376,16 @@ public class FsmXml implements FsmXmlInterface {
 		} // End if (localName.equals(TAG_SEMIRING))
 		else if (localName.equals(TAG_MONOID)) {
 
-			if (!(tag.object instanceof AutomataInterface.Alphabet)) {
-				throw new FsmXmlException("Mismatched tag.object type.");
-			} else if (!(parentTag.object instanceof Automata)) {
-				throw new FsmXmlException("Unexpected parent tag.object type.");
-			}
-
-			Automata automata = (Automata) parentTag.object;
-			if (automata.getAlphabet() == null) {
-				automata.setAlphabet((AutomataInterface.Alphabet) tag.object);
-			} else if (automata.getSecondAlphabet() == null) {
-				automata.setSecondAlphabet((AutomataInterface.Alphabet) tag.object);
-			}
+			if ((tag.object instanceof AutomataInterface.Alphabet)
+					&& (parentTag.object instanceof Automata)) {
+				Automata automata = (Automata) parentTag.object;
+				if (automata.getAlphabet() == null) {
+					automata.setAlphabet((AutomataInterface.Alphabet) tag.object);
+				} else if (automata.getSecondAlphabet() == null) {
+					automata.setSecondAlphabet((AutomataInterface.Alphabet) tag.object);
+				}
+			}  // End if ((tag.object instanceof AutomataInterface.Alphabet)
+			//	&& (parentTag.object instanceof Automata))
 
 		} // End if (localName.equals(TAG_MONOID))
 		else if (localName.equals(TAG_MON_GEN)) {
@@ -424,7 +422,7 @@ public class FsmXml implements FsmXmlInterface {
 			Automata automata = (Automata) parentTag.object;
 			automata.addTransition((Transition) tag.object);
 
-		}  // End if (localName.equals(TAG_TRANSITION))
+		} // End if (localName.equals(TAG_TRANSITION))
 		else if (localName.equals(TAG_LABEL)) {
 
 			if (!(tag.object instanceof String)) {
@@ -445,7 +443,7 @@ public class FsmXml implements FsmXmlInterface {
 
 			((State) tag.object).setInitialWeight(true);
 
-		}  // End if (localName.equals(TAG_INITIAL))
+		} // End if (localName.equals(TAG_INITIAL))
 		else if (localName.equals(TAG_FINAL)) {
 
 			if (!(tag.object instanceof State)) {
@@ -479,6 +477,7 @@ public class FsmXml implements FsmXmlInterface {
 
 		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 		XMLStreamReader xmlStreamReader = null;
+		List<Automata> automataList = null;
 
 		try {
 			xmlStreamReader = xmlInputFactory.createXMLStreamReader(inputStream);
@@ -486,8 +485,9 @@ public class FsmXml implements FsmXmlInterface {
 			if (eventType != XMLStreamReader.START_DOCUMENT) {
 				throw new FsmXmlException("Unrecognizable FSM XML file.");
 			}
-			this.pmAutomataList = new ArrayList<Automata>();
 			this.pmTagStack = new ArrayDeque<Tag>();
+			this.pmAutomataList = new ArrayList<Automata>();
+			this.pmMapIdState = new HashMap<String, State>();
 
 			while (xmlStreamReader.hasNext()) {
 				eventType = xmlStreamReader.next();
@@ -500,10 +500,10 @@ public class FsmXml implements FsmXmlInterface {
 						break;
 					case XMLStreamReader.CHARACTERS:
 						if (!xmlStreamReader.isWhiteSpace()) {
-							System.out.println("XML event CHARACTERS: " + xmlStreamReader.getText());
+//							System.out.println("XML event CHARACTERS: " + xmlStreamReader.getText());
 						}
 					default:
-						System.out.println("eventType: " + eventType);
+//						System.out.println("eventType: " + eventType);
 				}  // End switch (eventType)
 			}  // End while (xmlStreamReader.hasNext())
 
@@ -515,6 +515,10 @@ public class FsmXml implements FsmXmlInterface {
 			if (this.pmTagStack != null) {
 				this.pmTagStack = null;
 			}
+			automataList = this.pmAutomataList;
+			this.pmAutomataList = null;
+			this.pmMapIdState.clear();
+			this.pmMapIdState = null;
 			if (xmlStreamReader != null) {
 				try {
 					xmlStreamReader.close();
@@ -524,7 +528,7 @@ public class FsmXml implements FsmXmlInterface {
 			}  // End if (xmlStreamReader != null)
 		}
 
-		return null;
+		return automataList;
 
 	}  // End public List<Automata> read(InputStream inputStream)
 
@@ -534,9 +538,98 @@ public class FsmXml implements FsmXmlInterface {
 	}
 
 	public static void main(String args[]) {
+		String automataRepositoryPath = "../../vaucanson-1.4a/data/automata/";
 		FsmXml fsmXml = new FsmXml();
-		File file = new File("D:/NTU_Master_2nd_Year/automata/char-b/a1.xml");
 		try {
+			File file = new File(automataRepositoryPath + "char-b/a1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-b/b1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-b/div3base2.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-b/double-3-1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-b/evena.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-b/ladybird-6.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-b/oddb.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-f2/ring-7-0-2-3.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-fmp-b/fibred_left.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-fmp-b/fibred_right.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-fmp-b/quot3base2.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-fmp-b/t1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-fmp-b/u1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-fmp-z/t1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-fmp-z/u1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-q/b1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-q/c1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-q/d1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-r/b1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-r/c1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-r/d1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-z/b1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-z/c1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-z/d1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-zmax/maxab.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-zmax/maxblocka.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-zmin/minab.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-zmin/minblocka.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "char-zmin/slowgrow.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			fsmXml.read(file);
+			file = new File(automataRepositoryPath + "int-b/coins.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
 			fsmXml.read(file);
 		} catch (Exception exception) {
 			exception.printStackTrace();

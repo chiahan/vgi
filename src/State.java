@@ -94,18 +94,48 @@ public class State implements StateInterface {
 
 	@Override
 	public List<Transition> getTransitions() {
-		return this.pmTransitions;
+		ArrayList<Transition> arrayList = new ArrayList<Transition>();
+		arrayList.addAll(this.pmIncomingTransitions);
+		arrayList.addAll(this.pmOutgoingTransitions);
+		return arrayList;
 	}
 
 	@Override
-	public void setTransitions(List<Transition> transitions) {
-		this.pmTransitions = transitions;
+	public List<Transition> getIncomingTransitions() {
+		return this.pmIncomingTransitions;
 	}
+
+	@Override
+	public void setIncomingTransitions(List<Transition> transitions) {
+		this.pmOutgoingTransitions = transitions;
+	}
+
+	@Override
+	public List<Transition> getOutgoingTransitions() {
+		return this.pmOutgoingTransitions;
+	}
+
+	@Override
+	public void setOutgoingTransitions(List<Transition> transitions) {
+		this.pmOutgoingTransitions = transitions;
+	}
+
+	@Override
+	public void addTransition(Transition transition) {
+		if (transition.getSourceState().equals(this)) {
+			this.pmOutgoingTransitions.add(transition);
+		} else if (transition.getTargetState().equals(this)) {
+			this.pmIncomingTransitions.add(transition);
+		} else {
+			throw new IllegalArgumentException("Can not add a transition to a state which is neither the source nor the target of the transition.");
+		}
+	}  // End public void addTransition(Transition transition)
 	private String pmId;
 	private String pmName;
 	private Object pmInitialWeight;
 	private Object pmFinalWeight;
-	private List<Transition> pmTransitions;
+	private List<Transition> pmIncomingTransitions;
+	private List<Transition> pmOutgoingTransitions;
 	private GeometricData pmGeometricData;
 
 	public State() {
@@ -113,7 +143,8 @@ public class State implements StateInterface {
 		this.pmName = new String();
 		this.pmInitialWeight = null;
 		this.pmFinalWeight = null;
-		this.pmTransitions = new ArrayList<Transition>();
+		this.pmIncomingTransitions = new ArrayList<Transition>();
+		this.pmOutgoingTransitions = new ArrayList<Transition>();
 		this.pmGeometricData = new GeometricData();
 	}
 }  // End public class State implements StateInterface

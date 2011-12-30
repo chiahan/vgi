@@ -71,9 +71,11 @@ public interface AutomataInterface {
 
 	public void setAllStates(List<State> allStates);
 
-	public State getStateById(String id);
+	public void addState(State state);
 
 	public List<Transition> getAllTransitions();
 
 	public void setAllTransitions(List<Transition> allTransitions);
+
+	public void addTransition(Transition transition);
 }  // End public interface AutomataInterface

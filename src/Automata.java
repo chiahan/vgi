@@ -76,19 +76,8 @@ public class Automata implements AutomataInterface {
 		this.pmAllStates = allStates;
 	}
 
-	public State getStateById(String id) {
-		Iterator<State> iterator = this.pmAllStates.iterator();
-		while (iterator.hasNext()) {
-			State state = iterator.next();
-			if (state.getId().equals(id)) {
-				return state;
-			}
-		}  // End while (iterator.hasNext())
-		return null;
-	}  // End public State getStateById(String id)
-
-	public void addState(State s) {
-		pmAllStates.add(s);
+	public void addState(State state) {
+		pmAllStates.add(state);
 	}
 
 	/**
@@ -107,8 +96,10 @@ public class Automata implements AutomataInterface {
 		this.pmAllTransitions = transitions;
 	}
 
-	public void addTransition(Transition t) {
-		pmAllTransitions.add(t);
+	public void addTransition(Transition transition) {
+		pmAllTransitions.add(transition);
+		transition.getSourceState().addTransition(transition);
+		transition.getTargetState().addTransition(transition);
 	}
 	private WritingData pmWritingData;
 	private Weight pmWeight;

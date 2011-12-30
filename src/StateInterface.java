@@ -43,6 +43,13 @@ public interface StateInterface {
 
 	public List<Transition> getTransitions();
 
-	public void setTransitions(List<Transition> transitions);
+	public List<Transition> getIncomingTransitions();
 
+	public void setIncomingTransitions(List<Transition> transitions);
+
+	public List<Transition> getOutgoingTransitions();
+
+	public void setOutgoingTransitions(List<Transition> transitions);
+
+	public void addTransition(Transition transition);
 }  // End public interface StateInterface
