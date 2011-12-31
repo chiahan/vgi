@@ -196,8 +196,11 @@ public class FsmXml implements FsmXmlInterface {
 		else if (localName.equals(TAG_MONOID)) {
 
 			String type = xmlStreamReader.getAttributeValue(null, ATR_TYPE);
+
 			if (type.equals(VAL_UNIT)) {
+
 				throw new FsmXmlException("VGI does not currently support the monoid type \"unit\".");
+
 			} else if (type.equals(VAL_FREE)) {
 
 				AutomataInterface.Alphabet alphabet = new AutomataInterface.Alphabet();
@@ -216,8 +219,15 @@ public class FsmXml implements FsmXmlInterface {
 				tag.object = alphabet;
 
 			} else if (type.equals(VAL_PRODUCT)) {
+
+				if (!(parentTag.object instanceof Automata)) {
+					throw new FsmXmlException("Unexpected parent tag.object type.");
+				}
+
+				((Automata) parentTag.object).setIsTransducer(true);
 				tag.object = parentTag.object;
-			}
+
+			}  // End if (type.equals(VAL_PRODUCT))
 
 		} // End if (localName.equals(TAG_MONOID))
 		else if (localName.equals(TAG_MON_GEN)) {

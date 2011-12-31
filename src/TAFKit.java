@@ -626,5 +626,113 @@ public class TAFKit implements TAFKitInterface {
 
 		}  // End for (int index = 0; index < algorithmToRun.outputsInfo.size(); index++)
 
+		try {
+//			automataType = new AutomataType(  // vcsn-char-char-b
+//					AutomataType.Semiring.B_BOOLEAN,
+//					AutomataType.AlphabetDataType.CHAR,
+//					AutomataType.AlphabetDataType.CHAR,
+//					false);
+//			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-char-char-z
+					AutomataType.Semiring.Z_INTEGER,
+					AutomataType.AlphabetDataType.CHAR,
+					AutomataType.AlphabetDataType.CHAR,
+					false);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-char-f2
+					AutomataType.Semiring.F2_TWO_ELEMENT_FIELD,
+					AutomataType.AlphabetDataType.CHAR,
+					null,
+					false);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-char-fmp-b
+					AutomataType.Semiring.B_BOOLEAN,
+					AutomataType.AlphabetDataType.CHAR,
+					null,
+					true);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-char-fmp-z
+					AutomataType.Semiring.Z_INTEGER,
+					AutomataType.AlphabetDataType.CHAR,
+					null,
+					true);
+			tafKit.listVcsnAlgorithms(automataType);
+//			automataType = new AutomataType(  // vcsn-char-int-b
+//					AutomataType.Semiring.B_BOOLEAN,
+//					AutomataType.AlphabetDataType.CHAR,
+//					AutomataType.AlphabetDataType.INT,
+//					false);
+//			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-char-q
+					AutomataType.Semiring.Q_RATIONAL,
+					AutomataType.AlphabetDataType.CHAR,
+					null,
+					false);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-char-r
+					AutomataType.Semiring.R_REAL,
+					AutomataType.AlphabetDataType.CHAR,
+					null,
+					false);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-char-z
+					AutomataType.Semiring.Z_INTEGER,
+					AutomataType.AlphabetDataType.CHAR,
+					null,
+					false);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-char-zmax
+					AutomataType.Semiring.ZMAX_MAX_TROPICAL,
+					AutomataType.AlphabetDataType.CHAR,
+					null,
+					false);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-char-zmin
+					AutomataType.Semiring.ZMIN_MIN_TROPICAL,
+					AutomataType.AlphabetDataType.CHAR,
+					null,
+					false);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-int-b
+					AutomataType.Semiring.B_BOOLEAN,
+					AutomataType.AlphabetDataType.INT,
+					null,
+					false);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-int-fmp-b
+					AutomataType.Semiring.B_BOOLEAN,
+					AutomataType.AlphabetDataType.INT,
+					null,
+					true);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-int-fmp-z
+					AutomataType.Semiring.Z_INTEGER,
+					AutomataType.AlphabetDataType.INT,
+					null,
+					true);
+			tafKit.listVcsnAlgorithms(automataType);
+//			automataType = new AutomataType(  // vcsn-int-int-b
+//					AutomataType.Semiring.B_BOOLEAN,
+//					AutomataType.AlphabetDataType.INT,
+//					AutomataType.AlphabetDataType.INT,
+//					false);
+//			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-int-int-z
+					AutomataType.Semiring.Z_INTEGER,
+					AutomataType.AlphabetDataType.INT,
+					AutomataType.AlphabetDataType.INT,
+					false);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType(  // vcsn-int-z
+					AutomataType.Semiring.Z_INTEGER,
+					AutomataType.AlphabetDataType.INT,
+					null,
+					false);
+			tafKit.listVcsnAlgorithms(automataType);
+		} catch (Exception exception) {
+			exception.printStackTrace();
+			return;
+		}
+
 	}  // End public static void main(String args[])
 }  // End public class TAFKit

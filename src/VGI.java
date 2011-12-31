@@ -214,11 +214,7 @@ public class VGI extends javax.swing.JFrame {
 	public VGI() {
 		pmVGI = this;
 		pmTAFKit = null;
-		pmAutomataType = new TAFKitInterface.AutomataType(
-				TAFKitInterface.AutomataType.Semiring.B_BOOLEAN,
-				TAFKitInterface.AutomataType.AlphabetDataType.CHAR,
-				null,
-				false);
+		pmAutomataType = null;
 		initComponents();
                 this.infoPanel.setVisible(false);
 	}
@@ -606,16 +602,21 @@ public class VGI extends javax.swing.JFrame {
 		}
 
 		FsmXml fsmXml = new FsmXml();
+		List<Automata> automataList = null;
 		try {
-			fsmXml.read(fileChooser.getSelectedFile());
+			automataList = fsmXml.read(fileChooser.getSelectedFile());
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		if ((automataList != null) && (automataList.size() > 0)) {
+			this.pmAutomataType = new TAFKitInterface.AutomataType(automataList.get(0));
+			this.updateAlgorithmMenuItems();
 		}
 	}//GEN-LAST:event_openMenuItemActionPerformed
 
 	private void updateAlgorithmMenuItems() {
 
-		if (pmAutomataType == null) {
+		if (this.pmAutomataType == null) {
 			return;
 		}
 

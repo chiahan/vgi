@@ -114,7 +114,6 @@ public class State implements StateInterface {
 			throw new IllegalArgumentException("Can not add a transition to a state which is neither the source nor the target of the transition.");
 		}
 	}  // End public void addTransition(Transition transition)
-	private String pmId;
 	private String pmName;
 	private Object pmInitialWeight;
 	private Object pmFinalWeight;
@@ -123,7 +122,6 @@ public class State implements StateInterface {
 	private GeometricData pmGeometricData;
 
 	public State() {
-		this.pmId = null;
 		this.pmName = new String();
 		this.pmInitialWeight = null;
 		this.pmFinalWeight = null;
