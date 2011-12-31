@@ -216,7 +216,7 @@ public class VGI extends javax.swing.JFrame {
 		pmTAFKit = null;
 		pmAutomataType = null;
 		initComponents();
-                this.infoPanel.setVisible(false);
+		this.infoPanel.setVisible(false);
 	}
 
 	/** This method is called from within the constructor to
@@ -540,6 +540,7 @@ public class VGI extends javax.swing.JFrame {
 		tafKitPathChooser.setDialogTitle(this.setTAFKitPathMenuItem.getText());
 		tafKitPathChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		tafKitPathChooser.setMultiSelectionEnabled(false);
+		TAFKit tafKit = null;
 
 		while (true) {
 
@@ -549,7 +550,7 @@ public class VGI extends javax.swing.JFrame {
 			}
 
 			try {
-				pmTAFKit = new TAFKit(tafKitPathChooser.getSelectedFile());
+				tafKit = new TAFKit(tafKitPathChooser.getSelectedFile());
 				break;
 			} catch (IllegalArgumentException illegalArgumentException) {
 				returnValue = JOptionPane.showConfirmDialog(
@@ -565,8 +566,9 @@ public class VGI extends javax.swing.JFrame {
 
 		}  // End while (true)
 
-		if (pmTAFKit != null) {
-			this.currentSettingMenuItem.setText("Current setting:  " + pmTAFKit.getTafKitPath());
+		if (tafKit != null) {
+			this.currentSettingMenuItem.setText("Current setting:  " + tafKit.getTafKitPath());
+			this.pmTAFKit = tafKit;
 			this.updateAlgorithmMenuItems();
 		}  // End if (pmTAFKit != null)
 
@@ -616,7 +618,7 @@ public class VGI extends javax.swing.JFrame {
 
 	private void updateAlgorithmMenuItems() {
 
-		if (this.pmAutomataType == null) {
+		if ((this.pmTAFKit == null) || (this.pmAutomataType == null)) {
 			return;
 		}
 
