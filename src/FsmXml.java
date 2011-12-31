@@ -219,15 +219,8 @@ public class FsmXml implements FsmXmlInterface {
 				tag.object = alphabet;
 
 			} else if (type.equals(VAL_PRODUCT)) {
-
-				if (!(parentTag.object instanceof Automata)) {
-					throw new FsmXmlException("Unexpected parent tag.object type.");
-				}
-
-				((Automata) parentTag.object).setIsTransducer(true);
 				tag.object = parentTag.object;
-
-			}  // End if (type.equals(VAL_PRODUCT))
+			}
 
 		} // End if (localName.equals(TAG_MONOID))
 		else if (localName.equals(TAG_MON_GEN)) {
@@ -391,8 +384,8 @@ public class FsmXml implements FsmXmlInterface {
 				Automata automata = (Automata) parentTag.object;
 				if (automata.getAlphabet() == null) {
 					automata.setAlphabet((AutomataInterface.Alphabet) tag.object);
-				} else if (automata.getSecondAlphabet() == null) {
-					automata.setSecondAlphabet((AutomataInterface.Alphabet) tag.object);
+				} else if (automata.getOutputAlphabet() == null) {
+					automata.setOutputAlphabet((AutomataInterface.Alphabet) tag.object);
 				}
 			}  // End if ((tag.object instanceof AutomataInterface.Alphabet)
 			//	&& (parentTag.object instanceof Automata))

@@ -59,13 +59,9 @@ public interface AutomataInterface {
 
 	public void setAlphabet(Alphabet alphabet);
 
-	public Alphabet getSecondAlphabet();
+	public Alphabet getOutputAlphabet();
 
-	public void setSecondAlphabet(Alphabet alphabet);
-
-	public boolean isTransducer();
-
-	public void setIsTransducer(boolean isTransducer);
+	public void setOutputAlphabet(Alphabet alphabet);
 
 	public List<State> getAllStates();
 

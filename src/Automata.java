@@ -41,23 +41,13 @@ public class Automata implements AutomataInterface {
 	}
 
 	@Override
-	public Alphabet getSecondAlphabet() {
-		return this.pmSecondAlphabet;
+	public Alphabet getOutputAlphabet() {
+		return this.pmOutputAlphabet;
 	}
 
 	@Override
-	public void setSecondAlphabet(Alphabet alphabet) {
-		this.pmSecondAlphabet = alphabet;
-	}
-
-	@Override
-	public boolean isTransducer() {
-		return this.pmIsTransducer;
-	}
-
-	@Override
-	public void setIsTransducer(boolean isTransducer) {
-		this.pmIsTransducer = isTransducer;
+	public void setOutputAlphabet(Alphabet alphabet) {
+		this.pmOutputAlphabet = alphabet;
 	}
 
 	/**
@@ -104,8 +94,7 @@ public class Automata implements AutomataInterface {
 	private WritingData pmWritingData;
 	private Weight pmWeight;
 	private Alphabet pmAlphabet;
-	private Alphabet pmSecondAlphabet;
-	private boolean pmIsTransducer;
+	private Alphabet pmOutputAlphabet;
 	private List<State> pmAllStates;
 	private List<Transition> pmAllTransitions;
 

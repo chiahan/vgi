@@ -36,39 +36,37 @@ public interface TAFKitInterface {
 
 		public enum AlphabetDataType {
 
-			CHAR, INT
+			CHAR, INT,
+			CHAR_CHAR, CHAR_INT, INT_INT
 		}
 		Semiring semiring;
 		AlphabetDataType alphabetDataType;
-		AlphabetDataType secondAlphabetDataType;
-		boolean isTransducer;
+		AlphabetDataType outputAlphabetDataType;
 
 		public AutomataType() {
 			this.semiring = Semiring.B_BOOLEAN;
 			this.alphabetDataType = AlphabetDataType.CHAR;
-			this.secondAlphabetDataType = null;
-			this.isTransducer = false;
+			this.outputAlphabetDataType = null;
 		}
 
 		public AutomataType(
 				Semiring semiring,
 				AlphabetDataType alphabetDataType,
-				AlphabetDataType secondAlphabetDataType,
-				boolean isTransducer) {
+				AlphabetDataType outputAlphabetDataType) {
 			this.semiring = semiring;
 			this.alphabetDataType = alphabetDataType;
-			this.secondAlphabetDataType = secondAlphabetDataType;
-			this.isTransducer = isTransducer;
+			this.outputAlphabetDataType = outputAlphabetDataType;
 		}
 
 		public AutomataType(Automata automata) {
 			this();
 			this.semiring = automata.getWeight().semiring;
 			this.alphabetDataType = automata.getAlphabet().dataType;
-			if (automata.getSecondAlphabet() != null) {
-				this.secondAlphabetDataType = automata.getSecondAlphabet().dataType;
+			if (automata.getOutputAlphabet() != null) {
+				this.outputAlphabetDataType = automata.getOutputAlphabet().dataType;
+			} else {
+				this.outputAlphabetDataType = null;
 			}
-			this.isTransducer = automata.isTransducer();
 		}
 
 		public String toExecutableFileName() {
@@ -82,26 +80,22 @@ public interface TAFKitInterface {
 				case INT:
 					string = string + "int-";
 					break;
+				case CHAR_CHAR:
+					string = string + "char-char-";
+					break;
+				case CHAR_INT:
+					string = string + "char-int-";
+					break;
+				case INT_INT:
+					string = string + "int-int-";
+					break;
 				default:
 					throw new IllegalArgumentException("Invalid alphabet type for TAF-Kit instance.");
 			}  // End switch (this.alphabetDataType)
 
-			if (this.isTransducer) {
+			if (this.outputAlphabetDataType != null) {
 				string = string + "fmp-";
-			} else if (this.secondAlphabetDataType != null) {
-
-				switch (this.alphabetDataType) {
-					case CHAR:
-						string = string + "char-";
-						break;
-					case INT:
-						string = string + "int-";
-						break;
-					default:
-						throw new IllegalArgumentException("Unrecognized alphabet data type for TAF-Kit instance.");
-				}  // End switch (this.alphabetDataType)
-
-			}  // End else if (this.secondAlphabetDataType != null)
+			}
 
 			switch (this.semiring) {
 
