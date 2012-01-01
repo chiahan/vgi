@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,14 +34,18 @@ import javax.xml.transform.stream.StreamSource;
  */
 public class FsmXml implements FsmXmlInterface {
 
-	private class Tag {
+	private static class Tag {
 
+		public enum Type {
+
+			START, END
+		}
 		public String localName;
-		public Object object;
+		public Type type;
 
 		public Tag() {
 			this.localName = null;
-			this.object = null;
+			this.type = null;
 		}
 
 		public Tag(String localName) {
@@ -49,10 +53,39 @@ public class FsmXml implements FsmXmlInterface {
 			this.localName = localName;
 		}
 
-		public Tag(String localName, Object object) {
+		public Tag(String localName, Type type) {
 			this(localName);
-			this.object = object;
+			this.type = type;
 		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if ((obj == null)
+					|| (!(Tag.class.isAssignableFrom(obj.getClass())))) {
+				return false;
+			}
+			Tag tag = (Tag) obj;
+			if (!(this.localName.equals(tag.localName))) {
+				return false;
+			}
+			if (this.type != tag.type) {
+				return false;
+			}
+			return true;
+		}  // End public boolean equals(Object obj)
+
+		public boolean equals(String localName, Type type) {
+			if ((localName == null) || (type == null)) {
+				return false;
+			}
+			if (!(this.localName.equals(localName))) {
+				return false;
+			}
+			if (this.type != type) {
+				return false;
+			}
+			return true;
+		}  // End public boolean equals(String localName, Type type)
 	}  // End private class Tag
 	private static final String TAG_FSMXML = "fsmxml";
 	private static final String VAL_FSMXML_NAMESPACE = "http://vaucanson.lrde.epita.fr";
@@ -108,6 +141,7 @@ public class FsmXml implements FsmXmlInterface {
 	private static final String TAG_STATES = "states";
 	private static final String TAG_STATE = "state";
 	private static final String ATR_ID = "id";
+	private static final String ATR_NAME = "name";
 	private static final String TAG_TRANSITIONS = "transitions";
 	private static final String TAG_TRANSITION = "transition";
 	private static final String ATR_SOURCE = "source";
@@ -117,14 +151,6 @@ public class FsmXml implements FsmXmlInterface {
 	private static final String TAG_INITIAL = "initial";
 	private static final String TAG_FINAL = "final";
 	private static final String ATR_STATE = "state";
-	private Deque<Tag> pmTagStack;
-	private List<Automata> pmAutomataList;
-	private Map<String, State> pmMapIdState;
-
-	public FsmXml() {
-		this.pmAutomataList = null;
-		this.pmTagStack = null;
-	}
 
 	@Override
 	public List<Automata> read(File fsmXmlFile)
@@ -134,6 +160,91 @@ public class FsmXml implements FsmXmlInterface {
 		InputStream inputStream = new FileInputStream(fsmXmlFile);
 		return this.read(inputStream);
 	}  // End public List<Automata> read(File fsmXmlFile)
+
+	private Tag nextStartOrEndTag(XMLStreamReader xmlStreamReader)
+			throws XMLStreamException {
+		Tag tag = null;
+		while (xmlStreamReader.hasNext()) {
+			int eventType = xmlStreamReader.next();
+			if (eventType == XMLStreamReader.START_ELEMENT) {
+				tag = new Tag(xmlStreamReader.getLocalName(), Tag.Type.START);
+				break;
+			} else if (eventType == XMLStreamReader.END_ELEMENT) {
+				tag = new Tag(xmlStreamReader.getLocalName(), Tag.Type.END);
+				break;
+			}
+		}  // End while (xmlStreamReader.hasNext())
+		return tag;
+	}  // End private String nextStartTag(XMLStreamReader xmlStreamReader)
+
+	private boolean findNextSpecifiedTag(XMLStreamReader xmlStreamReader, String localName, Tag.Type type)
+			throws
+			XMLStreamException {
+		while (xmlStreamReader.hasNext()) {
+			int eventType = xmlStreamReader.next();
+			if (((eventType == XMLStreamReader.START_ELEMENT) && (type == Tag.Type.START))
+					|| ((eventType == XMLStreamReader.END_ELEMENT) && (type == Tag.Type.END))) {
+				String name = xmlStreamReader.getLocalName();
+				if (localName.equals(name)) {
+					return true;
+				}
+			}
+		}  // End while (xmlStreamReader.hasNext())
+		return false;
+	}  // End private boolean findNextSpecifiedTag(String localName, Tag.Type type)
+
+	private boolean findNextSpecifiedTag(XMLStreamReader xmlStreamReader, Tag tag)
+			throws
+			XMLStreamException {
+		if ((tag == null) || (tag.localName == null) || (tag.type == null)) {
+			throw new IllegalArgumentException();
+		}
+		return this.findNextSpecifiedTag(xmlStreamReader, tag.localName, tag.type);
+	}  // End private boolean findNextSpecifiedTag(Tag tag)
+
+	private void assertTag(String localName, Tag.Type type) throws FsmXmlException {
+
+		if ((localName == null) || (type == null)) {
+			throw new IllegalArgumentException();
+		}
+
+		String message = "Expected \"" + localName;
+		if (type == Tag.Type.START) {
+			message = message + " start\"";
+		} else {
+			message = message + " end\"";
+		}
+
+		throw new FsmXmlException(message + " tag is not found.");
+
+	}  // End private void assertTag(String localName, Tag.Type type) throws FsmXmlException
+
+	private void assertTag(Tag tagExpected, Tag tagFound) throws FsmXmlException {
+
+		if (tagExpected.equals(tagFound)) {
+			return;
+		}
+
+		String message = "Expected \"" + tagExpected.localName;
+		if (tagExpected.type == Tag.Type.START) {
+			message = message + " start\"";
+		} else {
+			message = message + " end\"";
+		}
+		if (tagFound == null) {
+			message = message + " tag is not found.";
+		} else {
+			message = message + " tag but found \"" + tagFound.localName;
+			if (tagFound.type == Tag.Type.START) {
+				message = message + " start\" tag.";
+			} else {
+				message = message + " end\" tag.";
+			}
+		}
+
+		throw new FsmXmlException(message);
+
+	}  // End private void assertTag(Tag tagExpected, Tag tagFound) throws FsmXmlException
 
 	@Override
 	public List<Automata> read(InputStream inputStream)
@@ -196,8 +307,6 @@ public class FsmXml implements FsmXmlInterface {
 
 		} catch (XMLStreamException xmlStreamException) {
 			throw new FsmXmlException(xmlStreamException);
-		} catch (FsmXmlException fsmXmlException) {
-			throw fsmXmlException;
 		} finally {
 			if (xmlStreamReader != null) {
 				try {
@@ -384,7 +493,7 @@ public class FsmXml implements FsmXmlInterface {
 				String localName = xmlStreamReader.getLocalName();
 				if ((localName.equals(TAG_WRITING_DATA)) && (alphabet != null)) {
 					alphabet.identitySymbol = xmlStreamReader.getAttributeValue(null, ATR_IDENTITY_SYM);
-					alphabet.timesSymbol =  xmlStreamReader.getAttributeValue(null, ATR_TIMES_SYM);
+					alphabet.timesSymbol = xmlStreamReader.getAttributeValue(null, ATR_TIMES_SYM);
 				} else if ((localName.equals(TAG_MON_GEN)) && (alphabet != null)) {
 					alphabet.allSymbols.add(parseMonGenTag(xmlStreamReader, automata));
 				} else if (localName.equals(TAG_MONOID)) {
@@ -468,6 +577,10 @@ public class FsmXml implements FsmXmlInterface {
 
 		}  // End while (xmlStreamReader.hasNext())
 
+		if (pair.isEmpty()) {
+			pair = null;
+			throw new FsmXmlException("Parsing \"" + TAG_MON_GEN + "\" tag yields no result.");
+		}
 		return pair;
 	}  // End private Object parseMonGenTag(XMLStreamReader xmlStreamReader, Automata automata)
 
@@ -526,13 +639,174 @@ public class FsmXml implements FsmXmlInterface {
 
 		}  // End while (xmlStreamReader.hasNext())
 
+		if (dataType == null) {
+			throw new FsmXmlException("Parsing \"" + TAG_GEN_SORT + "\" tag yields no result.");
+		}
 		return dataType;
 	}  // End private TAFKitInterface.AutomataType.AlphabetDataType parseGenSortTag(XMLStreamReader xmlStreamReader, Automata automata)
 
 	private void parseAutomatonStructTag(XMLStreamReader xmlStreamReader, Automata automata)
 			throws XMLStreamException,
 			FsmXmlException {
+
+		if (!(this.findNextSpecifiedTag(xmlStreamReader, TAG_STATES, Tag.Type.START))) {
+			assertTag(TAG_STATES, Tag.Type.START);
+		}
+		Map<String, State> statesMap = parseStatesTag(xmlStreamReader, automata);
+
+		if (!(this.findNextSpecifiedTag(xmlStreamReader, TAG_TRANSITIONS, Tag.Type.START))) {
+			assertTag(TAG_TRANSITIONS, Tag.Type.START);
+		}
+		parseTransitionsTag(xmlStreamReader, automata, statesMap);
+
+		if (!(this.findNextSpecifiedTag(xmlStreamReader, TAG_AUTOMATON_STRUCT, Tag.Type.END))) {
+			assertTag(TAG_AUTOMATON_STRUCT, Tag.Type.END);
+		}
+
 	}  // End private void parseAutomatonStructTag(XMLStreamReader xmlStreamReader, Automata automata)
+
+	private Map<String, State> parseStatesTag(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		Map<String, State> statesMap = new HashMap<String, State>();
+
+		Tag tag = this.nextStartOrEndTag(xmlStreamReader);
+		while ((tag != null) && (!(tag.equals(TAG_STATES, Tag.Type.END)))) {
+
+			if (tag.equals(TAG_STATE, Tag.Type.START)) {
+				String id = xmlStreamReader.getAttributeValue(null, ATR_ID);
+				if (id == null) {
+					throw new FsmXmlException("Missing required \"" + ATR_ID + "\" attribute of a \"" + tag.localName + "\" tag.");
+				}
+				State state = new State();
+				state.setName(xmlStreamReader.getAttributeValue(null, ATR_NAME));
+				automata.addState(state);
+				statesMap.put(id, state);
+			}  // End if (tag.equals(TAG_STATE, Tag.Type.START))
+
+			tag = this.nextStartOrEndTag(xmlStreamReader);
+
+		}  // End while ((tag != null) && (!(tag.equals(TAG_STATES, Tag.Type.END))))
+
+		if (statesMap.isEmpty()) {
+			statesMap = null;
+			throw new FsmXmlException("Parsing \"" + TAG_STATES + "\" tag yields no result.");
+		}
+		return statesMap;
+
+	}  // End private Map<String, State> parseStatesTag(XMLStreamReader xmlStreamReader, Automata automata)
+
+	private void parseTransitionsTag(XMLStreamReader xmlStreamReader, Automata automata, Map<String, State> statesMap)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		Tag tag = this.nextStartOrEndTag(xmlStreamReader);
+		while ((tag != null) && (!(tag.equals(TAG_TRANSITIONS, Tag.Type.END)))) {
+
+			if (tag.equals(TAG_TRANSITION, Tag.Type.START)) {
+
+				String sourceId = xmlStreamReader.getAttributeValue(null, ATR_SOURCE);
+				if (sourceId == null) {
+					throw new FsmXmlException("Missing required \"" + ATR_SOURCE + "\" attribute of a \"" + tag.localName + "\" tag.");
+				}
+				String targetId = xmlStreamReader.getAttributeValue(null, ATR_TARGET);
+				if (targetId == null) {
+					throw new FsmXmlException("Missing required \"" + ATR_TARGET + "\" attribute of a \"" + tag.localName + "\" tag.");
+				}
+				State sourceState = statesMap.get(sourceId);
+				if (sourceState == null) {
+					throw new FsmXmlException("Missing state with id \"" + sourceId + "\", which is referenced by a transition.");
+				}
+				State targetState = statesMap.get(targetId);
+				if (targetState == null) {
+					throw new FsmXmlException("Missing state with id \"" + targetId + "\", which is referenced by a transition.");
+				}
+				if (!(this.findNextSpecifiedTag(xmlStreamReader, TAG_LABEL, Tag.Type.START))) {
+					this.assertTag(TAG_LABEL, Tag.Type.START);
+				}
+				String label = parseLabelTag(xmlStreamReader, automata);
+				Transition transition = new Transition();
+				transition.setSourceState(sourceState);
+				transition.setTargetState(targetState);
+				transition.setLabel(label);
+				automata.addTransition(transition);
+
+			} // End if (tag.equals(TAG_TRANSITION, Tag.Type.START))
+			else if (tag.equals(TAG_INITIAL, Tag.Type.START)) {
+
+				String id = xmlStreamReader.getAttributeValue(null, ATR_STATE);
+				if (id == null) {
+					throw new FsmXmlException("Missing required \"" + ATR_STATE + "\" attribute of a \"" + tag.localName + "\" tag.");
+				}
+				State state = statesMap.get(id);
+				if (state == null) {
+					throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + tag.localName + "\" tag.");
+				}
+				state.setInitialWeight(true);
+
+			} // End if (tag.equals(TAG_INITIAL, Tag.Type.START))
+			else if (tag.equals(TAG_FINAL, Tag.Type.START)) {
+
+				String id = xmlStreamReader.getAttributeValue(null, ATR_STATE);
+				if (id == null) {
+					throw new FsmXmlException("Missing required \"" + ATR_STATE + "\" attribute of a \"" + tag.localName + "\" tag.");
+				}
+				State state = statesMap.get(id);
+				if (state == null) {
+					throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + tag.localName + "\" tag.");
+				}
+				state.setFinalWeight(true);
+
+			}  // End if (tag.equals(TAG_FINAL, Tag.Type.START))
+
+			tag = this.nextStartOrEndTag(xmlStreamReader);
+
+		}  // End while ((tag != null) && (!(tag.equals(TAG_TRANSITIONS, Tag.Type.END))))
+
+	}  // End private void parseTransitionsTag(XMLStreamReader xmlStreamReader, Automata automata, Map<String, State> statesMap)
+
+	private String parseLabelTag(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		String label = new String();
+
+		Tag tag = this.nextStartOrEndTag(xmlStreamReader);
+		while ((tag != null) && (!(tag.equals(TAG_LABEL, Tag.Type.END)))) {
+
+			if (tag.equals(TAG_MON_GEN, Tag.Type.START)) {
+
+				Object symbol = parseMonGenTag(xmlStreamReader, automata);
+				if (symbol instanceof String) {
+					if (!(label.isEmpty())) {
+						label = label + automata.getWritingData().spacesSym;
+					}
+					label = label + ((String) symbol);
+				} else if (symbol instanceof List) {
+					List list = ((List) symbol);
+					Iterator iterator = list.iterator();
+					while (iterator.hasNext()) {
+						Object object = iterator.next();
+						if (!(label.isEmpty())) {
+							label = label + automata.getWritingData().spacesSym;
+						}
+						label = label + object.toString();
+					}  // End while (iterator.hasNext())
+				}
+
+			}  // End if (tag.equals(TAG_MON_GEN, Tag.Type.START))
+
+			tag = this.nextStartOrEndTag(xmlStreamReader);
+
+		}  // End while ((tag != null) && (!(tag.equals(TAG_LABEL, Tag.Type.END))))
+
+		if (label.isEmpty()) {
+			label = null;
+			throw new FsmXmlException("Parsing \"" + TAG_LABEL + "\" tag yields no result.");
+		}
+		return label;
+	}  // End private void parseLabelTag(XMLStreamReader xmlStreamReader, Automata automata)
 
 	@Override
 	public void write(List<Automata> automataList, File fsmXmlFile)
@@ -569,7 +843,6 @@ public class FsmXml implements FsmXmlInterface {
 				xmlStreamWriter.writeStartElement(TAG_AUTOMATON_STRUCT);
 				writeStatesTag(xmlStreamWriter, automata);
 				writeTransitionsTag(xmlStreamWriter, automata);
-				writeInitialFinalTags(xmlStreamWriter, automata);
 				xmlStreamWriter.writeEndElement();  // TAG_AUTOMATON_STRUCT
 				xmlStreamWriter.writeEndElement();  // TAG_AUTOMATON
 			}  // End while (automataIterator.hasNext())
@@ -592,8 +865,6 @@ public class FsmXml implements FsmXmlInterface {
 			throw new FsmXmlException(transformerConfigurationException);
 		} catch (TransformerException transformerException) {
 			throw new FsmXmlException(transformerException);
-//		} catch (FsmXmlException fsmXmlException) {
-//			throw fsmXmlException;
 		} finally {
 			if (xmlStreamWriter != null) {
 				try {
@@ -827,9 +1098,21 @@ public class FsmXml implements FsmXmlInterface {
 			XMLStreamException,
 			FsmXmlException {
 
+		List<State> allStates = automata.getAllStates();
+		Iterator<State> allStatesIterator = allStates.iterator();
 		xmlStreamWriter.writeStartElement(TAG_STATES);
-		xmlStreamWriter.writeStartElement(TAG_STATE);
-		xmlStreamWriter.writeEndElement();  // End TAG_STATE
+
+		while (allStatesIterator.hasNext()) {
+			State state = allStatesIterator.next();
+			xmlStreamWriter.writeStartElement(TAG_STATE);
+			xmlStreamWriter.writeAttribute(ATR_ID, "s" + allStates.indexOf(state));
+			String name = state.getName();
+			if (name != null) {
+				xmlStreamWriter.writeAttribute(ATR_NAME, name);
+			}
+			xmlStreamWriter.writeEndElement();  // End TAG_STATE
+		}  // End while (allStatesIterator.hasNext())
+
 		xmlStreamWriter.writeEndElement();  // End TAG_STATES
 
 	}  // End private void writeStateTags(XMLStreamWriter xmlStreamWriter, Automata automata)
@@ -839,9 +1122,51 @@ public class FsmXml implements FsmXmlInterface {
 			XMLStreamException,
 			FsmXmlException {
 
+		List<Transition> allTransitions = automata.getAllTransitions();
+		Iterator<Transition> allTransitionsIterator = allTransitions.iterator();
+		List<State> allStates = automata.getAllStates();
 		xmlStreamWriter.writeStartElement(TAG_TRANSITIONS);
-		xmlStreamWriter.writeStartElement(TAG_TRANSITION);
-		xmlStreamWriter.writeEndElement();  // End TAG_TRANSITION
+
+		while (allTransitionsIterator.hasNext()) {
+			Transition transition = allTransitionsIterator.next();
+			xmlStreamWriter.writeStartElement(TAG_TRANSITION);
+			State state = transition.getSourceState();
+			xmlStreamWriter.writeAttribute(ATR_SOURCE, "s" + allStates.indexOf(state));
+			state = transition.getTargetState();
+			xmlStreamWriter.writeAttribute(ATR_TARGET, "s" + allStates.indexOf(state));
+			String label = transition.getLabel();
+			if (label != null) {
+				xmlStreamWriter.writeStartElement(TAG_LABEL);
+				xmlStreamWriter.writeStartElement(TAG_MON_ELMT);
+				xmlStreamWriter.writeStartElement(TAG_MON_GEN);
+				xmlStreamWriter.writeAttribute(ATR_VALUE, label);
+				xmlStreamWriter.writeEndElement();  // End TAG_MON_GEN
+				xmlStreamWriter.writeEndElement();  // End TAG_MON_ELMT
+				xmlStreamWriter.writeEndElement();  // End TAG_LABEL
+			}
+			xmlStreamWriter.writeEndElement();  // End TAG_TRANSITION
+		}  // End while (allTransitionsIterator.hasNext())
+
+		Iterator<State> allStatesIterator = allStates.iterator();
+		while (allStatesIterator.hasNext()) {
+			State state = allStatesIterator.next();
+			if (state.getInitialWeight() != null) {
+				xmlStreamWriter.writeStartElement(TAG_INITIAL);
+				xmlStreamWriter.writeAttribute(ATR_STATE, "s" + allStates.indexOf(state));
+				xmlStreamWriter.writeEndElement();  // End TAG_INITIAL
+			}
+		}  // End while (allStatesIterator.hasNext())
+
+		allStatesIterator = allStates.iterator();
+		while (allStatesIterator.hasNext()) {
+			State state = allStatesIterator.next();
+			if (state.getFinalWeight() != null) {
+				xmlStreamWriter.writeStartElement(TAG_FINAL);
+				xmlStreamWriter.writeAttribute(ATR_STATE, "s" + allStates.indexOf(state));
+				xmlStreamWriter.writeEndElement();  // End TAG_FINAL
+			}
+		}  // End while (allStatesIterator.hasNext())
+
 		xmlStreamWriter.writeEndElement();  // End TAG_TRANSITIONS
 
 	}  // End private void writeTransitionTags(XMLStreamWriter xmlStreamWriter, Automata automata)
