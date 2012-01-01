@@ -384,6 +384,7 @@ public class FsmXml implements FsmXmlInterface {
 				String localName = xmlStreamReader.getLocalName();
 				if ((localName.equals(TAG_WRITING_DATA)) && (alphabet != null)) {
 					alphabet.identitySymbol = xmlStreamReader.getAttributeValue(null, ATR_IDENTITY_SYM);
+					alphabet.timesSymbol =  xmlStreamReader.getAttributeValue(null, ATR_TIMES_SYM);
 				} else if ((localName.equals(TAG_MON_GEN)) && (alphabet != null)) {
 					alphabet.allSymbols.add(parseMonGenTag(xmlStreamReader, automata));
 				} else if (localName.equals(TAG_MONOID)) {
@@ -699,12 +700,12 @@ public class FsmXml implements FsmXmlInterface {
 			xmlStreamWriter.writeStartElement(TAG_MONOID);
 			xmlStreamWriter.writeAttribute(ATR_PROD_DIM, Integer.toString(2));
 			xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_PRODUCT);
-			xmlStreamWriter.writeEndElement();  // End TAG_MONOID
 			xmlStreamWriter.writeStartElement(TAG_WRITING_DATA);
 			xmlStreamWriter.writeAttribute(ATR_IDENTITY_SYM, "1");
 			xmlStreamWriter.writeEndElement();  // End TAG_WRITING_DATA
 			writeMonoidTag(xmlStreamWriter, alphabet);
 			writeMonoidTag(xmlStreamWriter, outputAlphabet);
+			xmlStreamWriter.writeEndElement();  // End TAG_MONOID
 		} else {
 			//
 			// If this is NOT a transducer
@@ -722,19 +723,27 @@ public class FsmXml implements FsmXmlInterface {
 		xmlStreamWriter.writeStartElement(TAG_MONOID);
 
 		xmlStreamWriter.writeAttribute(ATR_GEN_DESCRIP, VAL_ENUM);
-		if ((alphabet.dataType == TAFKitInterface.AutomataType.AlphabetDataType.CHAR)
-				|| (alphabet.dataType == TAFKitInterface.AutomataType.AlphabetDataType.INT)) {
-			xmlStreamWriter.writeAttribute(ATR_GEN_KIND, VAL_SIMPLE);
-		} else {
-			xmlStreamWriter.writeAttribute(ATR_GEN_DIM, Integer.toString(2));
-			xmlStreamWriter.writeAttribute(ATR_GEN_KIND, VAL_TUPLE);
-		}
+		switch (alphabet.dataType) {
+			case CHAR:
+				xmlStreamWriter.writeAttribute(ATR_GEN_KIND, VAL_SIMPLE);
+				xmlStreamWriter.writeAttribute(ATR_GEN_SORT, VAL_LETTERS);
+				break;
+			case INT:
+				xmlStreamWriter.writeAttribute(ATR_GEN_KIND, VAL_SIMPLE);
+				xmlStreamWriter.writeAttribute(ATR_GEN_SORT, VAL_INTEGERS);
+				break;
+			default:
+				xmlStreamWriter.writeAttribute(ATR_GEN_DIM, Integer.toString(2));
+				xmlStreamWriter.writeAttribute(ATR_GEN_KIND, VAL_TUPLE);
+				break;
+		}  // End switch (alphabet.dataType)
 		xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_FREE);
-
-		xmlStreamWriter.writeEndElement();  // End TAG_MONOID
 
 		xmlStreamWriter.writeStartElement(TAG_WRITING_DATA);
 		xmlStreamWriter.writeAttribute(ATR_IDENTITY_SYM, alphabet.identitySymbol.toString());
+		if (alphabet.timesSymbol != null) {
+			xmlStreamWriter.writeAttribute(ATR_TIMES_SYM, alphabet.timesSymbol.toString());
+		}
 		xmlStreamWriter.writeEndElement();  // End TAG_WRITING_DATA
 
 		switch (alphabet.dataType) {
@@ -785,6 +794,8 @@ public class FsmXml implements FsmXmlInterface {
 			Object symbol = monGenIterator.next();
 			writeMonGenTag(xmlStreamWriter, symbol);
 		}  // End while (monGenIterator.hasNext())
+
+		xmlStreamWriter.writeEndElement();  // End TAG_MONOID
 
 	}  // End private void writeMonoidTag(XMLStreamWriter xmlStreamWriter, AutomataInterface.Alphabet alphabet)
 
@@ -845,135 +856,52 @@ public class FsmXml implements FsmXmlInterface {
 
 	}  // End private void writeInitialFinalTags(XMLStreamWriter xmlStreamWriter, Automata automata)
 
+	private static void testFsmXmlFile(String fileToRead, String fileToWrite)
+			throws
+			FileNotFoundException,
+			FsmXmlException {
+		FsmXml fsmXml = new FsmXml();
+		File file = new File(fileToRead);
+		System.out.println("Reading " + file.getAbsolutePath());
+		List<Automata> automataList = fsmXml.read(file);
+		file = new File(fileToWrite);
+		fsmXml.write(automataList, System.out);
+	}  // End private void testOneFile(String fileToRead, String fileToWrite)
+
 	public static void main(String args[]) {
 		String automataRepositoryPath = "../../vaucanson-1.4a/data/automata/";
-		FsmXml fsmXml = new FsmXml();
-		List<Automata> automataList = null;
 		try {
-			File file = new File(automataRepositoryPath + "char-b/a1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-b/b1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-b/div3base2.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-b/double-3-1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-b/evena.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-b/ladybird-6.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-b/oddb.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-char-b/ex-pair1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-f2/ring-7-0-2-3.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-fmp-b/fibred_left.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-fmp-b/fibred_right.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-fmp-b/quot3base2.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-fmp-b/t1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-fmp-b/u1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-fmp-z/t1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-fmp-z/u1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-q/b1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-q/c1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-q/d1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-r/b1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-r/c1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-r/d1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-z/b1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-z/c1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-z/d1.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-zmax/maxab.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-zmax/maxblocka.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-zmin/minab.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-zmin/minblocka.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "char-zmin/slowgrow.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
-			file = new File(automataRepositoryPath + "int-b/coins.xml");
-			System.out.println("Reading " + file.getAbsolutePath());
-			automataList = fsmXml.read(file);
-			fsmXml.write(automataList, System.out);
+			testFsmXmlFile(automataRepositoryPath + "char-b/a1.xml", automataRepositoryPath + "char-b/a1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-b/b1.xml", automataRepositoryPath + "char-b/b1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-b/div3base2.xml", automataRepositoryPath + "char-b/div3base2w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-b/double-3-1.xml", automataRepositoryPath + "char-b/double-3-1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-b/evena.xml", automataRepositoryPath + "char-b/evenaw.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-b/ladybird-6.xml", automataRepositoryPath + "char-b/ladybird-6w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-b/oddb.xml", automataRepositoryPath + "char-b/oddbw.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-char-b/ex-pair1.xml", automataRepositoryPath + "char-char-b/ex-pair1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-f2/ring-7-0-2-3.xml", automataRepositoryPath + "char-f2/ring-7-0-2-3w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-fmp-b/fibred_left.xml", automataRepositoryPath + "char-fmp-b/fibred_leftw.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-fmp-b/fibred_right.xml", automataRepositoryPath + "char-fmp-b/fibred_rightw.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-fmp-b/quot3base2.xml", automataRepositoryPath + "char-fmp-b/quot3base2w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-fmp-b/t1.xml", automataRepositoryPath + "char-fmp-b/t1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-fmp-b/u1.xml", automataRepositoryPath + "char-fmp-b/u1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-fmp-z/t1.xml", automataRepositoryPath + "char-fmp-z/t1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-fmp-z/u1.xml", automataRepositoryPath + "char-fmp-z/u1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-q/b1.xml", automataRepositoryPath + "char-q/b1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-q/c1.xml", automataRepositoryPath + "char-q/c1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-q/d1.xml", automataRepositoryPath + "char-q/d1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-r/b1.xml", automataRepositoryPath + "char-r/b1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-r/c1.xml", automataRepositoryPath + "char-r/c1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-r/d1.xml", automataRepositoryPath + "char-r/d1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-z/b1.xml", automataRepositoryPath + "char-z/b1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-z/c1.xml", automataRepositoryPath + "char-z/c1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-z/d1.xml", automataRepositoryPath + "char-z/d1w.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-zmax/maxab.xml", automataRepositoryPath + "char-zmax/maxabw.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-zmax/maxblocka.xml", automataRepositoryPath + "char-zmax/maxblockaw.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-zmin/minab.xml", automataRepositoryPath + "char-zmin/minabw.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-zmin/minblocka.xml", automataRepositoryPath + "char-zmin/minblockaw.xml");
+			testFsmXmlFile(automataRepositoryPath + "char-zmin/slowgrow.xml", automataRepositoryPath + "char-zmin/slowgroww.xml");
+			testFsmXmlFile(automataRepositoryPath + "int-b/coins.xml", automataRepositoryPath + "int-b/coinsw.xml");
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}

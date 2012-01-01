@@ -39,11 +39,13 @@ public interface AutomataInterface {
 		public TAFKitInterface.AutomataType.AlphabetDataType dataType;
 		public List<Object> allSymbols;
 		public Object identitySymbol;
+		public Object timesSymbol;
 
 		public Alphabet() {
 			this.dataType = null;
 			this.allSymbols = new ArrayList<Object>();
 			this.identitySymbol = null;
+			this.timesSymbol = null;
 		}
 	}  // End public class Alphabet
 
