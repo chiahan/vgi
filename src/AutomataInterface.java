@@ -28,7 +28,7 @@ public interface AutomataInterface {
 		public Object zeroSymbol;
 
 		public Weight() {
-			this.semiring = TAFKitInterface.AutomataType.Semiring.B_BOOLEAN;
+			this.semiring = null;
 			this.identitySymbol = null;
 			this.zeroSymbol = null;
 		}
@@ -41,11 +41,15 @@ public interface AutomataInterface {
 		public Object identitySymbol;
 
 		public Alphabet() {
-			this.dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR;
+			this.dataType = null;
 			this.allSymbols = new ArrayList<Object>();
 			this.identitySymbol = null;
 		}
 	}  // End public class Alphabet
+
+	public String getName();
+
+	public void setName(String name);
 
 	public WritingData getWritingData();
 

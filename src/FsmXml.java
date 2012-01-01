@@ -1,17 +1,32 @@
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayDeque;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 /**
  *
@@ -66,7 +81,13 @@ public class FsmXml implements FsmXmlInterface {
 	private static final String VAL_FIELD = "field";
 	private static final String VAL_MIN_PLUS = "minPlus";
 	private static final String VAL_MAX_PLUS = "maxPlus";
+	private static final String VAL_NUMERICAL = "numerical";
 	private static final String TAG_MONOID = "monoid";
+	private static final String ATR_GEN_DESCRIP = "genDescrip";
+	private static final String VAL_ENUM = "enum";
+	private static final String ATR_GEN_KIND = "genKind";
+	private static final String VAL_SIMPLE = "simple";
+	private static final String VAL_TUPLE = "tuple";
 	private static final String ATR_GEN_SORT = "genSort";
 	private static final String VAL_LETTERS = "letters";
 	private static final String VAL_DIGITS = "digits";
@@ -76,8 +97,13 @@ public class FsmXml implements FsmXmlInterface {
 	private static final String VAL_UNIT = "unit";
 	private static final String VAL_FREE = "free";
 	private static final String VAL_PRODUCT = "product";
+	private static final String ATR_GEN_DIM = "genDim";
+	private static final String ATR_PROD_DIM = "prodDim";
 	private static final String TAG_MON_GEN = "monGen";
 	private static final String ATR_VALUE = "value";
+	private static final String TAG_GEN_SORT = "genSort";
+	private static final String TAG_GEN_COMP_SORT = "genCompSort";
+	private static final String TAG_MON_COMP_GEN = "monCompGen";
 	private static final String TAG_AUTOMATON_STRUCT = "automatonStruct";
 	private static final String TAG_STATES = "states";
 	private static final String TAG_STATE = "state";
@@ -99,369 +125,6 @@ public class FsmXml implements FsmXmlInterface {
 		this.pmAutomataList = null;
 		this.pmTagStack = null;
 	}
-
-	private void processStartElement(XMLStreamReader xmlStreamReader)
-			throws FsmXmlException {
-
-		String localName = xmlStreamReader.getLocalName();
-
-		//
-		// Check that <fsmxml xmlns="http://vaucanson.lrde.epita.fr" version="1.0"> is at the root level.
-		//
-		if (this.pmTagStack.isEmpty()) {
-			if (!(localName.equals(TAG_FSMXML))) {
-				throw new FsmXmlException("Root tag is not " + TAG_FSMXML + " so this is likely an invalid FSM XML file.");
-			} else if (!(xmlStreamReader.getNamespaceURI().equals(VAL_FSMXML_NAMESPACE))) {
-				throw new FsmXmlException("Namespace is not " + VAL_FSMXML_NAMESPACE + " so this is likely an invalid FSM XML file.");
-			} else if (!(xmlStreamReader.getVersion().equals(VAL_FSMXML_VERSION_NUMBER))) {
-				throw new FsmXmlException("VGI only supports FSM XML files whose version is " + VAL_FSMXML_VERSION_NUMBER + ".");
-			}
-		}  // End if (this.pmTagStack.isEmpty())
-
-//		System.out.print(localName + " start");
-//		for (int index = 0; index < xmlStreamReader.getAttributeCount(); index++) {
-//			System.out.print("; " + xmlStreamReader.getAttributeLocalName(index) + " = " + xmlStreamReader.getAttributeValue(index));
-//		}  // End for (int index = 0; index < xmlStreamReader.getAttributeCount(); index++)
-//		System.out.println();
-
-		Tag tag = new Tag(localName);
-		Tag parentTag = this.pmTagStack.peek();
-
-		if (localName.equals(TAG_AUTOMATON)) {
-
-			tag.object = new Automata();
-
-		} // End if (localName.equals(TAG_AUTOMATON))
-		else if (localName.equals(TAG_WRITING_DATA)) {
-
-			if (parentTag.localName.equals(TAG_MONOID)) {
-
-				tag.object = xmlStreamReader.getAttributeValue(null, ATR_IDENTITY_SYM);
-
-			} else {  // End if (parentTag.localName.equals(TAG_MONOID))
-				AutomataInterface.WritingData writingData = new AutomataInterface.WritingData();
-				writingData.closePar = xmlStreamReader.getAttributeValue(null, ATR_CLOSE_PAR).charAt(0);
-				writingData.openPar = xmlStreamReader.getAttributeValue(null, ATR_OPEN_PAR).charAt(0);
-				writingData.plusSym = xmlStreamReader.getAttributeValue(null, ATR_PLUS_SYM).charAt(0);
-				writingData.spacesSym = xmlStreamReader.getAttributeValue(null, ATR_SPACES_SYM).charAt(0);
-				writingData.starSym = xmlStreamReader.getAttributeValue(null, ATR_STAR_SYM).charAt(0);
-				writingData.timesSym = xmlStreamReader.getAttributeValue(null, ATR_TIMES_SYM).charAt(0);
-				writingData.weightClosing = xmlStreamReader.getAttributeValue(null, ATR_WEIGHT_CLOSING).charAt(0);
-				writingData.weightOpening = xmlStreamReader.getAttributeValue(null, ATR_WEIGHT_OPENING).charAt(0);
-				writingData.zeroSym = xmlStreamReader.getAttributeValue(null, ATR_ZERO_SYM).charAt(0);
-				tag.object = writingData;
-			}  // End else part of if (parentTag.localName.equals(TAG_MONOID))
-
-		} // End if (localName.equals(TAG_WRITING_DATA))
-		else if (localName.equals(TAG_SEMIRING)) {
-
-			AutomataInterface.Weight weight = new AutomataInterface.Weight();
-			String set = xmlStreamReader.getAttributeValue(null, ATR_SET);
-			String operations = xmlStreamReader.getAttributeValue(null, ATR_OPERATIONS);
-
-			if (set.equals(VAL_B)) {
-
-				if (operations.equals(VAL_CLASSICAL)) {
-					weight.semiring = TAFKitInterface.AutomataType.Semiring.B_BOOLEAN;
-				} else if (operations.equals(VAL_FIELD)) {
-					weight.semiring = TAFKitInterface.AutomataType.Semiring.F2_TWO_ELEMENT_FIELD;
-				} else {
-					throw new FsmXmlException("Unrecognizable semiring operation.");
-				}
-
-			} else if (set.equals(VAL_Z)) {
-
-
-				if (operations.equals(VAL_CLASSICAL)) {
-					weight.semiring = TAFKitInterface.AutomataType.Semiring.Z_INTEGER;
-				} else if (operations.equals(VAL_MIN_PLUS)) {
-					weight.semiring = TAFKitInterface.AutomataType.Semiring.ZMIN_MIN_TROPICAL;
-				} else if (operations.equals(VAL_MAX_PLUS)) {
-					weight.semiring = TAFKitInterface.AutomataType.Semiring.ZMAX_MAX_TROPICAL;
-				} else {
-					throw new FsmXmlException("Unrecognizable semiring operation.");
-				}
-
-			} else if (set.equals(VAL_Q)) {
-				weight.semiring = TAFKitInterface.AutomataType.Semiring.Q_RATIONAL;
-			} else if (set.equals(VAL_R)) {
-				weight.semiring = TAFKitInterface.AutomataType.Semiring.R_REAL;
-			} else {
-				throw new FsmXmlException("Unrecognizable semiring set.");
-			}
-
-			tag.object = weight;
-
-		} // End if (localName.equals(TAG_SEMIRING))
-		else if (localName.equals(TAG_MONOID)) {
-
-			String type = xmlStreamReader.getAttributeValue(null, ATR_TYPE);
-
-			if (type.equals(VAL_UNIT)) {
-
-				throw new FsmXmlException("VGI does not currently support the monoid type \"unit\".");
-
-			} else if (type.equals(VAL_FREE)) {
-
-				AutomataInterface.Alphabet alphabet = new AutomataInterface.Alphabet();
-				String genSort = xmlStreamReader.getAttributeValue(null, ATR_GEN_SORT);
-
-				if ((genSort.equals(VAL_LETTERS))
-						|| (genSort.equals(VAL_DIGITS))
-						|| (genSort.equals(VAL_ALPHANUMS))) {
-					alphabet.dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR;
-				} else if (genSort.equals(VAL_INTEGERS)) {
-					alphabet.dataType = TAFKitInterface.AutomataType.AlphabetDataType.INT;
-				} else {
-					throw new FsmXmlException("Unrecognizable value of the genSort attribute of the monoid tag.");
-				}
-
-				tag.object = alphabet;
-
-			} else if (type.equals(VAL_PRODUCT)) {
-				tag.object = parentTag.object;
-			}
-
-		} // End if (localName.equals(TAG_MONOID))
-		else if (localName.equals(TAG_MON_GEN)) {
-
-			tag.object = xmlStreamReader.getAttributeValue(null, ATR_VALUE);
-
-		} // End if (localName.equals(TAG_MON_GEN))
-		else if (localName.equals(TAG_STATE)) {
-
-			String id = xmlStreamReader.getAttributeValue(null, ATR_ID);
-			if (id == null) {
-				throw new FsmXmlException("Missing required \"" + ATR_ID + "\" attribute of a \"" + localName + "\" tag.");
-			}
-
-			State state = new State();
-			this.pmMapIdState.put(id, state);
-			tag.object = state;
-
-		} // End if (localName.equals(TAG_STATE))
-		else if (localName.equals(TAG_TRANSITION)) {
-
-			String sourceId = xmlStreamReader.getAttributeValue(null, ATR_SOURCE);
-			if (sourceId == null) {
-				throw new FsmXmlException("Missing required \"" + ATR_SOURCE + "\" attribute of a \"" + localName + "\" tag.");
-			}
-			String targetId = xmlStreamReader.getAttributeValue(null, ATR_TARGET);
-			if (targetId == null) {
-				throw new FsmXmlException("Missing required \"" + ATR_TARGET + "\" attribute of a \"" + localName + "\" tag.");
-			}
-			if (!(parentTag.object instanceof Automata)) {
-				throw new FsmXmlException("Unexpected parent tag.object type.");
-			}
-			Automata automata = (Automata) parentTag.object;
-			State sourceState = this.pmMapIdState.get(sourceId);
-			if (sourceState == null) {
-				throw new FsmXmlException("Missing state with id \"" + sourceId + "\", which is referenced by a transition.");
-			}
-			State targetState = this.pmMapIdState.get(targetId);
-			if (targetState == null) {
-				throw new FsmXmlException("Missing state with id \"" + targetId + "\", which is referenced by a transition.");
-			}
-
-			Transition transition = new Transition();
-			transition.setSourceState(sourceState);
-			transition.setTargetState(targetState);
-			tag.object = transition;
-
-		} // End if (localName.equals(TAG_TRANSITION))
-		else if (localName.equals(TAG_LABEL)) {
-
-			tag.object = new String();
-
-		} // End if (localName.equals(TAG_LABEL))
-		else if (localName.equals(TAG_INITIAL)) {
-
-			String id = xmlStreamReader.getAttributeValue(null, ATR_STATE);
-			if (id == null) {
-				throw new FsmXmlException("Missing required \"" + ATR_STATE + "\" attribute of a \"" + localName + "\" tag.");
-			}
-			if (!(parentTag.object instanceof Automata)) {
-				throw new FsmXmlException("Unexpected parent tag.object type.");
-			}
-			Automata automata = (Automata) parentTag.object;
-			State state = this.pmMapIdState.get(id);
-			if (state == null) {
-				throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + localName + "\" tag.");
-			}
-
-			tag.object = state;
-
-		} // End if (localName.equals(TAG_INITIAL))
-		else if (localName.equals(TAG_FINAL)) {
-
-			String id = xmlStreamReader.getAttributeValue(null, ATR_STATE);
-			if (id == null) {
-				throw new FsmXmlException("Missing required \"" + ATR_STATE + "\" attribute of a \"" + localName + "\" tag.");
-			}
-			if (!(parentTag.object instanceof Automata)) {
-				throw new FsmXmlException("Unexpected parent tag.object type.");
-			}
-			Automata automata = (Automata) parentTag.object;
-			State state = this.pmMapIdState.get(id);
-			if (state == null) {
-				throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + localName + "\" tag.");
-			}
-
-			tag.object = state;
-
-		} // End if (localName.equals(TAG_FINAL))
-		else if (parentTag != null) {
-
-			tag.object = parentTag.object;
-
-		}
-
-		this.pmTagStack.push(tag);
-	}  // End private void processStartElement(XMLStreamReader xmlStreamReader)
-
-	private void processEndElement(XMLStreamReader xmlStreamReader)
-			throws FsmXmlException {
-
-		String localName = xmlStreamReader.getLocalName();
-//		System.out.println(localName + " end");
-
-		Tag tag = this.pmTagStack.pop();
-		if (!(tag.localName.equals(localName))) {
-			throw new FsmXmlException(tag.localName + " start tage is being matched with a different end tag, " + localName + ".");
-		}
-
-		Tag parentTag = this.pmTagStack.peek();
-
-		if (localName.equals(TAG_AUTOMATON)) {
-
-			if (!(tag.object instanceof Automata)) {
-				throw new FsmXmlException("Mismatched tag.object type.");
-			}
-
-			this.pmAutomataList.add((Automata) tag.object);
-			this.pmMapIdState.clear();
-
-		} // End if (localName.equals(TAG_AUTOMATON))
-		else if (localName.equals(TAG_WRITING_DATA)) {
-
-			if (parentTag.localName.equals(TAG_MONOID)) {
-
-				if (parentTag.object instanceof AutomataInterface.Alphabet) {
-					AutomataInterface.Alphabet alphabet = (AutomataInterface.Alphabet) parentTag.object;
-					alphabet.identitySymbol = tag.object;
-				}
-
-			} else {  // End if (parentTag.localName.equals(TAG_MONOID))
-
-				if (!(tag.object instanceof AutomataInterface.WritingData)) {
-					throw new FsmXmlException("Mismatched tag.object type.");
-				} else if (parentTag.object instanceof Automata) {
-					Automata automata = (Automata) parentTag.object;
-					automata.setWritingData((AutomataInterface.WritingData) tag.object);
-				}
-
-			}  // End else part of if (parentTag.localName.equals(TAG_MONOID))
-
-		} // End if (localName.equals(TAG_WRITING_DATA))
-		else if (localName.equals(TAG_SEMIRING)) {
-
-			if (!(tag.object instanceof AutomataInterface.Weight)) {
-				throw new FsmXmlException("Mismatched tag.object type.");
-			} else if (!(parentTag.localName.equals(TAG_VALUE_TYPE))) {
-				throw new FsmXmlException("Unexpected parent tag.");
-			} else if (!(parentTag.object instanceof Automata)) {
-				throw new FsmXmlException("Unexpected parent tag.object type.");
-			}
-
-			Automata automata = (Automata) parentTag.object;
-			automata.setWeight((AutomataInterface.Weight) tag.object);
-
-		} // End if (localName.equals(TAG_SEMIRING))
-		else if (localName.equals(TAG_MONOID)) {
-
-			if ((tag.object instanceof AutomataInterface.Alphabet)
-					&& (parentTag.object instanceof Automata)) {
-				Automata automata = (Automata) parentTag.object;
-				if (automata.getAlphabet() == null) {
-					automata.setAlphabet((AutomataInterface.Alphabet) tag.object);
-				} else if (automata.getOutputAlphabet() == null) {
-					automata.setOutputAlphabet((AutomataInterface.Alphabet) tag.object);
-				}
-			}  // End if ((tag.object instanceof AutomataInterface.Alphabet)
-			//	&& (parentTag.object instanceof Automata))
-
-		} // End if (localName.equals(TAG_MONOID))
-		else if (localName.equals(TAG_MON_GEN)) {
-
-			if (!(tag.object instanceof String)) {
-				throw new FsmXmlException("Mismatched tag.object type.");
-			} else if (parentTag.object instanceof AutomataInterface.Alphabet) {
-				((AutomataInterface.Alphabet) parentTag.object).allSymbols.add(tag.object);
-			} else if (parentTag.object instanceof String) {
-				String label = (String) parentTag.object;
-				label = label + (String) tag.object;
-			}
-
-		} // End if (localName.equals(TAG_MON_GEN))
-		else if (localName.equals(TAG_STATE)) {
-
-			if (!(tag.object instanceof State)) {
-				throw new FsmXmlException("Mismatched tag.object type.");
-			} else if (!(parentTag.object instanceof Automata)) {
-				throw new FsmXmlException("Unexpected parent tag.object type.");
-			}
-
-			((Automata) parentTag.object).addState((State) tag.object);
-
-		} // End if (localName.equals(TAG_STATE))
-		else if (localName.equals(TAG_TRANSITION)) {
-
-			if (!(tag.object instanceof Transition)) {
-				throw new FsmXmlException("Mismatched tag.object type.");
-			} else if (!(parentTag.object instanceof Automata)) {
-				throw new FsmXmlException("Unexpected parent tag.object type.");
-			}
-
-			Automata automata = (Automata) parentTag.object;
-			automata.addTransition((Transition) tag.object);
-
-		} // End if (localName.equals(TAG_TRANSITION))
-		else if (localName.equals(TAG_LABEL)) {
-
-			if (!(tag.object instanceof String)) {
-				throw new FsmXmlException("Mismatched tag.object type.");
-			} else if (!(parentTag.object instanceof Transition)) {
-				throw new FsmXmlException("Unexpected parent tag.object type.");
-			}
-
-			Transition transition = (Transition) parentTag.object;
-			transition.setLabel((String) tag.object);
-
-		} // End if (localName.equals(TAG_LABEL))
-		else if (localName.equals(TAG_INITIAL)) {
-
-			if (!(tag.object instanceof State)) {
-				throw new FsmXmlException("Mismatched tag.object type.");
-			}
-
-			((State) tag.object).setInitialWeight(true);
-
-		} // End if (localName.equals(TAG_INITIAL))
-		else if (localName.equals(TAG_FINAL)) {
-
-			if (!(tag.object instanceof State)) {
-				throw new FsmXmlException("Mismatched tag.object type.");
-			}
-
-			((State) tag.object).setFinalWeight(true);
-
-		}  // End if (localName.equals(TAG_FINAL))
-
-		parentTag = null;
-		tag.localName = null;
-		tag.object = null;
-		tag = null;
-	}  // End private void processEndElement(XMLStreamReader xmlStreamReader)
 
 	@Override
 	public List<Automata> read(File fsmXmlFile)
@@ -488,26 +151,47 @@ public class FsmXml implements FsmXmlInterface {
 			if (eventType != XMLStreamReader.START_DOCUMENT) {
 				throw new FsmXmlException("Unrecognizable FSM XML file.");
 			}
-			this.pmTagStack = new ArrayDeque<Tag>();
-			this.pmAutomataList = new ArrayList<Automata>();
-			this.pmMapIdState = new HashMap<String, State>();
+			if (!(xmlStreamReader.hasNext())) {
+				throw new FsmXmlException("Unrecognizable FSM XML file.");
+			}
+			eventType = xmlStreamReader.next();
+			if (eventType != XMLStreamReader.START_ELEMENT) {
+				throw new FsmXmlException("Unrecognizable FSM XML file.");
+			}
+			String localName = xmlStreamReader.getLocalName();
+			//
+			// Check that <fsmxml xmlns="http://vaucanson.lrde.epita.fr" version="1.0"> is at the root level.
+			//
+			if (!(localName.equals(TAG_FSMXML))) {
+				throw new FsmXmlException("Root tag is not " + TAG_FSMXML + " so this is likely an invalid FSM XML file.");
+			} else if (!(xmlStreamReader.getNamespaceURI().equals(VAL_FSMXML_NAMESPACE))) {
+				throw new FsmXmlException("Namespace is not " + VAL_FSMXML_NAMESPACE + " so this is likely an invalid FSM XML file.");
+			} else if (!(xmlStreamReader.getVersion().equals(VAL_FSMXML_VERSION_NUMBER))) {
+				throw new FsmXmlException("VGI only supports FSM XML files whose version is " + VAL_FSMXML_VERSION_NUMBER + ".");
+			}
+			automataList = new ArrayList<Automata>();
 
 			while (xmlStreamReader.hasNext()) {
+
 				eventType = xmlStreamReader.next();
-				switch (eventType) {
-					case XMLStreamReader.START_ELEMENT:
-						this.processStartElement(xmlStreamReader);
+				if (eventType == XMLStreamReader.START_ELEMENT) {
+
+					localName = xmlStreamReader.getLocalName();
+					if (localName.equals(TAG_AUTOMATON)) {
+						Automata automata = parseAutomatonTag(xmlStreamReader);
+						automataList.add(automata);
+					}
+
+				} // End if (eventType == XMLStreamReader.START_ELEMENT)
+				else if (eventType == XMLStreamReader.END_ELEMENT) {
+
+					localName = xmlStreamReader.getLocalName();
+					if (localName.equals(TAG_FSMXML)) {
 						break;
-					case XMLStreamReader.END_ELEMENT:
-						this.processEndElement(xmlStreamReader);
-						break;
-					case XMLStreamReader.CHARACTERS:
-						if (!xmlStreamReader.isWhiteSpace()) {
-//							System.out.println("XML event CHARACTERS: " + xmlStreamReader.getText());
-						}
-					default:
-//						System.out.println("eventType: " + eventType);
-				}  // End switch (eventType)
+					}
+
+				}  // End if (eventType == XMLStreamReader.END_ELEMENT)
+
 			}  // End while (xmlStreamReader.hasNext())
 
 		} catch (XMLStreamException xmlStreamException) {
@@ -515,13 +199,6 @@ public class FsmXml implements FsmXmlInterface {
 		} catch (FsmXmlException fsmXmlException) {
 			throw fsmXmlException;
 		} finally {
-			if (this.pmTagStack != null) {
-				this.pmTagStack = null;
-			}
-			automataList = this.pmAutomataList;
-			this.pmAutomataList = null;
-			this.pmMapIdState.clear();
-			this.pmMapIdState = null;
 			if (xmlStreamReader != null) {
 				try {
 					xmlStreamReader.close();
@@ -531,109 +208,772 @@ public class FsmXml implements FsmXmlInterface {
 			}  // End if (xmlStreamReader != null)
 		}
 
-		return automataList;
+		if ((automataList != null) && (automataList.isEmpty())) {
+			automataList = null;
+		}
 
+		return automataList;
 	}  // End public List<Automata> read(InputStream inputStream)
 
-	@Override
-	public void write(List<Automata> automataList, File fsmXmlFile) {
-		throw new UnsupportedOperationException("Not supported yet.");
+	private Automata parseAutomatonTag(XMLStreamReader xmlStreamReader)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		Automata automata = new Automata();
+
+		while (xmlStreamReader.hasNext()) {
+
+			int eventType = xmlStreamReader.next();
+			if (eventType == XMLStreamReader.START_ELEMENT) {
+
+				String localName = xmlStreamReader.getLocalName();
+				if (localName.equals(TAG_VALUE_TYPE)) {
+					parseValueTypeTag(xmlStreamReader, automata);
+				} else if (localName.equals(TAG_AUTOMATON_STRUCT)) {
+					parseAutomatonStructTag(xmlStreamReader, automata);
+				}
+
+			} // End if (eventType == XMLStreamReader.START_ELEMENT)
+			else if (eventType == XMLStreamReader.END_ELEMENT) {
+
+				String localName = xmlStreamReader.getLocalName();
+				if (localName.equals(TAG_AUTOMATON)) {
+					break;
+				}
+
+			}  // End if (eventType == XMLStreamReader.END_ELEMENT)
+
+		}  // End while (xmlStreamReader.hasNext())
+
+		return automata;
 	}
+
+	private void parseValueTypeTag(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		while (xmlStreamReader.hasNext()) {
+
+			int eventType = xmlStreamReader.next();
+			if (eventType == XMLStreamReader.START_ELEMENT) {
+
+				String localName = xmlStreamReader.getLocalName();
+				if (localName.equals(TAG_WRITING_DATA)) {
+
+					if (automata.getWritingData() == null) {
+						AutomataInterface.WritingData writingData = new AutomataInterface.WritingData();
+						writingData.closePar = xmlStreamReader.getAttributeValue(null, ATR_CLOSE_PAR).charAt(0);
+						writingData.openPar = xmlStreamReader.getAttributeValue(null, ATR_OPEN_PAR).charAt(0);
+						writingData.plusSym = xmlStreamReader.getAttributeValue(null, ATR_PLUS_SYM).charAt(0);
+						writingData.spacesSym = xmlStreamReader.getAttributeValue(null, ATR_SPACES_SYM).charAt(0);
+						writingData.starSym = xmlStreamReader.getAttributeValue(null, ATR_STAR_SYM).charAt(0);
+						writingData.timesSym = xmlStreamReader.getAttributeValue(null, ATR_TIMES_SYM).charAt(0);
+						writingData.weightClosing = xmlStreamReader.getAttributeValue(null, ATR_WEIGHT_CLOSING).charAt(0);
+						writingData.weightOpening = xmlStreamReader.getAttributeValue(null, ATR_WEIGHT_OPENING).charAt(0);
+						writingData.zeroSym = xmlStreamReader.getAttributeValue(null, ATR_ZERO_SYM).charAt(0);
+						automata.setWritingData(writingData);
+					}
+
+				} else if (localName.equals(TAG_SEMIRING)) {
+
+					AutomataInterface.Weight weight = new AutomataInterface.Weight();
+					String set = xmlStreamReader.getAttributeValue(null, ATR_SET);
+					String operations = xmlStreamReader.getAttributeValue(null, ATR_OPERATIONS);
+
+					if (set.equals(VAL_B)) {
+
+						if (operations.equals(VAL_CLASSICAL)) {
+							weight.semiring = TAFKitInterface.AutomataType.Semiring.B_BOOLEAN;
+						} else if (operations.equals(VAL_FIELD)) {
+							weight.semiring = TAFKitInterface.AutomataType.Semiring.F2_TWO_ELEMENT_FIELD;
+						} else {
+							throw new FsmXmlException("Unrecognizable semiring operation.");
+						}
+
+					} else if (set.equals(VAL_Z)) {
+
+						if (operations.equals(VAL_CLASSICAL)) {
+							weight.semiring = TAFKitInterface.AutomataType.Semiring.Z_INTEGER;
+						} else if (operations.equals(VAL_MIN_PLUS)) {
+							weight.semiring = TAFKitInterface.AutomataType.Semiring.ZMIN_MIN_TROPICAL;
+						} else if (operations.equals(VAL_MAX_PLUS)) {
+							weight.semiring = TAFKitInterface.AutomataType.Semiring.ZMAX_MAX_TROPICAL;
+						} else {
+							throw new FsmXmlException("Unrecognizable semiring operation.");
+						}
+
+					} else if (set.equals(VAL_Q)) {
+						weight.semiring = TAFKitInterface.AutomataType.Semiring.Q_RATIONAL;
+					} else if (set.equals(VAL_R)) {
+						weight.semiring = TAFKitInterface.AutomataType.Semiring.R_REAL;
+					} else {
+						throw new FsmXmlException("Unrecognizable semiring set.");
+					}
+
+					automata.setWeight(weight);
+
+				} else if (localName.equals(TAG_MONOID)) {
+					parseMonoidTag(xmlStreamReader, automata);
+				}
+
+			} // End if (eventType == XMLStreamReader.START_ELEMENT)
+			else if (eventType == XMLStreamReader.END_ELEMENT) {
+
+				String localName = xmlStreamReader.getLocalName();
+				if (localName.equals(TAG_VALUE_TYPE)) {
+					break;
+				}
+
+			}  // End if (eventType == XMLStreamReader.END_ELEMENT)
+
+		}  // End while (xmlStreamReader.hasNext())
+
+	}  // End private void parseValueTypeTag(XMLStreamReader xmlStreamReader, Automata automata)
+
+	private void parseMonoidTag(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		AutomataInterface.Alphabet alphabet = null;
+		String type = xmlStreamReader.getAttributeValue(null, ATR_TYPE);
+
+		if (type.equals(VAL_UNIT)) {
+
+			throw new FsmXmlException("VGI does not currently support the monoid type \"unit\".");
+
+		} else if (type.equals(VAL_FREE)) {
+
+			alphabet = new AutomataInterface.Alphabet();
+			String genKind = xmlStreamReader.getAttributeValue(null, ATR_GEN_KIND);
+
+			if (genKind.equals(VAL_SIMPLE)) {
+
+				String genSort = xmlStreamReader.getAttributeValue(null, ATR_GEN_SORT);
+				if ((genSort.equals(VAL_LETTERS))
+						|| (genSort.equals(VAL_DIGITS))
+						|| (genSort.equals(VAL_ALPHANUMS))) {
+					alphabet.dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR;
+				} else if (genSort.equals(VAL_INTEGERS)) {
+					alphabet.dataType = TAFKitInterface.AutomataType.AlphabetDataType.INT;
+				} else {
+					throw new FsmXmlException("Unrecognizable value of the \"" + ATR_GEN_SORT + "\" attribute of the monoid tag.");
+				}
+
+			} // End if (genSort != null)
+			else if (!(genKind.equals(VAL_TUPLE))) {
+				throw new FsmXmlException("Expected the \"" + ATR_GEN_KIND + "\" attribute to be \"" + VAL_TUPLE + "\" but found \"" + genKind + "\".");
+			}
+
+		} else if (type.equals(VAL_PRODUCT)) {
+			// This is a transducer.
+		}
+
+		if (alphabet != null) {
+			if (automata.getAlphabet() == null) {
+				automata.setAlphabet(alphabet);
+			} else if (automata.getOutputAlphabet() == null) {
+				automata.setOutputAlphabet(alphabet);
+			}
+		}  // End if (alphabet != null)
+
+		while (xmlStreamReader.hasNext()) {
+
+			int eventType = xmlStreamReader.next();
+			if (eventType == XMLStreamReader.START_ELEMENT) {
+
+				String localName = xmlStreamReader.getLocalName();
+				if ((localName.equals(TAG_WRITING_DATA)) && (alphabet != null)) {
+					alphabet.identitySymbol = xmlStreamReader.getAttributeValue(null, ATR_IDENTITY_SYM);
+				} else if ((localName.equals(TAG_MON_GEN)) && (alphabet != null)) {
+					alphabet.allSymbols.add(parseMonGenTag(xmlStreamReader, automata));
+				} else if (localName.equals(TAG_MONOID)) {
+					parseMonoidTag(xmlStreamReader, automata);
+				} else if (localName.equals(TAG_GEN_SORT)) {
+					alphabet.dataType = parseGenSortTag(xmlStreamReader, automata);
+				}
+
+			} // End if (eventType == XMLStreamReader.START_ELEMENT)
+			else if (eventType == XMLStreamReader.END_ELEMENT) {
+
+				String localName = xmlStreamReader.getLocalName();
+				if (localName.equals(TAG_MONOID)) {
+					break;
+				}
+
+			}  // End if (eventType == XMLStreamReader.END_ELEMENT)
+
+		}  // End while (xmlStreamReader.hasNext())
+
+	}  // End private void parseMonoidTag(XMLStreamReader xmlStreamReader, Automata automata)
+
+	private Object parseMonGenTag(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		String value = xmlStreamReader.getAttributeValue(null, ATR_VALUE);
+		if (value != null) {
+			return value;
+		}
+
+		ArrayList<Object> pair = new ArrayList<Object>();
+
+		while (xmlStreamReader.hasNext()) {
+
+			int eventType = xmlStreamReader.next();
+			if (eventType == XMLStreamReader.START_ELEMENT) {
+
+				String localName = xmlStreamReader.getLocalName();
+				if (localName.equals(TAG_MON_COMP_GEN)) {
+
+					value = xmlStreamReader.getAttributeValue(null, ATR_VALUE);
+					Object symbol;
+					switch (automata.getAlphabet().dataType) {
+						case CHAR_CHAR:
+							symbol = new Character(value.charAt(0));
+							break;
+						case CHAR_INT:
+							if (pair.isEmpty()) {
+								symbol = new Character(value.charAt(0));
+							} else {
+								symbol = new Integer(value);
+							}
+							break;
+						case INT_CHAR:
+							if (pair.isEmpty()) {
+								symbol = new Integer(value);
+							} else {
+								symbol = new Character(value.charAt(0));
+							}
+							break;
+						case INT_INT:
+							symbol = new Integer(value);
+							break;
+						default:
+							throw new FsmXmlException("Unexpected value of the alphabet data type.");
+					}  // End switch (automata.getAlphabet().dataType)
+					pair.add(symbol);
+
+				}  // End if (localName.equals(TAG_MON_COMP_GEN))
+
+			} // End if (eventType == XMLStreamReader.START_ELEMENT)
+			else if (eventType == XMLStreamReader.END_ELEMENT) {
+
+				String localName = xmlStreamReader.getLocalName();
+				if (localName.equals(TAG_MON_GEN)) {
+					break;
+				}
+
+			}  // End if (eventType == XMLStreamReader.END_ELEMENT)
+
+		}  // End while (xmlStreamReader.hasNext())
+
+		return pair;
+	}  // End private Object parseMonGenTag(XMLStreamReader xmlStreamReader, Automata automata)
+
+	private TAFKitInterface.AutomataType.AlphabetDataType parseGenSortTag(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		TAFKitInterface.AutomataType.AlphabetDataType dataType = null;
+
+		while (xmlStreamReader.hasNext()) {
+
+			int eventType = xmlStreamReader.next();
+			if (eventType == XMLStreamReader.START_ELEMENT) {
+
+				String localName = xmlStreamReader.getLocalName();
+				if (localName.equals(TAG_GEN_COMP_SORT)) {
+
+					String genCompSort = xmlStreamReader.getAttributeValue(null, ATR_VALUE);
+					if ((genCompSort.equals(VAL_LETTERS))
+							|| (genCompSort.equals(VAL_DIGITS))
+							|| (genCompSort.equals(VAL_ALPHANUMS))) {
+
+						if (dataType == null) {
+							dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR;
+						} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.CHAR) {
+							dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR_CHAR;
+						} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.INT) {
+							dataType = TAFKitInterface.AutomataType.AlphabetDataType.INT_CHAR;
+						}
+
+					} else if (genCompSort.equals(VAL_INTEGERS)) {
+
+						if (dataType == null) {
+							dataType = TAFKitInterface.AutomataType.AlphabetDataType.INT;
+						} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.CHAR) {
+							dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR_INT;
+						} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.INT) {
+							dataType = TAFKitInterface.AutomataType.AlphabetDataType.INT_INT;
+						}
+
+					} else {
+						throw new FsmXmlException("Unrecognizable value of the \"" + ATR_VALUE + "\" attribute of the \"" + TAG_GEN_COMP_SORT + "\" tag.");
+					}
+
+				}
+
+			} // End if (eventType == XMLStreamReader.START_ELEMENT)
+			else if (eventType == XMLStreamReader.END_ELEMENT) {
+
+				String localName = xmlStreamReader.getLocalName();
+				if (localName.equals(TAG_GEN_SORT)) {
+					break;
+				}
+
+			}  // End if (eventType == XMLStreamReader.END_ELEMENT)
+
+		}  // End while (xmlStreamReader.hasNext())
+
+		return dataType;
+	}  // End private TAFKitInterface.AutomataType.AlphabetDataType parseGenSortTag(XMLStreamReader xmlStreamReader, Automata automata)
+
+	private void parseAutomatonStructTag(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+	}  // End private void parseAutomatonStructTag(XMLStreamReader xmlStreamReader, Automata automata)
+
+	@Override
+	public void write(List<Automata> automataList, File fsmXmlFile)
+			throws
+			FileNotFoundException,
+			FsmXmlException {
+		OutputStream outputStream = new FileOutputStream(fsmXmlFile);
+		this.write(automataList, outputStream);
+	}  // End public void write(List<Automata> automataList, File fsmXmlFile)
+
+	@Override
+	public void write(List<Automata> automataList, OutputStream outputStream)
+			throws
+			FileNotFoundException,
+			FsmXmlException {
+
+		XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
+		XMLStreamWriter xmlStreamWriter = null;
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		ByteArrayInputStream byteArrayInputStream = null;
+
+		try {
+			xmlStreamWriter = xmlOutputFactory.createXMLStreamWriter(byteArrayOutputStream);
+			xmlStreamWriter.writeStartDocument();
+			xmlStreamWriter.writeStartElement(TAG_FSMXML);
+			xmlStreamWriter.writeAttribute("xmlns", VAL_FSMXML_NAMESPACE);
+			xmlStreamWriter.writeAttribute("version", VAL_FSMXML_VERSION_NUMBER);
+
+			Iterator<Automata> automataIterator = automataList.iterator();
+			while (automataIterator.hasNext()) {
+				Automata automata = automataIterator.next();
+				xmlStreamWriter.writeStartElement(TAG_AUTOMATON);
+				writeValueTypeTag(xmlStreamWriter, automata);
+				xmlStreamWriter.writeStartElement(TAG_AUTOMATON_STRUCT);
+				writeStatesTag(xmlStreamWriter, automata);
+				writeTransitionsTag(xmlStreamWriter, automata);
+				writeInitialFinalTags(xmlStreamWriter, automata);
+				xmlStreamWriter.writeEndElement();  // TAG_AUTOMATON_STRUCT
+				xmlStreamWriter.writeEndElement();  // TAG_AUTOMATON
+			}  // End while (automataIterator.hasNext())
+
+			xmlStreamWriter.writeEndElement();
+			xmlStreamWriter.writeEndDocument();
+			xmlStreamWriter.flush();
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+			Source source = new StreamSource(byteArrayInputStream);
+			Result result = new StreamResult(outputStream);
+			transformer.transform(source, result);
+		} catch (XMLStreamException xmlStreamException) {
+			throw new FsmXmlException(xmlStreamException);
+		} catch (TransformerConfigurationException transformerConfigurationException) {
+			throw new FsmXmlException(transformerConfigurationException);
+		} catch (TransformerException transformerException) {
+			throw new FsmXmlException(transformerException);
+//		} catch (FsmXmlException fsmXmlException) {
+//			throw fsmXmlException;
+		} finally {
+			if (xmlStreamWriter != null) {
+				try {
+					xmlStreamWriter.close();
+				} catch (XMLStreamException xmlStreamException) {
+					throw new FsmXmlException(xmlStreamException);
+				}
+			}  // End if (xmlStreamReader != null)
+			if (byteArrayInputStream != null) {
+				try {
+					byteArrayInputStream.close();
+				} catch (IOException iOException) {
+					throw new FsmXmlException(iOException);
+				}
+			}  // End if (byteArrayInputStream != null)
+			try {
+				byteArrayOutputStream.close();
+			} catch (IOException iOException) {
+				throw new FsmXmlException(iOException);
+			}
+		}  // End finally
+
+	}  // End public void write(List<Automata> automataList, OutputStream outputStream)
+
+	private void writeValueTypeTag(XMLStreamWriter xmlStreamWriter, Automata automata)
+			throws
+			XMLStreamException,
+			FsmXmlException {
+
+		xmlStreamWriter.writeStartElement(TAG_VALUE_TYPE);
+
+		AutomataInterface.WritingData writingData = automata.getWritingData();
+		xmlStreamWriter.writeStartElement(TAG_WRITING_DATA);
+		xmlStreamWriter.writeAttribute(ATR_CLOSE_PAR, writingData.closePar.toString());
+		xmlStreamWriter.writeAttribute(ATR_OPEN_PAR, writingData.openPar.toString());
+		xmlStreamWriter.writeAttribute(ATR_PLUS_SYM, writingData.plusSym.toString());
+		xmlStreamWriter.writeAttribute(ATR_SPACES_SYM, writingData.spacesSym.toString());
+		xmlStreamWriter.writeAttribute(ATR_STAR_SYM, writingData.starSym.toString());
+		xmlStreamWriter.writeAttribute(ATR_TIMES_SYM, writingData.timesSym.toString());
+		xmlStreamWriter.writeAttribute(ATR_WEIGHT_CLOSING, writingData.weightClosing.toString());
+		xmlStreamWriter.writeAttribute(ATR_WEIGHT_OPENING, writingData.weightOpening.toString());
+		xmlStreamWriter.writeAttribute(ATR_ZERO_SYM, writingData.zeroSym.toString());
+		xmlStreamWriter.writeEndElement();  // End TAG_WRITING_DATA
+
+		AutomataInterface.Weight weight = automata.getWeight();
+		xmlStreamWriter.writeStartElement(TAG_SEMIRING);
+		switch (weight.semiring) {
+			case B_BOOLEAN:
+				xmlStreamWriter.writeAttribute(ATR_OPERATIONS, VAL_CLASSICAL);
+				xmlStreamWriter.writeAttribute(ATR_SET, VAL_B);
+				xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_NUMERICAL);
+				break;
+			case Z_INTEGER:
+				xmlStreamWriter.writeAttribute(ATR_OPERATIONS, VAL_CLASSICAL);
+				xmlStreamWriter.writeAttribute(ATR_SET, VAL_Z);
+				xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_NUMERICAL);
+				break;
+			case Q_RATIONAL:
+				xmlStreamWriter.writeAttribute(ATR_OPERATIONS, VAL_CLASSICAL);
+				xmlStreamWriter.writeAttribute(ATR_SET, VAL_Q);
+				xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_NUMERICAL);
+				break;
+			case R_REAL:
+				xmlStreamWriter.writeAttribute(ATR_OPERATIONS, VAL_CLASSICAL);
+				xmlStreamWriter.writeAttribute(ATR_SET, VAL_R);
+				xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_NUMERICAL);
+				break;
+			case F2_TWO_ELEMENT_FIELD:
+				xmlStreamWriter.writeAttribute(ATR_OPERATIONS, VAL_FIELD);
+				xmlStreamWriter.writeAttribute(ATR_SET, VAL_B);
+				xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_NUMERICAL);
+				break;
+			case ZMIN_MIN_TROPICAL:
+				xmlStreamWriter.writeAttribute(ATR_OPERATIONS, VAL_MIN_PLUS);
+				xmlStreamWriter.writeAttribute(ATR_SET, VAL_Z);
+				xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_NUMERICAL);
+				break;
+			case ZMAX_MAX_TROPICAL:
+				xmlStreamWriter.writeAttribute(ATR_OPERATIONS, VAL_MAX_PLUS);
+				xmlStreamWriter.writeAttribute(ATR_SET, VAL_Z);
+				xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_NUMERICAL);
+				break;
+		}  // End switch (weight.semiring)
+		xmlStreamWriter.writeEndElement();  // End TAG_SEMIRING
+
+		writeMonoidTag(xmlStreamWriter, automata);
+
+		xmlStreamWriter.writeEndElement();  // End TAG_VALUE_TYPE
+
+	}  // End private void writeValueTypeTag(XMLStreamWriter xmlStreamWriter, Automata automata)
+
+	private void writeMonoidTag(XMLStreamWriter xmlStreamWriter, Automata automata)
+			throws
+			XMLStreamException,
+			FsmXmlException {
+
+		AutomataInterface.Alphabet alphabet = automata.getAlphabet();
+		AutomataInterface.Alphabet outputAlphabet = automata.getOutputAlphabet();
+
+		if (outputAlphabet != null) {
+			//
+			// If this IS a transducer
+			//
+			xmlStreamWriter.writeStartElement(TAG_MONOID);
+			xmlStreamWriter.writeAttribute(ATR_PROD_DIM, Integer.toString(2));
+			xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_PRODUCT);
+			xmlStreamWriter.writeEndElement();  // End TAG_MONOID
+			xmlStreamWriter.writeStartElement(TAG_WRITING_DATA);
+			xmlStreamWriter.writeAttribute(ATR_IDENTITY_SYM, "1");
+			xmlStreamWriter.writeEndElement();  // End TAG_WRITING_DATA
+			writeMonoidTag(xmlStreamWriter, alphabet);
+			writeMonoidTag(xmlStreamWriter, outputAlphabet);
+		} else {
+			//
+			// If this is NOT a transducer
+			//
+			writeMonoidTag(xmlStreamWriter, alphabet);
+		}
+
+	}  // End private void writeMonoidTag(XMLStreamWriter xmlStreamWriter, Automata automata)
+
+	private void writeMonoidTag(XMLStreamWriter xmlStreamWriter, AutomataInterface.Alphabet alphabet)
+			throws
+			XMLStreamException,
+			FsmXmlException {
+
+		xmlStreamWriter.writeStartElement(TAG_MONOID);
+
+		xmlStreamWriter.writeAttribute(ATR_GEN_DESCRIP, VAL_ENUM);
+		if ((alphabet.dataType == TAFKitInterface.AutomataType.AlphabetDataType.CHAR)
+				|| (alphabet.dataType == TAFKitInterface.AutomataType.AlphabetDataType.INT)) {
+			xmlStreamWriter.writeAttribute(ATR_GEN_KIND, VAL_SIMPLE);
+		} else {
+			xmlStreamWriter.writeAttribute(ATR_GEN_DIM, Integer.toString(2));
+			xmlStreamWriter.writeAttribute(ATR_GEN_KIND, VAL_TUPLE);
+		}
+		xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_FREE);
+
+		xmlStreamWriter.writeEndElement();  // End TAG_MONOID
+
+		xmlStreamWriter.writeStartElement(TAG_WRITING_DATA);
+		xmlStreamWriter.writeAttribute(ATR_IDENTITY_SYM, alphabet.identitySymbol.toString());
+		xmlStreamWriter.writeEndElement();  // End TAG_WRITING_DATA
+
+		switch (alphabet.dataType) {
+			case CHAR_CHAR:
+				xmlStreamWriter.writeStartElement(TAG_GEN_SORT);
+				xmlStreamWriter.writeStartElement(TAG_GEN_COMP_SORT);
+				xmlStreamWriter.writeAttribute(ATR_VALUE, VAL_LETTERS);
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_COMP_SORT
+				xmlStreamWriter.writeStartElement(TAG_GEN_COMP_SORT);
+				xmlStreamWriter.writeAttribute(ATR_VALUE, VAL_LETTERS);
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_COMP_SORT
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_SORT
+				break;
+			case CHAR_INT:
+				xmlStreamWriter.writeStartElement(TAG_GEN_SORT);
+				xmlStreamWriter.writeStartElement(TAG_GEN_COMP_SORT);
+				xmlStreamWriter.writeAttribute(ATR_VALUE, VAL_LETTERS);
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_COMP_SORT
+				xmlStreamWriter.writeStartElement(TAG_GEN_COMP_SORT);
+				xmlStreamWriter.writeAttribute(ATR_VALUE, VAL_INTEGERS);
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_COMP_SORT
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_SORT
+				break;
+			case INT_CHAR:
+				xmlStreamWriter.writeStartElement(TAG_GEN_SORT);
+				xmlStreamWriter.writeStartElement(TAG_GEN_COMP_SORT);
+				xmlStreamWriter.writeAttribute(ATR_VALUE, VAL_INTEGERS);
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_COMP_SORT
+				xmlStreamWriter.writeStartElement(TAG_GEN_COMP_SORT);
+				xmlStreamWriter.writeAttribute(ATR_VALUE, VAL_LETTERS);
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_COMP_SORT
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_SORT
+				break;
+			case INT_INT:
+				xmlStreamWriter.writeStartElement(TAG_GEN_SORT);
+				xmlStreamWriter.writeStartElement(TAG_GEN_COMP_SORT);
+				xmlStreamWriter.writeAttribute(ATR_VALUE, VAL_INTEGERS);
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_COMP_SORT
+				xmlStreamWriter.writeStartElement(TAG_GEN_COMP_SORT);
+				xmlStreamWriter.writeAttribute(ATR_VALUE, VAL_INTEGERS);
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_COMP_SORT
+				xmlStreamWriter.writeEndElement();  // End TAG_GEN_SORT
+				break;
+		}  // End switch (alphabet.dataType)
+
+		Iterator<Object> monGenIterator = alphabet.allSymbols.iterator();
+		while (monGenIterator.hasNext()) {
+			Object symbol = monGenIterator.next();
+			writeMonGenTag(xmlStreamWriter, symbol);
+		}  // End while (monGenIterator.hasNext())
+
+	}  // End private void writeMonoidTag(XMLStreamWriter xmlStreamWriter, AutomataInterface.Alphabet alphabet)
+
+	private void writeMonGenTag(XMLStreamWriter xmlStreamWriter, Object symbol)
+			throws
+			XMLStreamException,
+			FsmXmlException {
+
+		xmlStreamWriter.writeStartElement(TAG_MON_GEN);
+
+		if (symbol instanceof String) {
+			xmlStreamWriter.writeAttribute(ATR_VALUE, (String) symbol);
+		} else if (symbol instanceof List) {
+			Iterator symbolIterator = ((List) symbol).iterator();
+			while (symbolIterator.hasNext()) {
+				Object object = symbolIterator.next();
+				xmlStreamWriter.writeStartElement(TAG_MON_COMP_GEN);
+				xmlStreamWriter.writeAttribute(ATR_VALUE, object.toString());
+				xmlStreamWriter.writeEndElement();  // End TAG_MON_COMP_GEN
+			}  // End while (symbolIterator.hasNext())
+		}
+
+		xmlStreamWriter.writeEndElement();  // End TAG_MON_GEN
+
+	}  // End private void writeMonGenTag(XMLStreamWriter xmlStreamWriter, Object symbol)
+
+	private void writeStatesTag(XMLStreamWriter xmlStreamWriter, Automata automata)
+			throws
+			XMLStreamException,
+			FsmXmlException {
+
+		xmlStreamWriter.writeStartElement(TAG_STATES);
+		xmlStreamWriter.writeStartElement(TAG_STATE);
+		xmlStreamWriter.writeEndElement();  // End TAG_STATE
+		xmlStreamWriter.writeEndElement();  // End TAG_STATES
+
+	}  // End private void writeStateTags(XMLStreamWriter xmlStreamWriter, Automata automata)
+
+	private void writeTransitionsTag(XMLStreamWriter xmlStreamWriter, Automata automata)
+			throws
+			XMLStreamException,
+			FsmXmlException {
+
+		xmlStreamWriter.writeStartElement(TAG_TRANSITIONS);
+		xmlStreamWriter.writeStartElement(TAG_TRANSITION);
+		xmlStreamWriter.writeEndElement();  // End TAG_TRANSITION
+		xmlStreamWriter.writeEndElement();  // End TAG_TRANSITIONS
+
+	}  // End private void writeTransitionTags(XMLStreamWriter xmlStreamWriter, Automata automata)
+
+	private void writeInitialFinalTags(XMLStreamWriter xmlStreamWriter, Automata automata)
+			throws
+			XMLStreamException,
+			FsmXmlException {
+
+		xmlStreamWriter.writeStartElement(TAG_INITIAL);
+		xmlStreamWriter.writeEndElement();  // End TAG_INITIAL
+
+	}  // End private void writeInitialFinalTags(XMLStreamWriter xmlStreamWriter, Automata automata)
 
 	public static void main(String args[]) {
 		String automataRepositoryPath = "../../vaucanson-1.4a/data/automata/";
 		FsmXml fsmXml = new FsmXml();
+		List<Automata> automataList = null;
 		try {
 			File file = new File(automataRepositoryPath + "char-b/a1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-b/b1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-b/div3base2.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-b/double-3-1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-b/evena.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-b/ladybird-6.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-b/oddb.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
+			file = new File(automataRepositoryPath + "char-char-b/ex-pair1.xml");
+			System.out.println("Reading " + file.getAbsolutePath());
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-f2/ring-7-0-2-3.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-fmp-b/fibred_left.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-fmp-b/fibred_right.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-fmp-b/quot3base2.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-fmp-b/t1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-fmp-b/u1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-fmp-z/t1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-fmp-z/u1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-q/b1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-q/c1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-q/d1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-r/b1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-r/c1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-r/d1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-z/b1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-z/c1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-z/d1.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-zmax/maxab.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-zmax/maxblocka.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-zmin/minab.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-zmin/minblocka.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "char-zmin/slowgrow.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 			file = new File(automataRepositoryPath + "int-b/coins.xml");
 			System.out.println("Reading " + file.getAbsolutePath());
-			fsmXml.read(file);
+			automataList = fsmXml.read(file);
+			fsmXml.write(automataList, System.out);
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}

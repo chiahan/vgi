@@ -37,7 +37,7 @@ public interface TAFKitInterface {
 		public enum AlphabetDataType {
 
 			CHAR, INT,
-			CHAR_CHAR, CHAR_INT, INT_INT
+			CHAR_CHAR, CHAR_INT, INT_CHAR, INT_INT
 		}
 		Semiring semiring;
 		AlphabetDataType alphabetDataType;
@@ -85,6 +85,9 @@ public interface TAFKitInterface {
 					break;
 				case CHAR_INT:
 					string = string + "char-int-";
+					break;
+				case INT_CHAR:
+					string = string + "int-char-";
 					break;
 				case INT_INT:
 					string = string + "int-int-";

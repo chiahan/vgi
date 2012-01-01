@@ -7,6 +7,16 @@ import java.util.*;
 
 public class Automata implements AutomataInterface {
 
+	@Override
+	public String getName() {
+		return this.pmName;
+	}
+
+	@Override
+	public void setName(String name) {
+		this.pmName = name;
+	}
+
 	/**
 	 * @return the Type
 	 */
@@ -91,6 +101,7 @@ public class Automata implements AutomataInterface {
 		transition.getSourceState().addTransition(transition);
 		transition.getTargetState().addTransition(transition);
 	}
+	private String pmName;
 	private WritingData pmWritingData;
 	private Weight pmWeight;
 	private Alphabet pmAlphabet;
@@ -99,15 +110,18 @@ public class Automata implements AutomataInterface {
 	private List<Transition> pmAllTransitions;
 
 	public Automata() {
-		this.pmWeight = new Weight();
+		this.pmName = null;
+		this.pmWritingData = null;
+		this.pmWeight = null;
+		this.pmAlphabet = null;
+		this.pmOutputAlphabet = null;
 		this.pmAllStates = new ArrayList<State>();
 		this.pmAllTransitions = new ArrayList<Transition>();
 	}
 
 	public Automata(Weight weight) {
+		this();
 		this.pmWeight = weight;
-		this.pmAllStates = new ArrayList<State>();
-		this.pmAllTransitions = new ArrayList<Transition>();
 	}
 
 	public static void main(String args[]) {

@@ -2,6 +2,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import javax.swing.filechooser.FileFilter;
 
@@ -54,5 +55,13 @@ public interface FsmXmlInterface {
 			FileNotFoundException,
 			FsmXmlException;
 
-	public void write(List<Automata> automataList, File fsmXmlFile);
+	public void write(List<Automata> automataList, File fsmXmlFile)
+			throws
+			FileNotFoundException,
+			FsmXmlException;
+
+	public void write(List<Automata> automataList, OutputStream outputStream)
+			throws
+			FileNotFoundException,
+			FsmXmlException;
 }  // End public interface FsmXmlInterface
