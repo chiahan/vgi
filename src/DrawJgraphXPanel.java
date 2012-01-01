@@ -49,9 +49,10 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         
         graphComponent = component;
         graph = graphComponent.getGraph();
-//        graphComponent.setBackground(Color.WHITE);
-//        graphComponent.validateGraph();
+        graph.setDisconnectOnMove(false);
+        graphComponent.setConnectable(false);
         graphOutline = new mxGraphOutline(graphComponent);
+        graphComponent.getViewport().setBackground(Color.WHITE);
 
         cellTable = new Hashtable<Integer, mxCell>();
         
@@ -128,7 +129,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
              */
             public void mousePressed(MouseEvent e) {
                 // Handles context menu on the Mac where the trigger is on mousepressed
-                mouseReleased(e);
+//                mouseReleased(e);
             }
 
             /**
@@ -147,23 +148,48 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                     vertexSelected = selectedCell.isVertex();
                 }
                 addStateMenuItem.setVisible(!selected);
+                addControlPointMenuItem.setVisible(edgeSelected);
+                
                 if (vertexSelected) {
+                    DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
+                            new state_properties(selectedCell));
+                    
                     addTransitionFromMenuItem.setVisible(
                             (transitionFrom == null)?true:false);
                     addTransitionToMenuItem.setVisible(
                             (transitionFrom == null)?false:true);
                 }
                 else {
+                    if (edgeSelected) {
+                        DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
+                                new edge_properties(selectedCell));
+                    }
+                    else {
+                        DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
+                            new Automata_properties());
+                    }
+                    
                     addTransitionFromMenuItem.setVisible(false);
                     addTransitionToMenuItem.setVisible(false);
                 }
-                addControlPointMenuItem.setVisible(edgeSelected);
                 
                 if (e.isPopupTrigger()) {
                     popMouseX = e.getX();
                     popMouseY = e.getY();
                     graphPopupMenu.show(graphComponent, popMouseX, popMouseY);
                 }
+               
+                if (vertexSelected) {
+                    
+                }
+                else if (edgeSelected) {
+                    
+                }
+                else {
+
+                }
+                DrawJgraphXPanel.this.validate();
+                
             }
         });
 
