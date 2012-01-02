@@ -129,13 +129,6 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
              */
             public void mousePressed(MouseEvent e) {
                 // Handles context menu on the Mac where the trigger is on mousepressed
-//                mouseReleased(e);
-            }
-
-            /**
-             * 
-             */
-            public void mouseReleased(MouseEvent e) {
                 boolean selected = !graph.isSelectionEmpty();
         
                 mxCell selectedCell = (mxCell) graph.getSelectionCell();
@@ -234,7 +227,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         Object parent = graph.getDefaultParent();
         int id = cellTable.size();
         Object newVertex = graph.insertVertex(parent, Integer.toString(id), "", 
-                            x - 25, y - 25, 50, 50, "shape=ellipse");
+                            x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
         cellTable.put((Integer) id, (mxCell) newVertex);
         System.out.println("add state at" + x + "," + y);
     }
