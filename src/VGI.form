@@ -402,7 +402,7 @@
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <EmptySpace min="0" pref="777" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="776" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
               </Layout>
@@ -417,24 +417,24 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <EmptySpace min="0" pref="1407" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="1409" max="32767" attributes="0"/>
                       <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
                               <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                               <Component id="tableScrollPane" min="-2" pref="375" max="-2" attributes="0"/>
-                              <EmptySpace pref="1020" max="32767" attributes="1"/>
+                              <EmptySpace pref="1022" max="32767" attributes="1"/>
                           </Group>
                       </Group>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <EmptySpace min="0" pref="777" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="776" max="32767" attributes="0"/>
                       <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
                               <EmptySpace min="-2" pref="0" max="-2" attributes="0"/>
                               <Component id="tableScrollPane" min="-2" pref="267" max="-2" attributes="0"/>
-                              <EmptySpace pref="510" max="32767" attributes="1"/>
+                              <EmptySpace pref="509" max="32767" attributes="1"/>
                           </Group>
                       </Group>
                   </Group>

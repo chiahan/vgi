@@ -22,8 +22,13 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
     public CreateAutomataDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        this.semiringSymbolPanel.setVisible(false);
+        this.semiringTypePanel.setVisible(false);
         this.semiringSetPanel.setVisible(false);
         this.semiringOperationPanel.setVisible(false);
+        this.monoidTypePanel.setVisible(false);
+        this.monoidAlphabetPanel1.setVisible(false);
+        this.createFlag = false;
     }
 
     /** This method is called from within the constructor to
@@ -39,7 +44,16 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
         SemiringSetButtonGroup = new javax.swing.ButtonGroup();
         SemiringOperationButtonGroup = new javax.swing.ButtonGroup();
         MonoidTypeButtonGroup = new javax.swing.ButtonGroup();
+        semiringSetOperationbuttonGroup = new javax.swing.ButtonGroup();
         semiringPanel = new javax.swing.JPanel();
+        semiringSetOperationPanel = new javax.swing.JPanel();
+        semiringBooleanRadioButton = new javax.swing.JRadioButton();
+        semiringIntegerRadioButton = new javax.swing.JRadioButton();
+        semiringRationalRadioButton = new javax.swing.JRadioButton();
+        semiringRealRadioButton = new javax.swing.JRadioButton();
+        semiringF2RadioButton = new javax.swing.JRadioButton();
+        semiringMinTropicalRadioButton = new javax.swing.JRadioButton();
+        semiringMaxTropicalRadioButton = new javax.swing.JRadioButton();
         semiringSymbolPanel = new javax.swing.JPanel();
         semiringZeroSymbolLabel = new javax.swing.JLabel();
         semiringZeroSymbolTextField = new javax.swing.JTextField();
@@ -60,30 +74,75 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
         minPlusRadioButton = new javax.swing.JRadioButton();
         maxPlusRadioButton = new javax.swing.JRadioButton();
         monoidPanel = new javax.swing.JPanel();
-        monoidSymbolPanel1 = new javax.swing.JPanel();
-        monoidZeroSymbolLabel = new javax.swing.JLabel();
-        monoidZeroSymbolTextField = new javax.swing.JTextField();
-        monoidTypePanel = new javax.swing.JPanel();
-        unitRadioButton = new javax.swing.JRadioButton();
-        freeRadioButton = new javax.swing.JRadioButton();
-        productRadioButton = new javax.swing.JRadioButton();
+        monoidSymbolPanel = new javax.swing.JPanel();
         monoidAlphabetPanel = new javax.swing.JPanel();
         monoidAlphabetComboBox = new javax.swing.JComboBox();
         subAlphabetPanel = new javax.swing.JPanel();
         addAlphabetButton = new javax.swing.JButton();
         delAlphabetButton = new javax.swing.JButton();
+        monoidZeroSymbolPanel = new javax.swing.JPanel();
+        monoidZeroSymbolTextField = new javax.swing.JTextField();
+        monoidAlphabetPanel1 = new javax.swing.JPanel();
+        monoidAlphabetComboBox1 = new javax.swing.JComboBox();
+        subAlphabetPanel1 = new javax.swing.JPanel();
+        addAlphabetButton1 = new javax.swing.JButton();
+        delAlphabetButton1 = new javax.swing.JButton();
+        monoidTypePanel = new javax.swing.JPanel();
+        unitRadioButton = new javax.swing.JRadioButton();
+        freeRadioButton = new javax.swing.JRadioButton();
+        productRadioButton = new javax.swing.JRadioButton();
         ButtonPanel = new javax.swing.JPanel();
         okCanelPanel = new javax.swing.JPanel();
         cancelButton = new javax.swing.JButton();
         okButton = new javax.swing.JButton();
         buttonPanel = new javax.swing.JPanel();
         booleanButton = new javax.swing.JButton();
+        weightedButton = new javax.swing.JButton();
+        FMPButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Set Type");
 
         semiringPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Semiring"));
         semiringPanel.setLayout(new java.awt.GridLayout());
+
+        semiringSetOperationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Set&Operation"));
+        semiringSetOperationPanel.setLayout(new javax.swing.BoxLayout(semiringSetOperationPanel, javax.swing.BoxLayout.PAGE_AXIS));
+
+        semiringSetOperationbuttonGroup.add(semiringBooleanRadioButton);
+        semiringBooleanRadioButton.setText("Boolean");
+        semiringBooleanRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                seiringSetOperationRadioButtonActionPerformed(evt);
+            }
+        });
+        semiringSetOperationPanel.add(semiringBooleanRadioButton);
+
+        semiringSetOperationbuttonGroup.add(semiringIntegerRadioButton);
+        semiringIntegerRadioButton.setText("Integer");
+        semiringSetOperationPanel.add(semiringIntegerRadioButton);
+
+        semiringSetOperationbuttonGroup.add(semiringRationalRadioButton);
+        semiringRationalRadioButton.setText("Rational");
+        semiringSetOperationPanel.add(semiringRationalRadioButton);
+
+        semiringSetOperationbuttonGroup.add(semiringRealRadioButton);
+        semiringRealRadioButton.setText("Real");
+        semiringSetOperationPanel.add(semiringRealRadioButton);
+
+        semiringSetOperationbuttonGroup.add(semiringF2RadioButton);
+        semiringF2RadioButton.setText("Two Element Field");
+        semiringSetOperationPanel.add(semiringF2RadioButton);
+
+        semiringSetOperationbuttonGroup.add(semiringMinTropicalRadioButton);
+        semiringMinTropicalRadioButton.setText("Min Tropical");
+        semiringSetOperationPanel.add(semiringMinTropicalRadioButton);
+
+        semiringSetOperationbuttonGroup.add(semiringMaxTropicalRadioButton);
+        semiringMaxTropicalRadioButton.setText("Max Tropical");
+        semiringSetOperationPanel.add(semiringMaxTropicalRadioButton);
+
+        semiringPanel.add(semiringSetOperationPanel);
 
         semiringSymbolPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Symbol"));
         semiringSymbolPanel.setLayout(new javax.swing.BoxLayout(semiringSymbolPanel, javax.swing.BoxLayout.PAGE_AXIS));
@@ -221,38 +280,8 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
         monoidPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Monoid"));
         monoidPanel.setLayout(new java.awt.GridLayout(1, 0));
 
-        monoidSymbolPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Symbol"));
-        monoidSymbolPanel1.setLayout(new javax.swing.BoxLayout(monoidSymbolPanel1, javax.swing.BoxLayout.PAGE_AXIS));
-
-        monoidZeroSymbolLabel.setText("zero symbol:");
-        monoidSymbolPanel1.add(monoidZeroSymbolLabel);
-
-        monoidZeroSymbolTextField.setText("0");
-        monoidSymbolPanel1.add(monoidZeroSymbolTextField);
-
-        monoidPanel.add(monoidSymbolPanel1);
-
-        monoidTypePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Type"));
-        monoidTypePanel.setLayout(new javax.swing.BoxLayout(monoidTypePanel, javax.swing.BoxLayout.PAGE_AXIS));
-
-        MonoidTypeButtonGroup.add(unitRadioButton);
-        unitRadioButton.setText("unit");
-        unitRadioButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                monoidTypeActionPerformed(evt);
-            }
-        });
-        monoidTypePanel.add(unitRadioButton);
-
-        MonoidTypeButtonGroup.add(freeRadioButton);
-        freeRadioButton.setText("free");
-        monoidTypePanel.add(freeRadioButton);
-
-        MonoidTypeButtonGroup.add(productRadioButton);
-        productRadioButton.setText("product");
-        monoidTypePanel.add(productRadioButton);
-
-        monoidPanel.add(monoidTypePanel);
+        monoidSymbolPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Symbol"));
+        monoidSymbolPanel.setLayout(new javax.swing.BoxLayout(monoidSymbolPanel, javax.swing.BoxLayout.PAGE_AXIS));
 
         monoidAlphabetPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Alphabet"));
         monoidAlphabetPanel.setLayout(new java.awt.GridLayout(1, 0));
@@ -280,7 +309,67 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
 
         monoidAlphabetPanel.add(subAlphabetPanel);
 
-        monoidPanel.add(monoidAlphabetPanel);
+        monoidSymbolPanel.add(monoidAlphabetPanel);
+
+        monoidZeroSymbolPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Zero Symbol"));
+        monoidZeroSymbolPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        monoidZeroSymbolTextField.setText("0");
+        monoidZeroSymbolPanel.add(monoidZeroSymbolTextField);
+
+        monoidSymbolPanel.add(monoidZeroSymbolPanel);
+
+        monoidAlphabetPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Alphabet"));
+        monoidAlphabetPanel1.setLayout(new java.awt.GridLayout());
+
+        monoidAlphabetComboBox1.setEditable(true);
+        monoidAlphabetPanel1.add(monoidAlphabetComboBox1);
+
+        subAlphabetPanel1.setLayout(new java.awt.GridLayout(2, 1));
+
+        addAlphabetButton1.setText("add");
+        addAlphabetButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addAlphabetButton1monoidAlphabetAdd(evt);
+            }
+        });
+        subAlphabetPanel1.add(addAlphabetButton1);
+
+        delAlphabetButton1.setText("delete");
+        delAlphabetButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                delAlphabetButton1monoidDelAlphabetActionPerformed(evt);
+            }
+        });
+        subAlphabetPanel1.add(delAlphabetButton1);
+
+        monoidAlphabetPanel1.add(subAlphabetPanel1);
+
+        monoidSymbolPanel.add(monoidAlphabetPanel1);
+
+        monoidPanel.add(monoidSymbolPanel);
+
+        monoidTypePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Type"));
+        monoidTypePanel.setLayout(new javax.swing.BoxLayout(monoidTypePanel, javax.swing.BoxLayout.PAGE_AXIS));
+
+        MonoidTypeButtonGroup.add(unitRadioButton);
+        unitRadioButton.setText("unit");
+        unitRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                monoidTypeActionPerformed(evt);
+            }
+        });
+        monoidTypePanel.add(unitRadioButton);
+
+        MonoidTypeButtonGroup.add(freeRadioButton);
+        freeRadioButton.setText("free");
+        monoidTypePanel.add(freeRadioButton);
+
+        MonoidTypeButtonGroup.add(productRadioButton);
+        productRadioButton.setText("product");
+        monoidTypePanel.add(productRadioButton);
+
+        monoidPanel.add(monoidTypePanel);
 
         getContentPane().add(monoidPanel, java.awt.BorderLayout.CENTER);
 
@@ -311,6 +400,22 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
             }
         });
         buttonPanel.add(booleanButton);
+
+        weightedButton.setText("weighted");
+        weightedButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                weightedButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(weightedButton);
+
+        FMPButton.setText("FMP");
+        FMPButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                FMPButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(FMPButton);
 
         ButtonPanel.add(buttonPanel, java.awt.BorderLayout.WEST);
 
@@ -388,24 +493,30 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         // TODO add your handling code here:
+        createFlag = false;
         this.setVisible(false);
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
         // TODO add your handling code here:
-        if (!((semiringZeroSymbolTextField.getText().equals("")) ||
-             (semiringIdentitySymbolTextField.getText().equals("")) ||
-             (semiringType == null) || (semiringSet == null) ||
-             (semiringOperation == null))) {
-            Semiring semiring = new Semiring(semiringZeroSymbolTextField.getText(),
-                                           semiringIdentitySymbolTextField.getText(),
-                                           semiringType, semiringSet,
-                                           semiringOperation, "", null, null);
-            Monoid monoid = new Monoid(monoidZeroSymbolTextField.getText(), 
-                                      monoidAlphabetComboBox.getModel().getSize(), 
-                                      monoidAlphabetComboBox.getModel(), 
-                                      0, null);
+//        if (!((semiringZeroSymbolTextField.getText().equals("")) ||
+//             (semiringIdentitySymbolTextField.getText().equals("")) ||
+//             (semiringType == null) || (semiringSet == null) ||
+//             (semiringOperation == null))) {
+//            Semiring semiring = new Semiring(semiringZeroSymbolTextField.getText(),
+//                                           semiringIdentitySymbolTextField.getText(),
+//                                           semiringType, semiringSet,
+//                                           semiringOperation, "", null, null);
+//            Monoid monoid = new Monoid(monoidZeroSymbolTextField.getText(), 
+//                                      monoidAlphabetComboBox.getModel().getSize(), 
+//                                      monoidAlphabetComboBox.getModel(), 
+//                                      0, null);
+//            this.setVisible(false);
+//            createFlag = true;
+//        }
+        if (!(tafKitSemiring == null)) {
             this.setVisible(false);
+            createFlag = true;
         }
         else {
             System.out.println("some options are empty");
@@ -414,26 +525,89 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
 
     private void booleanButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_booleanButtonActionPerformed
         // TODO add your handling code here:
-        this.numericalRadioButton.setSelected(true);
-        semiringType = Semiring.SemiringType.NUMERICAL;
-        this.semiringSetPanel.setVisible(true);
-        this.BRadioButton.setSelected(true);
-        semiringSet = Semiring.SemiringSet.B;
-        this.semiringOperationPanel.setVisible(true);
-        this.classicalRadioButton.setSelected(true);
-        semiringOperation = Semiring.SemiringOperation.CLASSICAL;
-        this.freeRadioButton.setSelected(true);
-        monoidType = Monoid.MonoidType.free;
+//        this.numericalRadioButton.setSelected(true);
+//        semiringType = Semiring.SemiringType.NUMERICAL;
+//        this.semiringSetPanel.setVisible(true);
+//        this.BRadioButton.setSelected(true);
+//        semiringSet = Semiring.SemiringSet.B;
+//        this.semiringOperationPanel.setVisible(true);
+//        this.classicalRadioButton.setSelected(true);
+//        semiringOperation = Semiring.SemiringOperation.CLASSICAL;
+//        this.freeRadioButton.setSelected(true);
+//        monoidType = Monoid.MonoidType.free;
+        this.tafKitSemiring = TAFKitInterface.AutomataType.Semiring.B_BOOLEAN;
+        this.semiringBooleanRadioButton.setSelected(true);
         this.monoidAlphabetComboBox.addItem("a");
         this.monoidAlphabetComboBox.addItem("b");
+        this.semiringRationalRadioButton.setEnabled(true);
+        this.semiringRealRadioButton.setEnabled(true);
+        this.semiringF2RadioButton.setEnabled(true);
+        this.semiringMaxTropicalRadioButton.setEnabled(true);
+        this.semiringMinTropicalRadioButton.setEnabled(true);
     }//GEN-LAST:event_booleanButtonActionPerformed
 
-    Monoid getMonoid() {
+    private void seiringSetOperationRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_seiringSetOperationRadioButtonActionPerformed
+        // TODO add your handling code here:
+        String cmd = evt.getActionCommand();
+        if (cmd.equals("Boolean")) {
+            this.tafKitSemiring = TAFKitInterface.AutomataType.Semiring.B_BOOLEAN;
+        }
+        else if (cmd.equals("Integer")) {
+            this.tafKitSemiring = TAFKitInterface.AutomataType.Semiring.Z_INTEGER;
+        }
+        else if (cmd.equals("Rational")) {
+            this.tafKitSemiring = TAFKitInterface.AutomataType.Semiring.Q_RATIONAL;
+        }
+        else if (cmd.equals("Real")) {
+            this.tafKitSemiring = TAFKitInterface.AutomataType.Semiring.R_REAL;
+        }
+        else if (cmd.equals("Two Element Field")) {
+            this.tafKitSemiring = TAFKitInterface.AutomataType.Semiring.F2_TWO_ELEMENT_FIELD;
+        }
+        else if (cmd.equals("Min Tropical")) {
+            this.tafKitSemiring = TAFKitInterface.AutomataType.Semiring.ZMIN_MIN_TROPICAL;
+        }
+        else if (cmd.equals("Max Tropical")) {
+            this.tafKitSemiring = TAFKitInterface.AutomataType.Semiring.ZMAX_MAX_TROPICAL;
+        }
+    }//GEN-LAST:event_seiringSetOperationRadioButtonActionPerformed
+
+    private void weightedButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_weightedButtonActionPerformed
+        // TODO add your handling code here:
+        this.booleanButtonActionPerformed(evt);
+    }//GEN-LAST:event_weightedButtonActionPerformed
+
+    private void FMPButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FMPButtonActionPerformed
+        // TODO add your handling code here:
+        this.booleanButtonActionPerformed(evt);
+        this.semiringRationalRadioButton.setEnabled(false);
+        this.semiringRealRadioButton.setEnabled(false);
+        this.semiringF2RadioButton.setEnabled(false);
+        this.semiringMaxTropicalRadioButton.setEnabled(false);
+        this.semiringMinTropicalRadioButton.setEnabled(false);
+        this.monoidAlphabetPanel1.setVisible(true);
+    }//GEN-LAST:event_FMPButtonActionPerformed
+
+    private void addAlphabetButton1monoidAlphabetAdd(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addAlphabetButton1monoidAlphabetAdd
+        // TODO add your handling code here:
+        monoidAlphabetComboBox1.addItem(monoidAlphabetComboBox.getSelectedItem());
+    }//GEN-LAST:event_addAlphabetButton1monoidAlphabetAdd
+
+    private void delAlphabetButton1monoidDelAlphabetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delAlphabetButton1monoidDelAlphabetActionPerformed
+        // TODO add your handling code here:
+        monoidAlphabetComboBox1.removeItem(monoidAlphabetComboBox.getSelectedItem());
+    }//GEN-LAST:event_delAlphabetButton1monoidDelAlphabetActionPerformed
+
+    public Monoid getMonoid() {
         return monoid;
     }
     
-    Semiring getSemiring() {
+    public Semiring getSemiring() {
         return semiring;
+    }
+    
+    public boolean isCreated() {
+        return createFlag;
     }
     
     /**
@@ -481,20 +655,23 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
             }
         });
     }
-    Semiring semiring;
-    Semiring.SemiringType semiringType;
-    Semiring.SemiringSet semiringSet;
-    Semiring.SemiringOperation semiringOperation;
-    Monoid monoid;
-    Monoid.MonoidType monoidType;
-    String semiringZeroSymbol;
-    String semiringIdentitySymbol;
-    String monoidZeroSymbol;
-    ArrayList monoidAlphabet;
+    private Semiring semiring;
+    private Semiring.SemiringType semiringType;
+    private Semiring.SemiringSet semiringSet;
+    private Semiring.SemiringOperation semiringOperation;
+    private TAFKitInterface.AutomataType.Semiring tafKitSemiring;
+    private Monoid monoid;
+    private Monoid.MonoidType monoidType;
+    private String semiringZeroSymbol;
+    private String semiringIdentitySymbol;
+    private String monoidZeroSymbol;
+    private ArrayList monoidAlphabet;
+    private boolean createFlag;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     javax.swing.JRadioButton BRadioButton;
     javax.swing.JPanel ButtonPanel;
     javax.swing.JRadioButton CRadioButton;
+    javax.swing.JButton FMPButton;
     javax.swing.ButtonGroup MonoidTypeButtonGroup;
     javax.swing.JRadioButton NRadioButton;
     javax.swing.JRadioButton QRadioButton;
@@ -504,29 +681,42 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
     javax.swing.ButtonGroup SemiringTypeButtonGroup;
     javax.swing.JRadioButton ZRadioButton;
     javax.swing.JButton addAlphabetButton;
+    javax.swing.JButton addAlphabetButton1;
     javax.swing.JButton booleanButton;
     javax.swing.JPanel buttonPanel;
     javax.swing.JButton cancelButton;
     javax.swing.JRadioButton classicalRadioButton;
     javax.swing.JButton delAlphabetButton;
+    javax.swing.JButton delAlphabetButton1;
     javax.swing.JRadioButton freeRadioButton;
     javax.swing.JRadioButton maxPlusRadioButton;
     javax.swing.JRadioButton minPlusRadioButton;
     javax.swing.JComboBox monoidAlphabetComboBox;
+    javax.swing.JComboBox monoidAlphabetComboBox1;
     javax.swing.JPanel monoidAlphabetPanel;
+    javax.swing.JPanel monoidAlphabetPanel1;
     javax.swing.JPanel monoidPanel;
-    javax.swing.JPanel monoidSymbolPanel1;
+    javax.swing.JPanel monoidSymbolPanel;
     javax.swing.JPanel monoidTypePanel;
-    javax.swing.JLabel monoidZeroSymbolLabel;
+    javax.swing.JPanel monoidZeroSymbolPanel;
     javax.swing.JTextField monoidZeroSymbolTextField;
     javax.swing.JRadioButton numericalRadioButton;
     javax.swing.JButton okButton;
     javax.swing.JPanel okCanelPanel;
     javax.swing.JRadioButton productRadioButton;
+    javax.swing.JRadioButton semiringBooleanRadioButton;
+    javax.swing.JRadioButton semiringF2RadioButton;
     javax.swing.JLabel semiringIdentitySymbolLabel;
     javax.swing.JTextField semiringIdentitySymbolTextField;
+    javax.swing.JRadioButton semiringIntegerRadioButton;
+    javax.swing.JRadioButton semiringMaxTropicalRadioButton;
+    javax.swing.JRadioButton semiringMinTropicalRadioButton;
     javax.swing.JPanel semiringOperationPanel;
     javax.swing.JPanel semiringPanel;
+    javax.swing.JRadioButton semiringRationalRadioButton;
+    javax.swing.JRadioButton semiringRealRadioButton;
+    javax.swing.JPanel semiringSetOperationPanel;
+    javax.swing.ButtonGroup semiringSetOperationbuttonGroup;
     javax.swing.JPanel semiringSetPanel;
     javax.swing.JPanel semiringSymbolPanel;
     javax.swing.JPanel semiringTypePanel;
@@ -534,6 +724,8 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
     javax.swing.JTextField semiringZeroSymbolTextField;
     javax.swing.JRadioButton seriesRadioButton;
     javax.swing.JPanel subAlphabetPanel;
+    javax.swing.JPanel subAlphabetPanel1;
     javax.swing.JRadioButton unitRadioButton;
+    javax.swing.JButton weightedButton;
     // End of variables declaration//GEN-END:variables
 }

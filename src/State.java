@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 
+import com.mxgraph.model.mxCell;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +65,7 @@ public class State implements StateInterface {
 	 * @return the geometricData
 	 */
 	@Override
-	public GeometricData getGeometricData() {
+	public mxCell getGeometricData() {
 		return this.pmGeometricData;
 	}
 
@@ -72,7 +73,7 @@ public class State implements StateInterface {
 	 * @param geometricData the geometriData to set
 	 */
 	@Override
-	public void setGeometricData(GeometricData geometricData) {
+	public void setGeometricData(mxCell geometricData) {
 		this.pmGeometricData = geometricData;
 	}
 
@@ -119,7 +120,7 @@ public class State implements StateInterface {
 	private Object pmFinalWeight;
 	private List<Transition> pmIncomingTransitions;
 	private List<Transition> pmOutgoingTransitions;
-	private GeometricData pmGeometricData;
+	private mxCell pmGeometricData;
 
 	public State() {
 		this.pmName = new String();
@@ -127,6 +128,15 @@ public class State implements StateInterface {
 		this.pmFinalWeight = null;
 		this.pmIncomingTransitions = new ArrayList<Transition>();
 		this.pmOutgoingTransitions = new ArrayList<Transition>();
-		this.pmGeometricData = new GeometricData();
+		this.pmGeometricData = null;
 	}
+        
+        public State(mxCell geometricData) {
+            this.pmName = new String();
+            this.pmInitialWeight = null;
+            this.pmFinalWeight = null;
+            this.pmIncomingTransitions = new ArrayList<Transition>();
+            this.pmOutgoingTransitions = new ArrayList<Transition>();
+            this.pmGeometricData = geometricData;
+        }
 }  // End public class State implements StateInterface

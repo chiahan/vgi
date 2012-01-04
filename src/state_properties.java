@@ -168,6 +168,7 @@ private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
 // TODO add your handling code here:
     JComboBox cb = (JComboBox)evt.getSource();
     Style = (String)cb.getSelectedItem();
+    System.out.println(Style);
     _cell.setStyle(Style);
 }//GEN-LAST:event_jComboBox1ActionPerformed
 

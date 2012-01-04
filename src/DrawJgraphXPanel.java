@@ -44,7 +44,7 @@ import javax.swing.SwingUtilities;
 public class DrawJgraphXPanel extends javax.swing.JPanel {
 
     /** Creates new form DrawJgraphXPanel */
-    public DrawJgraphXPanel(mxGraphComponent component) {
+    public DrawJgraphXPanel(mxGraphComponent component, Automata automata) {
         initComponents();
         
         graphComponent = component;
@@ -53,6 +53,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         graphComponent.setConnectable(false);
         graphOutline = new mxGraphOutline(graphComponent);
         graphComponent.getViewport().setBackground(Color.WHITE);
+        this.automata = automata;
 
         cellTable = new Hashtable<Integer, mxCell>();
         
@@ -60,6 +61,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         infoTabbedPane.add(graphOutline, 0);
         infoTabbedPane.setTitleAt(0, "graph outline");
         infoTabbedPane.setSelectedIndex(0);
+        innerSplitPane.setTopComponent(new Automata_properties());
         mainSplitPane.setRightComponent(graphComponent);
 
         installRepaintListener();
@@ -76,6 +78,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
     protected Hashtable<Integer, mxCell> cellTable;
     protected mxCell transitionFrom, transitionTo;
     protected int popMouseX, popMouseY;
+    protected Automata automata;
     
     protected void installRepaintListener() {
         graphComponent.getGraph().addListener(mxEvent.REPAINT,
@@ -171,18 +174,18 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                     popMouseY = e.getY();
                     graphPopupMenu.show(graphComponent, popMouseX, popMouseY);
                 }
-               
-                if (vertexSelected) {
-                    
-                }
-                else if (edgeSelected) {
-                    
-                }
-                else {
-
-                }
                 DrawJgraphXPanel.this.validate();
-                
+            }
+            
+            /**
+             * 
+             */
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    popMouseX = e.getX();
+                    popMouseY = e.getY();
+                    graphPopupMenu.show(graphComponent, popMouseX, popMouseY);
+                }
             }
         });
 
@@ -213,6 +216,10 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         Object e = graph.insertEdge(parent, null, "", source, target, "shape=curve");
         ArrayList<mxPoint> points = new ArrayList<mxPoint>();
         ((mxCell) e).getGeometry().setPoints(points);
+        automata.addTransition(
+                new Transition((mxCell)e, 
+                automata.getState(source), 
+                automata.getState(target)));
     }
     
     protected void mouseLocationChanged(MouseEvent e) {
@@ -229,6 +236,8 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         Object newVertex = graph.insertVertex(parent, Integer.toString(id), "", 
                             x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
         cellTable.put((Integer) id, (mxCell) newVertex);
+        automata.addState(new State((mxCell) newVertex));
+
         System.out.println("add state at" + x + "," + y);
     }
 

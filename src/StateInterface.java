@@ -1,4 +1,5 @@
 
+import com.mxgraph.model.mxCell;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
@@ -10,16 +11,7 @@ import java.util.List;
  */
 public interface StateInterface {
 
-	public class GeometricData {
-
-		Point2D location;
-		Shape shape;
-
-		public GeometricData() {
-			this.location = new Point2D.Double();
-			this.shape = new Ellipse2D.Double();
-		}
-	}  // End public class GeometricData
+	public mxCell geometricData = null;
 
 	public String getName();
 
@@ -33,9 +25,9 @@ public interface StateInterface {
 
 	public void setFinalWeight(Object finalWeight);
 
-	public GeometricData getGeometricData();
+	public mxCell getGeometricData();
 
-	public void setGeometricData(GeometricData geometricData);
+	public void setGeometricData(mxCell geometricData);
 
 	public List<Transition> getTransitions();
 

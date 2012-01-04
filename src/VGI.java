@@ -27,204 +27,204 @@ import com.mxgraph.view.mxGraph;
  */
 public class VGI extends javax.swing.JFrame {
 
-	private VGI pmVGI;
-	private TAFKit pmTAFKit;
-	private TAFKitInterface.AutomataType pmAutomataType;
+    private VGI pmVGI;
+    private TAFKit pmTAFKit;
+    private TAFKitInterface.AutomataType pmAutomataType;
 
-	private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener {
+    private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener {
 
-		public TAFKitInterface.VcsnAlgorithm vcsnAlgorithm;
+        public TAFKitInterface.VcsnAlgorithm vcsnAlgorithm;
 
-		public AlgorithmMenuItemActionListener(TAFKitInterface.VcsnAlgorithm vcsnAlgorithm) {
-			if (vcsnAlgorithm == null) {
-				throw new IllegalArgumentException("Input argument vcsnAlgorithm cannot be null!");
-			}
-			this.vcsnAlgorithm = vcsnAlgorithm;
-		}
+        public AlgorithmMenuItemActionListener(TAFKitInterface.VcsnAlgorithm vcsnAlgorithm) {
+            if (vcsnAlgorithm == null) {
+                throw new IllegalArgumentException("Input argument vcsnAlgorithm cannot be null!");
+            }
+            this.vcsnAlgorithm = vcsnAlgorithm;
+        }
 
-		@Override
-		public void actionPerformed(ActionEvent actionEvent) {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
 
-			ArrayList<Object> inputs = new ArrayList<Object>();
+            ArrayList<Object> inputs = new ArrayList<Object>();
 
-			for (int index = 0; index < this.vcsnAlgorithm.inputsInfo.size(); index++) {
-				TAFKitInterface.VcsnAlgorithm.IoInfo inputInfo = this.vcsnAlgorithm.inputsInfo.get(index);
-				switch (inputInfo.type) {
+            for (int index = 0; index < this.vcsnAlgorithm.inputsInfo.size(); index++) {
+                TAFKitInterface.VcsnAlgorithm.IoInfo inputInfo = this.vcsnAlgorithm.inputsInfo.get(index);
+                switch (inputInfo.type) {
 
-					case AUTOMATON:
-						JFileChooser fileChooser = new JFileChooser();
-						fileChooser.setDialogTitle("Please choose a FSM XML file");
-						fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-						fileChooser.setMultiSelectionEnabled(false);
-						fileChooser.setFileFilter(FsmXmlInterface.fileFilter);
-						int returnValue = fileChooser.showOpenDialog(pmVGI);
-						if (returnValue != JFileChooser.APPROVE_OPTION) {
-							return;
-						}
-						inputs.add(fileChooser.getSelectedFile());
-						break;
+                    case AUTOMATON:
+                        JFileChooser fileChooser = new JFileChooser();
+                        fileChooser.setDialogTitle("Please choose a FSM XML file");
+                        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                        fileChooser.setMultiSelectionEnabled(false);
+                        fileChooser.setFileFilter(FsmXmlInterface.fileFilter);
+                        int returnValue = fileChooser.showOpenDialog(pmVGI);
+                        if (returnValue != JFileChooser.APPROVE_OPTION) {
+                            return;
+                        }
+                        inputs.add(fileChooser.getSelectedFile());
+                        break;
 
-					case BOOLEAN:
-						throw new IllegalArgumentException("The " + (index + 1) + "th argument is boolean, but no argument should be boolean.");
+                    case BOOLEAN:
+                        throw new IllegalArgumentException("The " + (index + 1) + "th argument is boolean, but no argument should be boolean.");
 
-					case INTEGER:
-						String string = JOptionPane.showInputDialog("Please input an integer.");
-						if ((string == null) || (string.isEmpty())) {
-							return;
-						}
-						inputs.add(Integer.decode(string));
-						break;
+                    case INTEGER:
+                        String string = JOptionPane.showInputDialog("Please input an integer.");
+                        if ((string == null) || (string.isEmpty())) {
+                            return;
+                        }
+                        inputs.add(Integer.decode(string));
+                        break;
 
-					case REGULAR_EXPRESSION:
-						string = JOptionPane.showInputDialog("Please input a regular expression.");
-						if ((string == null) || (string.isEmpty())) {
-							return;
-						}
-						inputs.add(string);
-						break;
+                    case REGULAR_EXPRESSION:
+                        string = JOptionPane.showInputDialog("Please input a regular expression.");
+                        if ((string == null) || (string.isEmpty())) {
+                            return;
+                        }
+                        inputs.add(string);
+                        break;
 
-					case TEXT:
-						throw new IllegalArgumentException("The " + (index + 1) + "th argument is text, but no argument should be text.");
+                    case TEXT:
+                        throw new IllegalArgumentException("The " + (index + 1) + "th argument is text, but no argument should be text.");
 
-					case WEIGHT:
-						string = JOptionPane.showInputDialog("Please input a weight value.");
-						if ((string == null) || (string.isEmpty())) {
-							return;
-						}
-						inputs.add(string);
-						break;
+                    case WEIGHT:
+                        string = JOptionPane.showInputDialog("Please input a weight value.");
+                        if ((string == null) || (string.isEmpty())) {
+                            return;
+                        }
+                        inputs.add(string);
+                        break;
 
-					case WORD:
-						string = JOptionPane.showInputDialog("Please input a word.");
-						if ((string == null) || (string.isEmpty())) {
-							return;
-						}
-						inputs.add(string);
-						break;
+                    case WORD:
+                        string = JOptionPane.showInputDialog("Please input a word.");
+                        if ((string == null) || (string.isEmpty())) {
+                            return;
+                        }
+                        inputs.add(string);
+                        break;
 
-					default:
-						break;
+                    default:
+                        break;
 
-				}  // End switch (inputInfo.type)
-			}  // End for (int index = 0; index < this.vcsnAlgorithm.inputsInfo.size(); index++)
+                }  // End switch (inputInfo.type)
+            }  // End for (int index = 0; index < this.vcsnAlgorithm.inputsInfo.size(); index++)
 
-			List<Object> outputs;
-			try {
-				outputs = pmTAFKit.runVcsnAlgorithm(pmAutomataType, this.vcsnAlgorithm, inputs);
-			} catch (Exception exception) {
-				exception.printStackTrace();
-				return;
-			}
+            List<Object> outputs;
+            try {
+                outputs = pmTAFKit.runVcsnAlgorithm(pmAutomataType, this.vcsnAlgorithm, inputs);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                return;
+            }
 
-			for (int index = 0; index < this.vcsnAlgorithm.outputsInfo.size(); index++) {
+            for (int index = 0; index < this.vcsnAlgorithm.outputsInfo.size(); index++) {
 
-				TAFKitInterface.VcsnAlgorithm.IoInfo outputInfo = this.vcsnAlgorithm.outputsInfo.get(index);
-				Object object = outputs.get(index);
+                TAFKitInterface.VcsnAlgorithm.IoInfo outputInfo = this.vcsnAlgorithm.outputsInfo.get(index);
+                Object object = outputs.get(index);
 
-				switch (outputInfo.type) {
+                switch (outputInfo.type) {
 
-					case AUTOMATON:
-						// TODO:  Convert stream to a FSM XML file and open it in VGI.
-						JOptionPane.showMessageDialog(
-								pmVGI,
-								"Output of \"" + this.vcsnAlgorithm.name + "\" is an automaton, but we cannot display it yet.",
-								null,
-								JOptionPane.INFORMATION_MESSAGE);
-						break;
+                    case AUTOMATON:
+                        // TODO:  Convert stream to a FSM XML file and open it in VGI.
+                        JOptionPane.showMessageDialog(
+                                pmVGI,
+                                "Output of \"" + this.vcsnAlgorithm.name + "\" is an automaton, but we cannot display it yet.",
+                                null,
+                                JOptionPane.INFORMATION_MESSAGE);
+                        break;
 
-					case BOOLEAN:
-						if (object instanceof Boolean) {
-							Boolean bool = (Boolean) object;
-							JOptionPane.showMessageDialog(
-									pmVGI,
-									"Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + bool,
-									null,
-									JOptionPane.INFORMATION_MESSAGE);
-						} else {
-							throw new IllegalArgumentException("The " + (index + 1) + "th output should be an integer, but it is not!");
-						}
-						break;
+                    case BOOLEAN:
+                        if (object instanceof Boolean) {
+                            Boolean bool = (Boolean) object;
+                            JOptionPane.showMessageDialog(
+                                    pmVGI,
+                                    "Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + bool,
+                                    null,
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            throw new IllegalArgumentException("The " + (index + 1) + "th output should be an integer, but it is not!");
+                        }
+                        break;
 
-					case INTEGER:
-						if (object instanceof Integer) {
-							Integer integer = (Integer) object;
-							JOptionPane.showMessageDialog(
-									pmVGI,
-									"Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + integer,
-									null,
-									JOptionPane.INFORMATION_MESSAGE);
-						} else {
-							throw new IllegalArgumentException("The " + (index + 1) + "th output should be an integer, but it is not!");
-						}
-						break;
+                    case INTEGER:
+                        if (object instanceof Integer) {
+                            Integer integer = (Integer) object;
+                            JOptionPane.showMessageDialog(
+                                    pmVGI,
+                                    "Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + integer,
+                                    null,
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            throw new IllegalArgumentException("The " + (index + 1) + "th output should be an integer, but it is not!");
+                        }
+                        break;
 
-					case REGULAR_EXPRESSION:
-						if (object instanceof String) {
-							String string = (String) object;
-							JOptionPane.showMessageDialog(
-									pmVGI,
-									"Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + string,
-									null,
-									JOptionPane.INFORMATION_MESSAGE);
-						} else {
-							throw new IllegalArgumentException("The " + (index + 1) + "th output should be a regular expression, but it is not!");
-						}
-						break;
+                    case REGULAR_EXPRESSION:
+                        if (object instanceof String) {
+                            String string = (String) object;
+                            JOptionPane.showMessageDialog(
+                                    pmVGI,
+                                    "Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + string,
+                                    null,
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            throw new IllegalArgumentException("The " + (index + 1) + "th output should be a regular expression, but it is not!");
+                        }
+                        break;
 
-					case TEXT:
-						if (object instanceof String) {
-							String string = (String) object;
-							JOptionPane.showMessageDialog(
-									pmVGI,
-									"Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + string,
-									null,
-									JOptionPane.INFORMATION_MESSAGE);
-						} else {
-							throw new IllegalArgumentException("The " + (index + 1) + "th output should be text, but it is not!");
-						}
-						break;
+                    case TEXT:
+                        if (object instanceof String) {
+                            String string = (String) object;
+                            JOptionPane.showMessageDialog(
+                                    pmVGI,
+                                    "Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + string,
+                                    null,
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            throw new IllegalArgumentException("The " + (index + 1) + "th output should be text, but it is not!");
+                        }
+                        break;
 
-					case WEIGHT:
-						throw new UnsupportedOperationException("The " + (index + 1) + "th output should be a weight, but VGI does not support weight outputs yet!");
+                    case WEIGHT:
+                        throw new UnsupportedOperationException("The " + (index + 1) + "th output should be a weight, but VGI does not support weight outputs yet!");
 
-					case WORD:
-						if (object instanceof String) {
-							String string = (String) object;
-							JOptionPane.showMessageDialog(
-									pmVGI,
-									"Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + string,
-									null,
-									JOptionPane.INFORMATION_MESSAGE);
-						} else {
-							throw new IllegalArgumentException("The " + (index + 1) + "th output should be a word, but it is not!");
-						}
-						break;
+                    case WORD:
+                        if (object instanceof String) {
+                            String string = (String) object;
+                            JOptionPane.showMessageDialog(
+                                    pmVGI,
+                                    "Output of \"" + this.vcsnAlgorithm.name + "\" is:\n" + string,
+                                    null,
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            throw new IllegalArgumentException("The " + (index + 1) + "th output should be a word, but it is not!");
+                        }
+                        break;
 
-					default:
-						throw new IllegalArgumentException("The " + (index + 1) + "th output does not have a recognizable type.");
+                    default:
+                        throw new IllegalArgumentException("The " + (index + 1) + "th output does not have a recognizable type.");
 
-				}  // End switch (outputInfo.type)
+                }  // End switch (outputInfo.type)
 
-			}  // End for (int index = 0; index < this.vcsnAlgorithm.outputsInfo.size(); index++)
+            }  // End for (int index = 0; index < this.vcsnAlgorithm.outputsInfo.size(); index++)
 
-		}  // End public void actionPerformed(ActionEvent actionEvent)
-	}  // End private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener
+        }  // End public void actionPerformed(ActionEvent actionEvent)
+    }  // End private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener
 
-	/** Creates new form VGI */
-	public VGI() {
-		pmVGI = this;
-		pmTAFKit = null;
-		pmAutomataType = null;
-		initComponents();
-		this.infoPanel.setVisible(false);
-	}
+    /** Creates new form VGI */
+    public VGI() {
+        pmVGI = this;
+        pmTAFKit = null;
+        pmAutomataType = null;
+        initComponents();
+        this.infoPanel.setVisible(false);
+    }
 
-	/** This method is called from within the constructor to
-	 * initialize the form.
-	 * WARNING: Do NOT modify this code. The content of this method is
-	 * always regenerated by the Form Editor.
-	 */
-	@SuppressWarnings("unchecked")
+    /** This method is called from within the constructor to
+     * initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -533,179 +533,181 @@ public class VGI extends javax.swing.JFrame {
 
     private void setTAFKitPathMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setTAFKitPathMenuItemActionPerformed
 
-		JFileChooser tafKitPathChooser = new JFileChooser();
-		if (pmTAFKit != null) {
-			tafKitPathChooser.setCurrentDirectory(pmTAFKit.getTafKitPath());
-		}
-		tafKitPathChooser.setDialogTitle(this.setTAFKitPathMenuItem.getText());
-		tafKitPathChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		tafKitPathChooser.setMultiSelectionEnabled(false);
-		TAFKit tafKit = null;
+        JFileChooser tafKitPathChooser = new JFileChooser();
+        if (pmTAFKit != null) {
+            tafKitPathChooser.setCurrentDirectory(pmTAFKit.getTafKitPath());
+        }
+        tafKitPathChooser.setDialogTitle(this.setTAFKitPathMenuItem.getText());
+        tafKitPathChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        tafKitPathChooser.setMultiSelectionEnabled(false);
+        TAFKit tafKit = null;
 
-		while (true) {
+        while (true) {
 
-			int returnValue = tafKitPathChooser.showOpenDialog(this);
-			if (returnValue != JFileChooser.APPROVE_OPTION) {
-				break;
-			}
+            int returnValue = tafKitPathChooser.showOpenDialog(this);
+            if (returnValue != JFileChooser.APPROVE_OPTION) {
+                break;
+            }
 
-			try {
-				tafKit = new TAFKit(tafKitPathChooser.getSelectedFile());
-				break;
-			} catch (IllegalArgumentException illegalArgumentException) {
-				returnValue = JOptionPane.showConfirmDialog(
-						this,
-						illegalArgumentException.getMessage() + "\nDo you want to try setting TAF-Kit path again?",
-						"Invalid TAF-Kit path",
-						JOptionPane.YES_NO_OPTION,
-						JOptionPane.WARNING_MESSAGE);
-				if (returnValue != JOptionPane.YES_OPTION) {
-					break;
-				}
-			}
+            try {
+                tafKit = new TAFKit(tafKitPathChooser.getSelectedFile());
+                break;
+            } catch (IllegalArgumentException illegalArgumentException) {
+                returnValue = JOptionPane.showConfirmDialog(
+                        this,
+                        illegalArgumentException.getMessage() + "\nDo you want to try setting TAF-Kit path again?",
+                        "Invalid TAF-Kit path",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE);
+                if (returnValue != JOptionPane.YES_OPTION) {
+                    break;
+                }
+            }
 
-		}  // End while (true)
+        }  // End while (true)
 
-		if (tafKit != null) {
-			this.currentSettingMenuItem.setText("Current setting:  " + tafKit.getTafKitPath());
-			this.pmTAFKit = tafKit;
-			this.updateAlgorithmMenuItems();
-		}  // End if (pmTAFKit != null)
+        if (tafKit != null) {
+            this.currentSettingMenuItem.setText("Current setting:  " + tafKit.getTafKitPath());
+            this.pmTAFKit = tafKit;
+            this.updateAlgorithmMenuItems();
+        }  // End if (pmTAFKit != null)
 
     }//GEN-LAST:event_setTAFKitPathMenuItemActionPerformed
 
     private void newMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newMenuItemActionPerformed
-		// TODO add your handling code here:
-		CreateAutomataDialog createDialog = new CreateAutomataDialog(this, true);
-		createDialog.setVisible(true);
-		Monoid monoid = createDialog.getMonoid();
-		Semiring semiring = createDialog.getSemiring();
-		Automata automata = new Automata();
-		System.out.println("Create automata from 'NewMenuItem'");
+        // TODO add your handling code here:
+        CreateAutomataDialog createDialog = new CreateAutomataDialog(this, true);
+        createDialog.setVisible(true);
+        if (createDialog.isCreated()) {
+            Monoid monoid = createDialog.getMonoid();
+            Semiring semiring = createDialog.getSemiring();
+            Automata automata = new Automata();
+            System.out.println("Create automata from 'NewMenuItem'");
 
-		/* Create draw panel for new automata */
-		mxGraph graph = new mxGraph();
-		mxGraphComponent graphComponent = new mxGraphComponent(graph);
-		this.drawPanel = new DrawJgraphXPanel(graphComponent);
-		this.mainSplitPane.setLeftComponent(this.drawPanel);
-		this.validate();
-		System.out.println("adding DrawPanel is done! ");
+            /* Create draw panel for new automata */
+            mxGraph graph = new mxGraph();
+            mxGraphComponent graphComponent = new mxGraphComponent(graph);
+            this.drawPanel = new DrawJgraphXPanel(graphComponent, automata);
+            this.mainSplitPane.setLeftComponent(this.drawPanel);
+            this.validate();
+            System.out.println("adding DrawPanel is done! ");
+        }
     }//GEN-LAST:event_newMenuItemActionPerformed
 
 	private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openMenuItemActionPerformed
 
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setFileFilter(FsmXmlInterface.fileFilter);
-		int returnValue = fileChooser.showOpenDialog(this);
-		if (returnValue != JFileChooser.APPROVE_OPTION) {
-			return;
-		}
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setMultiSelectionEnabled(false);
+            fileChooser.setFileFilter(FsmXmlInterface.fileFilter);
+            int returnValue = fileChooser.showOpenDialog(this);
+            if (returnValue != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
 
-		FsmXml fsmXml = new FsmXml();
-		List<Automata> automataList = null;
-		try {
-			automataList = fsmXml.read(fileChooser.getSelectedFile());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		if ((automataList != null) && (automataList.size() > 0)) {
-			this.pmAutomataType = new TAFKitInterface.AutomataType(automataList.get(0));
-			this.updateAlgorithmMenuItems();
-		}
+            FsmXml fsmXml = new FsmXml();
+            List<Automata> automataList = null;
+            try {
+                automataList = fsmXml.read(fileChooser.getSelectedFile());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if ((automataList != null) && (automataList.size() > 0)) {
+                this.pmAutomataType = new TAFKitInterface.AutomataType(automataList.get(0));
+                this.updateAlgorithmMenuItems();
+            }
 	}//GEN-LAST:event_openMenuItemActionPerformed
 
-	private void updateAlgorithmMenuItems() {
+    private void updateAlgorithmMenuItems() {
 
-		if ((this.pmTAFKit == null) || (this.pmAutomataType == null)) {
-			return;
-		}
+        if ((this.pmTAFKit == null) || (this.pmAutomataType == null)) {
+            return;
+        }
 
-		List<TAFKitInterface.VcsnAlgorithm> vcsnAlgorithms = null;
+        List<TAFKitInterface.VcsnAlgorithm> vcsnAlgorithms = null;
 
-		try {
-			vcsnAlgorithms = pmTAFKit.listVcsnAlgorithms(pmAutomataType);
-		} catch (FileNotFoundException fileNotFoundException) {
-			if (this.algorithmsMenu.getMenuComponentCount() > 3) {
-				this.algorithmsMenu.removeAll();
-				this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
-				this.algorithmsMenu.add(this.currentSettingMenuItem);
-				this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
-			}
-			JMenuItem menuItem = new JMenuItem();
-			menuItem.setText("TAF-Kit currently does not support this type of automata, \"" + pmAutomataType.toExecutableFileName() + "\".");
-			menuItem.setEnabled(false);
-			this.algorithmsMenu.add(menuItem);
-			return;
-		} catch (TAFKitInterface.TAFKitException tafKitException) {
-			JOptionPane.showMessageDialog(
-					this,
-					tafKitException.getMessage(),
-					null,
-					JOptionPane.WARNING_MESSAGE);
-			return;
-		}
+        try {
+            vcsnAlgorithms = pmTAFKit.listVcsnAlgorithms(pmAutomataType);
+        } catch (FileNotFoundException fileNotFoundException) {
+            if (this.algorithmsMenu.getMenuComponentCount() > 3) {
+                this.algorithmsMenu.removeAll();
+                this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
+                this.algorithmsMenu.add(this.currentSettingMenuItem);
+                this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
+            }
+            JMenuItem menuItem = new JMenuItem();
+            menuItem.setText("TAF-Kit currently does not support this type of automata, \"" + pmAutomataType.toExecutableFileName() + "\".");
+            menuItem.setEnabled(false);
+            this.algorithmsMenu.add(menuItem);
+            return;
+        } catch (TAFKitInterface.TAFKitException tafKitException) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    tafKitException.getMessage(),
+                    null,
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-		if (this.algorithmsMenu.getMenuComponentCount() > 3) {
-			this.algorithmsMenu.removeAll();
-			this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
-			this.algorithmsMenu.add(this.currentSettingMenuItem);
-			this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
-		}
+        if (this.algorithmsMenu.getMenuComponentCount() > 3) {
+            this.algorithmsMenu.removeAll();
+            this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
+            this.algorithmsMenu.add(this.currentSettingMenuItem);
+            this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
+        }
 
-		JMenu submenu = null;
+        JMenu submenu = null;
 
-		for (int index = 0; index < vcsnAlgorithms.size(); index++) {
-			TAFKitInterface.VcsnAlgorithm vcsnAlgorithm = vcsnAlgorithms.get(index);
-			JMenuItem menuItem;
-			if (vcsnAlgorithm.name.equalsIgnoreCase("category")) {
-				submenu = new JMenu(vcsnAlgorithm.description);
-				this.algorithmsMenu.add(submenu);
-			} else {
-				menuItem = new JMenuItem(vcsnAlgorithm.name);
-				AlgorithmMenuItemActionListener algorithmMenuItemActionListener = new AlgorithmMenuItemActionListener(vcsnAlgorithm);
-				menuItem.addActionListener(algorithmMenuItemActionListener);
-				submenu.add(menuItem);
-			}
-		}  // End for (int index = 0; index < vcsnAlgorithms.size(); index ++)
-	}  // End private void updateAlgorithmMenuItems()
+        for (int index = 0; index < vcsnAlgorithms.size(); index++) {
+            TAFKitInterface.VcsnAlgorithm vcsnAlgorithm = vcsnAlgorithms.get(index);
+            JMenuItem menuItem;
+            if (vcsnAlgorithm.name.equalsIgnoreCase("category")) {
+                submenu = new JMenu(vcsnAlgorithm.description);
+                this.algorithmsMenu.add(submenu);
+            } else {
+                menuItem = new JMenuItem(vcsnAlgorithm.name);
+                AlgorithmMenuItemActionListener algorithmMenuItemActionListener = new AlgorithmMenuItemActionListener(vcsnAlgorithm);
+                menuItem.addActionListener(algorithmMenuItemActionListener);
+                submenu.add(menuItem);
+            }
+        }  // End for (int index = 0; index < vcsnAlgorithms.size(); index ++)
+    }  // End private void updateAlgorithmMenuItems()
 
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String args[]) {
-		/* Set the Nimbus look and feel */
-		//<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-		 * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-		 */
-		try {
-			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
-					javax.swing.UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-		} catch (ClassNotFoundException ex) {
-			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (InstantiationException ex) {
-			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (IllegalAccessException ex) {
-			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
-			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		}
-		//</editor-fold>
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
 
-		/* Create and display the form */
-		java.awt.EventQueue.invokeLater(new Runnable() {
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
 
-			public void run() {
-				new VGI().setVisible(true);
-			}
-		});
-	}
+            public void run() {
+                new VGI().setVisible(true);
+            }
+        });
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JButton actualSizeButton;
