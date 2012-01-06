@@ -2400,7 +2400,7 @@ public class mxGraph extends mxEventSource
 			double x, double y, double width, double height, String style)
 	{
 		mxGeometry geometry = new mxGeometry(x, y, width, height);
-		mxCell vertex = new mxCell(value, geometry, style);
+		mxCell vertex = new mxCell(value, geometry, "shape=actor");
 
 		vertex.setId(id);
 		vertex.setVertex(true);
