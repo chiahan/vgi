@@ -1,4 +1,5 @@
 
+import java.awt.geom.Point2D;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -142,11 +143,15 @@ public class FsmXml implements FsmXmlInterface {
 	private static final String TAG_STATE = "state";
 	private static final String ATR_ID = "id";
 	private static final String ATR_NAME = "name";
+	private static final String TAG_GEOMETRIC_DATA = "geometricData";
+	private static final String ATR_X = "x";
+	private static final String ATR_Y = "y";
 	private static final String TAG_TRANSITIONS = "transitions";
 	private static final String TAG_TRANSITION = "transition";
 	private static final String ATR_SOURCE = "source";
 	private static final String ATR_TARGET = "target";
 	private static final String TAG_LABEL = "label";
+	private static final String TAG_CONTROL_POINT = "controlPoint";
 	private static final String TAG_MON_ELMT = "monElmt";
 	private static final String TAG_INITIAL = "initial";
 	private static final String TAG_FINAL = "final";
@@ -683,7 +688,10 @@ public class FsmXml implements FsmXmlInterface {
 				state.setName(xmlStreamReader.getAttributeValue(null, ATR_NAME));
 				automata.addState(state);
 				statesMap.put(id, state);
-			}  // End if (tag.equals(TAG_STATE, Tag.Type.START))
+			} // End if (tag.equals(TAG_STATE, Tag.Type.START))
+			else if (tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.START)) {
+				parseStateGeometricData(xmlStreamReader, automata);
+			}  // End if (tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.START))
 
 			tag = this.nextStartOrEndTag(xmlStreamReader);
 
@@ -696,6 +704,28 @@ public class FsmXml implements FsmXmlInterface {
 		return statesMap;
 
 	}  // End private Map<String, State> parseStatesTag(XMLStreamReader xmlStreamReader, Automata automata)
+
+	private void parseStateGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		Tag tag;
+
+		do {  //  while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END))))
+
+			if ((xmlStreamReader.isStartElement()) && (xmlStreamReader.getLocalName().equals(TAG_GEOMETRIC_DATA))) {
+				Double x = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_X));
+				Double y = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_Y));
+				List<State> allStates = automata.getAllStates();
+				State state = allStates.get(allStates.size() - 1);
+				state.getGeometricData().location = new Point2D.Double(x, y);
+			}
+
+			tag = this.nextStartOrEndTag(xmlStreamReader);
+
+		} while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END))));
+
+	}  // End private void parseStateGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
 
 	private void parseTransitionsTag(XMLStreamReader xmlStreamReader, Automata automata, Map<String, State> statesMap)
 			throws XMLStreamException,
@@ -733,6 +763,11 @@ public class FsmXml implements FsmXmlInterface {
 				automata.addTransition(transition);
 
 			} // End if (tag.equals(TAG_TRANSITION, Tag.Type.START))
+			else if (tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.START)) {
+
+				parseTransitionGeometricData(xmlStreamReader, automata);
+
+			} // End if (tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.START))
 			else if (tag.equals(TAG_INITIAL, Tag.Type.START)) {
 
 				String id = xmlStreamReader.getAttributeValue(null, ATR_STATE);
@@ -807,6 +842,28 @@ public class FsmXml implements FsmXmlInterface {
 		}
 		return label;
 	}  // End private void parseLabelTag(XMLStreamReader xmlStreamReader, Automata automata)
+
+	private void parseTransitionGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		Tag tag;
+
+		do {  //  while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END))))
+
+			if ((xmlStreamReader.isStartElement()) && (xmlStreamReader.getLocalName().equals(TAG_CONTROL_POINT))) {
+				Double x = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_X));
+				Double y = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_Y));
+				List<Transition> allTransitions = automata.getAllTransitions();
+				Transition transition = allTransitions.get(allTransitions.size() - 1);
+				transition.getGeometricData().controlPoints.add(new Point2D.Double(x, y));
+			}  // End if ((xmlStreamReader.isStartElement()) && (xmlStreamReader.getLocalName().equals(TAG_CONTROL_POINT)))
+
+			tag = this.nextStartOrEndTag(xmlStreamReader);
+
+		} while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END))));
+
+	}  // End private void parseTransitionGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
 
 	@Override
 	public void write(List<Automata> automataList, File fsmXmlFile)
@@ -897,17 +954,19 @@ public class FsmXml implements FsmXmlInterface {
 		xmlStreamWriter.writeStartElement(TAG_VALUE_TYPE);
 
 		AutomataInterface.WritingData writingData = automata.getWritingData();
-		xmlStreamWriter.writeStartElement(TAG_WRITING_DATA);
-		xmlStreamWriter.writeAttribute(ATR_CLOSE_PAR, writingData.closePar.toString());
-		xmlStreamWriter.writeAttribute(ATR_OPEN_PAR, writingData.openPar.toString());
-		xmlStreamWriter.writeAttribute(ATR_PLUS_SYM, writingData.plusSym.toString());
-		xmlStreamWriter.writeAttribute(ATR_SPACES_SYM, writingData.spacesSym.toString());
-		xmlStreamWriter.writeAttribute(ATR_STAR_SYM, writingData.starSym.toString());
-		xmlStreamWriter.writeAttribute(ATR_TIMES_SYM, writingData.timesSym.toString());
-		xmlStreamWriter.writeAttribute(ATR_WEIGHT_CLOSING, writingData.weightClosing.toString());
-		xmlStreamWriter.writeAttribute(ATR_WEIGHT_OPENING, writingData.weightOpening.toString());
-		xmlStreamWriter.writeAttribute(ATR_ZERO_SYM, writingData.zeroSym.toString());
-		xmlStreamWriter.writeEndElement();  // End TAG_WRITING_DATA
+		if (writingData != null) {
+			xmlStreamWriter.writeStartElement(TAG_WRITING_DATA);
+			xmlStreamWriter.writeAttribute(ATR_CLOSE_PAR, writingData.closePar.toString());
+			xmlStreamWriter.writeAttribute(ATR_OPEN_PAR, writingData.openPar.toString());
+			xmlStreamWriter.writeAttribute(ATR_PLUS_SYM, writingData.plusSym.toString());
+			xmlStreamWriter.writeAttribute(ATR_SPACES_SYM, writingData.spacesSym.toString());
+			xmlStreamWriter.writeAttribute(ATR_STAR_SYM, writingData.starSym.toString());
+			xmlStreamWriter.writeAttribute(ATR_TIMES_SYM, writingData.timesSym.toString());
+			xmlStreamWriter.writeAttribute(ATR_WEIGHT_CLOSING, writingData.weightClosing.toString());
+			xmlStreamWriter.writeAttribute(ATR_WEIGHT_OPENING, writingData.weightOpening.toString());
+			xmlStreamWriter.writeAttribute(ATR_ZERO_SYM, writingData.zeroSym.toString());
+			xmlStreamWriter.writeEndElement();  // End TAG_WRITING_DATA
+		}  // End if (writingData != null)
 
 		AutomataInterface.Weight weight = automata.getWeight();
 		xmlStreamWriter.writeStartElement(TAG_SEMIRING);
@@ -1010,12 +1069,14 @@ public class FsmXml implements FsmXmlInterface {
 		}  // End switch (alphabet.dataType)
 		xmlStreamWriter.writeAttribute(ATR_TYPE, VAL_FREE);
 
-		xmlStreamWriter.writeStartElement(TAG_WRITING_DATA);
-		xmlStreamWriter.writeAttribute(ATR_IDENTITY_SYM, alphabet.identitySymbol.toString());
-		if (alphabet.timesSymbol != null) {
-			xmlStreamWriter.writeAttribute(ATR_TIMES_SYM, alphabet.timesSymbol.toString());
-		}
-		xmlStreamWriter.writeEndElement();  // End TAG_WRITING_DATA
+		if (alphabet.identitySymbol != null) {
+			xmlStreamWriter.writeStartElement(TAG_WRITING_DATA);
+			xmlStreamWriter.writeAttribute(ATR_IDENTITY_SYM, alphabet.identitySymbol.toString());
+			if (alphabet.timesSymbol != null) {
+				xmlStreamWriter.writeAttribute(ATR_TIMES_SYM, alphabet.timesSymbol.toString());
+			}
+			xmlStreamWriter.writeEndElement();  // End TAG_WRITING_DATA
+		}  // End if (alphabet.identitySymbol != null)
 
 		switch (alphabet.dataType) {
 			case CHAR_CHAR:
@@ -1110,6 +1171,13 @@ public class FsmXml implements FsmXmlInterface {
 			if (name != null) {
 				xmlStreamWriter.writeAttribute(ATR_NAME, name);
 			}
+			Point2D point2d = state.getGeometricData().location;
+			if (point2d != null) {
+				xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
+				xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(point2d.getX()));
+				xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
+				xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
+			}
 			xmlStreamWriter.writeEndElement();  // End TAG_STATE
 		}  // End while (allStatesIterator.hasNext())
 
@@ -1144,6 +1212,19 @@ public class FsmXml implements FsmXmlInterface {
 				xmlStreamWriter.writeEndElement();  // End TAG_MON_ELMT
 				xmlStreamWriter.writeEndElement();  // End TAG_LABEL
 			}
+			List<Point2D> controlPoints = transition.getGeometricData().controlPoints;
+			if (!(controlPoints.isEmpty())) {
+				xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
+				Iterator<Point2D> iteratePoints = controlPoints.iterator();
+				while (iteratePoints.hasNext()) {
+					Point2D point2d = iteratePoints.next();
+					xmlStreamWriter.writeStartElement(TAG_CONTROL_POINT);
+					xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(point2d.getX()));
+					xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
+					xmlStreamWriter.writeEndElement();  // End TAG_CONTROL_POINT
+				}  // End while (iteratePoints.hasNext())
+				xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
+			}  // End if (controlPoints != null)
 			xmlStreamWriter.writeEndElement();  // End TAG_TRANSITION
 		}  // End while (allTransitionsIterator.hasNext())
 
@@ -1189,13 +1270,17 @@ public class FsmXml implements FsmXmlInterface {
 		File file = new File(fileToRead);
 		System.out.println("Reading " + file.getAbsolutePath());
 		List<Automata> automataList = fsmXml.read(file);
-		file = new File(fileToWrite);
 		fsmXml.write(automataList, System.out);
+		if (fileToWrite != null) {
+			file = new File(fileToWrite);
+//			fsmXml.write(automataList, file);
+		}
 	}  // End private void testOneFile(String fileToRead, String fileToWrite)
 
 	public static void main(String args[]) {
 		String automataRepositoryPath = "../../vaucanson-1.4a/data/automata/";
 		try {
+//			testFsmXmlFile("../Vaucanson/2011 NSC ANR Collaboration Report/4_state_NFA.xml", null);
 			testFsmXmlFile(automataRepositoryPath + "char-b/a1.xml", automataRepositoryPath + "char-b/a1w.xml");
 			testFsmXmlFile(automataRepositoryPath + "char-b/b1.xml", automataRepositoryPath + "char-b/b1w.xml");
 			testFsmXmlFile(automataRepositoryPath + "char-b/div3base2.xml", automataRepositoryPath + "char-b/div3base2w.xml");

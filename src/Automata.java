@@ -3,7 +3,6 @@
  * and open the template in the editor.
  */
 
-import com.mxgraph.model.mxCell;
 import java.util.*;
 
 public class Automata implements AutomataInterface {
@@ -77,6 +76,7 @@ public class Automata implements AutomataInterface {
 		this.pmAllStates = allStates;
 	}
 
+	@Override
 	public void addState(State state) {
 		pmAllStates.add(state);
 	}
@@ -97,6 +97,7 @@ public class Automata implements AutomataInterface {
 		this.pmAllTransitions = transitions;
 	}
 
+	@Override
 	public void addTransition(Transition transition) {
 		pmAllTransitions.add(transition);
 		transition.getSourceState().addTransition(transition);
@@ -134,16 +135,5 @@ public class Automata implements AutomataInterface {
 		System.out.println("Creating Automata with Weight");
 		Automata automataWithWeight = new Automata(weight);
 	}
-        
-        public State getState(mxCell state) {
-            int index = pmAllStates.size();
-            for (int i=0; i<index; i++) {
-                State s = pmAllStates.get(i);
-                if (state == s.getGeometricData()) {
-                    return s;
-                }
-            }
-            return null;
-        }
 }  // End public class Automata implements AutomataInterface
 

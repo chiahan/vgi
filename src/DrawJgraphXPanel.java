@@ -216,10 +216,10 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         Object e = graph.insertEdge(parent, null, "", source, target, "shape=curve");
         ArrayList<mxPoint> points = new ArrayList<mxPoint>();
         ((mxCell) e).getGeometry().setPoints(points);
-        automata.addTransition(
-                new Transition((mxCell)e, 
-                automata.getState(source), 
-                automata.getState(target)));
+//        automata.addTransition(
+//                new Transition((mxCell)e, 
+//                automata.getState(source), 
+//                automata.getState(target)));
     }
     
     protected void mouseLocationChanged(MouseEvent e) {
@@ -236,7 +236,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         Object newVertex = graph.insertVertex(parent, Integer.toString(id), "", 
                             x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
         cellTable.put((Integer) id, (mxCell) newVertex);
-        automata.addState(new State((mxCell) newVertex));
+//        automata.addState(new State((mxCell) newVertex));
 
         System.out.println("add state at" + x + "," + y);
     }

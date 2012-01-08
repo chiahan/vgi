@@ -1,5 +1,4 @@
 
-import com.mxgraph.model.mxCell;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +9,14 @@ import java.util.List;
  */
 public interface TransitionInterface {
 
-	public mxCell GeometricData = null;
+	public class GeometricData {
+
+		List<Point2D> controlPoints;
+
+		public GeometricData() {
+			this.controlPoints = new ArrayList<Point2D>();
+		}
+	}  // End public class GeometricData
 
 	public State getSourceState();
 
@@ -24,8 +30,7 @@ public interface TransitionInterface {
 
 	public void setLabel(String label);
 
-	public mxCell getGeometricData();
+	public GeometricData getGeometricData();
 
-	public void setGeometricData(mxCell geometricData);
-
+	public void setGeometricData(GeometricData geometricData);
 }  // End public interface TransitionInterface

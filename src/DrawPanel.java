@@ -526,8 +526,7 @@ public class DrawPanel extends JPanel {
                 State state = stateList.get(i);
                 String id = "s" + i;
                 String name = state.getName();
-                //Point2D location = state.getGeometricData().location;
-                Point location = state.getGeometricData().getGeometry().getPoint();
+                Point2D location = state.getGeometricData().location;
                 
                 //x,y???
                 Object vertex = graph.insertVertex(parent, Integer.toString(i), 

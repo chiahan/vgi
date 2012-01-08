@@ -1,11 +1,7 @@
-
-import com.mxgraph.model.mxCell;
-
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author wkren
@@ -64,7 +60,7 @@ public class Transition implements TransitionInterface {
 	 * @return the geometricData
 	 */
 	@Override
-	public mxCell getGeometricData() {
+	public GeometricData getGeometricData() {
 		return this.pmGeometricData;
 	}
 
@@ -72,26 +68,18 @@ public class Transition implements TransitionInterface {
 	 * @param geometricData the geometricData to set
 	 */
 	@Override
-	public void setGeometricData(mxCell geometricData) {
+	public void setGeometricData(GeometricData geometricData) {
 		this.pmGeometricData = geometricData;
 	}
-
 	private State pmSourceState;
 	private State pmTargetState;
 	private String pmLabel;
-	private mxCell pmGeometricData;
+	private GeometricData pmGeometricData;
 
 	public Transition() {
 		this.pmSourceState = null;
 		this.pmTargetState = null;
 		this.pmLabel = null;
-		this.pmGeometricData = null;
+		this.pmGeometricData = new GeometricData();
 	}
-        
-        public Transition(mxCell geometricData, State source, State target) {
-            this.pmSourceState = source;
-            this.pmTargetState = target;
-            this.pmLabel = null;
-            this.pmGeometricData = geometricData;
-        }
 }  // End public class Transition implements TransitionInterface
