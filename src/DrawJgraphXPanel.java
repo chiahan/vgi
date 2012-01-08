@@ -144,7 +144,9 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                     vertexSelected = selectedCell.isVertex();
                 }
                 addStateMenuItem.setVisible(!selected);
+                deleteMenuItem.setVisible(selected);
                 addControlPointMenuItem.setVisible(edgeSelected);
+                cancelMenuItem.setVisible((transitionFrom == null)?false:true);
                 
                 if (vertexSelected) {
                     DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
@@ -265,6 +267,18 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         graphComponent.refresh();
     }
     
+    public void deleteCell(mxCell cell) {
+        if (cell != null) {
+            cellTable.remove(cell);
+            mxCell[] cells = {cell};
+            graph.removeCells(cells);
+        }
+        else {
+            System.out.println("Cell is empty");
+        }
+        graph.refresh();
+    }
+    
     public class CompareCtrlPoint implements Comparator {
         @Override
         public int compare(Object t, Object t1) {
@@ -297,6 +311,8 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         addTransitionFromMenuItem = new javax.swing.JMenuItem();
         addTransitionToMenuItem = new javax.swing.JMenuItem();
         addControlPointMenuItem = new javax.swing.JMenuItem();
+        deleteMenuItem = new javax.swing.JMenuItem();
+        cancelMenuItem = new javax.swing.JMenuItem();
         mainSplitPane = new javax.swing.JSplitPane();
         innerSplitPane = new javax.swing.JSplitPane();
         libPanel = new javax.swing.JPanel();
@@ -336,6 +352,22 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
             }
         });
         graphPopupMenu.add(addControlPointMenuItem);
+
+        deleteMenuItem.setText("Delete");
+        deleteMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteMenuItemActionPerformed(evt);
+            }
+        });
+        graphPopupMenu.add(deleteMenuItem);
+
+        cancelMenuItem.setText("Cancel");
+        cancelMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelMenuItemActionPerformed(evt);
+            }
+        });
+        graphPopupMenu.add(cancelMenuItem);
 
         addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -440,11 +472,24 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         addControlPoint();
     }//GEN-LAST:event_addControlPointMenuItemActionPerformed
 
+    private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
+        // TODO add your handling code here:
+        mxCell selectedCell = (mxCell) graph.getSelectionCell();
+        deleteCell(selectedCell);
+    }//GEN-LAST:event_deleteMenuItemActionPerformed
+
+    private void cancelMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelMenuItemActionPerformed
+        // TODO add your handling code here:
+        transitionFrom = null;
+    }//GEN-LAST:event_cancelMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addControlPointMenuItem;
     private javax.swing.JMenuItem addStateMenuItem;
     private javax.swing.JMenuItem addTransitionFromMenuItem;
     private javax.swing.JMenuItem addTransitionToMenuItem;
+    private javax.swing.JMenuItem cancelMenuItem;
+    private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JPanel graphOutlinePanel;
     private javax.swing.JPopupMenu graphPopupMenu;
     private javax.swing.JTabbedPane infoTabbedPane;

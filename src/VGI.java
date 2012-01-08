@@ -9,6 +9,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
 /*
@@ -284,18 +285,21 @@ public class VGI extends javax.swing.JFrame {
         toolBar.setRollover(true);
 
         addStateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/add.png"))); // NOI18N
+        addStateButton.setEnabled(false);
         addStateButton.setFocusable(false);
         addStateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addStateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBar.add(addStateButton);
 
         addTransitionButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/arrow_right.png"))); // NOI18N
+        addTransitionButton.setEnabled(false);
         addTransitionButton.setFocusable(false);
         addTransitionButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         addTransitionButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBar.add(addTransitionButton);
 
         deleteButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/close.png"))); // NOI18N
+        deleteButton.setEnabled(false);
         deleteButton.setFocusable(false);
         deleteButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         deleteButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -306,34 +310,56 @@ public class VGI extends javax.swing.JFrame {
         fitWindowButton.setFocusable(false);
         fitWindowButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         fitWindowButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        fitWindowButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fitWindowButtonActionPerformed(evt);
+            }
+        });
         toolBar.add(fitWindowButton);
 
         zoomInButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/zoomin.png"))); // NOI18N
         zoomInButton.setFocusable(false);
         zoomInButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         zoomInButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        zoomInButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                zoomInButtonActionPerformed(evt);
+            }
+        });
         toolBar.add(zoomInButton);
 
         zoomOutButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/zoomout.png"))); // NOI18N
         zoomOutButton.setFocusable(false);
         zoomOutButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         zoomOutButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        zoomOutButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                zoomOutButtonActionPerformed(evt);
+            }
+        });
         toolBar.add(zoomOutButton);
 
         actualSizeButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/refresh.png"))); // NOI18N
         actualSizeButton.setFocusable(false);
         actualSizeButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         actualSizeButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        actualSizeButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                actualSizeButtonActionPerformed(evt);
+            }
+        });
         toolBar.add(actualSizeButton);
         toolBar.add(toolBarSeparator2);
 
         setAsInitialStateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/object_07.png"))); // NOI18N
+        setAsInitialStateButton.setEnabled(false);
         setAsInitialStateButton.setFocusable(false);
         setAsInitialStateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         setAsInitialStateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBar.add(setAsInitialStateButton);
 
         setAsFinalStateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/object_06.png"))); // NOI18N
+        setAsFinalStateButton.setEnabled(false);
         setAsFinalStateButton.setFocusable(false);
         setAsFinalStateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         setAsFinalStateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -346,7 +372,7 @@ public class VGI extends javax.swing.JFrame {
         statusLabel.setText("status:");
         mainPanel.add(statusLabel, java.awt.BorderLayout.SOUTH);
 
-        mainSplitPane.setOneTouchExpandable(true);
+        mainSplitPane.setDividerSize(20);
 
         drawPanel.setPreferredSize(new java.awt.Dimension(800, 600));
 
@@ -354,11 +380,11 @@ public class VGI extends javax.swing.JFrame {
         drawPanel.setLayout(drawPanelLayout);
         drawPanelLayout.setHorizontalGroup(
             drawPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 800, Short.MAX_VALUE)
+            .add(0, 0, Short.MAX_VALUE)
         );
         drawPanelLayout.setVerticalGroup(
             drawPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 773, Short.MAX_VALUE)
+            .add(0, 776, Short.MAX_VALUE)
         );
 
         mainSplitPane.setLeftComponent(drawPanel);
@@ -374,27 +400,28 @@ public class VGI extends javax.swing.JFrame {
                 "Type", "Value"
             }
         ));
+        infoTable1.setEnabled(false);
         tableScrollPane.setViewportView(infoTable1);
 
         org.jdesktop.layout.GroupLayout infoPanelLayout = new org.jdesktop.layout.GroupLayout(infoPanel);
         infoPanel.setLayout(infoPanelLayout);
         infoPanelLayout.setHorizontalGroup(
             infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 624, Short.MAX_VALUE)
+            .add(0, 1409, Short.MAX_VALUE)
             .add(infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(infoPanelLayout.createSequentialGroup()
                     .add(12, 12, 12)
                     .add(tableScrollPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 375, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(237, Short.MAX_VALUE)))
+                    .addContainerGap(1022, Short.MAX_VALUE)))
         );
         infoPanelLayout.setVerticalGroup(
             infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 773, Short.MAX_VALUE)
+            .add(0, 776, Short.MAX_VALUE)
             .add(infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(infoPanelLayout.createSequentialGroup()
                     .add(0, 0, 0)
                     .add(tableScrollPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 267, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(506, Short.MAX_VALUE)))
+                    .addContainerGap(509, Short.MAX_VALUE)))
         );
 
         mainSplitPane.setRightComponent(infoPanel);
@@ -617,6 +644,26 @@ public class VGI extends javax.swing.JFrame {
                 this.updateAlgorithmMenuItems();
             }
 	}//GEN-LAST:event_openMenuItemActionPerformed
+
+    private void zoomInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInButtonActionPerformed
+        // TODO add your handling code here:
+        ((DrawJgraphXPanel)drawPanel).graphComponent.zoomIn();
+    }//GEN-LAST:event_zoomInButtonActionPerformed
+
+    private void zoomOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOutButtonActionPerformed
+        // TODO add your handling code here:
+         ((DrawJgraphXPanel)drawPanel).graphComponent.zoomOut();
+    }//GEN-LAST:event_zoomOutButtonActionPerformed
+
+    private void fitWindowButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fitWindowButtonActionPerformed
+        // TODO add your handling code here:
+       ((DrawJgraphXPanel)drawPanel).graphComponent.zoomTo(1, false);
+    }//GEN-LAST:event_fitWindowButtonActionPerformed
+
+    private void actualSizeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_actualSizeButtonActionPerformed
+        // TODO add your handling code here:
+        ((DrawJgraphXPanel)drawPanel).graphComponent.zoomActual();
+    }//GEN-LAST:event_actualSizeButtonActionPerformed
 
     private void updateAlgorithmMenuItems() {
 
