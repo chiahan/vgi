@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
+import javax.swing.JDialog;
 
 /*
  * To change this template, choose Tools | Templates
@@ -211,6 +212,22 @@ public class VGI extends javax.swing.JFrame {
         }  // End public void actionPerformed(ActionEvent actionEvent)
     }  // End private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener
 
+    public void graphFitWindow(DrawJgraphXPanel panel) {
+        panel.graphComponent.zoomTo(1, false);
+    }
+    
+    public void graphZoomIn(DrawJgraphXPanel panel) {
+        panel.graphComponent.zoomIn();
+    }
+    
+    public void graphZoomOut(DrawJgraphXPanel panel) {
+        panel.graphComponent.zoomOut();
+    }
+    
+    public void graphActualSize(DrawJgraphXPanel panel) {
+        panel.graphComponent.zoomActual();
+    }
+    
     /** Creates new form VGI */
     public VGI() {
         pmVGI = this;
@@ -268,8 +285,8 @@ public class VGI extends javax.swing.JFrame {
         zoomOutMenuItem = new javax.swing.JMenuItem();
         actualSizeMenuItem = new javax.swing.JMenuItem();
         viewMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
-        displayAutomataPropertiesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        displayStatusBarCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        showPropertiesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        showStatusBarCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -479,15 +496,22 @@ public class VGI extends javax.swing.JFrame {
         deleteMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DELETE, 0));
         deleteMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/close.png"))); // NOI18N
         deleteMenuItem.setText("Delete");
+        deleteMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteMenuItemActionPerformed(evt);
+            }
+        });
         editMenu.add(deleteMenuItem);
         editMenu.add(editMenuSeparator1);
 
         setAsInitialStateMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/object_07.png"))); // NOI18N
         setAsInitialStateMenuItem.setText("Set As Initial State");
+        setAsInitialStateMenuItem.setEnabled(false);
         editMenu.add(setAsInitialStateMenuItem);
 
         setAsFinalStateMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/object_06.png"))); // NOI18N
         setAsFinalStateMenuItem.setText("Set As Final State");
+        setAsFinalStateMenuItem.setEnabled(false);
         editMenu.add(setAsFinalStateMenuItem);
 
         menuBar.add(editMenu);
@@ -497,28 +521,58 @@ public class VGI extends javax.swing.JFrame {
 
         fitWindowMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoom.png"))); // NOI18N
         fitWindowMenuItem.setText("Fit Window");
+        fitWindowMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fitWindowMenuItemActionPerformed(evt);
+            }
+        });
         viewMenu.add(fitWindowMenuItem);
 
         zoomInMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoomin.png"))); // NOI18N
         zoomInMenuItem.setText("Zoom In");
+        zoomInMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                zoomInMenuItemActionPerformed(evt);
+            }
+        });
         viewMenu.add(zoomInMenuItem);
 
         zoomOutMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoomout.png"))); // NOI18N
         zoomOutMenuItem.setText("Zoom Out");
+        zoomOutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                zoomOutMenuItemActionPerformed(evt);
+            }
+        });
         viewMenu.add(zoomOutMenuItem);
 
         actualSizeMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/refresh.png"))); // NOI18N
         actualSizeMenuItem.setText("Actual Size");
+        actualSizeMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                actualSizeMenuItemActionPerformed(evt);
+            }
+        });
         viewMenu.add(actualSizeMenuItem);
         viewMenu.add(viewMenuSeparator1);
 
-        displayAutomataPropertiesCheckBoxMenuItem.setSelected(true);
-        displayAutomataPropertiesCheckBoxMenuItem.setText("Display Automata Properties");
-        viewMenu.add(displayAutomataPropertiesCheckBoxMenuItem);
+        showPropertiesCheckBoxMenuItem.setSelected(true);
+        showPropertiesCheckBoxMenuItem.setText("Display Automata Properties");
+        showPropertiesCheckBoxMenuItem.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                showPropertiesCheckBoxMenuItemStateChanged(evt);
+            }
+        });
+        viewMenu.add(showPropertiesCheckBoxMenuItem);
 
-        displayStatusBarCheckBoxMenuItem.setSelected(true);
-        displayStatusBarCheckBoxMenuItem.setText("Display Status Bar");
-        viewMenu.add(displayStatusBarCheckBoxMenuItem);
+        showStatusBarCheckBoxMenuItem.setSelected(true);
+        showStatusBarCheckBoxMenuItem.setText("Display Status Bar");
+        showStatusBarCheckBoxMenuItem.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                showStatusBarCheckBoxMenuItemStateChanged(evt);
+            }
+        });
+        viewMenu.add(showStatusBarCheckBoxMenuItem);
 
         menuBar.add(viewMenu);
 
@@ -545,10 +599,20 @@ public class VGI extends javax.swing.JFrame {
 
         rationalExpressionSymbolsMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/question.png"))); // NOI18N
         rationalExpressionSymbolsMenuItem.setText("Rational Expression Symbols");
+        rationalExpressionSymbolsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rationalExpressionSymbolsMenuItemActionPerformed(evt);
+            }
+        });
         helpMenu.add(rationalExpressionSymbolsMenuItem);
 
         aboutMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/about.png"))); // NOI18N
         aboutMenuItem.setText("About");
+        aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aboutMenuItemActionPerformed(evt);
+            }
+        });
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
@@ -647,23 +711,67 @@ public class VGI extends javax.swing.JFrame {
 
     private void zoomInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInButtonActionPerformed
         // TODO add your handling code here:
-        ((DrawJgraphXPanel)drawPanel).graphComponent.zoomIn();
+        this.graphZoomIn((DrawJgraphXPanel)drawPanel);
     }//GEN-LAST:event_zoomInButtonActionPerformed
 
     private void zoomOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOutButtonActionPerformed
         // TODO add your handling code here:
-         ((DrawJgraphXPanel)drawPanel).graphComponent.zoomOut();
+        this.graphZoomOut((DrawJgraphXPanel)drawPanel);
     }//GEN-LAST:event_zoomOutButtonActionPerformed
 
     private void fitWindowButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fitWindowButtonActionPerformed
         // TODO add your handling code here:
-       ((DrawJgraphXPanel)drawPanel).graphComponent.zoomTo(1, false);
+       this.graphFitWindow((DrawJgraphXPanel)drawPanel);
     }//GEN-LAST:event_fitWindowButtonActionPerformed
 
     private void actualSizeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_actualSizeButtonActionPerformed
         // TODO add your handling code here:
-        ((DrawJgraphXPanel)drawPanel).graphComponent.zoomActual();
+        this.graphActualSize((DrawJgraphXPanel)drawPanel);
     }//GEN-LAST:event_actualSizeButtonActionPerformed
+
+    private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
+        // TODO add your handling code here:
+        ((DrawJgraphXPanel)drawPanel).deleteSelectedCell();
+    }//GEN-LAST:event_deleteMenuItemActionPerformed
+
+    private void fitWindowMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fitWindowMenuItemActionPerformed
+        // TODO add your handling code here:
+        this.graphFitWindow((DrawJgraphXPanel)drawPanel);
+    }//GEN-LAST:event_fitWindowMenuItemActionPerformed
+
+    private void zoomInMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInMenuItemActionPerformed
+        // TODO add your handling code here:
+        this.graphZoomIn((DrawJgraphXPanel)drawPanel);
+    }//GEN-LAST:event_zoomInMenuItemActionPerformed
+
+    private void zoomOutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOutMenuItemActionPerformed
+        // TODO add your handling code here:
+        this.graphZoomOut((DrawJgraphXPanel)drawPanel);
+    }//GEN-LAST:event_zoomOutMenuItemActionPerformed
+
+    private void actualSizeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_actualSizeMenuItemActionPerformed
+        // TODO add your handling code here:
+        this.graphActualSize((DrawJgraphXPanel)drawPanel);
+    }//GEN-LAST:event_actualSizeMenuItemActionPerformed
+
+    private void showPropertiesCheckBoxMenuItemStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_showPropertiesCheckBoxMenuItemStateChanged
+        ((DrawJgraphXPanel)drawPanel).setShowPropert(showPropertiesCheckBoxMenuItem.getState());
+    }//GEN-LAST:event_showPropertiesCheckBoxMenuItemStateChanged
+
+    private void showStatusBarCheckBoxMenuItemStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_showStatusBarCheckBoxMenuItemStateChanged
+        // TODO add your handling code here:
+        this.statusLabel.setVisible(showStatusBarCheckBoxMenuItem.getState());
+    }//GEN-LAST:event_showStatusBarCheckBoxMenuItemStateChanged
+
+    private void rationalExpressionSymbolsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rationalExpressionSymbolsMenuItemActionPerformed
+        // TODO add your handling code here:
+        JOptionPane.showMessageDialog(this,"Under Construction");
+    }//GEN-LAST:event_rationalExpressionSymbolsMenuItemActionPerformed
+
+    private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
+        // TODO add your handling code here:
+        JOptionPane.showMessageDialog(this,"Under Construction");
+    }//GEN-LAST:event_aboutMenuItemActionPerformed
 
     private void updateAlgorithmMenuItems() {
 
@@ -767,8 +875,6 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem currentSettingMenuItem;
     private javax.swing.JButton deleteButton;
     private javax.swing.JMenuItem deleteMenuItem;
-    private javax.swing.JCheckBoxMenuItem displayAutomataPropertiesCheckBoxMenuItem;
-    private javax.swing.JCheckBoxMenuItem displayStatusBarCheckBoxMenuItem;
     private javax.swing.JPanel drawPanel;
     private javax.swing.JMenu editMenu;
     private javax.swing.JPopupMenu.Separator editMenuSeparator1;
@@ -793,6 +899,8 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JButton setAsInitialStateButton;
     private javax.swing.JMenuItem setAsInitialStateMenuItem;
     private javax.swing.JMenuItem setTAFKitPathMenuItem;
+    private javax.swing.JCheckBoxMenuItem showPropertiesCheckBoxMenuItem;
+    private javax.swing.JCheckBoxMenuItem showStatusBarCheckBoxMenuItem;
     private javax.swing.JLabel statusLabel;
     private javax.swing.JScrollPane tableScrollPane;
     private javax.swing.JToolBar toolBar;

@@ -46,7 +46,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
     /** Creates new form DrawJgraphXPanel */
     public DrawJgraphXPanel(mxGraphComponent component, Automata automata) {
         initComponents();
-        
+
         graphComponent = component;
         graph = graphComponent.getGraph();
         graph.setDisconnectOnMove(false);
@@ -56,7 +56,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         this.automata = automata;
 
         cellTable = new Hashtable<Integer, mxCell>();
-        
+
         infoTabbedPane.remove(graphOutlinePanel);
         infoTabbedPane.add(graphOutline, 0);
         infoTabbedPane.setTitleAt(0, "graph outline");
@@ -67,7 +67,6 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         installRepaintListener();
         installListeners();
     }
-
     private static final long serialVersionUID = -6561623072112577140L;
     protected mxGraphComponent graphComponent;
     protected mxGraphOutline graphOutline;
@@ -79,7 +78,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
     protected mxCell transitionFrom, transitionTo;
     protected int popMouseX, popMouseY;
     protected Automata automata;
-    
+
     protected void installRepaintListener() {
         graphComponent.getGraph().addListener(mxEvent.REPAINT,
                 new mxIEventListener() {
@@ -100,11 +99,11 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                     }
                 });
     }
-    
+
     public void status(String msg) {
 //        statusBar.setText(msg);
     }
-    
+
     protected void installListeners() {
         // Installs mouse wheel listener for zooming
         MouseWheelListener wheelTracker = new MouseWheelListener() {
@@ -127,13 +126,14 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
 
         // Installs the popup menu in the graph component
         graphComponent.getGraphControl().addMouseListener(new MouseAdapter() {
+
             /**
              * 
              */
             public void mousePressed(MouseEvent e) {
                 // Handles context menu on the Mac where the trigger is on mousepressed
                 boolean selected = !graph.isSelectionEmpty();
-        
+
                 mxCell selectedCell = (mxCell) graph.getSelectionCell();
 
                 boolean edgeSelected = false;
@@ -146,31 +146,29 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                 addStateMenuItem.setVisible(!selected);
                 deleteMenuItem.setVisible(selected);
                 addControlPointMenuItem.setVisible(edgeSelected);
-                cancelMenuItem.setVisible((transitionFrom == null)?false:true);
-                
+                cancelMenuItem.setVisible((transitionFrom == null) ? false : true);
+
                 if (vertexSelected) {
                     DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
                             new state_properties(selectedCell));
-                    
+
                     addTransitionFromMenuItem.setVisible(
-                            (transitionFrom == null)?true:false);
+                            (transitionFrom == null) ? true : false);
                     addTransitionToMenuItem.setVisible(
-                            (transitionFrom == null)?false:true);
-                }
-                else {
+                            (transitionFrom == null) ? false : true);
+                } else {
                     if (edgeSelected) {
                         DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
                                 new edge_properties(selectedCell));
-                    }
-                    else {
+                    } else {
                         DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
-                            new Automata_properties());
+                                new Automata_properties());
                     }
-                    
+
                     addTransitionFromMenuItem.setVisible(false);
                     addTransitionToMenuItem.setVisible(false);
                 }
-                
+
                 if (e.isPopupTrigger()) {
                     popMouseX = e.getX();
                     popMouseY = e.getY();
@@ -178,7 +176,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                 }
                 DrawJgraphXPanel.this.validate();
             }
-            
+
             /**
              * 
              */
@@ -188,6 +186,9 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                     popMouseY = e.getY();
                     graphPopupMenu.show(graphComponent, popMouseX, popMouseY);
                 }
+
+                graph.refresh();
+                graph.repaint();
             }
         });
 
@@ -212,7 +213,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                     }
                 });
     }
-    
+
     public void addTransition(mxCell source, mxCell target) {
         Object parent = graph.getDefaultParent();
         Object e = graph.insertEdge(parent, null, "", source, target, "shape=curve");
@@ -223,20 +224,20 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
 //                automata.getState(source), 
 //                automata.getState(target)));
     }
-    
+
     protected void mouseLocationChanged(MouseEvent e) {
         status(e.getX() + ", \n" + e.getY());
     }
-    
+
     public mxGraphComponent getGraphComponent() {
         return graphComponent;
     }
-    
+
     public void addState(int x, int y) {
         Object parent = graph.getDefaultParent();
         int id = cellTable.size();
-        Object newVertex = graph.insertVertex(parent, Integer.toString(id), "", 
-                            x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
+        Object newVertex = graph.insertVertex(parent, Integer.toString(id), "",
+                x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
         cellTable.put((Integer) id, (mxCell) newVertex);
 //        automata.addState(new State((mxCell) newVertex));
 
@@ -244,8 +245,8 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
     }
 
     public void addControlPoint() {
-        addControlPoint((mxCell) graphComponent.getCellAt(popMouseX, popMouseY), 
-                                                        popMouseX, popMouseY);
+        addControlPoint((mxCell) graphComponent.getCellAt(popMouseX, popMouseY),
+                popMouseX, popMouseY);
     }
 
     public void addControlPoint(mxCell cell, int x, int y) {
@@ -256,8 +257,8 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         //to sort
         if (points.size() > 1) {
             Collections.sort(points, new CompareCtrlPoint());
-            if (cell.getSource().getGeometry().getX() > 
-                    cell.getTarget().getGeometry().getX()) {
+            if (cell.getSource().getGeometry().getX()
+                    > cell.getTarget().getGeometry().getX()) {
                 Collections.reverse(points);
             }
         }
@@ -266,20 +267,30 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         cell.getGeometry().setPoints(points);
         graphComponent.refresh();
     }
-    
+
+    public void deleteSelectedCell() {
+        mxCell selectedCell = (mxCell) graph.getSelectionCell();
+        deleteCell(selectedCell);
+    }
+
     public void deleteCell(mxCell cell) {
         if (cell != null) {
             cellTable.remove(cell);
             mxCell[] cells = {cell};
             graph.removeCells(cells);
-        }
-        else {
+        } else {
             System.out.println("Cell is empty");
         }
         graph.refresh();
     }
-    
+
+    public void setShowPropert(boolean flag) {
+        this.innerSplitPane.getTopComponent().setVisible(flag);
+        this.innerSplitPane.resetToPreferredSizes();
+    }
+
     public class CompareCtrlPoint implements Comparator {
+
         @Override
         public int compare(Object t, Object t1) {
             Integer tX = (int) ((mxPoint) t).getX();
@@ -296,7 +307,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
 
         }
     }
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -380,6 +391,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
 
         innerSplitPane.setDividerLocation(300);
         innerSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        innerSplitPane.setResizeWeight(0.5);
 
         libPanel.setPreferredSize(new java.awt.Dimension(300, 300));
 
@@ -445,7 +457,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         Object cell = graphComponent.getCellAt(popMouseX, popMouseY);
         if (cell != null) {
             if (((mxCell) cell).isVertex()) {
-                transitionFrom = (mxCell)cell;
+                transitionFrom = (mxCell) cell;
             }
         }
     }//GEN-LAST:event_addTransitionFromMenuItemActionPerformed
@@ -474,15 +486,13 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
 
     private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
         // TODO add your handling code here:
-        mxCell selectedCell = (mxCell) graph.getSelectionCell();
-        deleteCell(selectedCell);
+        deleteSelectedCell();
     }//GEN-LAST:event_deleteMenuItemActionPerformed
 
     private void cancelMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelMenuItemActionPerformed
         // TODO add your handling code here:
         transitionFrom = null;
     }//GEN-LAST:event_cancelMenuItemActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addControlPointMenuItem;
     private javax.swing.JMenuItem addStateMenuItem;
