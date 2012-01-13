@@ -5,24 +5,23 @@
 
     
 import com.mxgraph.model.mxCell;
-import java.awt.BorderLayout;
 
-import javax.swing.JFrame;
+import com.mxgraph.view.mxGraph;
 /**
  *
  * @author bl606
  */
 public class Property_show {
     
-    public javax.swing.JPanel show(mxCell cell){
+    public javax.swing.JPanel show(mxGraph graph ,mxCell cell){
     
     if(cell.isVertex()){
-        state_properties state = new state_properties(cell);
+        state_properties state = new state_properties(graph, cell);
         return state;
     }    
     else if(cell.isEdge()){
         
-        edge_properties edge = new edge_properties(cell);
+        edge_properties edge = new edge_properties(graph,cell);
         return edge;
     }
     else if( (!(cell.isEdge())&&(!(cell.isVertex())) )){

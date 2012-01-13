@@ -150,7 +150,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
 
                 if (vertexSelected) {
                     DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
-                            new state_properties(selectedCell));
+                            new state_properties(graph, selectedCell));
 
                     addTransitionFromMenuItem.setVisible(
                             (transitionFrom == null) ? true : false);
@@ -159,7 +159,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                 } else {
                     if (edgeSelected) {
                         DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
-                                new edge_properties(selectedCell));
+                                new edge_properties(graph, selectedCell));
                     } else {
                         DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
                                 new Automata_properties());

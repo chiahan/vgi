@@ -1,5 +1,6 @@
-
 import com.mxgraph.model.mxCell;
+import com.mxgraph.view.mxGraph;
+import javax.swing.JComboBox;
 
 /*
  * To change this template, choose Tools | Templates
@@ -18,7 +19,10 @@ import com.mxgraph.model.mxCell;
 public class edge_properties extends javax.swing.JPanel {
 
     /** Creates new form edge_properties */
-    public edge_properties(mxCell cell) {
+    public edge_properties(mxGraph graph, mxCell cell) {
+        
+        _graph=graph;
+        _cell=cell;
         initComponents();
     }
 
@@ -31,24 +35,51 @@ public class edge_properties extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        label_label = new javax.swing.JLabel();
+        weight_label = new javax.swing.JLabel();
+        Label_TextField1 = new javax.swing.JTextField();
+        Weight_TextField2 = new javax.swing.JTextField();
+        style_label = new javax.swing.JLabel();
+        Style_ComboBox = new javax.swing.JComboBox();
+        style_label1 = new javax.swing.JLabel();
+        End_StyleComboBox = new javax.swing.JComboBox();
 
-        jLabel1.setText("Label :");
+        jLabel3.setText("jLabel3");
 
-        jLabel2.setText("Weight :");
+        setPreferredSize(new java.awt.Dimension(325, 362));
 
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        label_label.setText("Label :");
+
+        weight_label.setText("Weight :");
+
+        Label_TextField1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                Label_TextField1ActionPerformed(evt);
             }
         });
 
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+        Weight_TextField2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
+                Weight_TextField2ActionPerformed(evt);
+            }
+        });
+
+        style_label.setText("Start_Style :");
+
+        Style_ComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "classic", "block", "open", "oval", "diamond" }));
+        Style_ComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Style_ComboBoxActionPerformed(evt);
+            }
+        });
+
+        style_label1.setText("End_Style :");
+
+        End_StyleComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "classic", "block", "open", "oval", "diamond" }));
+        End_StyleComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                End_StyleComboBoxActionPerformed(evt);
             }
         });
 
@@ -57,47 +88,87 @@ public class edge_properties extends javax.swing.JPanel {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(36, 36, 36)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel1))
-                .addGap(4, 4, 4)
+                    .addComponent(style_label1)
+                    .addComponent(label_label)
+                    .addComponent(style_label)
+                    .addComponent(weight_label))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE))
+                    .addComponent(Weight_TextField2, javax.swing.GroupLayout.DEFAULT_SIZE, 189, Short.MAX_VALUE)
+                    .addComponent(Label_TextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 189, Short.MAX_VALUE)
+                    .addComponent(Style_ComboBox, 0, 189, Short.MAX_VALUE)
+                    .addComponent(End_StyleComboBox, 0, 189, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(44, 44, 44)
+                .addGap(54, 54, 54)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                    .addComponent(label_label)
+                    .addComponent(Label_TextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(38, 38, 38)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(109, Short.MAX_VALUE))
+                    .addComponent(Weight_TextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(weight_label))
+                .addGap(43, 43, 43)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(style_label)
+                    .addComponent(Style_ComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(31, 31, 31)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(style_label1)
+                    .addComponent(End_StyleComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(84, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+private void Label_TextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Label_TextField1ActionPerformed
 // TODO add your handling code here:
-    Label = (String)jTextField1.getText();
-}//GEN-LAST:event_jTextField1ActionPerformed
+    Label = (String)Label_TextField1.getText();
+}//GEN-LAST:event_Label_TextField1ActionPerformed
 
-private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
+private void Weight_TextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Weight_TextField2ActionPerformed
 // TODO add your handling code here:
-    Weight = (String)jTextField2.getText();
-}//GEN-LAST:event_jTextField2ActionPerformed
+    Weight = (String)Weight_TextField2.getText();
+}//GEN-LAST:event_Weight_TextField2ActionPerformed
+
+private void Style_ComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Style_ComboBoxActionPerformed
+// TODO add your handling code here:
+    JComboBox cb = (JComboBox)evt.getSource();
+    Style = "startArrow=" + ((String)cb.getSelectedItem()).toLowerCase();
+    Object[] objects = new Object[1];
+    objects[0]=_cell;
+    _graph.setCellStyle(Style, objects );
+    
+}//GEN-LAST:event_Style_ComboBoxActionPerformed
+
+private void End_StyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_End_StyleComboBoxActionPerformed
+// TODO add your handling code here:
+    JComboBox cb = (JComboBox)evt.getSource();
+    Style = "endArrow=" + ((String)cb.getSelectedItem()).toLowerCase();
+    Object[] objects = new Object[1];
+    objects[0]=_cell;
+    _graph.setCellStyle(Style, objects );
+}//GEN-LAST:event_End_StyleComboBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JComboBox End_StyleComboBox;
+    private javax.swing.JTextField Label_TextField1;
+    private javax.swing.JComboBox Style_ComboBox;
+    private javax.swing.JTextField Weight_TextField2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel label_label;
+    private javax.swing.JLabel style_label;
+    private javax.swing.JLabel style_label1;
+    private javax.swing.JLabel weight_label;
     // End of variables declaration//GEN-END:variables
     private String Label;
     private String Weight;
+    
+    private String Style;
+    private mxCell _cell;
+    private mxGraph _graph;
 }
