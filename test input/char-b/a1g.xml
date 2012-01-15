@@ -1,0 +1,75 @@
+
+<fsmxml xmlns="http://vaucanson.lrde.epita.fr" version="1.0">
+
+  <automaton>
+    <valueType>
+      <writingData closePar=")" openPar="(" plusSym="+" spacesSym=" " starSym="*" timesSym="." weightClosing="}" weightOpening="{" zeroSym="0"/>
+      <semiring operations="classical" set="B" type="numerical"/>
+      <monoid genDescrip="enum" genKind="simple" genSort="letters" type="free">
+        <writingData identitySym="1"/>
+        <monGen value="a"/>
+        <monGen value="b"/>
+      </monoid>
+    </valueType>
+    <automatonStruct>
+      <states>
+        <state id="s0">
+                    <geometricData x="63.3974609375" y="200.0"/>
+                </state>
+        <state id="s1">
+                    <geometricData x="236.6025390625" y="200.0"/>
+                </state>
+        <state id="s2">
+                    <geometricData x="150.0" y="50.0"/>
+                </state>
+      </states>
+      <transitions>
+        <transition source="s0" target="s0">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s0" target="s0">
+          <label>
+            <monElmt>
+              <monGen value="b"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s0" target="s1">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s1" target="s2">
+          <label>
+            <monElmt>
+              <monGen value="b"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s2" target="s2">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s2" target="s2">
+          <label>
+            <monElmt>
+              <monGen value="b"/>
+            </monElmt>
+          </label>
+        </transition>
+        <initial state="s0"/>
+        <final state="s2"/>
+      </transitions>
+    </automatonStruct>
+  </automaton>
+
+</fsmxml>

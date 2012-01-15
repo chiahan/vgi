@@ -1262,56 +1262,92 @@ public class FsmXml implements FsmXmlInterface {
 
 	}  // End private void writeInitialFinalTags(XMLStreamWriter xmlStreamWriter, Automata automata)
 
-	private static void testFsmXmlFile(String fileToRead, String fileToWrite)
+	private static void testFsmXmlFile(String filePathToRead, String filePathToWrite)
 			throws
 			FileNotFoundException,
+			IOException,
 			FsmXmlException {
 		FsmXml fsmXml = new FsmXml();
-		File file = new File(fileToRead);
+		File file = new File(filePathToRead);
 		System.out.println("Reading " + file.getAbsolutePath());
 		List<Automata> automataList = fsmXml.read(file);
 		fsmXml.write(automataList, System.out);
-		if (fileToWrite != null) {
-			file = new File(fileToWrite);
-//			fsmXml.write(automataList, file);
+		if (filePathToWrite != null) {
+			file = new File(filePathToWrite);
+			if (!(file.exists())) {
+				file.getParentFile().mkdirs();
+				file.createNewFile();
+			}
+			fsmXml.write(automataList, file);
 		}
-	}  // End private void testOneFile(String fileToRead, String fileToWrite)
+	}  // End private static void testFsmXmlFile(String filePathToRead, String filePathToWrite)
 
 	public static void main(String args[]) {
-		String automataRepositoryPath = "../../vaucanson-1.4a/data/automata/";
+		String testInputFolderPath = "./test input/";
+		String testOutputFolderPath = "./test output/";
 		try {
-//			testFsmXmlFile("../Vaucanson/2011 NSC ANR Collaboration Report/4_state_NFA.xml", null);
-			testFsmXmlFile(automataRepositoryPath + "char-b/a1.xml", automataRepositoryPath + "char-b/a1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-b/b1.xml", automataRepositoryPath + "char-b/b1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-b/div3base2.xml", automataRepositoryPath + "char-b/div3base2w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-b/double-3-1.xml", automataRepositoryPath + "char-b/double-3-1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-b/evena.xml", automataRepositoryPath + "char-b/evenaw.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-b/ladybird-6.xml", automataRepositoryPath + "char-b/ladybird-6w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-b/oddb.xml", automataRepositoryPath + "char-b/oddbw.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-char-b/ex-pair1.xml", automataRepositoryPath + "char-char-b/ex-pair1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-f2/ring-7-0-2-3.xml", automataRepositoryPath + "char-f2/ring-7-0-2-3w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-fmp-b/fibred_left.xml", automataRepositoryPath + "char-fmp-b/fibred_leftw.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-fmp-b/fibred_right.xml", automataRepositoryPath + "char-fmp-b/fibred_rightw.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-fmp-b/quot3base2.xml", automataRepositoryPath + "char-fmp-b/quot3base2w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-fmp-b/t1.xml", automataRepositoryPath + "char-fmp-b/t1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-fmp-b/u1.xml", automataRepositoryPath + "char-fmp-b/u1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-fmp-z/t1.xml", automataRepositoryPath + "char-fmp-z/t1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-fmp-z/u1.xml", automataRepositoryPath + "char-fmp-z/u1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-q/b1.xml", automataRepositoryPath + "char-q/b1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-q/c1.xml", automataRepositoryPath + "char-q/c1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-q/d1.xml", automataRepositoryPath + "char-q/d1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-r/b1.xml", automataRepositoryPath + "char-r/b1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-r/c1.xml", automataRepositoryPath + "char-r/c1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-r/d1.xml", automataRepositoryPath + "char-r/d1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-z/b1.xml", automataRepositoryPath + "char-z/b1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-z/c1.xml", automataRepositoryPath + "char-z/c1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-z/d1.xml", automataRepositoryPath + "char-z/d1w.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-zmax/maxab.xml", automataRepositoryPath + "char-zmax/maxabw.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-zmax/maxblocka.xml", automataRepositoryPath + "char-zmax/maxblockaw.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-zmin/minab.xml", automataRepositoryPath + "char-zmin/minabw.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-zmin/minblocka.xml", automataRepositoryPath + "char-zmin/minblockaw.xml");
-			testFsmXmlFile(automataRepositoryPath + "char-zmin/slowgrow.xml", automataRepositoryPath + "char-zmin/slowgroww.xml");
-			testFsmXmlFile(automataRepositoryPath + "int-b/coins.xml", automataRepositoryPath + "int-b/coinsw.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/a1.xml", testOutputFolderPath + "char-b/a1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/a1g.xml", testOutputFolderPath + "char-b/a1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/b1.xml", testOutputFolderPath + "char-b/b1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/b1g.xml", testOutputFolderPath + "char-b/b1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/div3base2.xml", testOutputFolderPath + "char-b/div3base2.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/div3base2g.xml", testOutputFolderPath + "char-b/div3base2g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/double-3-1.xml", testOutputFolderPath + "char-b/double-3-1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/double-3-1g.xml", testOutputFolderPath + "char-b/double-3-1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/evena.xml", testOutputFolderPath + "char-b/evena.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/evenag.xml", testOutputFolderPath + "char-b/evenag.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/ladybird-6.xml", testOutputFolderPath + "char-b/ladybird-6.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/ladybird-6g.xml", testOutputFolderPath + "char-b/ladybird-6g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/oddb.xml", testOutputFolderPath + "char-b/oddb.xml");
+			testFsmXmlFile(testInputFolderPath + "char-b/oddbg.xml", testOutputFolderPath + "char-b/oddbg.xml");
+			testFsmXmlFile(testInputFolderPath + "char-char-b/ex-pair1.xml", testOutputFolderPath + "char-char-b/ex-pair1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-char-b/ex-pair1g.xml", testOutputFolderPath + "char-char-b/ex-pair1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-f2/ring-7-0-2-3.xml", testOutputFolderPath + "char-f2/ring-7-0-2-3.xml");
+			testFsmXmlFile(testInputFolderPath + "char-f2/ring-7-0-2-3g.xml", testOutputFolderPath + "char-f2/ring-7-0-2-3g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-b/fibred_left.xml", testOutputFolderPath + "char-fmp-b/fibred_left.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-b/fibred_leftg.xml", testOutputFolderPath + "char-fmp-b/fibred_leftg.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-b/fibred_right.xml", testOutputFolderPath + "char-fmp-b/fibred_right.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-b/fibred_rightg.xml", testOutputFolderPath + "char-fmp-b/fibred_rightg.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-b/quot3base2.xml", testOutputFolderPath + "char-fmp-b/quot3base2.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-b/quot3base2g.xml", testOutputFolderPath + "char-fmp-b/quot3base2g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-b/t1.xml", testOutputFolderPath + "char-fmp-b/t1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-b/t1g.xml", testOutputFolderPath + "char-fmp-b/t1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-b/u1.xml", testOutputFolderPath + "char-fmp-b/u1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-b/u1g.xml", testOutputFolderPath + "char-fmp-b/u1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-z/t1.xml", testOutputFolderPath + "char-fmp-z/t1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-z/t1g.xml", testOutputFolderPath + "char-fmp-z/t1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-z/u1.xml", testOutputFolderPath + "char-fmp-z/u1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-fmp-z/u1g.xml", testOutputFolderPath + "char-fmp-z/u1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-q/b1.xml", testOutputFolderPath + "char-q/b1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-q/b1g.xml", testOutputFolderPath + "char-q/b1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-q/c1.xml", testOutputFolderPath + "char-q/c1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-q/c1g.xml", testOutputFolderPath + "char-q/c1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-q/d1.xml", testOutputFolderPath + "char-q/d1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-q/d1g.xml", testOutputFolderPath + "char-q/d1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-r/b1.xml", testOutputFolderPath + "char-r/b1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-r/b1g.xml", testOutputFolderPath + "char-r/b1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-r/c1.xml", testOutputFolderPath + "char-r/c1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-r/c1g.xml", testOutputFolderPath + "char-r/c1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-r/d1.xml", testOutputFolderPath + "char-r/d1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-r/d1g.xml", testOutputFolderPath + "char-r/d1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-z/b1.xml", testOutputFolderPath + "char-z/b1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-z/b1g.xml", testOutputFolderPath + "char-z/b1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-z/c1.xml", testOutputFolderPath + "char-z/c1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-z/c1g.xml", testOutputFolderPath + "char-z/c1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-z/d1.xml", testOutputFolderPath + "char-z/d1.xml");
+			testFsmXmlFile(testInputFolderPath + "char-z/d1g.xml", testOutputFolderPath + "char-z/d1g.xml");
+			testFsmXmlFile(testInputFolderPath + "char-zmax/maxab.xml", testOutputFolderPath + "char-zmax/maxab.xml");
+			testFsmXmlFile(testInputFolderPath + "char-zmax/maxabg.xml", testOutputFolderPath + "char-zmax/maxabg.xml");
+			testFsmXmlFile(testInputFolderPath + "char-zmax/maxblocka.xml", testOutputFolderPath + "char-zmax/maxblocka.xml");
+			testFsmXmlFile(testInputFolderPath + "char-zmax/maxblockag.xml", testOutputFolderPath + "char-zmax/maxblockag.xml");
+			testFsmXmlFile(testInputFolderPath + "char-zmin/minab.xml", testOutputFolderPath + "char-zmin/minab.xml");
+			testFsmXmlFile(testInputFolderPath + "char-zmin/minabg.xml", testOutputFolderPath + "char-zmin/minabg.xml");
+			testFsmXmlFile(testInputFolderPath + "char-zmin/minblocka.xml", testOutputFolderPath + "char-zmin/minblocka.xml");
+			testFsmXmlFile(testInputFolderPath + "char-zmin/minblockag.xml", testOutputFolderPath + "char-zmin/minblockag.xml");
+			testFsmXmlFile(testInputFolderPath + "char-zmin/slowgrow.xml", testOutputFolderPath + "char-zmin/slowgrow.xml");
+			testFsmXmlFile(testInputFolderPath + "char-zmin/slowgrowg.xml", testOutputFolderPath + "char-zmin/slowgrowg.xml");
+			testFsmXmlFile(testInputFolderPath + "int-b/coins.xml", testOutputFolderPath + "int-b/coins.xml");
+			testFsmXmlFile(testInputFolderPath + "int-b/coinsg.xml", testOutputFolderPath + "int-b/coinsg.xml");
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}
