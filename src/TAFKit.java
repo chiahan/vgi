@@ -10,7 +10,6 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 /**
  *
@@ -26,10 +25,12 @@ public class TAFKit implements TAFKitInterface {
 		this.setTafKitPath(tafKitPath);
 	}  // End public TAFKit(String tafKitFolderPathStr)
 
+	@Override
 	public File getTafKitPath() {
 		return pmTafKitPath;
 	}  // End public File getTafKitPath()
 
+	@Override
 	public void setTafKitPath(
 			File tafKitFolderPath)
 			throws
@@ -62,6 +63,7 @@ public class TAFKit implements TAFKitInterface {
 
 	}  // End public void setTafKitPath(...)
 
+	@Override
 	public List<VcsnAlgorithm> listVcsnAlgorithms(
 			AutomataType automataType)
 			throws
@@ -74,10 +76,15 @@ public class TAFKit implements TAFKitInterface {
 		}
 
 		Process process;
+		InputStream inputStream;
+		String string;
 		int exitValue;
 		try {
 			process = Runtime.getRuntime().exec("./" + tafKitExecutableFileName + " --list-all-commands-json",
 					null, pmTafKitPath);
+			inputStream = process.getInputStream();
+			string = convertInputStreamToString(inputStream);
+			inputStream.close();
 			exitValue = process.waitFor();
 		} catch (IOException ioException) {
 			throw new Error(ioException);
@@ -85,18 +92,10 @@ public class TAFKit implements TAFKitInterface {
 			throw new Error(interruptedException);
 		}
 
-
 		switch (exitValue) {
 			case 0:
 				break;
 			default:
-				InputStream inputStream = process.getInputStream();
-				String string = convertInputStreamToString(inputStream);
-				try {
-					inputStream.close();
-				} catch (IOException ioException) {
-					throw new Error(ioException);
-				}
 				inputStream = process.getErrorStream();
 				string = string + convertInputStreamToString(inputStream);
 				TAFKitException tafKitException = new TAFKitException(string);
@@ -110,7 +109,7 @@ public class TAFKit implements TAFKitInterface {
 
 		JSONArray jaCategories;
 		try {
-			jaCategories = new JSONArray(new JSONTokener(process.getInputStream()));
+			jaCategories = new JSONArray(string);
 		} catch (JSONException jsonException) {
 			throw new TAFKitException("Output format of --list-all-commands-json probably changed.", jsonException);
 		}
@@ -124,7 +123,7 @@ public class TAFKit implements TAFKitInterface {
 				throw new TAFKitException("Output format of --list-all-commands-json probably changed.");
 			}
 
-			String string = joCategory.optString("category", null);
+			string = joCategory.optString("category", null);
 			if (string == null) {
 				throw new TAFKitException("Output format of --list-all-commands-json probably changed.");
 			}
@@ -248,6 +247,7 @@ public class TAFKit implements TAFKitInterface {
 
 	}	// End public List<VcsnAlgorithm> listVcsnAlgorithms(...)
 
+	@Override
 	public List<Object> runVcsnAlgorithm(
 			AutomataType automataType,
 			VcsnAlgorithm algorithm,
@@ -351,9 +351,14 @@ public class TAFKit implements TAFKitInterface {
 		}  // End for (int index = 0; index < inputs.size(); index++)
 
 		Process process;
+		InputStream inputStream;
+		String string;
 		int exitValue;
 		try {
 			process = Runtime.getRuntime().exec(commandStr, null, pmTafKitPath);
+			inputStream = process.getInputStream();
+			string = convertInputStreamToString(inputStream);
+			inputStream.close();
 			exitValue = process.waitFor();
 		} catch (IOException ioException) {
 			throw new Error(ioException);
@@ -375,13 +380,6 @@ public class TAFKit implements TAFKitInterface {
 				if (AtLeastOneOutputIsBoolean) {
 					break;  // Leave switch block
 				}
-				InputStream inputStream = process.getInputStream();
-				String string = convertInputStreamToString(inputStream);
-				try {
-					inputStream.close();
-				} catch (IOException ioException) {
-					throw new Error(ioException);
-				}
 				inputStream = process.getErrorStream();
 				string = string + convertInputStreamToString(inputStream);
 				TAFKitException tafKitException = new TAFKitException(string);
@@ -393,7 +391,6 @@ public class TAFKit implements TAFKitInterface {
 				throw tafKitException;
 		}  // End switch (exitValue)
 
-		InputStream stream = process.getInputStream();
 		ArrayList<Object> outputs = new ArrayList<Object>();
 
 		for (int index = 0; index < algorithm.outputsInfo.size(); index++) {
@@ -407,9 +404,9 @@ public class TAFKit implements TAFKitInterface {
 
 				case BOOLEAN:
 					if (exitValue == 0) {
-						outputs.add(new Boolean(true));
+						outputs.add(true);
 					} else {
-						outputs.add(new Boolean(false));
+						outputs.add(false);
 					}
 					break;
 
@@ -417,12 +414,10 @@ public class TAFKit implements TAFKitInterface {
 					throw new TAFKitException("The " + (index + 1) + "th output is an integer, but no output should be an integer.");
 
 				case REGULAR_EXPRESSION:
-					String string = this.convertInputStreamToString(stream);
 					outputs.add(string);
 					break;
 
 				case TEXT:
-					string = this.convertInputStreamToString(stream);
 					outputs.add(string);
 					break;
 
@@ -430,7 +425,6 @@ public class TAFKit implements TAFKitInterface {
 					throw new UnsupportedOperationException("The " + (index + 1) + "th output should be a weight, but VGI does not support weight outputs yet!");
 
 				case WORD:
-					string = this.convertInputStreamToString(stream);
 					outputs.add(string);
 					break;
 
@@ -440,12 +434,6 @@ public class TAFKit implements TAFKitInterface {
 			}  // End switch (algorithm.outputsInfo.get(index).type)
 
 		}  // End for (int index = 0; index < algorithm.outputsInfo.size(); index++)
-
-		try {
-			stream.close();
-		} catch (IOException ioException) {
-			throw new Error(ioException);
-		}
 
 		return outputs;
 
@@ -626,87 +614,87 @@ public class TAFKit implements TAFKitInterface {
 		}  // End for (int index = 0; index < algorithmToRun.outputsInfo.size(); index++)
 
 		try {
-//			automataType = new AutomataType(  // vcsn-char-char-b
-//					AutomataType.Semiring.B_BOOLEAN,
-//					AutomataType.AlphabetDataType.CHAR_CHAR,
-//					null);
-//			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-char-char-z
+			automataType = new AutomataType( // vcsn-char-char-b
+					AutomataType.Semiring.B_BOOLEAN,
+					AutomataType.AlphabetDataType.CHAR_CHAR,
+					null);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType( // vcsn-char-char-z
 					AutomataType.Semiring.Z_INTEGER,
 					AutomataType.AlphabetDataType.CHAR_CHAR,
 					null);
 			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-char-f2
+			automataType = new AutomataType( // vcsn-char-f2
 					AutomataType.Semiring.F2_TWO_ELEMENT_FIELD,
 					AutomataType.AlphabetDataType.CHAR,
 					null);
 			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-char-fmp-b
+			automataType = new AutomataType( // vcsn-char-fmp-b
 					AutomataType.Semiring.B_BOOLEAN,
 					AutomataType.AlphabetDataType.CHAR,
 					AutomataType.AlphabetDataType.CHAR);
 			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-char-fmp-z
+			automataType = new AutomataType( // vcsn-char-fmp-z
 					AutomataType.Semiring.Z_INTEGER,
 					AutomataType.AlphabetDataType.CHAR,
 					AutomataType.AlphabetDataType.CHAR);
 			tafKit.listVcsnAlgorithms(automataType);
-//			automataType = new AutomataType(  // vcsn-char-int-b
-//					AutomataType.Semiring.B_BOOLEAN,
-//					AutomataType.AlphabetDataType.CHAR_INT,
-//					null);
-//			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-char-q
+			automataType = new AutomataType( // vcsn-char-int-b
+					AutomataType.Semiring.B_BOOLEAN,
+					AutomataType.AlphabetDataType.CHAR_INT,
+					null);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType( // vcsn-char-q
 					AutomataType.Semiring.Q_RATIONAL,
 					AutomataType.AlphabetDataType.CHAR,
 					null);
 			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-char-r
+			automataType = new AutomataType( // vcsn-char-r
 					AutomataType.Semiring.R_REAL,
 					AutomataType.AlphabetDataType.CHAR,
 					null);
 			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-char-z
+			automataType = new AutomataType( // vcsn-char-z
 					AutomataType.Semiring.Z_INTEGER,
 					AutomataType.AlphabetDataType.CHAR,
 					null);
 			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-char-zmax
+			automataType = new AutomataType( // vcsn-char-zmax
 					AutomataType.Semiring.ZMAX_MAX_TROPICAL,
 					AutomataType.AlphabetDataType.CHAR,
 					null);
 			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-char-zmin
+			automataType = new AutomataType( // vcsn-char-zmin
 					AutomataType.Semiring.ZMIN_MIN_TROPICAL,
 					AutomataType.AlphabetDataType.CHAR,
 					null);
 			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-int-b
+			automataType = new AutomataType( // vcsn-int-b
 					AutomataType.Semiring.B_BOOLEAN,
 					AutomataType.AlphabetDataType.INT,
 					null);
 			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-int-fmp-b
+			automataType = new AutomataType( // vcsn-int-fmp-b
 					AutomataType.Semiring.B_BOOLEAN,
 					AutomataType.AlphabetDataType.INT,
 					AutomataType.AlphabetDataType.INT);
 			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-int-fmp-z
+			automataType = new AutomataType( // vcsn-int-fmp-z
 					AutomataType.Semiring.Z_INTEGER,
 					AutomataType.AlphabetDataType.INT,
 					AutomataType.AlphabetDataType.INT);
 			tafKit.listVcsnAlgorithms(automataType);
-//			automataType = new AutomataType(  // vcsn-int-int-b
-//					AutomataType.Semiring.B_BOOLEAN,
-//					AutomataType.AlphabetDataType.INT_INT,
-//					null);
-//			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-int-int-z
+			automataType = new AutomataType( // vcsn-int-int-b
+					AutomataType.Semiring.B_BOOLEAN,
+					AutomataType.AlphabetDataType.INT_INT,
+					null);
+			tafKit.listVcsnAlgorithms(automataType);
+			automataType = new AutomataType( // vcsn-int-int-z
 					AutomataType.Semiring.Z_INTEGER,
 					AutomataType.AlphabetDataType.INT_INT,
 					null);
 			tafKit.listVcsnAlgorithms(automataType);
-			automataType = new AutomataType(  // vcsn-int-z
+			automataType = new AutomataType( // vcsn-int-z
 					AutomataType.Semiring.Z_INTEGER,
 					AutomataType.AlphabetDataType.INT,
 					null);
