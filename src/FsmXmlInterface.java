@@ -1,6 +1,7 @@
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -57,11 +58,10 @@ public interface FsmXmlInterface {
 
 	public void write(List<Automata> automataList, File fsmXmlFile)
 			throws
-			FileNotFoundException,
+			IOException,
 			FsmXmlException;
 
 	public void write(List<Automata> automataList, OutputStream outputStream)
 			throws
-			FileNotFoundException,
 			FsmXmlException;
 }  // End public interface FsmXmlInterface

@@ -868,8 +868,12 @@ public class FsmXml implements FsmXmlInterface {
 	@Override
 	public void write(List<Automata> automataList, File fsmXmlFile)
 			throws
-			FileNotFoundException,
+			IOException,
 			FsmXmlException {
+		if (!(fsmXmlFile.exists())) {
+			fsmXmlFile.getParentFile().mkdirs();
+			fsmXmlFile.createNewFile();
+		}
 		OutputStream outputStream = new FileOutputStream(fsmXmlFile);
 		this.write(automataList, outputStream);
 	}  // End public void write(List<Automata> automataList, File fsmXmlFile)
@@ -877,7 +881,6 @@ public class FsmXml implements FsmXmlInterface {
 	@Override
 	public void write(List<Automata> automataList, OutputStream outputStream)
 			throws
-			FileNotFoundException,
 			FsmXmlException {
 
 		XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
@@ -904,7 +907,7 @@ public class FsmXml implements FsmXmlInterface {
 				xmlStreamWriter.writeEndElement();  // TAG_AUTOMATON
 			}  // End while (automataIterator.hasNext())
 
-			xmlStreamWriter.writeEndElement();
+			xmlStreamWriter.writeEndElement();  // TAG_FSMXML
 			xmlStreamWriter.writeEndDocument();
 			xmlStreamWriter.flush();
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -912,10 +915,17 @@ public class FsmXml implements FsmXmlInterface {
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+//			transformer.setOutputProperty("{http://xml.apache.org/xalan}line-separator", "\n");
+//			No idea why {http://xml.apache.org/xalan}line-separator does not work
+//			so the horrible line.separator work around is used in order to specify
+//			Unix line endings in the resulting XML file.
 			byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 			Source source = new StreamSource(byteArrayInputStream);
 			Result result = new StreamResult(outputStream);
+			String originalLineSeparator = System.getProperty("line.separator");
+			System.setProperty("line.separator", "\n");
 			transformer.transform(source, result);
+			System.setProperty("line.separator", originalLineSeparator);
 		} catch (XMLStreamException xmlStreamException) {
 			throw new FsmXmlException(xmlStreamException);
 		} catch (TransformerConfigurationException transformerConfigurationException) {
@@ -1264,7 +1274,6 @@ public class FsmXml implements FsmXmlInterface {
 
 	private static void testFsmXmlFile(String filePathToRead, String filePathToWrite)
 			throws
-			FileNotFoundException,
 			IOException,
 			FsmXmlException {
 		FsmXml fsmXml = new FsmXml();
@@ -1274,10 +1283,6 @@ public class FsmXml implements FsmXmlInterface {
 		fsmXml.write(automataList, System.out);
 		if (filePathToWrite != null) {
 			file = new File(filePathToWrite);
-			if (!(file.exists())) {
-				file.getParentFile().mkdirs();
-				file.createNewFile();
-			}
 			fsmXml.write(automataList, file);
 		}
 	}  // End private static void testFsmXmlFile(String filePathToRead, String filePathToWrite)
