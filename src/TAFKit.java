@@ -274,7 +274,10 @@ public class TAFKit implements TAFKitInterface {
 			throw new IllegalArgumentException("The VcsnAlgorithm algorithm argument is invalid.");
 		}
 
-		String commandStr = "./" + tafKitExecutableFileName + " -v " + algorithm.name;
+		List<String> commandTokens = new ArrayList<String>();
+		commandTokens.add("./" + tafKitExecutableFileName);
+		commandTokens.add("-v");
+		commandTokens.add(algorithm.name);
 
 		for (int index = 0; index < inputs.size(); index++) {
 
@@ -285,17 +288,12 @@ public class TAFKit implements TAFKitInterface {
 					if (object instanceof Automata) {
 						// TODO:  Prepare temporary XML file and append the file name to command.
 					} else if (object instanceof File) {
-						String string = ((File) object).getAbsolutePath();
-						if (!(string.toLowerCase().endsWith(".xml"))) {
-							throw new IllegalArgumentException("The " + (index + 1) + "th argument should be an XML file representing an automaton, but it is not!");
-						}
-						commandStr = commandStr + " " + string;
+						File file = (File) object;
+						String string = file.getAbsolutePath();
+						commandTokens.add(string);
 					} else if (object instanceof String) {
 						String string = (String) object;
-						if (!(string.toLowerCase().endsWith(".xml"))) {
-							throw new IllegalArgumentException("The " + (index + 1) + "th argument should be an XML file representing an automaton, but it is not!");
-						}
-						commandStr = commandStr + " " + string;
+						commandTokens.add(string);
 					} else {
 						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be an automaton, but it is not!");
 					}
@@ -307,7 +305,7 @@ public class TAFKit implements TAFKitInterface {
 				case INTEGER:
 					if (object instanceof Integer) {
 						Integer integer = (Integer) object;
-						commandStr = commandStr + " " + integer.toString();
+						commandTokens.add(integer.toString());
 					} else {
 						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be an integer, but it is not!");
 					}
@@ -316,7 +314,7 @@ public class TAFKit implements TAFKitInterface {
 				case REGULAR_EXPRESSION:
 					if (object instanceof String) {
 						String string = (String) object;
-						commandStr = commandStr + " " + string;
+						commandTokens.add(string);
 					} else {
 						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be a regular expression, but it is not!");
 					}
@@ -325,7 +323,7 @@ public class TAFKit implements TAFKitInterface {
 				case TEXT:
 					if (object instanceof String) {
 						String string = (String) object;
-						commandStr = commandStr + " " + string;
+						commandTokens.add(string);
 					} else {
 						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be text, but it is not!");
 					}
@@ -337,7 +335,7 @@ public class TAFKit implements TAFKitInterface {
 				case WORD:
 					if (object instanceof String) {
 						String string = (String) object;
-						commandStr = commandStr + " " + string;
+						commandTokens.add(string);
 					} else {
 						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be a word, but it is not!");
 					}
@@ -355,7 +353,9 @@ public class TAFKit implements TAFKitInterface {
 		String string;
 		int exitValue;
 		try {
-			process = Runtime.getRuntime().exec(commandStr, null, pmTafKitPath);
+			String[] cmdArray = new String[commandTokens.size()];
+			commandTokens.toArray(cmdArray);
+			process = Runtime.getRuntime().exec(cmdArray, null, pmTafKitPath);
 			inputStream = process.getInputStream();
 			string = convertInputStreamToString(inputStream);
 			inputStream.close();
