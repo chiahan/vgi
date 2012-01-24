@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -13,19 +13,7 @@ import javax.swing.filechooser.FileFilter;
  */
 public interface FsmXmlInterface {
 
-	public static FileFilter fileFilter = new FileFilter() {
-
-		@Override
-		public boolean accept(File file) {
-			return ((file.getName().toLowerCase().endsWith(".xml"))
-					|| (file.isDirectory()));
-		}
-
-		@Override
-		public String getDescription() {
-			return "FSM XML files";
-		}
-	};
+	public static FileNameExtensionFilter fileNameExtensionFilter = new FileNameExtensionFilter("FSM XML files", "xml");
 
 	public class FsmXmlException extends Exception {
 
