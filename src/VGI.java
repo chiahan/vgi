@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JFileChooser;
@@ -235,13 +236,24 @@ public class VGI extends javax.swing.JFrame {
 	/** Creates new form VGI */
 	public VGI() {
 		this.pmVGI = this;
-		this.pmLastFolderForOpenFile = new File(System.getProperty("user.dir"));
-		this.pmLastFolderForSaveFile = new File(System.getProperty("user.dir"));
-		this.pmTAFKit = null;
+		String defaultFolderPath = System.getProperty("user.dir");
+		this.pmLastFolderForOpenFile = new File(defaultFolderPath);
+		this.pmLastFolderForSaveFile = new File(defaultFolderPath);
 		this.pmAutomataType = null;
 		initComponents();
 		this.infoPanel.setVisible(false);
-	}
+		Preferences preferences = Preferences.systemRoot().node(this.getClass().getName());
+		String string = preferences.get("TAF-Kit Path", defaultFolderPath);
+		try {
+			this.pmTAFKit = new TAFKit(new File(string));
+		} catch (IllegalArgumentException illegalArgumentException) {
+			this.pmTAFKit = null;
+		}
+		if (this.pmTAFKit != null) {
+			this.currentSettingMenuItem.setText("Current setting:  " + this.pmTAFKit.getTafKitPath().getAbsolutePath());
+			this.updateAlgorithmMenuItems();
+		}
+	}  // End public VGI()
 
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -674,9 +686,11 @@ public class VGI extends javax.swing.JFrame {
 		}  // End while (true)
 
 		if (tafKit != null) {
-			this.currentSettingMenuItem.setText("Current setting:  " + tafKit.getTafKitPath());
+			this.currentSettingMenuItem.setText("Current setting:  " + tafKit.getTafKitPath().getAbsolutePath());
 			this.pmTAFKit = tafKit;
 			this.updateAlgorithmMenuItems();
+			Preferences preferences = Preferences.systemRoot().node(this.getClass().getName());
+			preferences.put("TAF-Kit Path", tafKit.getTafKitPath().getAbsolutePath());
 		}  // End if (pmTAFKit != null)
 
     }//GEN-LAST:event_setTAFKitPathMenuItemActionPerformed
@@ -833,8 +847,8 @@ public class VGI extends javax.swing.JFrame {
 
 		FileFilter fileFilter = fileChooser.getFileFilter();
 		File file = fileChooser.getSelectedFile();
-		if ((fileFilter.accept(file)) ||
-				(!(FileNameExtensionFilter.class.isAssignableFrom(fileFilter.getClass())))) {
+		if ((fileFilter.accept(file))
+				|| (!(FileNameExtensionFilter.class.isAssignableFrom(fileFilter.getClass())))) {
 			return file;
 		}
 
