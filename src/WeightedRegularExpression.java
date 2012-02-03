@@ -3,360 +3,530 @@
  *
  * @author JLiu
  */
-public class WeightedRegularExpression {
+public abstract class WeightedRegularExpression {
 
 	private WeightedRegularExpression parent;
-	private AutomataInterface.WritingData writingData;
-	private AutomataInterface.Weight weight;
 	private AutomataInterface.Alphabet alphabet;
+	private AutomataInterface.Weight weight;
+	private AutomataInterface.WritingData writingData;
 
-	public WeightedRegularExpression getParent() {
+	public final WeightedRegularExpression getParent() {
 		return this.parent;
 	}
 
-	public void setParent(WeightedRegularExpression parent) {
+	public final void setParent(WeightedRegularExpression parent) {
 		this.parent = parent;
 	}
 
-	public AutomataInterface.WritingData getWritingData() {
-		if (this.writingData == null) {
-			this.setWritingData(this.getParent().getWritingData());
-		}
-		return this.writingData;
-	}
-
-	public void setWritingData(AutomataInterface.WritingData writingData) {
-		this.writingData = writingData;
-	}
-
-	public AutomataInterface.Weight getWeight() {
-		if (this.weight == null) {
-			this.setWeight(this.getParent().getWeight());
-		}
-		return this.weight;
-	}
-
-	public void setWeight(AutomataInterface.Weight weight) {
-		this.weight = weight;
-	}
-
-	public AutomataInterface.Alphabet getAlphabet() {
+	public final AutomataInterface.Alphabet getAlphabet() {
 		if (this.alphabet == null) {
-			this.setAlphabet(this.getParent().getAlphabet());
+			if (this.parent == null) {
+				return null;
+			}
+			this.setAlphabet(this.parent.getAlphabet());
 		}
 		return this.alphabet;
 	}
 
-	public void setAlphabet(AutomataInterface.Alphabet alphabet) {
+	public final void setAlphabet(AutomataInterface.Alphabet alphabet) {
 		this.alphabet = alphabet;
+		if (this.parent != null) {
+			this.parent.setAlphabet(alphabet);
+		}
 	}
+
+	public final AutomataInterface.Weight getWeight() {
+		if (this.weight == null) {
+			if (this.parent == null) {
+				return null;
+			}
+			this.setWeight(this.parent.getWeight());
+		}
+		return this.weight;
+	}
+
+	public final void setWeight(AutomataInterface.Weight weight) {
+		this.weight = weight;
+		if (this.parent != null) {
+			this.parent.setWeight(weight);
+		}
+	}
+
+	public final AutomataInterface.WritingData getWritingData() {
+		if (this.writingData == null) {
+			if (this.parent == null) {
+				return null;
+			}
+			this.setWritingData(this.parent.getWritingData());
+		}
+		return this.writingData;
+	}
+
+	public final void setWritingData(AutomataInterface.WritingData writingData) {
+		this.writingData = writingData;
+		if (this.parent != null) {
+			this.parent.setWritingData(writingData);
+		}
+	}
+
+	public WeightedRegularExpression getFirstSelectedExpression() {
+		return this;
+	}
+
+	public WeightedRegularExpression getNextSelectedExpression() {
+		if ((this.parent == null)
+				|| (!(ChildEnumerable.class.isAssignableFrom(this.parent.getClass())))) {
+			return null;
+		}
+		return ((ChildEnumerable) this.parent).getSelectedExpressionAfterThisChild(this);
+	}
+
+	public WeightedRegularExpression getPreviousSelectedExpression() {
+		if ((this.parent == null)
+				|| (!(ChildEnumerable.class.isAssignableFrom(this.parent.getClass())))) {
+			return null;
+		}
+		return ((ChildEnumerable) this.parent).getSelectedExpressionBeforeThisChild(this);
+	}
+
+	public interface ChildEnumerable {
+
+		public WeightedRegularExpression getSelectedExpressionAfterThisChild(WeightedRegularExpression child);
+
+		public WeightedRegularExpression getSelectedExpressionBeforeThisChild(WeightedRegularExpression child);
+	}
+
+	@Override
+	public String toString() {
+		if ((this.getAlphabet() == null)
+				|| (this.getWeight() == null)
+				|| (this.getWritingData() == null)) {
+			throw new RuntimeException("Alphabet, weight, and writing data required by " + this.getClass().getName() + ".toString() are unavailable!");
+		}
+		return super.toString();
+	}
+
+	public static abstract class ExpressionWithOneChildExpression extends WeightedRegularExpression
+			implements ChildEnumerable {
+
+		private WeightedRegularExpression expression;
+
+		public ExpressionWithOneChildExpression() {
+			super();
+		}
+
+		public ExpressionWithOneChildExpression(WeightedRegularExpression expression) {
+			this.setExpression(expression);
+		}
+
+		public final WeightedRegularExpression getExpression() {
+			return this.expression;
+		}
+
+		public final void setExpression(WeightedRegularExpression expression) {
+			this.expression = expression;
+			if (expression != null) {
+				expression.setParent(this);
+			}
+		}
+
+		@Override
+		public WeightedRegularExpression getFirstSelectedExpression() {
+			return this.expression.getFirstSelectedExpression();
+		}
+
+		@Override
+		public WeightedRegularExpression getNextSelectedExpression() {
+			WeightedRegularExpression parent = this.getParent();
+			if ((parent == null)
+					|| (!(ChildEnumerable.class.isAssignableFrom(parent.getClass())))) {
+				return null;
+			}
+			return ((ChildEnumerable) parent).getSelectedExpressionAfterThisChild(this);
+		}
+
+		@Override
+		public WeightedRegularExpression getPreviousSelectedExpression() {
+			return this.expression;
+		}
+
+		@Override
+		public WeightedRegularExpression getSelectedExpressionAfterThisChild(WeightedRegularExpression child) {
+			return this;
+		}
+
+		@Override
+		public WeightedRegularExpression getSelectedExpressionBeforeThisChild(WeightedRegularExpression child) {
+			WeightedRegularExpression parent = this.getParent();
+			if ((parent == null)
+					|| (!(ChildEnumerable.class.isAssignableFrom(parent.getClass())))) {
+				return null;
+			}
+			return ((ChildEnumerable) parent).getSelectedExpressionBeforeThisChild(this);
+		}
+	}  // End public static abstract class ExpressionWithOneChildExpression extends WeightedRegularExpression
+
+	public static abstract class ExpressionWithTwoChildrenExpressions extends WeightedRegularExpression
+			implements ChildEnumerable {
+
+		private WeightedRegularExpression leftExpression;
+		private WeightedRegularExpression rightExpression;
+
+		public ExpressionWithTwoChildrenExpressions() {
+			super();
+		}
+
+		public ExpressionWithTwoChildrenExpressions(WeightedRegularExpression leftExpression, WeightedRegularExpression rightExpression) {
+			this.setLeftExpression(leftExpression);
+			this.setRightExpression(rightExpression);
+		}
+
+		public final WeightedRegularExpression getLeftExpression() {
+			return this.leftExpression;
+		}
+
+		public final void setLeftExpression(WeightedRegularExpression leftExpression) {
+			this.leftExpression = leftExpression;
+			if (leftExpression != null) {
+				leftExpression.setParent(this);
+			}
+		}
+
+		public final WeightedRegularExpression getRightExpression() {
+			return this.rightExpression;
+		}
+
+		public final void setRightExpression(WeightedRegularExpression rightExpression) {
+			this.rightExpression = rightExpression;
+			if (rightExpression != null) {
+				rightExpression.setParent(this);
+			}
+		}
+
+		@Override
+		public WeightedRegularExpression getFirstSelectedExpression() {
+			return this.leftExpression.getFirstSelectedExpression();
+		}
+
+		@Override
+		public WeightedRegularExpression getNextSelectedExpression() {
+			WeightedRegularExpression parent = this.getParent();
+			if ((parent == null)
+					|| (!(ChildEnumerable.class.isAssignableFrom(parent.getClass())))) {
+				return null;
+			}
+			return ((ChildEnumerable) parent).getSelectedExpressionAfterThisChild(this);
+		}
+
+		@Override
+		public WeightedRegularExpression getPreviousSelectedExpression() {
+			return this.rightExpression;
+		}
+
+		@Override
+		public WeightedRegularExpression getSelectedExpressionAfterThisChild(WeightedRegularExpression child) {
+			if (this.leftExpression.equals(child)) {
+				return this.rightExpression.getFirstSelectedExpression();
+			} else if (this.rightExpression.equals(child)) {
+				return this;
+			} else {
+				throw new IllegalArgumentException("Required input is not a child of this node!");
+			}
+		}
+
+		@Override
+		public WeightedRegularExpression getSelectedExpressionBeforeThisChild(WeightedRegularExpression child) {
+			if (this.leftExpression.equals(child)) {
+				WeightedRegularExpression parent = this.getParent();
+				if ((parent == null)
+						|| (!(ChildEnumerable.class.isAssignableFrom(parent.getClass())))) {
+					return null;
+				}
+				return ((ChildEnumerable) parent).getSelectedExpressionBeforeThisChild(this);
+			} else if (this.rightExpression.equals(child)) {
+				return this.getLeftExpression();
+			} else {
+				throw new IllegalArgumentException("Required input is not a child of this node!");
+			}
+		}
+	}  // End public static abstract class ExpressionWithTwoChildrenExpressions extends WeightedRegularExpression
 
 	public static class Zero extends WeightedRegularExpression {
 
 		@Override
 		public String toString() {
+			super.toString();
 			return this.getWritingData().zeroSym.toString();
 		}
-	}
+	}  // End public static class Zero extends WeightedRegularExpression
 
 	public static class One extends WeightedRegularExpression {
 
 		@Override
 		public String toString() {
+			super.toString();
 			return this.getAlphabet().identitySymbol.toString();
 		}
-	}
+	}  // End public static class One extends WeightedRegularExpression
 
 	public static class Atomic extends WeightedRegularExpression {
 
-		private Object value;
+		private Object symbol;
 
 		public Atomic() {
 		}
 
 		public Atomic(Object value) {
-			this.setValue(value);
+			this.setSymbol(value);
 		}
 
-		public Object getValue() {
-			return this.value;
+		public final Object getSymbol() {
+			return this.symbol;
 		}
 
-		public void setValue(Object value) {
-			this.value = value;
+		public final void setSymbol(Object symbol) {
+			this.symbol = symbol;
 		}
 
 		@Override
 		public String toString() {
-			return value.toString();
+			super.toString();
+			return symbol.toString();
 		}
-	}
+	}  // End public static class Atomic extends WeightedRegularExpression
 
-	public static class Sum extends WeightedRegularExpression {
-
-		private WeightedRegularExpression leftExpression;
-		private WeightedRegularExpression rightExpression;
+	public static class Sum extends ExpressionWithTwoChildrenExpressions {
 
 		public Sum() {
+			super();
 		}
 
 		public Sum(WeightedRegularExpression leftExpression, WeightedRegularExpression rightExpression) {
-			this.setLeftExpression(leftExpression);
-			this.setRightExpression(rightExpression);
-		}
-
-		public WeightedRegularExpression getLeftExpression() {
-			return this.leftExpression;
-		}
-
-		public void setLeftExpression(WeightedRegularExpression leftExpression) {
-			leftExpression.setParent(this);
-			this.leftExpression = leftExpression;
-		}
-
-		public WeightedRegularExpression getRightExpression() {
-			return this.rightExpression;
-		}
-
-		public void setRightExpression(WeightedRegularExpression rightExpression) {
-			rightExpression.setParent(this);
-			this.rightExpression = rightExpression;
+			super(leftExpression, rightExpression);
 		}
 
 		@Override
 		public String toString() {
+			super.toString();
 			AutomataInterface.WritingData writingData = this.getWritingData();
-			String string = this.leftExpression.toString() + writingData.plusSym.toString() + this.rightExpression.toString();
+			String string = this.getLeftExpression().toString() + writingData.plusSym.toString() + this.getRightExpression().toString();
 			return string;
 		}
-	}
+	}  // End public static class Sum extends ExpressionWithTwoChildrenExpressions
 
-	public static class Product extends WeightedRegularExpression {
-
-		private WeightedRegularExpression leftExpression;
-		private WeightedRegularExpression rightExpression;
+	public static class Product extends ExpressionWithTwoChildrenExpressions {
 
 		public Product() {
+			super();
 		}
 
 		public Product(WeightedRegularExpression leftExpression, WeightedRegularExpression rightExpression) {
-			this.setLeftExpression(leftExpression);
-			this.setRightExpression(rightExpression);
-		}
-
-		public WeightedRegularExpression getLeftExpression() {
-			return this.leftExpression;
-		}
-
-		public void setLeftExpression(WeightedRegularExpression leftExpression) {
-			leftExpression.setParent(this);
-			this.leftExpression = leftExpression;
-		}
-
-		public WeightedRegularExpression getRightExpression() {
-			return this.rightExpression;
-		}
-
-		public void setRightExpression(WeightedRegularExpression rightExpression) {
-			rightExpression.setParent(this);
-			this.rightExpression = rightExpression;
+			super(leftExpression, rightExpression);
 		}
 
 		@Override
 		public String toString() {
+			super.toString();
 			AutomataInterface.WritingData writingData = this.getWritingData();
-			String string = this.leftExpression.toString();
-			if (Sum.class.isAssignableFrom(this.leftExpression.getClass())) {
-				string = string = writingData.openPar.toString() + string + writingData.closePar.toString();
+			WeightedRegularExpression leftExpression = this.getLeftExpression();
+			String string = leftExpression.toString();
+			if (Sum.class.isAssignableFrom(leftExpression.getClass())) {
+				string = writingData.openPar.toString() + string + writingData.closePar.toString();
 			}
 			string = string + writingData.timesSym.toString();
-			if (Sum.class.isAssignableFrom(this.rightExpression.getClass())) {
-				string = string + writingData.openPar.toString() + this.rightExpression.toString() + writingData.closePar.toString();
+			WeightedRegularExpression rightExpression = this.getRightExpression();
+			if (Sum.class.isAssignableFrom(rightExpression.getClass())) {
+				string = string + writingData.openPar.toString() + rightExpression.toString() + writingData.closePar.toString();
 			} else {
-				string = string + this.rightExpression.toString();
+				string = string + rightExpression.toString();
 			}
 			return string;
 		}
-	}
+	}  // End public static class Product extends ExpressionWithTwoChildrenExpressions
 
-	public static class Star extends WeightedRegularExpression {
-
-		private WeightedRegularExpression expression;
+	public static class Star extends ExpressionWithOneChildExpression {
 
 		public Star() {
+			super();
 		}
 
 		public Star(WeightedRegularExpression expression) {
-			this.setExpression(expression);
-		}
-
-		public WeightedRegularExpression getExpression() {
-			return this.expression;
-		}
-
-		public void setExpression(WeightedRegularExpression expression) {
-			expression.setParent(this);
-			this.expression = expression;
+			super(expression);
 		}
 
 		@Override
 		public String toString() {
+			super.toString();
 			AutomataInterface.WritingData writingData = this.getWritingData();
-			String string = this.expression.toString();
-			if (Sum.class.isAssignableFrom(this.expression.getClass())
-					|| Product.class.isAssignableFrom(this.expression.getClass())
-					|| LeftMultiply.class.isAssignableFrom(this.expression.getClass())
-					|| RightMultiply.class.isAssignableFrom(this.expression.getClass())) {
-				string = string = writingData.openPar.toString() + string + writingData.closePar.toString();
+			WeightedRegularExpression expression = this.getExpression();
+			String string = expression.toString();
+			if (Sum.class.isAssignableFrom(expression.getClass())
+					|| Product.class.isAssignableFrom(expression.getClass())
+					|| LeftMultiply.class.isAssignableFrom(expression.getClass())
+					|| RightMultiply.class.isAssignableFrom(expression.getClass())) {
+				string = writingData.openPar.toString() + string + writingData.closePar.toString();
 			}
 			string = string + writingData.starSym.toString();
 			return string;
 		}
-	}
+	}  // End public static class Star extends ExpressionWithOneChildExpression
 
-	public static class LeftMultiply extends WeightedRegularExpression {
+	public static class LeftMultiply extends ExpressionWithOneChildExpression {
 
 		private Object weightValue;
-		private WeightedRegularExpression expression;
 
 		public LeftMultiply() {
+			super();
 		}
 
 		public LeftMultiply(Object weightValue, WeightedRegularExpression expression) {
+			super(expression);
 			this.setWeightValue(weightValue);
-			this.setExpression(expression);
 		}
 
-		public Object getWeightValue() {
+		public final Object getWeightValue() {
 			return this.weightValue;
 		}
 
-		public void setWeightValue(Object weightValue) {
+		public final void setWeightValue(Object weightValue) {
 			this.weightValue = weightValue;
-		}
-
-		public WeightedRegularExpression getExpression() {
-			return this.expression;
-		}
-
-		public void setExpression(WeightedRegularExpression expression) {
-			expression.setParent(this);
-			this.expression = expression;
 		}
 
 		@Override
 		public String toString() {
+			super.toString();
 			AutomataInterface.WritingData writingData = this.getWritingData();
-			String string = writingData.weightOpening.toString() + weightValue.toString() + writingData.weightClosing.toString();
-			if (Sum.class.isAssignableFrom(this.expression.getClass())
-					|| Product.class.isAssignableFrom(this.expression.getClass())
-					|| Star.class.isAssignableFrom(this.expression.getClass())) {
-				string = string + writingData.openPar.toString() + this.expression.toString() + writingData.closePar.toString();
+			String string = writingData.weightOpening.toString() + this.weightValue.toString() + writingData.weightClosing.toString();
+			WeightedRegularExpression expression = this.getExpression();
+			if (Sum.class.isAssignableFrom(expression.getClass())
+					|| Product.class.isAssignableFrom(expression.getClass())
+					|| Star.class.isAssignableFrom(expression.getClass())) {
+				string = string + writingData.openPar.toString() + expression.toString() + writingData.closePar.toString();
 			} else {
-				string = string + this.expression.toString();
+				string = string + expression.toString();
 			}
 			return string;
 		}
-	}
+	}  // End public static class LeftMultiply extends ExpressionWithOneChildExpression
 
-	public static class RightMultiply extends WeightedRegularExpression {
+	public static class RightMultiply extends ExpressionWithOneChildExpression {
 
-		private WeightedRegularExpression expression;
 		private Object weightValue;
 
 		public RightMultiply() {
+			super();
 		}
 
 		public RightMultiply(WeightedRegularExpression expression, Object weightValue) {
-			this.setExpression(expression);
+			super(expression);
 			this.setWeightValue(weightValue);
 		}
 
-		public WeightedRegularExpression getExpression() {
-			return this.expression;
-		}
-
-		public void setExpression(WeightedRegularExpression expression) {
-			expression.setParent(this);
-			this.expression = expression;
-		}
-
-		public Object getWeightValue() {
+		public final Object getWeightValue() {
 			return this.weightValue;
 		}
 
-		public void setWeightValue(Object weightValue) {
+		public final void setWeightValue(Object weightValue) {
 			this.weightValue = weightValue;
 		}
 
 		@Override
 		public String toString() {
+			super.toString();
 			AutomataInterface.WritingData writingData = this.getWritingData();
-			String string = this.expression.toString();
-			if (Sum.class.isAssignableFrom(this.expression.getClass())
-					|| Product.class.isAssignableFrom(this.expression.getClass())) {
+			WeightedRegularExpression expression = this.getExpression();
+			String string = expression.toString();
+			if (Sum.class.isAssignableFrom(expression.getClass())
+					|| Product.class.isAssignableFrom(expression.getClass())) {
 				string = writingData.openPar.toString() + string + writingData.closePar.toString();
 			}
-			string = string + writingData.weightOpening.toString() + weightValue.toString() + writingData.weightClosing.toString();
+			string = string + writingData.weightOpening.toString() + this.weightValue.toString() + writingData.weightClosing.toString();
 			return string;
 		}
-	}
 
-	public static void main(String args[]) {
+		public static void main(String args[]) {
 
-		AutomataInterface.WritingData writingData = new AutomataInterface.WritingData();
-		writingData.closePar = ')';
-		writingData.openPar = '(';
-		writingData.plusSym = '+';
-		writingData.spacesSym = ' ';
-		writingData.starSym = '*';
-		writingData.timesSym = '.';
-		writingData.weightClosing = '}';
-		writingData.weightOpening = '{';
-		writingData.zeroSym = '0';
+			AutomataInterface.WritingData writingData = new AutomataInterface.WritingData();
+			writingData.closePar = ')';
+			writingData.openPar = '(';
+			writingData.plusSym = '+';
+			writingData.spacesSym = ' ';
+			writingData.starSym = '*';
+			writingData.timesSym = '.';
+			writingData.weightClosing = '}';
+			writingData.weightOpening = '{';
+			writingData.zeroSym = '0';
 
-		AutomataInterface.Weight weight = new AutomataInterface.Weight();
-		weight.semiring = TAFKitInterface.AutomataType.Semiring.Z_INTEGER;
-		weight.identitySymbol = (int) 1;
-		weight.zeroSymbol = (int) 0;
+			AutomataInterface.Weight weight = new AutomataInterface.Weight();
+			weight.semiring = TAFKitInterface.AutomataType.Semiring.Z_INTEGER;
+			weight.identitySymbol = (int) 1;
+			weight.zeroSymbol = (int) 0;
 
-		AutomataInterface.Alphabet alphabet = new AutomataInterface.Alphabet();
-		alphabet.dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR;
-		alphabet.allSymbols.add('a');
-		alphabet.allSymbols.add('b');
-		alphabet.identitySymbol = 'e';
+			AutomataInterface.Alphabet alphabet = new AutomataInterface.Alphabet();
+			alphabet.dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR;
+			alphabet.allSymbols.add('a');
+			alphabet.allSymbols.add('b');
+			alphabet.identitySymbol = 'e';
 
-		Sum sum = new Sum();
-		sum.setWritingData(writingData);
-		sum.setWeight(weight);
-		sum.setAlphabet(alphabet);
+			Object symbol_a = alphabet.allSymbols.get(0);
+			Object symbol_b = alphabet.allSymbols.get(1);
 
-		sum.setLeftExpression(new Star(new Sum(new LeftMultiply((int) 2, new Atomic('a')), new Product(new LeftMultiply((int) 3, new Atomic('b')), new LeftMultiply((int) 4, new Atomic('a'))))));
-		sum.setRightExpression(new LeftMultiply((int) 5, new Atomic('b')));
-		System.out.println(sum.toString());
+			WeightedRegularExpression expression = new Atomic(symbol_a);
+			expression = new LeftMultiply((int) 2, expression);
+			expression = new Sum(expression, null);
+			WeightedRegularExpression expression2 = new Atomic(symbol_b);
+			expression2 = new LeftMultiply((int) 3, expression2);
+			expression2 = new Product(expression2, null);
+			WeightedRegularExpression expression3 = new Atomic(symbol_a);
+			expression3 = new LeftMultiply((int) 4, expression3);
+			((Product) expression2).setRightExpression(expression3);
+			((Sum) expression).setRightExpression(expression2);
+			expression = new Star(expression);
+			expression = new Sum(expression, null);
+			expression2 = new Atomic(symbol_b);
+			expression2 = new LeftMultiply((int) 5, expression2);
+			((Sum) expression).setRightExpression(expression2);
+			expression2.setAlphabet(alphabet);
+			expression2.setWeight(weight);
+			expression2.setWritingData(writingData);
+			System.out.println(expression.toString());
 
-		Star star = new Star();
-		star.setWritingData(writingData);
-		star.setWeight(weight);
-		star.setAlphabet(alphabet);
+			expression2 = expression;
+			expression = expression.getFirstSelectedExpression();
+			while (expression != null) {
+				System.out.println(expression.toString());
+				expression = expression.getNextSelectedExpression();
+			}
 
-		star.setExpression(new Zero());
-		System.out.println(star.toString());
+			expression = expression2;
+			while (expression != null) {
+				System.out.println(expression.toString());
+				expression = expression.getPreviousSelectedExpression();
+			}
 
-		star.setExpression(new One());
-		System.out.println(star.toString());
+			Star star = new Star();
+			star.setWritingData(writingData);
+			star.setWeight(weight);
+			star.setAlphabet(alphabet);
 
-		star.setExpression(new Atomic('b'));
-		System.out.println(star.toString());
+			star.setExpression(new Zero());
+			System.out.println(star.toString());
 
-		star.setExpression(new LeftMultiply((int) 5, new Atomic('b')));
-		System.out.println(star.toString());
+			star.setExpression(new One());
+			System.out.println(star.toString());
 
-		star.setExpression(new RightMultiply(new Atomic('a'), (int) 9));
-		System.out.println(star.toString());
+			star.setExpression(new Atomic(symbol_b));
+			System.out.println(star.toString());
 
-		star.setExpression(new Product(new Atomic('b'), new Atomic('a')));
-		System.out.println(star.toString());
+			star.setExpression(new LeftMultiply((int) 5, new Atomic(symbol_b)));
+			System.out.println(star.toString());
 
-	}  // End public static void main(String args[])
+			star.setExpression(new RightMultiply(new Atomic(symbol_a), (int) 9));
+			System.out.println(star.toString());
+
+			star.setExpression(new Product(new Atomic(symbol_b), new Atomic(symbol_a)));
+			System.out.println(star.toString());
+
+		}  // End public static void main(String args[])
+	}  // End public static class RightMultiply extends ExpressionWithOneChildExpression
 }  // End public class WeightedRegularExpression
