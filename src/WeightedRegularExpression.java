@@ -75,7 +75,7 @@ public abstract class WeightedRegularExpression {
 
 	public WeightedRegularExpression getNextSelectedExpression() {
 		if ((this.parent == null)
-				|| (!(ChildEnumerable.class.isAssignableFrom(this.parent.getClass())))) {
+				|| (!(ChildEnumerable.class.isInstance(this.parent)))) {
 			return null;
 		}
 		return ((ChildEnumerable) this.parent).getSelectedExpressionAfterThisChild(this);
@@ -83,7 +83,7 @@ public abstract class WeightedRegularExpression {
 
 	public WeightedRegularExpression getPreviousSelectedExpression() {
 		if ((this.parent == null)
-				|| (!(ChildEnumerable.class.isAssignableFrom(this.parent.getClass())))) {
+				|| (!(ChildEnumerable.class.isInstance(this.parent)))) {
 			return null;
 		}
 		return ((ChildEnumerable) this.parent).getSelectedExpressionBeforeThisChild(this);
@@ -139,7 +139,7 @@ public abstract class WeightedRegularExpression {
 		public WeightedRegularExpression getNextSelectedExpression() {
 			WeightedRegularExpression parent = this.getParent();
 			if ((parent == null)
-					|| (!(ChildEnumerable.class.isAssignableFrom(parent.getClass())))) {
+					|| (!(ChildEnumerable.class.isInstance(parent)))) {
 				return null;
 			}
 			return ((ChildEnumerable) parent).getSelectedExpressionAfterThisChild(this);
@@ -147,19 +147,29 @@ public abstract class WeightedRegularExpression {
 
 		@Override
 		public WeightedRegularExpression getPreviousSelectedExpression() {
+			if (LeftMultiply.class.isInstance(this.expression)) {
+				return ((LeftMultiply) this.expression).getExpression();
+			}
 			return this.expression;
 		}
 
 		@Override
 		public WeightedRegularExpression getSelectedExpressionAfterThisChild(WeightedRegularExpression child) {
-			return this;
+			if (this.expression.equals(child)) {
+				return this;
+			} else {
+				throw new IllegalArgumentException("Required input is not a child of this node!");
+			}
 		}
 
 		@Override
 		public WeightedRegularExpression getSelectedExpressionBeforeThisChild(WeightedRegularExpression child) {
+			if (!(this.expression.equals(child))) {
+				throw new IllegalArgumentException("Required input is not a child of this node!");
+			}
 			WeightedRegularExpression parent = this.getParent();
 			if ((parent == null)
-					|| (!(ChildEnumerable.class.isAssignableFrom(parent.getClass())))) {
+					|| (!(ChildEnumerable.class.isInstance(parent)))) {
 				return null;
 			}
 			return ((ChildEnumerable) parent).getSelectedExpressionBeforeThisChild(this);
@@ -212,7 +222,7 @@ public abstract class WeightedRegularExpression {
 		public WeightedRegularExpression getNextSelectedExpression() {
 			WeightedRegularExpression parent = this.getParent();
 			if ((parent == null)
-					|| (!(ChildEnumerable.class.isAssignableFrom(parent.getClass())))) {
+					|| (!(ChildEnumerable.class.isInstance(parent)))) {
 				return null;
 			}
 			return ((ChildEnumerable) parent).getSelectedExpressionAfterThisChild(this);
@@ -220,6 +230,9 @@ public abstract class WeightedRegularExpression {
 
 		@Override
 		public WeightedRegularExpression getPreviousSelectedExpression() {
+			if (LeftMultiply.class.isInstance(this.rightExpression)) {
+				return ((LeftMultiply) this.rightExpression).getExpression();
+			}
 			return this.rightExpression;
 		}
 
@@ -239,7 +252,7 @@ public abstract class WeightedRegularExpression {
 			if (this.leftExpression.equals(child)) {
 				WeightedRegularExpression parent = this.getParent();
 				if ((parent == null)
-						|| (!(ChildEnumerable.class.isAssignableFrom(parent.getClass())))) {
+						|| (!(ChildEnumerable.class.isInstance(parent)))) {
 					return null;
 				}
 				return ((ChildEnumerable) parent).getSelectedExpressionBeforeThisChild(this);
@@ -330,12 +343,12 @@ public abstract class WeightedRegularExpression {
 			AutomataInterface.WritingData writingData = this.getWritingData();
 			WeightedRegularExpression leftExpression = this.getLeftExpression();
 			String string = leftExpression.toString();
-			if (Sum.class.isAssignableFrom(leftExpression.getClass())) {
+			if (Sum.class.isInstance(leftExpression)) {
 				string = writingData.openPar.toString() + string + writingData.closePar.toString();
 			}
 			string = string + writingData.timesSym.toString();
 			WeightedRegularExpression rightExpression = this.getRightExpression();
-			if (Sum.class.isAssignableFrom(rightExpression.getClass())) {
+			if (Sum.class.isInstance(rightExpression)) {
 				string = string + writingData.openPar.toString() + rightExpression.toString() + writingData.closePar.toString();
 			} else {
 				string = string + rightExpression.toString();
@@ -360,10 +373,10 @@ public abstract class WeightedRegularExpression {
 			AutomataInterface.WritingData writingData = this.getWritingData();
 			WeightedRegularExpression expression = this.getExpression();
 			String string = expression.toString();
-			if (Sum.class.isAssignableFrom(expression.getClass())
-					|| Product.class.isAssignableFrom(expression.getClass())
-					|| LeftMultiply.class.isAssignableFrom(expression.getClass())
-					|| RightMultiply.class.isAssignableFrom(expression.getClass())) {
+			if (Sum.class.isInstance(expression)
+					|| Product.class.isInstance(expression)
+					|| LeftMultiply.class.isInstance(expression)
+					|| RightMultiply.class.isInstance(expression)) {
 				string = writingData.openPar.toString() + string + writingData.closePar.toString();
 			}
 			string = string + writingData.starSym.toString();
@@ -393,14 +406,56 @@ public abstract class WeightedRegularExpression {
 		}
 
 		@Override
+		public WeightedRegularExpression getFirstSelectedExpression() {
+			return this;
+		}
+
+		@Override
+		public WeightedRegularExpression getNextSelectedExpression() {
+			return this.getExpression().getFirstSelectedExpression();
+		}
+
+		@Override
+		public WeightedRegularExpression getPreviousSelectedExpression() {
+			WeightedRegularExpression parent = this.getParent();
+			if ((parent == null)
+					|| (!(ChildEnumerable.class.isInstance(parent)))) {
+				return null;
+			}
+			WeightedRegularExpression expression = ((ChildEnumerable) parent).getSelectedExpressionBeforeThisChild(this);
+			if (LeftMultiply.class.isInstance(expression)) {
+				return ((LeftMultiply) expression).getExpression();
+			}
+			return expression;
+		}
+
+		@Override
+		public WeightedRegularExpression getSelectedExpressionAfterThisChild(WeightedRegularExpression child) {
+			if (!(this.getExpression().equals(child))) {
+				throw new IllegalArgumentException("Required input is not a child of this node!");
+			}
+			WeightedRegularExpression parent = this.getParent();
+			if ((parent == null)
+					|| (!(ChildEnumerable.class.isInstance(parent)))) {
+				return null;
+			}
+			return ((ChildEnumerable) parent).getSelectedExpressionAfterThisChild(this);
+		}
+
+		@Override
+		public WeightedRegularExpression getSelectedExpressionBeforeThisChild(WeightedRegularExpression child) {
+			return this;
+		}
+
+		@Override
 		public String toString() {
 			super.toString();
 			AutomataInterface.WritingData writingData = this.getWritingData();
 			String string = writingData.weightOpening.toString() + this.weightValue.toString() + writingData.weightClosing.toString();
 			WeightedRegularExpression expression = this.getExpression();
-			if (Sum.class.isAssignableFrom(expression.getClass())
-					|| Product.class.isAssignableFrom(expression.getClass())
-					|| Star.class.isAssignableFrom(expression.getClass())) {
+			if (Sum.class.isInstance(expression)
+					|| Product.class.isInstance(expression)
+					|| Star.class.isInstance(expression)) {
 				string = string + writingData.openPar.toString() + expression.toString() + writingData.closePar.toString();
 			} else {
 				string = string + expression.toString();
@@ -436,8 +491,8 @@ public abstract class WeightedRegularExpression {
 			AutomataInterface.WritingData writingData = this.getWritingData();
 			WeightedRegularExpression expression = this.getExpression();
 			String string = expression.toString();
-			if (Sum.class.isAssignableFrom(expression.getClass())
-					|| Product.class.isAssignableFrom(expression.getClass())) {
+			if (Sum.class.isInstance(expression)
+					|| Product.class.isInstance(expression)) {
 				string = writingData.openPar.toString() + string + writingData.closePar.toString();
 			}
 			string = string + writingData.weightOpening.toString() + this.weightValue.toString() + writingData.weightClosing.toString();
