@@ -44,7 +44,7 @@ public class Transition implements TransitionInterface {
 	 * @return the label
 	 */
 	@Override
-	public String getLabel() {
+	public WeightedRegularExpression getLabel() {
 		return this.pmLabel;
 	}
 
@@ -52,7 +52,7 @@ public class Transition implements TransitionInterface {
 	 * @param label the label to set
 	 */
 	@Override
-	public void setLabel(String label) {
+	public void setLabel(WeightedRegularExpression label) {
 		this.pmLabel = label;
 	}
 
@@ -73,7 +73,7 @@ public class Transition implements TransitionInterface {
 	}
 	private State pmSourceState;
 	private State pmTargetState;
-	private String pmLabel;
+	private WeightedRegularExpression pmLabel;
 	private GeometricData pmGeometricData;
 
 	public Transition() {

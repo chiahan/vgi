@@ -49,6 +49,9 @@ public interface AutomataInterface {
 		}
 	}  // End public class Alphabet
 
+	public class SymbolPair<E> extends ArrayList<E> {
+	}
+
 	public String getName();
 
 	public void setName(String name);

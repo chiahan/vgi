@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -152,7 +153,15 @@ public class FsmXml implements FsmXmlInterface {
 	private static final String ATR_TARGET = "target";
 	private static final String TAG_LABEL = "label";
 	private static final String TAG_CONTROL_POINT = "controlPoint";
+	private static final String TAG_ZERO = "zero";
+	private static final String TAG_ONE = "one";
 	private static final String TAG_MON_ELMT = "monElmt";
+	private static final String TAG_SUM = "sum";
+	private static final String TAG_PRODUCT = "product";
+	private static final String TAG_STAR = "star";
+	private static final String TAG_LEFT_EXT_MUL = "leftExtMul";
+	private static final String TAG_RIGHT_EXT_MUL = "rightExtMul";
+	private static final String TAG_WEIGHT = "weight";
 	private static final String TAG_INITIAL = "initial";
 	private static final String TAG_FINAL = "final";
 	private static final String ATR_STATE = "state";
@@ -530,7 +539,7 @@ public class FsmXml implements FsmXmlInterface {
 			return value;
 		}
 
-		ArrayList<Object> pair = new ArrayList<Object>();
+		AutomataInterface.SymbolPair<Object> pair = new AutomataInterface.SymbolPair<Object>();
 
 		while (xmlStreamReader.hasNext()) {
 
@@ -755,7 +764,7 @@ public class FsmXml implements FsmXmlInterface {
 				if (!(this.findNextSpecifiedTag(xmlStreamReader, TAG_LABEL, Tag.Type.START))) {
 					this.assertTag(TAG_LABEL, Tag.Type.START);
 				}
-				String label = parseLabelTag(xmlStreamReader, automata);
+				WeightedRegularExpression label = parseLabelTag(xmlStreamReader, automata);
 				Transition transition = new Transition();
 				transition.setSourceState(sourceState);
 				transition.setTargetState(targetState);
@@ -801,47 +810,188 @@ public class FsmXml implements FsmXmlInterface {
 
 	}  // End private void parseTransitionsTag(XMLStreamReader xmlStreamReader, Automata automata, Map<String, State> statesMap)
 
-	private String parseLabelTag(XMLStreamReader xmlStreamReader, Automata automata)
+	private WeightedRegularExpression parseLabelTag(XMLStreamReader xmlStreamReader, Automata automata)
 			throws XMLStreamException,
 			FsmXmlException {
 
-		String label = new String();
+		WeightedRegularExpression label = null;
+		WeightedRegularExpression firstChild = null;
+		WeightedRegularExpression secondChild = null;
+		Object weight = null;
 
-		Tag tag = this.nextStartOrEndTag(xmlStreamReader);
-		while ((tag != null) && (!(tag.equals(TAG_LABEL, Tag.Type.END)))) {
+		if (!(xmlStreamReader.isStartElement())) {
+			throw new FsmXmlException("The first input of parseLabelTag() is not a start tag!");
+		}
 
-			if (tag.equals(TAG_MON_GEN, Tag.Type.START)) {
+		String tagName = xmlStreamReader.getLocalName();
 
-				Object symbol = parseMonGenTag(xmlStreamReader, automata);
-				if (symbol instanceof String) {
-					if (!(label.isEmpty())) {
-						label = label + automata.getWritingData().spacesSym;
-					}
-					label = label + ((String) symbol);
-				} else if (symbol instanceof List) {
-					List list = ((List) symbol);
-					Iterator iterator = list.iterator();
-					while (iterator.hasNext()) {
-						Object object = iterator.next();
-						if (!(label.isEmpty())) {
-							label = label + automata.getWritingData().spacesSym;
-						}
-						label = label + object.toString();
-					}  // End while (iterator.hasNext())
+		while (xmlStreamReader.hasNext()) {
+			xmlStreamReader.next();
+
+			if (xmlStreamReader.isStartElement()) {
+				WeightedRegularExpression expression = null;
+				String localName = xmlStreamReader.getLocalName();
+
+				if (TAG_ZERO.equals(localName)) {
+					expression = new WeightedRegularExpression.Zero();
+				} else if (TAG_ONE.equals(localName)) {
+					expression = new WeightedRegularExpression.One();
+				} else if (TAG_MON_ELMT.equals(localName)) {
+					expression = new WeightedRegularExpression.Atomic(parseMonElmtTag(xmlStreamReader, automata));
+				} else if (TAG_SUM.equals(localName)) {
+					expression = parseLabelTag(xmlStreamReader, automata);
+				} else if (TAG_PRODUCT.equals(localName)) {
+					expression = parseLabelTag(xmlStreamReader, automata);
+				} else if (TAG_STAR.equals(localName)) {
+					expression = parseLabelTag(xmlStreamReader, automata);
+				} else if (TAG_LEFT_EXT_MUL.equals(localName)) {
+					expression = parseLabelTag(xmlStreamReader, automata);
+				} else if (TAG_RIGHT_EXT_MUL.equals(localName)) {
+					expression = parseLabelTag(xmlStreamReader, automata);
+				} else if (TAG_WEIGHT.equals(localName)) {
+					weight = parseWeightTag(xmlStreamReader, automata);
 				}
 
-			}  // End if (tag.equals(TAG_MON_GEN, Tag.Type.START))
+				if (expression != null) {
+					if (firstChild == null) {
+						firstChild = expression;
+					} else if (secondChild == null) {
+						secondChild = expression;
+					}
+				}
 
-			tag = this.nextStartOrEndTag(xmlStreamReader);
+			} // End if (xmlStreamReader.isStartElement())
+			else if (xmlStreamReader.isEndElement()) {
+				String localName = xmlStreamReader.getLocalName();
 
-		}  // End while ((tag != null) && (!(tag.equals(TAG_LABEL, Tag.Type.END))))
+				if (TAG_ZERO.equals(localName)) {
+					label = firstChild;
+				} else if (TAG_ONE.equals(localName)) {
+					label = firstChild;
+				} else if (TAG_MON_ELMT.equals(localName)) {
+					label = firstChild;
+				} else if (TAG_SUM.equals(localName)) {
+					if ((firstChild != null) && (secondChild != null)) {
+						label = new WeightedRegularExpression.Sum(firstChild, secondChild);
+					}
+				} else if (TAG_PRODUCT.equals(localName)) {
+					if ((firstChild != null) && (secondChild != null)) {
+						label = new WeightedRegularExpression.Product(firstChild, secondChild);
+					}
+				} else if (TAG_STAR.equals(localName)) {
+					if (firstChild != null) {
+						label = new WeightedRegularExpression.Star(firstChild);
+					}
+				} else if (TAG_LEFT_EXT_MUL.equals(localName)) {
+					if ((weight != null) && (firstChild != null)) {
+						label = new WeightedRegularExpression.LeftMultiply(weight, firstChild);
+					}
+				} else if (TAG_RIGHT_EXT_MUL.equals(localName)) {
+					if ((firstChild != null) && (weight != null)) {
+						label = new WeightedRegularExpression.RightMultiply(secondChild, weight);
+					}
+				} else if (TAG_LABEL.equals(localName)) {
+					label = firstChild;
+				}
+				if (tagName.equals(localName)) {
+					break;
+				}
+			}  // End if (xmlStreamReader.isEndElement())
 
-		if (label.isEmpty()) {
-			label = null;
-			throw new FsmXmlException("Parsing \"" + TAG_LABEL + "\" tag yields no result.");
+		}  // End while (xmlStreamReader.hasNext())
+
+		if (label == null) {
+			throw new FsmXmlException("Parsing \"" + tagName + "\" tag yields no result.");
 		}
+		label.setAlphabet(automata.getAlphabet());
+		label.setWeight(automata.getWeight());
+		label.setWritingData(automata.getWritingData());
 		return label;
-	}  // End private void parseLabelTag(XMLStreamReader xmlStreamReader, Automata automata)
+	}  // End private WeightedRegularExpression parseLabelTag(XMLStreamReader xmlStreamReader, Automata automata)
+
+	private Object parseMonElmtTag(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		Object returnObject = null;
+
+		while (xmlStreamReader.hasNext()) {
+
+			xmlStreamReader.next();
+			if (xmlStreamReader.isEndElement() && TAG_MON_ELMT.equals(xmlStreamReader.getLocalName())) {
+				break;
+			}
+
+			if (xmlStreamReader.isStartElement()) {
+				String localName = xmlStreamReader.getLocalName();
+				Object object = null;
+
+				if (TAG_MON_GEN.equals(localName)) {
+					object = parseMonGenTag(xmlStreamReader, automata);
+				} else if (TAG_MON_ELMT.equals(localName)) {
+					object = parseMonElmtTag(xmlStreamReader, automata);
+				} else if (TAG_ZERO.equals(localName)) {
+					object = new WeightedRegularExpression.Zero();
+				} else if (TAG_ONE.equals(localName)) {
+					object = new WeightedRegularExpression.One();
+				}
+
+				if (returnObject == null) {
+					returnObject = object;
+				} else if (List.class.isInstance(returnObject)) {
+					((List) returnObject).add(object);
+				} else {
+					List<Object> list = new ArrayList<Object>();
+					list.add(returnObject);
+					list.add(object);
+					returnObject = list;
+				}
+			}  // End if (xmlStreamReader.isStartElement())
+
+		}  // End while (xmlStreamReader.hasNext())
+
+		if (returnObject == null) {
+			throw new FsmXmlException("Parsing \"" + TAG_MON_ELMT + "\" tag yields no result.");
+		}
+		return returnObject;
+	}  // End private Object parseMonElmtTag(XMLStreamReader xmlStreamReader, Automata automata)
+
+	private Object parseWeightTag(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		Object object = null;//xmlStreamReader.getAttributeValue(null, ATR_VALUE);
+		switch (automata.getWeight().semiring) {
+			case Z_INTEGER:
+			case ZMIN_MIN_TROPICAL:
+			case ZMAX_MAX_TROPICAL:
+				object = Integer.valueOf(xmlStreamReader.getAttributeValue(null, ATR_VALUE));
+				break;
+			case Q_RATIONAL:
+			case R_REAL:
+				object = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_VALUE));
+				break;
+			case B_BOOLEAN:
+			case F2_TWO_ELEMENT_FIELD:
+				throw new FsmXmlException("The boolean semiring and the two-element field should not have any weight tags.");
+			default:
+				throw new FsmXmlException("Unrecognizable semiring set.");
+		}  // End switch (automata.getWeight().semiring)
+
+		while (xmlStreamReader.hasNext()) {
+
+			xmlStreamReader.next();
+			if (xmlStreamReader.isEndElement() && TAG_WEIGHT.equals(xmlStreamReader.getLocalName())) {
+				break;
+			}
+
+		}  // End while (xmlStreamReader.hasNext())
+
+		if (object == null) {
+			throw new FsmXmlException("Parsing \"" + TAG_WEIGHT + "\" tag yields no result.");
+		}
+		return object;
+	}  // End private Object parseWeightTag(XMLStreamReader xmlStreamReader, Automata automata)
 
 	private void parseTransitionGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
 			throws XMLStreamException,
@@ -1150,8 +1300,8 @@ public class FsmXml implements FsmXmlInterface {
 
 		if (symbol instanceof String) {
 			xmlStreamWriter.writeAttribute(ATR_VALUE, (String) symbol);
-		} else if (symbol instanceof List) {
-			Iterator symbolIterator = ((List) symbol).iterator();
+		} else if (symbol instanceof AutomataInterface.SymbolPair) {
+			Iterator symbolIterator = ((AutomataInterface.SymbolPair) symbol).iterator();
 			while (symbolIterator.hasNext()) {
 				Object object = symbolIterator.next();
 				xmlStreamWriter.writeStartElement(TAG_MON_COMP_GEN);
@@ -1212,14 +1362,10 @@ public class FsmXml implements FsmXmlInterface {
 			xmlStreamWriter.writeAttribute(ATR_SOURCE, "s" + allStates.indexOf(state));
 			state = transition.getTargetState();
 			xmlStreamWriter.writeAttribute(ATR_TARGET, "s" + allStates.indexOf(state));
-			String label = transition.getLabel();
+			WeightedRegularExpression label = transition.getLabel();
 			if (label != null) {
 				xmlStreamWriter.writeStartElement(TAG_LABEL);
-				xmlStreamWriter.writeStartElement(TAG_MON_ELMT);
-				xmlStreamWriter.writeStartElement(TAG_MON_GEN);
-				xmlStreamWriter.writeAttribute(ATR_VALUE, label);
-				xmlStreamWriter.writeEndElement();  // End TAG_MON_GEN
-				xmlStreamWriter.writeEndElement();  // End TAG_MON_ELMT
+				writeWeightedRegularExpression(xmlStreamWriter, label);
 				xmlStreamWriter.writeEndElement();  // End TAG_LABEL
 			}
 			List<Point2D> controlPoints = transition.getGeometricData().controlPoints;
@@ -1262,15 +1408,105 @@ public class FsmXml implements FsmXmlInterface {
 
 	}  // End private void writeTransitionTags(XMLStreamWriter xmlStreamWriter, Automata automata)
 
-	private void writeInitialFinalTags(XMLStreamWriter xmlStreamWriter, Automata automata)
+	private void writeWeightedRegularExpression(XMLStreamWriter xmlStreamWriter, WeightedRegularExpression expression)
 			throws
 			XMLStreamException,
 			FsmXmlException {
 
-		xmlStreamWriter.writeStartElement(TAG_INITIAL);
-		xmlStreamWriter.writeEndElement();  // End TAG_INITIAL
+		if (WeightedRegularExpression.Zero.class.isInstance(expression)) {
+			xmlStreamWriter.writeStartElement(TAG_ZERO);
+			xmlStreamWriter.writeEndElement();  // End TAG_ZERO
+		} else if (WeightedRegularExpression.One.class.isInstance(expression)) {
+			xmlStreamWriter.writeStartElement(TAG_ONE);
+			xmlStreamWriter.writeEndElement();  // End TAG_ONE
+		} else if (WeightedRegularExpression.Atomic.class.isInstance(expression)) {
+			WeightedRegularExpression.Atomic atomic = (WeightedRegularExpression.Atomic) expression;
+			writeMonElmtTag(xmlStreamWriter, atomic.getSymbol());
+		} else if (WeightedRegularExpression.Sum.class.isInstance(expression)) {
+			xmlStreamWriter.writeStartElement(TAG_SUM);
+			WeightedRegularExpression.Sum sum = (WeightedRegularExpression.Sum) expression;
+			writeWeightedRegularExpression(xmlStreamWriter, sum.getLeftExpression());
+			writeWeightedRegularExpression(xmlStreamWriter, sum.getRightExpression());
+			xmlStreamWriter.writeEndElement();  // End TAG_SUM
+		} else if (WeightedRegularExpression.Product.class.isInstance(expression)) {
+			xmlStreamWriter.writeStartElement(TAG_PRODUCT);
+			WeightedRegularExpression.Product product = (WeightedRegularExpression.Product) expression;
+			writeWeightedRegularExpression(xmlStreamWriter, product.getLeftExpression());
+			writeWeightedRegularExpression(xmlStreamWriter, product.getRightExpression());
+			xmlStreamWriter.writeEndElement();  // End TAG_PRODUCT
+		} else if (WeightedRegularExpression.Star.class.isInstance(expression)) {
+			xmlStreamWriter.writeStartElement(TAG_STAR);
+			WeightedRegularExpression.Star star = (WeightedRegularExpression.Star) expression;
+			writeWeightedRegularExpression(xmlStreamWriter, star.getExpression());
+			xmlStreamWriter.writeEndElement();  // End TAG_STAR
+		} else if (WeightedRegularExpression.LeftMultiply.class.isInstance(expression)) {
+			xmlStreamWriter.writeStartElement(TAG_LEFT_EXT_MUL);
+			WeightedRegularExpression.LeftMultiply leftMultiply = (WeightedRegularExpression.LeftMultiply) expression;
+			writeWeightTag(xmlStreamWriter, leftMultiply.getWeightValue());
+			writeWeightedRegularExpression(xmlStreamWriter, leftMultiply.getExpression());
+			xmlStreamWriter.writeEndElement();  // End TAG_LEFT_EXT_MUL
+		} else if (WeightedRegularExpression.RightMultiply.class.isInstance(expression)) {
+			xmlStreamWriter.writeStartElement(TAG_RIGHT_EXT_MUL);
+			WeightedRegularExpression.RightMultiply rightMultiply = (WeightedRegularExpression.RightMultiply) expression;
+			writeWeightedRegularExpression(xmlStreamWriter, rightMultiply.getExpression());
+			writeWeightTag(xmlStreamWriter, rightMultiply.getWeightValue());
+			xmlStreamWriter.writeEndElement();  // End TAG_RIGHT_EXT_MUL
+		}
 
-	}  // End private void writeInitialFinalTags(XMLStreamWriter xmlStreamWriter, Automata automata)
+	}  // End private void writeWeightedRegularExpression(XMLStreamWriter xmlStreamWriter, WeightedRegularExpression expression)
+
+	private void writeMonElmtTag(XMLStreamWriter xmlStreamWriter, Object monElmt)
+			throws
+			XMLStreamException,
+			FsmXmlException {
+
+		if (WeightedRegularExpression.Zero.class.isInstance(monElmt)) {
+			xmlStreamWriter.writeStartElement(TAG_ZERO);
+			xmlStreamWriter.writeEndElement();  // End TAG_ZERO
+			return;
+		} else if (WeightedRegularExpression.One.class.isInstance(monElmt)) {
+			xmlStreamWriter.writeStartElement(TAG_ONE);
+			xmlStreamWriter.writeEndElement();  // End TAG_ONE
+			return;
+		}
+
+		xmlStreamWriter.writeStartElement(TAG_MON_ELMT);
+
+		if (List.class.isInstance(monElmt)) {
+			if (AutomataInterface.SymbolPair.class.isInstance(monElmt)) {
+				writeMonGenTag(xmlStreamWriter, monElmt);
+			} else {
+				Iterator iterator = ((List) monElmt).iterator();
+				while (iterator.hasNext()) {
+					writeMonElmtTag(xmlStreamWriter, iterator.next());
+				}  // End while (iterator.hasNext())
+			}
+		} else {  // End if (List.class.isInstance(monElmt))
+			writeMonGenTag(xmlStreamWriter, monElmt);
+		}
+
+		xmlStreamWriter.writeEndElement();  // End TAG_MON_ELMT
+
+	}
+
+	private void writeWeightTag(XMLStreamWriter xmlStreamWriter, Object weight)
+			throws
+			XMLStreamException,
+			FsmXmlException {
+
+		xmlStreamWriter.writeStartElement(TAG_WEIGHT);
+		if (String.class.isInstance(weight)) {
+			xmlStreamWriter.writeAttribute(ATR_VALUE, ((String) weight));
+		} else if (Integer.class.isInstance(weight)) {
+			xmlStreamWriter.writeAttribute(ATR_VALUE, ((Integer) weight).toString());
+		} else if (Double.class.isInstance(weight)) {
+			DecimalFormat decimalFormat = new DecimalFormat("");
+			String output = decimalFormat.format((Double) weight);
+			xmlStreamWriter.writeAttribute(ATR_VALUE, output);
+		}
+		xmlStreamWriter.writeEndElement();  // End TAG_WEIGHT
+
+	}  // End private void writeWeightTag(XMLStreamWriter xmlStreamWriter, Object weight)
 
 	private static void testFsmXmlFile(String filePathToRead, String filePathToWrite)
 			throws

@@ -26,9 +26,9 @@ public interface TransitionInterface {
 
 	public void setTargetState(State targetState);
 
-	public String getLabel();
+	public WeightedRegularExpression getLabel();
 
-	public void setLabel(String label);
+	public void setLabel(WeightedRegularExpression label);
 
 	public GeometricData getGeometricData();
 
