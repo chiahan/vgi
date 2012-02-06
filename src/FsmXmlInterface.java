@@ -41,7 +41,6 @@ public interface FsmXmlInterface {
 
 	public List<Automata> read(InputStream inputStream)
 			throws
-			FileNotFoundException,
 			FsmXmlException;
 
 	public void write(List<Automata> automataList, File fsmXmlFile)

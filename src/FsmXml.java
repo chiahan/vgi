@@ -60,22 +60,6 @@ public class FsmXml implements FsmXmlInterface {
 			this.type = type;
 		}
 
-		@Override
-		public boolean equals(Object obj) {
-			if ((obj == null)
-					|| (!(Tag.class.isAssignableFrom(obj.getClass())))) {
-				return false;
-			}
-			Tag tag = (Tag) obj;
-			if (!(this.localName.equals(tag.localName))) {
-				return false;
-			}
-			if (this.type != tag.type) {
-				return false;
-			}
-			return true;
-		}  // End public boolean equals(Object obj)
-
 		public boolean equals(String localName, Type type) {
 			if ((localName == null) || (type == null)) {
 				return false;
@@ -88,6 +72,91 @@ public class FsmXml implements FsmXmlInterface {
 			}
 			return true;
 		}  // End public boolean equals(String localName, Type type)
+
+		public static Tag nextStartOrEnd(XMLStreamReader xmlStreamReader)
+				throws XMLStreamException {
+			Tag tag = null;
+			while (xmlStreamReader.hasNext()) {
+				int eventType = xmlStreamReader.next();
+				if (eventType == XMLStreamReader.START_ELEMENT) {
+					tag = new Tag(xmlStreamReader.getLocalName(), Tag.Type.START);
+					break;
+				} else if (eventType == XMLStreamReader.END_ELEMENT) {
+					tag = new Tag(xmlStreamReader.getLocalName(), Tag.Type.END);
+					break;
+				}
+			}  // End while (xmlStreamReader.hasNext())
+			return tag;
+		}  // End private String nextStartTag(XMLStreamReader xmlStreamReader)
+
+		public static boolean findNextSpecified(XMLStreamReader xmlStreamReader, String localName, Tag.Type type)
+				throws
+				XMLStreamException {
+			while (xmlStreamReader.hasNext()) {
+				int eventType = xmlStreamReader.next();
+				if (((eventType == XMLStreamReader.START_ELEMENT) && (type == Tag.Type.START))
+						|| ((eventType == XMLStreamReader.END_ELEMENT) && (type == Tag.Type.END))) {
+					String name = xmlStreamReader.getLocalName();
+					if (localName.equals(name)) {
+						return true;
+					}
+				}
+			}  // End while (xmlStreamReader.hasNext())
+			return false;
+		}  // End private boolean findNextSpecifiedTag(String localName, Tag.Type type)
+
+		public static boolean findNextSpecified(XMLStreamReader xmlStreamReader, Tag tag)
+				throws
+				XMLStreamException {
+			if ((tag == null) || (tag.localName == null) || (tag.type == null)) {
+				throw new IllegalArgumentException();
+			}
+			return findNextSpecified(xmlStreamReader, tag.localName, tag.type);
+		}  // End private boolean findNextSpecifiedTag(Tag tag)
+
+		public static void assertTag(String localName, Tag.Type type) throws FsmXmlException {
+
+			if ((localName == null) || (type == null)) {
+				throw new IllegalArgumentException();
+			}
+
+			String message = "Expected \"" + localName;
+			if (type == Tag.Type.START) {
+				message = message + " start\"";
+			} else {
+				message = message + " end\"";
+			}
+
+			throw new FsmXmlException(message + " tag is not found.");
+
+		}  // End private void assertTag(String localName, Tag.Type type) throws FsmXmlException
+
+		public static void assertTag(Tag tagExpected, Tag tagFound) throws FsmXmlException {
+
+			if (tagExpected.equals(tagFound)) {
+				return;
+			}
+
+			String message = "Expected \"" + tagExpected.localName;
+			if (tagExpected.type == Tag.Type.START) {
+				message = message + " start\"";
+			} else {
+				message = message + " end\"";
+			}
+			if (tagFound == null) {
+				message = message + " tag is not found.";
+			} else {
+				message = message + " tag but found \"" + tagFound.localName;
+				if (tagFound.type == Tag.Type.START) {
+					message = message + " start\" tag.";
+				} else {
+					message = message + " end\" tag.";
+				}
+			}
+
+			throw new FsmXmlException(message);
+
+		}  // End private void assertTag(Tag tagExpected, Tag tagFound) throws FsmXmlException
 	}  // End private class Tag
 	private static final String TAG_FSMXML = "fsmxml";
 	private static final String VAL_FSMXML_NAMESPACE = "http://vaucanson.lrde.epita.fr";
@@ -175,95 +244,9 @@ public class FsmXml implements FsmXmlInterface {
 		return this.read(inputStream);
 	}  // End public List<Automata> read(File fsmXmlFile)
 
-	private Tag nextStartOrEndTag(XMLStreamReader xmlStreamReader)
-			throws XMLStreamException {
-		Tag tag = null;
-		while (xmlStreamReader.hasNext()) {
-			int eventType = xmlStreamReader.next();
-			if (eventType == XMLStreamReader.START_ELEMENT) {
-				tag = new Tag(xmlStreamReader.getLocalName(), Tag.Type.START);
-				break;
-			} else if (eventType == XMLStreamReader.END_ELEMENT) {
-				tag = new Tag(xmlStreamReader.getLocalName(), Tag.Type.END);
-				break;
-			}
-		}  // End while (xmlStreamReader.hasNext())
-		return tag;
-	}  // End private String nextStartTag(XMLStreamReader xmlStreamReader)
-
-	private boolean findNextSpecifiedTag(XMLStreamReader xmlStreamReader, String localName, Tag.Type type)
-			throws
-			XMLStreamException {
-		while (xmlStreamReader.hasNext()) {
-			int eventType = xmlStreamReader.next();
-			if (((eventType == XMLStreamReader.START_ELEMENT) && (type == Tag.Type.START))
-					|| ((eventType == XMLStreamReader.END_ELEMENT) && (type == Tag.Type.END))) {
-				String name = xmlStreamReader.getLocalName();
-				if (localName.equals(name)) {
-					return true;
-				}
-			}
-		}  // End while (xmlStreamReader.hasNext())
-		return false;
-	}  // End private boolean findNextSpecifiedTag(String localName, Tag.Type type)
-
-	private boolean findNextSpecifiedTag(XMLStreamReader xmlStreamReader, Tag tag)
-			throws
-			XMLStreamException {
-		if ((tag == null) || (tag.localName == null) || (tag.type == null)) {
-			throw new IllegalArgumentException();
-		}
-		return this.findNextSpecifiedTag(xmlStreamReader, tag.localName, tag.type);
-	}  // End private boolean findNextSpecifiedTag(Tag tag)
-
-	private void assertTag(String localName, Tag.Type type) throws FsmXmlException {
-
-		if ((localName == null) || (type == null)) {
-			throw new IllegalArgumentException();
-		}
-
-		String message = "Expected \"" + localName;
-		if (type == Tag.Type.START) {
-			message = message + " start\"";
-		} else {
-			message = message + " end\"";
-		}
-
-		throw new FsmXmlException(message + " tag is not found.");
-
-	}  // End private void assertTag(String localName, Tag.Type type) throws FsmXmlException
-
-	private void assertTag(Tag tagExpected, Tag tagFound) throws FsmXmlException {
-
-		if (tagExpected.equals(tagFound)) {
-			return;
-		}
-
-		String message = "Expected \"" + tagExpected.localName;
-		if (tagExpected.type == Tag.Type.START) {
-			message = message + " start\"";
-		} else {
-			message = message + " end\"";
-		}
-		if (tagFound == null) {
-			message = message + " tag is not found.";
-		} else {
-			message = message + " tag but found \"" + tagFound.localName;
-			if (tagFound.type == Tag.Type.START) {
-				message = message + " start\" tag.";
-			} else {
-				message = message + " end\" tag.";
-			}
-		}
-
-		throw new FsmXmlException(message);
-
-	}  // End private void assertTag(Tag tagExpected, Tag tagFound) throws FsmXmlException
-
 	@Override
 	public List<Automata> read(InputStream inputStream)
 			throws
-			FileNotFoundException,
 			FsmXmlException {
 
 		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
@@ -276,18 +259,11 @@ public class FsmXml implements FsmXmlInterface {
 			if (eventType != XMLStreamReader.START_DOCUMENT) {
 				throw new FsmXmlException("Unrecognizable FSM XML file.");
 			}
-			if (!(xmlStreamReader.hasNext())) {
-				throw new FsmXmlException("Unrecognizable FSM XML file.");
-			}
-			eventType = xmlStreamReader.next();
-			if (eventType != XMLStreamReader.START_ELEMENT) {
-				throw new FsmXmlException("Unrecognizable FSM XML file.");
-			}
-			String localName = xmlStreamReader.getLocalName();
 			//
 			// Check that <fsmxml xmlns="http://vaucanson.lrde.epita.fr" version="1.0"> is at the root level.
 			//
-			if (!(localName.equals(TAG_FSMXML))) {
+			Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
+			if ((tag == null) || (!(tag.equals(TAG_FSMXML, Tag.Type.START)))) {
 				throw new FsmXmlException("Root tag is not " + TAG_FSMXML + " so this is likely an invalid FSM XML file.");
 			} else if (!(xmlStreamReader.getNamespaceURI().equals(VAL_FSMXML_NAMESPACE))) {
 				throw new FsmXmlException("Namespace is not " + VAL_FSMXML_NAMESPACE + " so this is likely an invalid FSM XML file.");
@@ -296,28 +272,15 @@ public class FsmXml implements FsmXmlInterface {
 			}
 			automataList = new ArrayList<Automata>();
 
-			while (xmlStreamReader.hasNext()) {
+			tag = Tag.nextStartOrEnd(xmlStreamReader);
+			while ((tag != null) && (!(tag.equals(TAG_FSMXML, Tag.Type.END)))) {
 
-				eventType = xmlStreamReader.next();
-				if (eventType == XMLStreamReader.START_ELEMENT) {
+				if (tag.equals(TAG_AUTOMATON, Tag.Type.START)) {
+					automataList.add(parseAutomatonTag(xmlStreamReader));
+				}
 
-					localName = xmlStreamReader.getLocalName();
-					if (localName.equals(TAG_AUTOMATON)) {
-						Automata automata = parseAutomatonTag(xmlStreamReader);
-						automataList.add(automata);
-					}
-
-				} // End if (eventType == XMLStreamReader.START_ELEMENT)
-				else if (eventType == XMLStreamReader.END_ELEMENT) {
-
-					localName = xmlStreamReader.getLocalName();
-					if (localName.equals(TAG_FSMXML)) {
-						break;
-					}
-
-				}  // End if (eventType == XMLStreamReader.END_ELEMENT)
-
-			}  // End while (xmlStreamReader.hasNext())
+				tag = Tag.nextStartOrEnd(xmlStreamReader);
+			}  // End while ((tag != null) && (!(tag.equals(TAG_FSMXML, Tag.Type.END))))
 
 		} catch (XMLStreamException xmlStreamException) {
 			throw new FsmXmlException(xmlStreamException);
@@ -344,30 +307,21 @@ public class FsmXml implements FsmXmlInterface {
 
 		Automata automata = new Automata();
 
-		while (xmlStreamReader.hasNext()) {
+		Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
+		while ((tag != null) && (!(tag.equals(TAG_AUTOMATON, Tag.Type.END)))) {
 
-			int eventType = xmlStreamReader.next();
-			if (eventType == XMLStreamReader.START_ELEMENT) {
+			if (tag.equals(TAG_VALUE_TYPE, Tag.Type.START)) {
+				parseValueTypeTag(xmlStreamReader, automata);
+			} else if (tag.equals(TAG_AUTOMATON_STRUCT, Tag.Type.START)) {
+				parseAutomatonStructTag(xmlStreamReader, automata);
+			}
 
-				String localName = xmlStreamReader.getLocalName();
-				if (localName.equals(TAG_VALUE_TYPE)) {
-					parseValueTypeTag(xmlStreamReader, automata);
-				} else if (localName.equals(TAG_AUTOMATON_STRUCT)) {
-					parseAutomatonStructTag(xmlStreamReader, automata);
-				}
+			tag = Tag.nextStartOrEnd(xmlStreamReader);
+		}  // End while ((tag != null) && (!(tag.equals(TAG_AUTOMATON, Tag.Type.END))))
 
-			} // End if (eventType == XMLStreamReader.START_ELEMENT)
-			else if (eventType == XMLStreamReader.END_ELEMENT) {
-
-				String localName = xmlStreamReader.getLocalName();
-				if (localName.equals(TAG_AUTOMATON)) {
-					break;
-				}
-
-			}  // End if (eventType == XMLStreamReader.END_ELEMENT)
-
-		}  // End while (xmlStreamReader.hasNext())
-
+		if (automata == null) {
+			throw new FsmXmlException("Parsing \"" + TAG_AUTOMATON + "\" tag yields no result.");
+		}
 		return automata;
 	}
 
@@ -375,81 +329,79 @@ public class FsmXml implements FsmXmlInterface {
 			throws XMLStreamException,
 			FsmXmlException {
 
-		while (xmlStreamReader.hasNext()) {
+		Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
+		while ((tag != null) && (!(tag.equals(TAG_VALUE_TYPE, Tag.Type.END)))) {
 
-			int eventType = xmlStreamReader.next();
-			if (eventType == XMLStreamReader.START_ELEMENT) {
+			if (tag.equals(TAG_WRITING_DATA, Tag.Type.START)) {
 
-				String localName = xmlStreamReader.getLocalName();
-				if (localName.equals(TAG_WRITING_DATA)) {
+				if (automata.getWritingData() == null) {
+					AutomataInterface.WritingData writingData = new AutomataInterface.WritingData();
+					writingData.closePar = xmlStreamReader.getAttributeValue(null, ATR_CLOSE_PAR).charAt(0);
+					writingData.openPar = xmlStreamReader.getAttributeValue(null, ATR_OPEN_PAR).charAt(0);
+					writingData.plusSym = xmlStreamReader.getAttributeValue(null, ATR_PLUS_SYM).charAt(0);
+					writingData.spacesSym = xmlStreamReader.getAttributeValue(null, ATR_SPACES_SYM).charAt(0);
+					writingData.starSym = xmlStreamReader.getAttributeValue(null, ATR_STAR_SYM).charAt(0);
+					writingData.timesSym = xmlStreamReader.getAttributeValue(null, ATR_TIMES_SYM).charAt(0);
+					writingData.weightClosing = xmlStreamReader.getAttributeValue(null, ATR_WEIGHT_CLOSING).charAt(0);
+					writingData.weightOpening = xmlStreamReader.getAttributeValue(null, ATR_WEIGHT_OPENING).charAt(0);
+					writingData.zeroSym = xmlStreamReader.getAttributeValue(null, ATR_ZERO_SYM).charAt(0);
+					automata.setWritingData(writingData);
+				}
 
-					if (automata.getWritingData() == null) {
-						AutomataInterface.WritingData writingData = new AutomataInterface.WritingData();
-						writingData.closePar = xmlStreamReader.getAttributeValue(null, ATR_CLOSE_PAR).charAt(0);
-						writingData.openPar = xmlStreamReader.getAttributeValue(null, ATR_OPEN_PAR).charAt(0);
-						writingData.plusSym = xmlStreamReader.getAttributeValue(null, ATR_PLUS_SYM).charAt(0);
-						writingData.spacesSym = xmlStreamReader.getAttributeValue(null, ATR_SPACES_SYM).charAt(0);
-						writingData.starSym = xmlStreamReader.getAttributeValue(null, ATR_STAR_SYM).charAt(0);
-						writingData.timesSym = xmlStreamReader.getAttributeValue(null, ATR_TIMES_SYM).charAt(0);
-						writingData.weightClosing = xmlStreamReader.getAttributeValue(null, ATR_WEIGHT_CLOSING).charAt(0);
-						writingData.weightOpening = xmlStreamReader.getAttributeValue(null, ATR_WEIGHT_OPENING).charAt(0);
-						writingData.zeroSym = xmlStreamReader.getAttributeValue(null, ATR_ZERO_SYM).charAt(0);
-						automata.setWritingData(writingData);
-					}
+			} else if (tag.equals(TAG_SEMIRING, Tag.Type.START)) {
 
-				} else if (localName.equals(TAG_SEMIRING)) {
+				AutomataInterface.Weight weight = new AutomataInterface.Weight();
+				String set = xmlStreamReader.getAttributeValue(null, ATR_SET);
+				String operations = xmlStreamReader.getAttributeValue(null, ATR_OPERATIONS);
 
-					AutomataInterface.Weight weight = new AutomataInterface.Weight();
-					String set = xmlStreamReader.getAttributeValue(null, ATR_SET);
-					String operations = xmlStreamReader.getAttributeValue(null, ATR_OPERATIONS);
+				if (set.equals(VAL_B)) {
 
-					if (set.equals(VAL_B)) {
-
-						if (operations.equals(VAL_CLASSICAL)) {
-							weight.semiring = TAFKitInterface.AutomataType.Semiring.B_BOOLEAN;
-						} else if (operations.equals(VAL_FIELD)) {
-							weight.semiring = TAFKitInterface.AutomataType.Semiring.F2_TWO_ELEMENT_FIELD;
-						} else {
-							throw new FsmXmlException("Unrecognizable semiring operation.");
-						}
-
-					} else if (set.equals(VAL_Z)) {
-
-						if (operations.equals(VAL_CLASSICAL)) {
-							weight.semiring = TAFKitInterface.AutomataType.Semiring.Z_INTEGER;
-						} else if (operations.equals(VAL_MIN_PLUS)) {
-							weight.semiring = TAFKitInterface.AutomataType.Semiring.ZMIN_MIN_TROPICAL;
-						} else if (operations.equals(VAL_MAX_PLUS)) {
-							weight.semiring = TAFKitInterface.AutomataType.Semiring.ZMAX_MAX_TROPICAL;
-						} else {
-							throw new FsmXmlException("Unrecognizable semiring operation.");
-						}
-
-					} else if (set.equals(VAL_Q)) {
-						weight.semiring = TAFKitInterface.AutomataType.Semiring.Q_RATIONAL;
-					} else if (set.equals(VAL_R)) {
-						weight.semiring = TAFKitInterface.AutomataType.Semiring.R_REAL;
+					if (operations.equals(VAL_CLASSICAL)) {
+						weight.semiring = TAFKitInterface.AutomataType.Semiring.B_BOOLEAN;
+					} else if (operations.equals(VAL_FIELD)) {
+						weight.semiring = TAFKitInterface.AutomataType.Semiring.F2_TWO_ELEMENT_FIELD;
 					} else {
-						throw new FsmXmlException("Unrecognizable semiring set.");
+						throw new FsmXmlException("Unrecognizable semiring operation.");
 					}
 
-					automata.setWeight(weight);
+				} else if (set.equals(VAL_Z)) {
 
-				} else if (localName.equals(TAG_MONOID)) {
-					parseMonoidTag(xmlStreamReader, automata);
+					if (operations.equals(VAL_CLASSICAL)) {
+						weight.semiring = TAFKitInterface.AutomataType.Semiring.Z_INTEGER;
+					} else if (operations.equals(VAL_MIN_PLUS)) {
+						weight.semiring = TAFKitInterface.AutomataType.Semiring.ZMIN_MIN_TROPICAL;
+					} else if (operations.equals(VAL_MAX_PLUS)) {
+						weight.semiring = TAFKitInterface.AutomataType.Semiring.ZMAX_MAX_TROPICAL;
+					} else {
+						throw new FsmXmlException("Unrecognizable semiring operation.");
+					}
+
+				} else if (set.equals(VAL_Q)) {
+					weight.semiring = TAFKitInterface.AutomataType.Semiring.Q_RATIONAL;
+				} else if (set.equals(VAL_R)) {
+					weight.semiring = TAFKitInterface.AutomataType.Semiring.R_REAL;
+				} else {
+					throw new FsmXmlException("Unrecognizable semiring set.");
 				}
 
-			} // End if (eventType == XMLStreamReader.START_ELEMENT)
-			else if (eventType == XMLStreamReader.END_ELEMENT) {
+				automata.setWeight(weight);
 
-				String localName = xmlStreamReader.getLocalName();
-				if (localName.equals(TAG_VALUE_TYPE)) {
-					break;
-				}
+			} else if (tag.equals(TAG_MONOID, Tag.Type.START)) {
+				parseMonoidTag(xmlStreamReader, automata);
+			}
 
-			}  // End if (eventType == XMLStreamReader.END_ELEMENT)
+			tag = Tag.nextStartOrEnd(xmlStreamReader);
+		}  // End while ((tag != null) && (!(tag.equals(TAG_VALUE_TYPE, Tag.Type.END))))
 
-		}  // End while (xmlStreamReader.hasNext())
+		if (automata.getAlphabet() == null) {
+			throw new FsmXmlException("Missing alphabet definition (i.e. <" + TAG_MONOID + "> tag) in the FSM XML file.");
+		}
+		if (automata.getWeight() == null) {
+			throw new FsmXmlException("Missing weight definition (i.e. <" + TAG_SEMIRING + "> tag) in the FSM XML file.");
+		}
+		if (automata.getWritingData() == null) {
+			throw new FsmXmlException("Missing writing data definition (i.e. <" + TAG_WRITING_DATA + "> tag) in the FSM XML file.");
+		}
 
 	}  // End private void parseValueTypeTag(XMLStreamReader xmlStreamReader, Automata automata)
 
@@ -499,34 +451,22 @@ public class FsmXml implements FsmXmlInterface {
 			}
 		}  // End if (alphabet != null)
 
-		while (xmlStreamReader.hasNext()) {
+		Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
+		while ((tag != null) && (!(tag.equals(TAG_MONOID, Tag.Type.END)))) {
 
-			int eventType = xmlStreamReader.next();
-			if (eventType == XMLStreamReader.START_ELEMENT) {
+			if ((tag.equals(TAG_WRITING_DATA, Tag.Type.START)) && (alphabet != null)) {
+				alphabet.identitySymbol = xmlStreamReader.getAttributeValue(null, ATR_IDENTITY_SYM);
+				alphabet.timesSymbol = xmlStreamReader.getAttributeValue(null, ATR_TIMES_SYM);
+			} else if ((tag.equals(TAG_MON_GEN, Tag.Type.START)) && (alphabet != null)) {
+				alphabet.allSymbols.add(parseMonGenTag(xmlStreamReader, automata));
+			} else if (tag.equals(TAG_MONOID, Tag.Type.START)) {
+				parseMonoidTag(xmlStreamReader, automata);
+			} else if (tag.equals(TAG_GEN_SORT, Tag.Type.START)) {
+				alphabet.dataType = parseGenSortTag(xmlStreamReader, automata);
+			}
 
-				String localName = xmlStreamReader.getLocalName();
-				if ((localName.equals(TAG_WRITING_DATA)) && (alphabet != null)) {
-					alphabet.identitySymbol = xmlStreamReader.getAttributeValue(null, ATR_IDENTITY_SYM);
-					alphabet.timesSymbol = xmlStreamReader.getAttributeValue(null, ATR_TIMES_SYM);
-				} else if ((localName.equals(TAG_MON_GEN)) && (alphabet != null)) {
-					alphabet.allSymbols.add(parseMonGenTag(xmlStreamReader, automata));
-				} else if (localName.equals(TAG_MONOID)) {
-					parseMonoidTag(xmlStreamReader, automata);
-				} else if (localName.equals(TAG_GEN_SORT)) {
-					alphabet.dataType = parseGenSortTag(xmlStreamReader, automata);
-				}
-
-			} // End if (eventType == XMLStreamReader.START_ELEMENT)
-			else if (eventType == XMLStreamReader.END_ELEMENT) {
-
-				String localName = xmlStreamReader.getLocalName();
-				if (localName.equals(TAG_MONOID)) {
-					break;
-				}
-
-			}  // End if (eventType == XMLStreamReader.END_ELEMENT)
-
-		}  // End while (xmlStreamReader.hasNext())
+			tag = Tag.nextStartOrEnd(xmlStreamReader);
+		}  // End while ((tag != null) && (!(tag.equals(TAG_MONOID, Tag.Type.END))))
 
 	}  // End private void parseMonoidTag(XMLStreamReader xmlStreamReader, Automata automata)
 
@@ -541,55 +481,43 @@ public class FsmXml implements FsmXmlInterface {
 
 		AutomataInterface.SymbolPair<Object> pair = new AutomataInterface.SymbolPair<Object>();
 
-		while (xmlStreamReader.hasNext()) {
+		Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
+		while ((tag != null) && (!(tag.equals(TAG_MON_GEN, Tag.Type.END)))) {
 
-			int eventType = xmlStreamReader.next();
-			if (eventType == XMLStreamReader.START_ELEMENT) {
+			if (tag.equals(TAG_MON_COMP_GEN, Tag.Type.START)) {
+				value = xmlStreamReader.getAttributeValue(null, ATR_VALUE);
+				Object symbol;
 
-				String localName = xmlStreamReader.getLocalName();
-				if (localName.equals(TAG_MON_COMP_GEN)) {
-
-					value = xmlStreamReader.getAttributeValue(null, ATR_VALUE);
-					Object symbol;
-					switch (automata.getAlphabet().dataType) {
-						case CHAR_CHAR:
+				switch (automata.getAlphabet().dataType) {
+					case CHAR_CHAR:
+						symbol = new Character(value.charAt(0));
+						break;
+					case CHAR_INT:
+						if (pair.isEmpty()) {
 							symbol = new Character(value.charAt(0));
-							break;
-						case CHAR_INT:
-							if (pair.isEmpty()) {
-								symbol = new Character(value.charAt(0));
-							} else {
-								symbol = new Integer(value);
-							}
-							break;
-						case INT_CHAR:
-							if (pair.isEmpty()) {
-								symbol = new Integer(value);
-							} else {
-								symbol = new Character(value.charAt(0));
-							}
-							break;
-						case INT_INT:
+						} else {
 							symbol = new Integer(value);
-							break;
-						default:
-							throw new FsmXmlException("Unexpected value of the alphabet data type.");
-					}  // End switch (automata.getAlphabet().dataType)
-					pair.add(symbol);
+						}
+						break;
+					case INT_CHAR:
+						if (pair.isEmpty()) {
+							symbol = new Integer(value);
+						} else {
+							symbol = new Character(value.charAt(0));
+						}
+						break;
+					case INT_INT:
+						symbol = new Integer(value);
+						break;
+					default:
+						throw new FsmXmlException("Unexpected value of the alphabet data type.");
+				}  // End switch (automata.getAlphabet().dataType)
 
-				}  // End if (localName.equals(TAG_MON_COMP_GEN))
+				pair.add(symbol);
+			}  // End if (tag.equals(TAG_MON_COMP_GEN, Tag.Type.START))
 
-			} // End if (eventType == XMLStreamReader.START_ELEMENT)
-			else if (eventType == XMLStreamReader.END_ELEMENT) {
-
-				String localName = xmlStreamReader.getLocalName();
-				if (localName.equals(TAG_MON_GEN)) {
-					break;
-				}
-
-			}  // End if (eventType == XMLStreamReader.END_ELEMENT)
-
-		}  // End while (xmlStreamReader.hasNext())
+			tag = Tag.nextStartOrEnd(xmlStreamReader);
+		}  // End while ((tag != null) && (!(tag.equals(TAG_MON_GEN, Tag.Type.END))))
 
 		if (pair.isEmpty()) {
 			pair = null;
@@ -604,54 +532,41 @@ public class FsmXml implements FsmXmlInterface {
 
 		TAFKitInterface.AutomataType.AlphabetDataType dataType = null;
 
-		while (xmlStreamReader.hasNext()) {
+		Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
+		while ((tag != null) && (!(tag.equals(TAG_GEN_SORT, Tag.Type.END)))) {
 
-			int eventType = xmlStreamReader.next();
-			if (eventType == XMLStreamReader.START_ELEMENT) {
+			if (tag.equals(TAG_GEN_COMP_SORT, Tag.Type.START)) {
+				String genCompSort = xmlStreamReader.getAttributeValue(null, ATR_VALUE);
 
-				String localName = xmlStreamReader.getLocalName();
-				if (localName.equals(TAG_GEN_COMP_SORT)) {
+				if ((genCompSort.equals(VAL_LETTERS))
+						|| (genCompSort.equals(VAL_DIGITS))
+						|| (genCompSort.equals(VAL_ALPHANUMS))) {
 
-					String genCompSort = xmlStreamReader.getAttributeValue(null, ATR_VALUE);
-					if ((genCompSort.equals(VAL_LETTERS))
-							|| (genCompSort.equals(VAL_DIGITS))
-							|| (genCompSort.equals(VAL_ALPHANUMS))) {
-
-						if (dataType == null) {
-							dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR;
-						} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.CHAR) {
-							dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR_CHAR;
-						} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.INT) {
-							dataType = TAFKitInterface.AutomataType.AlphabetDataType.INT_CHAR;
-						}
-
-					} else if (genCompSort.equals(VAL_INTEGERS)) {
-
-						if (dataType == null) {
-							dataType = TAFKitInterface.AutomataType.AlphabetDataType.INT;
-						} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.CHAR) {
-							dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR_INT;
-						} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.INT) {
-							dataType = TAFKitInterface.AutomataType.AlphabetDataType.INT_INT;
-						}
-
-					} else {
-						throw new FsmXmlException("Unrecognizable value of the \"" + ATR_VALUE + "\" attribute of the \"" + TAG_GEN_COMP_SORT + "\" tag.");
+					if (dataType == null) {
+						dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR;
+					} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.CHAR) {
+						dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR_CHAR;
+					} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.INT) {
+						dataType = TAFKitInterface.AutomataType.AlphabetDataType.INT_CHAR;
 					}
 
+				} else if (genCompSort.equals(VAL_INTEGERS)) {
+
+					if (dataType == null) {
+						dataType = TAFKitInterface.AutomataType.AlphabetDataType.INT;
+					} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.CHAR) {
+						dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR_INT;
+					} else if (dataType == TAFKitInterface.AutomataType.AlphabetDataType.INT) {
+						dataType = TAFKitInterface.AutomataType.AlphabetDataType.INT_INT;
+					}
+
+				} else {
+					throw new FsmXmlException("Unrecognizable value of the \"" + ATR_VALUE + "\" attribute of the \"" + TAG_GEN_COMP_SORT + "\" tag.");
 				}
+			}  // End if (tag.equals(TAG_GEN_COMP_SORT, Tag.Type.START))
 
-			} // End if (eventType == XMLStreamReader.START_ELEMENT)
-			else if (eventType == XMLStreamReader.END_ELEMENT) {
-
-				String localName = xmlStreamReader.getLocalName();
-				if (localName.equals(TAG_GEN_SORT)) {
-					break;
-				}
-
-			}  // End if (eventType == XMLStreamReader.END_ELEMENT)
-
-		}  // End while (xmlStreamReader.hasNext())
+			tag = Tag.nextStartOrEnd(xmlStreamReader);
+		}  // End while ((tag != null) && (!(tag.equals(TAG_GEN_SORT, Tag.Type.END))))
 
 		if (dataType == null) {
 			throw new FsmXmlException("Parsing \"" + TAG_GEN_SORT + "\" tag yields no result.");
@@ -663,18 +578,18 @@ public class FsmXml implements FsmXmlInterface {
 			throws XMLStreamException,
 			FsmXmlException {
 
-		if (!(this.findNextSpecifiedTag(xmlStreamReader, TAG_STATES, Tag.Type.START))) {
-			assertTag(TAG_STATES, Tag.Type.START);
+		if (!(Tag.findNextSpecified(xmlStreamReader, TAG_STATES, Tag.Type.START))) {
+			Tag.assertTag(TAG_STATES, Tag.Type.START);
 		}
 		Map<String, State> statesMap = parseStatesTag(xmlStreamReader, automata);
 
-		if (!(this.findNextSpecifiedTag(xmlStreamReader, TAG_TRANSITIONS, Tag.Type.START))) {
-			assertTag(TAG_TRANSITIONS, Tag.Type.START);
+		if (!(Tag.findNextSpecified(xmlStreamReader, TAG_TRANSITIONS, Tag.Type.START))) {
+			Tag.assertTag(TAG_TRANSITIONS, Tag.Type.START);
 		}
 		parseTransitionsTag(xmlStreamReader, automata, statesMap);
 
-		if (!(this.findNextSpecifiedTag(xmlStreamReader, TAG_AUTOMATON_STRUCT, Tag.Type.END))) {
-			assertTag(TAG_AUTOMATON_STRUCT, Tag.Type.END);
+		if (!(Tag.findNextSpecified(xmlStreamReader, TAG_AUTOMATON_STRUCT, Tag.Type.END))) {
+			Tag.assertTag(TAG_AUTOMATON_STRUCT, Tag.Type.END);
 		}
 
 	}  // End private void parseAutomatonStructTag(XMLStreamReader xmlStreamReader, Automata automata)
@@ -685,7 +600,7 @@ public class FsmXml implements FsmXmlInterface {
 
 		Map<String, State> statesMap = new HashMap<String, State>();
 
-		Tag tag = this.nextStartOrEndTag(xmlStreamReader);
+		Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
 		while ((tag != null) && (!(tag.equals(TAG_STATES, Tag.Type.END)))) {
 
 			if (tag.equals(TAG_STATE, Tag.Type.START)) {
@@ -702,14 +617,14 @@ public class FsmXml implements FsmXmlInterface {
 				parseStateGeometricData(xmlStreamReader, automata);
 			}  // End if (tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.START))
 
-			tag = this.nextStartOrEndTag(xmlStreamReader);
+			tag = Tag.nextStartOrEnd(xmlStreamReader);
 
 		}  // End while ((tag != null) && (!(tag.equals(TAG_STATES, Tag.Type.END))))
 
-		if (statesMap.isEmpty()) {
-			statesMap = null;
-			throw new FsmXmlException("Parsing \"" + TAG_STATES + "\" tag yields no result.");
-		}
+//		if (statesMap.isEmpty()) {
+//			statesMap = null;
+//			throw new FsmXmlException("Parsing \"" + TAG_STATES + "\" tag yields no result.");
+//		}
 		return statesMap;
 
 	}  // End private Map<String, State> parseStatesTag(XMLStreamReader xmlStreamReader, Automata automata)
@@ -718,21 +633,15 @@ public class FsmXml implements FsmXmlInterface {
 			throws XMLStreamException,
 			FsmXmlException {
 
-		Tag tag;
+		Double x = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_X));
+		Double y = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_Y));
+		List<State> allStates = automata.getAllStates();
+		State state = allStates.get(allStates.size() - 1);
+		state.getGeometricData().location = new Point2D.Double(x, y);
 
-		do {  //  while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END))))
-
-			if ((xmlStreamReader.isStartElement()) && (xmlStreamReader.getLocalName().equals(TAG_GEOMETRIC_DATA))) {
-				Double x = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_X));
-				Double y = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_Y));
-				List<State> allStates = automata.getAllStates();
-				State state = allStates.get(allStates.size() - 1);
-				state.getGeometricData().location = new Point2D.Double(x, y);
-			}
-
-			tag = this.nextStartOrEndTag(xmlStreamReader);
-
-		} while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END))));
+		if (!(Tag.findNextSpecified(xmlStreamReader, TAG_GEOMETRIC_DATA, Tag.Type.END))) {
+			Tag.assertTag(TAG_GEOMETRIC_DATA, Tag.Type.END);
+		}
 
 	}  // End private void parseStateGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
 
@@ -740,7 +649,7 @@ public class FsmXml implements FsmXmlInterface {
 			throws XMLStreamException,
 			FsmXmlException {
 
-		Tag tag = this.nextStartOrEndTag(xmlStreamReader);
+		Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
 		while ((tag != null) && (!(tag.equals(TAG_TRANSITIONS, Tag.Type.END)))) {
 
 			if (tag.equals(TAG_TRANSITION, Tag.Type.START)) {
@@ -761,8 +670,8 @@ public class FsmXml implements FsmXmlInterface {
 				if (targetState == null) {
 					throw new FsmXmlException("Missing state with id \"" + targetId + "\", which is referenced by a transition.");
 				}
-				if (!(this.findNextSpecifiedTag(xmlStreamReader, TAG_LABEL, Tag.Type.START))) {
-					this.assertTag(TAG_LABEL, Tag.Type.START);
+				if (!(Tag.findNextSpecified(xmlStreamReader, TAG_LABEL, Tag.Type.START))) {
+					Tag.assertTag(TAG_LABEL, Tag.Type.START);
 				}
 				WeightedRegularExpression label = parseLabelTag(xmlStreamReader, automata);
 				Transition transition = new Transition();
@@ -804,7 +713,7 @@ public class FsmXml implements FsmXmlInterface {
 
 			}  // End if (tag.equals(TAG_FINAL, Tag.Type.START))
 
-			tag = this.nextStartOrEndTag(xmlStreamReader);
+			tag = Tag.nextStartOrEnd(xmlStreamReader);
 
 		}  // End while ((tag != null) && (!(tag.equals(TAG_TRANSITIONS, Tag.Type.END))))
 
@@ -915,27 +824,21 @@ public class FsmXml implements FsmXmlInterface {
 
 		Object returnObject = null;
 
-		while (xmlStreamReader.hasNext()) {
+		Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
+		while ((tag != null) && (!(tag.equals(TAG_MON_ELMT, Tag.Type.END)))) {
+			Object object = null;
 
-			xmlStreamReader.next();
-			if (xmlStreamReader.isEndElement() && TAG_MON_ELMT.equals(xmlStreamReader.getLocalName())) {
-				break;
+			if (tag.equals(TAG_MON_GEN, Tag.Type.START)) {
+				object = parseMonGenTag(xmlStreamReader, automata);
+			} else if (tag.equals(TAG_MON_ELMT, Tag.Type.START)) {
+				object = parseMonElmtTag(xmlStreamReader, automata);
+			} else if (tag.equals(TAG_ZERO, Tag.Type.START)) {
+				object = new WeightedRegularExpression.Zero();
+			} else if (tag.equals(TAG_ONE, Tag.Type.START)) {
+				object = new WeightedRegularExpression.One();
 			}
 
-			if (xmlStreamReader.isStartElement()) {
-				String localName = xmlStreamReader.getLocalName();
-				Object object = null;
-
-				if (TAG_MON_GEN.equals(localName)) {
-					object = parseMonGenTag(xmlStreamReader, automata);
-				} else if (TAG_MON_ELMT.equals(localName)) {
-					object = parseMonElmtTag(xmlStreamReader, automata);
-				} else if (TAG_ZERO.equals(localName)) {
-					object = new WeightedRegularExpression.Zero();
-				} else if (TAG_ONE.equals(localName)) {
-					object = new WeightedRegularExpression.One();
-				}
-
+			if (object != null) {
 				if (returnObject == null) {
 					returnObject = object;
 				} else if (List.class.isInstance(returnObject)) {
@@ -946,9 +849,10 @@ public class FsmXml implements FsmXmlInterface {
 					list.add(object);
 					returnObject = list;
 				}
-			}  // End if (xmlStreamReader.isStartElement())
+			}  // End if (object != null)
 
-		}  // End while (xmlStreamReader.hasNext())
+			tag = Tag.nextStartOrEnd(xmlStreamReader);
+		}  // End while ((tag != null) && (!(tag.equals(TAG_MON_ELMT, Tag.Type.END))))
 
 		if (returnObject == null) {
 			throw new FsmXmlException("Parsing \"" + TAG_MON_ELMT + "\" tag yields no result.");
@@ -978,14 +882,9 @@ public class FsmXml implements FsmXmlInterface {
 				throw new FsmXmlException("Unrecognizable semiring set.");
 		}  // End switch (automata.getWeight().semiring)
 
-		while (xmlStreamReader.hasNext()) {
-
-			xmlStreamReader.next();
-			if (xmlStreamReader.isEndElement() && TAG_WEIGHT.equals(xmlStreamReader.getLocalName())) {
-				break;
-			}
-
-		}  // End while (xmlStreamReader.hasNext())
+		if (!(Tag.findNextSpecified(xmlStreamReader, TAG_WEIGHT, Tag.Type.END))) {
+			Tag.assertTag(TAG_WEIGHT, Tag.Type.END);
+		}
 
 		if (object == null) {
 			throw new FsmXmlException("Parsing \"" + TAG_WEIGHT + "\" tag yields no result.");
@@ -997,21 +896,19 @@ public class FsmXml implements FsmXmlInterface {
 			throws XMLStreamException,
 			FsmXmlException {
 
-		Tag tag;
+		Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
+		while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END)))) {
 
-		do {  //  while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END))))
-
-			if ((xmlStreamReader.isStartElement()) && (xmlStreamReader.getLocalName().equals(TAG_CONTROL_POINT))) {
+			if (tag.equals(TAG_CONTROL_POINT, Tag.Type.START)) {
 				Double x = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_X));
 				Double y = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_Y));
 				List<Transition> allTransitions = automata.getAllTransitions();
 				Transition transition = allTransitions.get(allTransitions.size() - 1);
 				transition.getGeometricData().controlPoints.add(new Point2D.Double(x, y));
-			}  // End if ((xmlStreamReader.isStartElement()) && (xmlStreamReader.getLocalName().equals(TAG_CONTROL_POINT)))
+			}  // End if (tag.equals(TAG_CONTROL_POINT, Tag.Type.START))
 
-			tag = this.nextStartOrEndTag(xmlStreamReader);
-
-		} while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END))));
+			tag = Tag.nextStartOrEnd(xmlStreamReader);
+		}  // End while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END))))
 
 	}  // End private void parseTransitionGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
 
