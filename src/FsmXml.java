@@ -9,7 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1397,8 +1397,9 @@ public class FsmXml implements FsmXmlInterface {
 		} else if (Integer.class.isInstance(weight)) {
 			xmlStreamWriter.writeAttribute(ATR_VALUE, ((Integer) weight).toString());
 		} else if (Double.class.isInstance(weight)) {
-			DecimalFormat decimalFormat = new DecimalFormat("");
-			String output = decimalFormat.format((Double) weight);
+			NumberFormat numberFormat = NumberFormat.getInstance();
+			numberFormat.setGroupingUsed(false);
+			String output = numberFormat.format((Double) weight);
 			xmlStreamWriter.writeAttribute(ATR_VALUE, output);
 		}
 		xmlStreamWriter.writeEndElement();  // End TAG_WEIGHT

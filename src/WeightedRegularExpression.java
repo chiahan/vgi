@@ -1,10 +1,25 @@
 
+import java.text.NumberFormat;
+
 /**
  *
  * @author JLiu
  */
 public abstract class WeightedRegularExpression {
 
+	public class HighlightRange {
+
+		public int start;
+		public int end;
+
+		public HighlightRange() {
+		}
+
+		public HighlightRange(int start, int end) {
+			this.start = start;
+			this.end = end;
+		}
+	}  // End public class HighlightRange
 	private WeightedRegularExpression parent;
 	private AutomataInterface.Alphabet alphabet;
 	private AutomataInterface.Weight weight;
@@ -73,6 +88,15 @@ public abstract class WeightedRegularExpression {
 		return this;
 	}
 
+	public HighlightRange getHighlightRange() {
+		int startOffset = 0;
+		if ((this.parent != null)
+				&& (ChildEnumerable.class.isInstance(this.parent))) {
+			startOffset = ((ChildEnumerable) this.parent).getHighlightStartOffsetOfThisChild(this);
+		}
+		return new HighlightRange(startOffset, startOffset + this.toString().length());
+	}
+
 	public WeightedRegularExpression getNextSelectedExpression() {
 		if ((this.parent == null)
 				|| (!(ChildEnumerable.class.isInstance(this.parent)))) {
@@ -90,6 +114,8 @@ public abstract class WeightedRegularExpression {
 	}
 
 	public interface ChildEnumerable {
+
+		public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child);
 
 		public WeightedRegularExpression getSelectedExpressionAfterThisChild(WeightedRegularExpression child);
 
@@ -136,6 +162,20 @@ public abstract class WeightedRegularExpression {
 		}
 
 		@Override
+		public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child) {
+			if (child == null) {
+				throw new IllegalArgumentException("Required input is not a child of this node!");
+			}
+			WeightedRegularExpression parent = this.getParent();
+			if ((parent != null)
+					&& (ChildEnumerable.class.isInstance(parent))) {
+				return ((ChildEnumerable) parent).getHighlightStartOffsetOfThisChild(this);
+			} else {
+				return 0;
+			}
+		}
+
+		@Override
 		public WeightedRegularExpression getNextSelectedExpression() {
 			WeightedRegularExpression parent = this.getParent();
 			if ((parent == null)
@@ -147,9 +187,9 @@ public abstract class WeightedRegularExpression {
 
 		@Override
 		public WeightedRegularExpression getPreviousSelectedExpression() {
-			if (LeftMultiply.class.isInstance(this.expression)) {
-				return ((LeftMultiply) this.expression).getExpression();
-			}
+//			if (LeftMultiply.class.isInstance(this.expression)) {
+//				return ((LeftMultiply) this.expression).getExpression();
+//			}
 			return this.expression;
 		}
 
@@ -219,6 +259,20 @@ public abstract class WeightedRegularExpression {
 		}
 
 		@Override
+		public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child) {
+			if (child == null) {
+				throw new IllegalArgumentException("Required input is not a child of this node!");
+			}
+			WeightedRegularExpression parent = this.getParent();
+			if ((parent != null)
+					&& (ChildEnumerable.class.isInstance(parent))) {
+				return ((ChildEnumerable) parent).getHighlightStartOffsetOfThisChild(this);
+			} else {
+				return 0;
+			}
+		}
+
+		@Override
 		public WeightedRegularExpression getNextSelectedExpression() {
 			WeightedRegularExpression parent = this.getParent();
 			if ((parent == null)
@@ -230,9 +284,9 @@ public abstract class WeightedRegularExpression {
 
 		@Override
 		public WeightedRegularExpression getPreviousSelectedExpression() {
-			if (LeftMultiply.class.isInstance(this.rightExpression)) {
-				return ((LeftMultiply) this.rightExpression).getExpression();
-			}
+//			if (LeftMultiply.class.isInstance(this.rightExpression)) {
+//				return ((LeftMultiply) this.rightExpression).getExpression();
+//			}
 			return this.rightExpression;
 		}
 
@@ -319,6 +373,24 @@ public abstract class WeightedRegularExpression {
 		}
 
 		@Override
+		public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child) {
+
+			int startOffset = super.getHighlightStartOffsetOfThisChild(child);
+			WeightedRegularExpression leftExpression = this.getLeftExpression();
+			WeightedRegularExpression rightExpression = this.getRightExpression();
+			AutomataInterface.WritingData writingData = this.getWritingData();
+
+			if (child.equals(leftExpression)) {
+				return startOffset;
+			} else if (child.equals(rightExpression)) {
+				return startOffset + leftExpression.toString().length() + writingData.plusSym.toString().length();
+			} else {
+				throw new IllegalArgumentException("Required input is not a child of this node!");
+			}
+
+		}  // End public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child)
+
+		@Override
 		public String toString() {
 			super.toString();
 			AutomataInterface.WritingData writingData = this.getWritingData();
@@ -336,6 +408,37 @@ public abstract class WeightedRegularExpression {
 		public Product(WeightedRegularExpression leftExpression, WeightedRegularExpression rightExpression) {
 			super(leftExpression, rightExpression);
 		}
+
+		@Override
+		public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child) {
+
+			int startOffset = super.getHighlightStartOffsetOfThisChild(child);
+			WeightedRegularExpression leftExpression = this.getLeftExpression();
+			WeightedRegularExpression rightExpression = this.getRightExpression();
+			AutomataInterface.WritingData writingData = this.getWritingData();
+
+			if (child.equals(leftExpression)) {
+
+				if (Sum.class.isInstance(leftExpression)) {
+					startOffset = startOffset + writingData.openPar.toString().length();
+				}
+
+			} else if (child.equals(rightExpression)) {
+
+				startOffset = startOffset + leftExpression.toString().length() + writingData.timesSym.toString().length();
+				if (Sum.class.isInstance(leftExpression)) {
+					startOffset = startOffset + writingData.openPar.toString().length() + writingData.closePar.toString().length();
+				}
+				if (Sum.class.isInstance(rightExpression)) {
+					startOffset = startOffset + writingData.openPar.toString().length();
+				}
+
+			} else {
+				throw new IllegalArgumentException("Required input is not a child of this node!");
+			}
+
+			return startOffset;
+		}  // End public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child)
 
 		@Override
 		public String toString() {
@@ -366,6 +469,29 @@ public abstract class WeightedRegularExpression {
 		public Star(WeightedRegularExpression expression) {
 			super(expression);
 		}
+
+		@Override
+		public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child) {
+
+			int startOffset = super.getHighlightStartOffsetOfThisChild(child);
+			WeightedRegularExpression expression = this.getExpression();
+			AutomataInterface.WritingData writingData = this.getWritingData();
+
+			if (child.equals(expression)) {
+
+				if (Sum.class.isInstance(expression)
+						|| Product.class.isInstance(expression)
+						|| LeftMultiply.class.isInstance(expression)
+						|| RightMultiply.class.isInstance(expression)) {
+					startOffset = startOffset + writingData.openPar.toString().length();
+				}
+
+			} else {
+				throw new IllegalArgumentException("Required input is not a child of this node!");
+			}
+
+			return startOffset;
+		}  // End public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child)
 
 		@Override
 		public String toString() {
@@ -405,53 +531,99 @@ public abstract class WeightedRegularExpression {
 			this.weightValue = weightValue;
 		}
 
-		@Override
-		public WeightedRegularExpression getFirstSelectedExpression() {
-			return this;
-		}
-
-		@Override
-		public WeightedRegularExpression getNextSelectedExpression() {
-			return this.getExpression().getFirstSelectedExpression();
-		}
-
-		@Override
-		public WeightedRegularExpression getPreviousSelectedExpression() {
-			WeightedRegularExpression parent = this.getParent();
-			if ((parent == null)
-					|| (!(ChildEnumerable.class.isInstance(parent)))) {
-				return null;
+		public String getWeightString() {
+			if (Double.class.isInstance(this.weightValue)) {
+				NumberFormat numberFormat = NumberFormat.getInstance();
+				numberFormat.setGroupingUsed(false);
+				return numberFormat.format((Double) this.weightValue);
+			} else {
+				return this.weightValue.toString();
 			}
-			WeightedRegularExpression expression = ((ChildEnumerable) parent).getSelectedExpressionBeforeThisChild(this);
-			if (LeftMultiply.class.isInstance(expression)) {
-				return ((LeftMultiply) expression).getExpression();
-			}
-			return expression;
 		}
 
+//		@Override
+//		public WeightedRegularExpression getFirstSelectedExpression() {
+//			return this;
+//		}
+//
+//		@Override
+//		public WeightedRegularExpression getNextSelectedExpression() {
+//			return this.getExpression().getFirstSelectedExpression();
+//		}
+//
+//		@Override
+//		public WeightedRegularExpression getPreviousSelectedExpression() {
+//			WeightedRegularExpression parent = this.getParent();
+//			if ((parent == null)
+//					|| (!(ChildEnumerable.class.isInstance(parent)))) {
+//				return null;
+//			}
+//			WeightedRegularExpression expression = ((ChildEnumerable) parent).getSelectedExpressionBeforeThisChild(this);
+//			if (LeftMultiply.class.isInstance(expression)) {
+//				return ((LeftMultiply) expression).getExpression();
+//			}
+//			return expression;
+//		}
+//
+//		@Override
+//		public WeightedRegularExpression getSelectedExpressionAfterThisChild(WeightedRegularExpression child) {
+//			if (!(this.getExpression().equals(child))) {
+//				throw new IllegalArgumentException("Required input is not a child of this node!");
+//			}
+//			WeightedRegularExpression parent = this.getParent();
+//			if ((parent == null)
+//					|| (!(ChildEnumerable.class.isInstance(parent)))) {
+//				return null;
+//			}
+//			return ((ChildEnumerable) parent).getSelectedExpressionAfterThisChild(this);
+//		}
+//
+//		@Override
+//		public WeightedRegularExpression getSelectedExpressionBeforeThisChild(WeightedRegularExpression child) {
+//			return this;
+//		}
+//
+//		@Override
+//		public HighlightRange getHighlightRange() {
+//			int startOffset = super.getHighlightRange().start;
+//			AutomataInterface.WritingData writingData = this.getWritingData();
+//			return new HighlightRange(startOffset,
+//					startOffset + writingData.weightOpening.toString().length()
+//					+ this.getWeightString().length()
+//					+ writingData.weightClosing.toString().length());
+//		}
+
 		@Override
-		public WeightedRegularExpression getSelectedExpressionAfterThisChild(WeightedRegularExpression child) {
-			if (!(this.getExpression().equals(child))) {
+		public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child) {
+
+			int startOffset = super.getHighlightStartOffsetOfThisChild(child);
+			WeightedRegularExpression expression = this.getExpression();
+			AutomataInterface.WritingData writingData = this.getWritingData();
+
+			if (child.equals(expression)) {
+
+				startOffset = startOffset + writingData.weightOpening.toString().length()
+						+ this.getWeightString().length()
+						+ writingData.weightClosing.toString().length();
+
+				if (Sum.class.isInstance(expression)
+						|| Product.class.isInstance(expression)
+						|| Star.class.isInstance(expression)) {
+					startOffset = startOffset + writingData.openPar.toString().length();
+				}
+
+			} else {
 				throw new IllegalArgumentException("Required input is not a child of this node!");
 			}
-			WeightedRegularExpression parent = this.getParent();
-			if ((parent == null)
-					|| (!(ChildEnumerable.class.isInstance(parent)))) {
-				return null;
-			}
-			return ((ChildEnumerable) parent).getSelectedExpressionAfterThisChild(this);
-		}
 
-		@Override
-		public WeightedRegularExpression getSelectedExpressionBeforeThisChild(WeightedRegularExpression child) {
-			return this;
-		}
+			return startOffset;
+		}  // End public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child)
 
 		@Override
 		public String toString() {
 			super.toString();
 			AutomataInterface.WritingData writingData = this.getWritingData();
-			String string = writingData.weightOpening.toString() + this.weightValue.toString() + writingData.weightClosing.toString();
+			String string = writingData.weightOpening.toString() + this.getWeightString() + writingData.weightClosing.toString();
 			WeightedRegularExpression expression = this.getExpression();
 			if (Sum.class.isInstance(expression)
 					|| Product.class.isInstance(expression)
@@ -485,6 +657,56 @@ public abstract class WeightedRegularExpression {
 			this.weightValue = weightValue;
 		}
 
+		public String getWeightString() {
+			if (Double.class.isInstance(this.weightValue)) {
+				NumberFormat numberFormat = NumberFormat.getInstance();
+				numberFormat.setGroupingUsed(false);
+				return numberFormat.format((Double) this.weightValue);
+			} else {
+				return this.weightValue.toString();
+			}
+		}
+
+//		@Override
+//		public HighlightRange getHighlightRange() {
+//
+//			int startOffset = super.getHighlightRange().start;
+//			WeightedRegularExpression expression = this.getExpression();
+//			AutomataInterface.WritingData writingData = this.getWritingData();
+//			startOffset = startOffset + expression.toString().length();
+//
+//			if (Sum.class.isInstance(expression)
+//					|| Product.class.isInstance(expression)) {
+//				startOffset = startOffset + writingData.openPar.toString().length()
+//						+ writingData.closePar.toString().length();
+//			}
+//
+//			return new HighlightRange(startOffset,
+//					startOffset + writingData.weightOpening.toString().length()
+//					+ this.getWeightString().length()
+//					+ writingData.weightClosing.toString().length());
+//		}  // End public HighlightRange getHighlightRange()
+		@Override
+		public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child) {
+
+			int startOffset = super.getHighlightStartOffsetOfThisChild(child);
+			WeightedRegularExpression expression = this.getExpression();
+			AutomataInterface.WritingData writingData = this.getWritingData();
+
+			if (child.equals(expression)) {
+
+				if (Sum.class.isInstance(expression)
+						|| Product.class.isInstance(expression)) {
+					startOffset = startOffset + writingData.openPar.toString().length();
+				}
+
+			} else {
+				throw new IllegalArgumentException("Required input is not a child of this node!");
+			}
+
+			return startOffset;
+		}  // End public int getHighlightStartOffsetOfThisChild(WeightedRegularExpression child)
+
 		@Override
 		public String toString() {
 			super.toString();
@@ -495,7 +717,7 @@ public abstract class WeightedRegularExpression {
 					|| Product.class.isInstance(expression)) {
 				string = writingData.openPar.toString() + string + writingData.closePar.toString();
 			}
-			string = string + writingData.weightOpening.toString() + this.weightValue.toString() + writingData.weightClosing.toString();
+			string = string + writingData.weightOpening.toString() + this.getWeightString() + writingData.weightClosing.toString();
 			return string;
 		}
 
@@ -550,6 +772,8 @@ public abstract class WeightedRegularExpression {
 			expression = expression.getFirstSelectedExpression();
 			while (expression != null) {
 				System.out.println(expression.toString());
+				HighlightRange highlightRange = expression.getHighlightRange();
+				System.out.println("start: " + highlightRange.start + ", end: " + highlightRange.end);
 				expression = expression.getNextSelectedExpression();
 			}
 
