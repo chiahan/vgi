@@ -54,6 +54,7 @@ public class Automata_properties extends javax.swing.JPanel {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipadx = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(stateLabel, gridBagConstraints);
 
         stateTextField.setColumns(5);
@@ -77,6 +78,7 @@ public class Automata_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(transitionLabel, gridBagConstraints);
 
         transitionTextField.setColumns(5);
@@ -100,6 +102,7 @@ public class Automata_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(initialLabel, gridBagConstraints);
 
         initialTextField.setColumns(5);
@@ -123,6 +126,7 @@ public class Automata_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(finalLabel, gridBagConstraints);
 
         finalTextField.setColumns(5);
