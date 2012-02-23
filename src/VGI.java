@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
+import javax.swing.JPanel;
 
 /*
  * To change this template, choose Tools | Templates
@@ -217,21 +218,42 @@ public class VGI extends javax.swing.JFrame {
 		}  // End public void actionPerformed(ActionEvent actionEvent)
 	}  // End private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener
 
-	public void graphFitWindow(DrawJgraphXPanel panel) {
-		panel.graphComponent.zoomTo(1, false);
+	public void graphFitWindow(JPanel panel) {
+		((JgraphXInternalFrame)panel.getComponent(0)).
+                getGraphComponent().zoomTo(1, false);
 	}
 
-	public void graphZoomIn(DrawJgraphXPanel panel) {
-		panel.graphComponent.zoomIn();
+	public void graphZoomIn(JPanel panel) {
+		((JgraphXInternalFrame)panel.getComponent(0)).
+                getGraphComponent().zoomIn();
 	}
 
-	public void graphZoomOut(DrawJgraphXPanel panel) {
-		panel.graphComponent.zoomOut();
+	public void graphZoomOut(JPanel panel) {
+		((JgraphXInternalFrame)panel.getComponent(0)).
+                getGraphComponent().zoomOut();
 	}
 
-	public void graphActualSize(DrawJgraphXPanel panel) {
-		panel.graphComponent.zoomActual();
+	public void graphActualSize(JPanel panel) {
+        ((JgraphXInternalFrame)panel.getComponent(0)).
+                getGraphComponent().zoomActual();
 	}
+    
+    private void createInternalFrame() {
+        Automata automata = new Automata();
+        mxGraph graph = new mxGraph();
+		mxGraphComponent graphComponent = new mxGraphComponent(graph);
+        JgraphXInternalFrame frame = 
+                new JgraphXInternalFrame(infoSplitPane, graphComponent, automata);
+        frame.setVisible(true);
+        mainDesktopPane.add(frame);
+        try {
+            frame.setSelected(true);
+        } catch (java.beans.PropertyVetoException e) {}
+
+        infoSplitPane.setTopComponent(new Automata_properties());
+        infoSplitPane.setBottomComponent(frame.getGraphOutline());
+        this.validate();
+    }
 
 	/** Creates new form VGI */
 	public VGI() {
@@ -241,7 +263,7 @@ public class VGI extends javax.swing.JFrame {
 		this.pmLastFolderForSaveFile = new File(defaultFolderPath);
 		this.pmAutomataType = null;
 		initComponents();
-		this.infoPanel.setVisible(false);
+		
 		Preferences preferences = Preferences.systemRoot().node(this.getClass().getName());
 		String string = preferences.get("TAF-Kit Path", defaultFolderPath);
 		try {
@@ -278,11 +300,10 @@ public class VGI extends javax.swing.JFrame {
         setAsFinalStateButton = new javax.swing.JButton();
         mainPanel = new javax.swing.JPanel();
         statusLabel = new javax.swing.JLabel();
-        mainSplitPane = new javax.swing.JSplitPane();
-        drawPanel = new javax.swing.JPanel();
-        infoPanel = new javax.swing.JPanel();
-        tableScrollPane = new javax.swing.JScrollPane();
-        infoTable1 = new javax.swing.JTable();
+        mainDesktopPane = new javax.swing.JDesktopPane();
+        infoSplitPane = new javax.swing.JSplitPane();
+        jnfoPanel = new javax.swing.JPanel();
+        outlinePanel = new javax.swing.JPanel();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         newMenuItem = new javax.swing.JMenuItem();
@@ -315,6 +336,7 @@ public class VGI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("VGI");
+        setMinimumSize(new java.awt.Dimension(1280, 960));
 
         toolBar.setFloatable(false);
         toolBar.setRollover(true);
@@ -406,64 +428,18 @@ public class VGI extends javax.swing.JFrame {
 
         statusLabel.setText("status:");
         mainPanel.add(statusLabel, java.awt.BorderLayout.SOUTH);
-
-        mainSplitPane.setDividerSize(20);
-
-        drawPanel.setPreferredSize(new java.awt.Dimension(800, 600));
-
-        org.jdesktop.layout.GroupLayout drawPanelLayout = new org.jdesktop.layout.GroupLayout(drawPanel);
-        drawPanel.setLayout(drawPanelLayout);
-        drawPanelLayout.setHorizontalGroup(
-            drawPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 0, Short.MAX_VALUE)
-        );
-        drawPanelLayout.setVerticalGroup(
-            drawPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 776, Short.MAX_VALUE)
-        );
-
-        mainSplitPane.setLeftComponent(drawPanel);
-
-        infoTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null},
-                {null, null},
-                {null, null},
-                {null, null}
-            },
-            new String [] {
-                "Type", "Value"
-            }
-        ));
-        infoTable1.setEnabled(false);
-        tableScrollPane.setViewportView(infoTable1);
-
-        org.jdesktop.layout.GroupLayout infoPanelLayout = new org.jdesktop.layout.GroupLayout(infoPanel);
-        infoPanel.setLayout(infoPanelLayout);
-        infoPanelLayout.setHorizontalGroup(
-            infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 1409, Short.MAX_VALUE)
-            .add(infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                .add(infoPanelLayout.createSequentialGroup()
-                    .add(12, 12, 12)
-                    .add(tableScrollPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 375, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(1022, Short.MAX_VALUE)))
-        );
-        infoPanelLayout.setVerticalGroup(
-            infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 776, Short.MAX_VALUE)
-            .add(infoPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                .add(infoPanelLayout.createSequentialGroup()
-                    .add(0, 0, 0)
-                    .add(tableScrollPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 267, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(509, Short.MAX_VALUE)))
-        );
-
-        mainSplitPane.setRightComponent(infoPanel);
-
-        mainPanel.add(mainSplitPane, java.awt.BorderLayout.CENTER);
+        mainPanel.add(mainDesktopPane, java.awt.BorderLayout.CENTER);
 
         getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
+
+        infoSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        infoSplitPane.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        infoSplitPane.setMinimumSize(new java.awt.Dimension(300, 600));
+        infoSplitPane.setPreferredSize(new java.awt.Dimension(300, 600));
+        infoSplitPane.setLeftComponent(jnfoPanel);
+        infoSplitPane.setRightComponent(outlinePanel);
+
+        getContentPane().add(infoSplitPane, java.awt.BorderLayout.WEST);
 
         fileMenu.setMnemonic('F');
         fileMenu.setText("File");
@@ -702,15 +678,10 @@ public class VGI extends javax.swing.JFrame {
 		if (createDialog.isCreated()) {
 			Monoid monoid = createDialog.getMonoid();
 			Semiring semiring = createDialog.getSemiring();
-			Automata automata = new Automata();
 			System.out.println("Create automata from 'NewMenuItem'");
 
 			/* Create draw panel for new automata */
-			mxGraph graph = new mxGraph();
-			mxGraphComponent graphComponent = new mxGraphComponent(graph);
-			this.drawPanel = new DrawJgraphXPanel(graphComponent, automata);
-			this.mainSplitPane.setLeftComponent(this.drawPanel);
-			this.validate();
+			this.createInternalFrame();
 			System.out.println("adding DrawPanel is done! ");
 		}
     }//GEN-LAST:event_newMenuItemActionPerformed
@@ -742,51 +713,52 @@ public class VGI extends javax.swing.JFrame {
 
     private void zoomInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInButtonActionPerformed
 		// TODO add your handling code here:
-		this.graphZoomIn((DrawJgraphXPanel) drawPanel);
+		this.graphZoomIn(mainPanel);
     }//GEN-LAST:event_zoomInButtonActionPerformed
 
     private void zoomOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOutButtonActionPerformed
 		// TODO add your handling code here:
-		this.graphZoomOut((DrawJgraphXPanel) drawPanel);
+		this.graphZoomOut(mainPanel);
     }//GEN-LAST:event_zoomOutButtonActionPerformed
 
     private void fitWindowButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fitWindowButtonActionPerformed
 		// TODO add your handling code here:
-		this.graphFitWindow((DrawJgraphXPanel) drawPanel);
+		this.graphFitWindow(mainPanel);
     }//GEN-LAST:event_fitWindowButtonActionPerformed
 
     private void actualSizeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_actualSizeButtonActionPerformed
 		// TODO add your handling code here:
-		this.graphActualSize((DrawJgraphXPanel) drawPanel);
+		this.graphActualSize(mainPanel);
     }//GEN-LAST:event_actualSizeButtonActionPerformed
 
     private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
 		// TODO add your handling code here:
-		((DrawJgraphXPanel) drawPanel).deleteSelectedCell();
+        ((JgraphXInternalFrame)mainPanel.getComponent(0)).deleteSelectedCell();
     }//GEN-LAST:event_deleteMenuItemActionPerformed
 
     private void fitWindowMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fitWindowMenuItemActionPerformed
 		// TODO add your handling code here:
-		this.graphFitWindow((DrawJgraphXPanel) drawPanel);
+		this.graphFitWindow(mainPanel);
     }//GEN-LAST:event_fitWindowMenuItemActionPerformed
 
     private void zoomInMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInMenuItemActionPerformed
 		// TODO add your handling code here:
-		this.graphZoomIn((DrawJgraphXPanel) drawPanel);
+		this.graphZoomIn(mainPanel);
     }//GEN-LAST:event_zoomInMenuItemActionPerformed
 
     private void zoomOutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOutMenuItemActionPerformed
 		// TODO add your handling code here:
-		this.graphZoomOut((DrawJgraphXPanel) drawPanel);
+		this.graphZoomOut(mainPanel);
     }//GEN-LAST:event_zoomOutMenuItemActionPerformed
 
     private void actualSizeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_actualSizeMenuItemActionPerformed
 		// TODO add your handling code here:
-		this.graphActualSize((DrawJgraphXPanel) drawPanel);
+		this.graphActualSize(mainPanel);
     }//GEN-LAST:event_actualSizeMenuItemActionPerformed
 
     private void showPropertiesCheckBoxMenuItemStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_showPropertiesCheckBoxMenuItemStateChanged
-		((DrawJgraphXPanel) drawPanel).setShowPropert(showPropertiesCheckBoxMenuItem.getState());
+		this.infoSplitPane.getTopComponent().
+                setVisible(showPropertiesCheckBoxMenuItem.getState());
     }//GEN-LAST:event_showPropertiesCheckBoxMenuItemStateChanged
 
     private void showStatusBarCheckBoxMenuItemStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_showStatusBarCheckBoxMenuItemStateChanged
@@ -960,7 +932,6 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem currentSettingMenuItem;
     private javax.swing.JButton deleteButton;
     private javax.swing.JMenuItem deleteMenuItem;
-    private javax.swing.JPanel drawPanel;
     private javax.swing.JMenu editMenu;
     private javax.swing.JPopupMenu.Separator editMenuSeparator1;
     private javax.swing.JMenuItem exitMenuItem;
@@ -969,13 +940,14 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JButton fitWindowButton;
     private javax.swing.JMenuItem fitWindowMenuItem;
     private javax.swing.JMenu helpMenu;
-    private javax.swing.JPanel infoPanel;
-    private javax.swing.JTable infoTable1;
+    private javax.swing.JSplitPane infoSplitPane;
+    private javax.swing.JPanel jnfoPanel;
+    private javax.swing.JDesktopPane mainDesktopPane;
     private javax.swing.JPanel mainPanel;
-    private javax.swing.JSplitPane mainSplitPane;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem newMenuItem;
     private javax.swing.JMenuItem openMenuItem;
+    private javax.swing.JPanel outlinePanel;
     private javax.swing.JMenuItem rationalExpressionSymbolsMenuItem;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
@@ -987,7 +959,6 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JCheckBoxMenuItem showPropertiesCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showStatusBarCheckBoxMenuItem;
     private javax.swing.JLabel statusLabel;
-    private javax.swing.JScrollPane tableScrollPane;
     private javax.swing.JToolBar toolBar;
     private javax.swing.JToolBar.Separator toolBarSeparator1;
     private javax.swing.JToolBar.Separator toolBarSeparator2;
