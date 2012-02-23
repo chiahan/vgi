@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
+import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
@@ -59,6 +60,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         graphComponent.getViewport().setBackground(Color.WHITE);
         this.automata = automata;
         this.infoSplitPane = infoSplitPane;
+        if ((topPanel != null) && (bottomPanel != null)) {
+            this.topPanel = (JPanel)infoSplitPane.getTopComponent();
+            this.bottomPanel = (JPanel)infoSplitPane.getBottomComponent();
+        }
         
         this.setBounds(xOffset*openFrameCount, yOffset*openFrameCount, 800, 600);
         openFrameCount++;
@@ -107,50 +112,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                // Handles context menu on the Mac where the trigger is on mousepressed
-                boolean selected = !graph.isSelectionEmpty();
-
-                mxCell selectedCell = (mxCell) graph.getSelectionCell();
-
-                boolean edgeSelected = false;
-                boolean vertexSelected = false;
-
-                if (selected) {
-                    edgeSelected = selectedCell.isEdge();
-                    vertexSelected = selectedCell.isVertex();
-                }
-                addStateMenuItem.setVisible(!selected);
-                deleteMenuItem.setVisible(selected);
-                addControlPointMenuItem.setVisible(edgeSelected);
-                cancelMenuItem.setVisible((transitionFrom == null) ? false : true);
-
-                if (vertexSelected) {
-                    JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                            new state_properties(graph, selectedCell));
-
-                    addTransitionFromMenuItem.setVisible(
-                            (transitionFrom == null) ? true : false);
-                    addTransitionToMenuItem.setVisible(
-                            (transitionFrom == null) ? false : true);
-                } else {
-                    if (edgeSelected) {
-                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new edge_properties(graph, selectedCell));
-                    } else {
-                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new Automata_properties());
-                    }
-
-                    addTransitionFromMenuItem.setVisible(false);
-                    addTransitionToMenuItem.setVisible(false);
-                }
-
-                if (e.isPopupTrigger()) {
-                    popMouseX = e.getX();
-                    popMouseY = e.getY();
-                    getGraphPopupMenu().show(getGraphComponent(), popMouseX, popMouseY);
-                }
-                JgraphXInternalFrame.this.validate();
+                maybeShowPopup(e);
             }
 
             /**
@@ -158,15 +120,82 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
              */
             @Override
             public void mouseReleased(MouseEvent e) {
+                boolean selected = !graph.isSelectionEmpty();
+                mxCell selectedCell = (mxCell) graph.getSelectionCell();
+
+                boolean edgeSelected = false;
+                boolean vertexSelected = false;
+                
+                if (selected) {
+                    edgeSelected = selectedCell.isEdge();
+                    if (edgeSelected) {
+                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+                                new edge_properties(graph, selectedCell));
+                    }
+                    
+                    vertexSelected = selectedCell.isVertex();
+                    if (vertexSelected) {
+                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+                                new state_properties(graph, selectedCell));
+
+                        addTransitionFromMenuItem.setVisible(
+                                (transitionFrom == null) ? true : false);
+                        addTransitionToMenuItem.setVisible(
+                                (transitionFrom == null) ? false : true);
+                    }
+                } else {
+                    JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+                        new Automata_properties());
+                    addTransitionFromMenuItem.setVisible(false);
+                    addTransitionToMenuItem.setVisible(false);
+                }
+                addStateMenuItem.setVisible(!selected);
+                deleteMenuItem.setVisible(selected);
+                addControlPointMenuItem.setVisible(edgeSelected);
+                cancelMenuItem.setVisible((transitionFrom == null) ? false : true);
+
+//                if (vertexSelected) {
+//                    JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+//                            new state_properties(graph, selectedCell));
+//
+//                    addTransitionFromMenuItem.setVisible(
+//                            (transitionFrom == null) ? true : false);
+//                    addTransitionToMenuItem.setVisible(
+//                            (transitionFrom == null) ? false : true);
+//                } else {
+//                    if (edgeSelected) {
+//                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+//                                new edge_properties(graph, selectedCell));
+//                    } else {
+//                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+//                                new Automata_properties());
+//                    }
+//
+//                    addTransitionFromMenuItem.setVisible(false);
+//                    addTransitionToMenuItem.setVisible(false);
+//                }
+
                 if (e.isPopupTrigger()) {
                     popMouseX = e.getX();
                     popMouseY = e.getY();
                     getGraphPopupMenu().show(getGraphComponent(), popMouseX, popMouseY);
                 }
+                JgraphXInternalFrame.this.validate();
+                
+                maybeShowPopup(e);
 
                 graph.refresh();
                 graph.repaint();
             }
+            
+            private void maybeShowPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    popMouseX = e.getX();
+                    popMouseY = e.getY();
+                    getGraphPopupMenu().show(getGraphComponent(), popMouseX, popMouseY);
+                }
+            }
+
         });
 
         // Installs a mouse motion listener to display the mouse location
@@ -189,10 +218,32 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         this.addInternalFrameListener(new InternalFrameAdapter() {
             @Override
             public void internalFrameActivated(InternalFrameEvent e) {
+                boolean selected = !graph.isSelectionEmpty();
+                mxCell selectedCell = (mxCell) graph.getSelectionCell();
+
+                boolean edgeSelected = false;
+                boolean vertexSelected = false;
+                
+                if (selected) {
+                    if (selectedCell.isEdge()) {
+                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+                                new edge_properties(graph, selectedCell));
+                    } else if (selectedCell.isVertex()) {
+                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+                                new state_properties(graph, selectedCell));
+                    }
+                } else {
+                    JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+                        new Automata_properties());
+                }
+                
                 JgraphXInternalFrame.this.infoSplitPane.setBottomComponent(
-                        ((JgraphXInternalFrame)e.getSource()).getGraphOutline());
-//                JgraphXInternalFrame.this.validate();
-                System.out.println("active"+e.getInternalFrame().toString());
+                        graphOutline);
+            }
+            
+            public void internalFrameClosing(InternalFrameEvent e) {
+                JgraphXInternalFrame.this.infoSplitPane.setTopComponent(topPanel);
+                JgraphXInternalFrame.this.infoSplitPane.setBottomComponent(bottomPanel);
             }
         });
     }
@@ -206,7 +257,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         int id = cellTable.size();
         Object newVertex = graph.insertVertex(parent, Integer.toString(id), "",
                 x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
-        cellTable.put((Integer) id, (mxCell) newVertex);
+        cellTable.put((Integer) id, (mxCell)newVertex);
+        graph.setSelectionCell(newVertex);
+        infoSplitPane.setTopComponent(new state_properties(graph, (mxCell)newVertex));
 //        automata.addState(new State((mxCell) newVertex));
 
         System.out.println("add state at" + x + "," + y);
@@ -316,6 +369,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     protected mxCell transitionFrom, transitionTo;
     protected int popMouseX, popMouseY;
     protected JSplitPane infoSplitPane;
+    private static JPanel topPanel = null, bottomPanel = null;
     protected Automata automata;
     /** This method is called from within the constructor to
      * initialize the form.

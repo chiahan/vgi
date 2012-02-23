@@ -252,7 +252,7 @@ public class VGI extends javax.swing.JFrame {
             frame.setSelected(true);
         } catch (java.beans.PropertyVetoException e) {}
 
-        infoSplitPane.setTopComponent(new Automata_properties());
+//        infoSplitPane.setTopComponent(new Automata_properties());
         mxGraphOutline graphOutline = frame.getGraphOutline();
         
         Dimension minimumSize = new Dimension(298, 284);
@@ -312,7 +312,7 @@ public class VGI extends javax.swing.JFrame {
         statusLabel = new javax.swing.JLabel();
         mainDesktopPane = new javax.swing.JDesktopPane();
         infoSplitPane = new javax.swing.JSplitPane();
-        jnfoPanel = new javax.swing.JPanel();
+        infoPanel = new javax.swing.JPanel();
         outlinePanel = new javax.swing.JPanel();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
@@ -449,13 +449,13 @@ public class VGI extends javax.swing.JFrame {
         infoSplitPane.setOpaque(false);
         infoSplitPane.setPreferredSize(new java.awt.Dimension(300, 600));
 
-        jnfoPanel.setMinimumSize(new java.awt.Dimension(300, 400));
-        jnfoPanel.setPreferredSize(new java.awt.Dimension(300, 400));
-        infoSplitPane.setLeftComponent(jnfoPanel);
+        infoPanel.setMinimumSize(new java.awt.Dimension(300, 400));
+        infoPanel.setPreferredSize(new java.awt.Dimension(300, 400));
+        infoSplitPane.setTopComponent(infoPanel);
 
         outlinePanel.setDoubleBuffered(false);
         outlinePanel.setPreferredSize(new java.awt.Dimension(298, 284));
-        infoSplitPane.setRightComponent(outlinePanel);
+        infoSplitPane.setBottomComponent(outlinePanel);
 
         getContentPane().add(infoSplitPane, java.awt.BorderLayout.WEST);
 
@@ -958,8 +958,8 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JButton fitWindowButton;
     private javax.swing.JMenuItem fitWindowMenuItem;
     private javax.swing.JMenu helpMenu;
+    private javax.swing.JPanel infoPanel;
     private javax.swing.JSplitPane infoSplitPane;
-    private javax.swing.JPanel jnfoPanel;
     private javax.swing.JDesktopPane mainDesktopPane;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
