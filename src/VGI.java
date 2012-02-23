@@ -13,7 +13,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.view.mxGraph;
+import java.awt.Dimension;
 import javax.swing.JPanel;
 
 /*
@@ -251,8 +253,16 @@ public class VGI extends javax.swing.JFrame {
         } catch (java.beans.PropertyVetoException e) {}
 
         infoSplitPane.setTopComponent(new Automata_properties());
-        infoSplitPane.setBottomComponent(frame.getGraphOutline());
+        mxGraphOutline graphOutline = frame.getGraphOutline();
+        
+        Dimension minimumSize = new Dimension(298, 284);
+        graphOutline.setMinimumSize(minimumSize);
+        infoSplitPane.setBottomComponent(graphOutline);
+
         this.validate();
+        System.out.println("bound: " + infoSplitPane.getBounds().toString());
+        System.out.println("bound: " + infoSplitPane.getBottomComponent().getBounds().toString());
+        System.out.println("min: " + infoSplitPane.getBottomComponent().getMinimumSize().toString());
     }
 
 	/** Creates new form VGI */
@@ -433,10 +443,18 @@ public class VGI extends javax.swing.JFrame {
         getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
 
         infoSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        infoSplitPane.setResizeWeight(1.0);
         infoSplitPane.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         infoSplitPane.setMinimumSize(new java.awt.Dimension(300, 600));
+        infoSplitPane.setOpaque(false);
         infoSplitPane.setPreferredSize(new java.awt.Dimension(300, 600));
+
+        jnfoPanel.setMinimumSize(new java.awt.Dimension(300, 400));
+        jnfoPanel.setPreferredSize(new java.awt.Dimension(300, 400));
         infoSplitPane.setLeftComponent(jnfoPanel);
+
+        outlinePanel.setDoubleBuffered(false);
+        outlinePanel.setPreferredSize(new java.awt.Dimension(298, 284));
         infoSplitPane.setRightComponent(outlinePanel);
 
         getContentPane().add(infoSplitPane, java.awt.BorderLayout.WEST);
