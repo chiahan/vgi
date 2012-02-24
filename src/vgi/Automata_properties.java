@@ -1,3 +1,5 @@
+package vgi;
+
 import com.mxgraph.model.mxCell;
 
 /*

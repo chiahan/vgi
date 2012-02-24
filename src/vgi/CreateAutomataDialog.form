@@ -50,8 +50,8 @@
       </Constraints>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-        <Property name="rows" type="int" value="1"/>
         <Property name="columns" type="int" value="0"/>
+        <Property name="rows" type="int" value="1"/>
       </Layout>
       <SubComponents>
         <Container class="javax.swing.JPanel" name="semiringSetOperationPanel">
@@ -145,8 +145,8 @@
       </Constraints>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-        <Property name="rows" type="int" value="1"/>
         <Property name="columns" type="int" value="0"/>
+        <Property name="rows" type="int" value="1"/>
       </Layout>
       <SubComponents>
         <Container class="javax.swing.JPanel" name="monoidSymbolPanel">
@@ -159,8 +159,8 @@
           </Properties>
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-            <Property name="rows" type="int" value="2"/>
             <Property name="columns" type="int" value="0"/>
+            <Property name="rows" type="int" value="2"/>
           </Layout>
           <SubComponents>
             <Container class="javax.swing.JPanel" name="monoidAlphabetPanel">
@@ -173,8 +173,8 @@
               </Properties>
 
               <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-                <Property name="rows" type="int" value="1"/>
                 <Property name="columns" type="int" value="0"/>
+                <Property name="rows" type="int" value="1"/>
               </Layout>
               <SubComponents>
                 <Component class="javax.swing.JComboBox" name="monoidAlphabetComboBox">
@@ -188,8 +188,8 @@
                 <Container class="javax.swing.JPanel" name="subAlphabetPanel">
 
                   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-                    <Property name="rows" type="int" value="2"/>
                     <Property name="columns" type="int" value="1"/>
+                    <Property name="rows" type="int" value="2"/>
                   </Layout>
                   <SubComponents>
                     <Component class="javax.swing.JButton" name="addAlphabetButton">
@@ -222,8 +222,8 @@
               </Properties>
 
               <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-                <Property name="rows" type="int" value="1"/>
                 <Property name="columns" type="int" value="0"/>
+                <Property name="rows" type="int" value="1"/>
               </Layout>
               <SubComponents>
                 <Component class="javax.swing.JComboBox" name="monoidAlphabetComboBox1">
@@ -237,8 +237,8 @@
                 <Container class="javax.swing.JPanel" name="subAlphabetPanel1">
 
                   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-                    <Property name="rows" type="int" value="2"/>
                     <Property name="columns" type="int" value="1"/>
+                    <Property name="rows" type="int" value="2"/>
                   </Layout>
                   <SubComponents>
                     <Component class="javax.swing.JButton" name="addAlphabetButton1">

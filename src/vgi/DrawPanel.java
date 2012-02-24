@@ -1,3 +1,5 @@
+package vgi;
+
 //package drawcomp;
 
 /*

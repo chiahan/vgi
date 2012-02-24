@@ -1,3 +1,5 @@
+package vgi;
+
 
 import java.util.ArrayList;
 import javax.swing.ComboBoxModel;
