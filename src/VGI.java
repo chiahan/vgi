@@ -240,8 +240,13 @@ public class VGI extends javax.swing.JFrame {
                 getGraphComponent().zoomActual();
 	}
     
-    private void createInternalFrame() {
-        Automata automata = new Automata();
+
+	private void createInternalFrame() {
+		Automata automata = new Automata();
+		this.createInternalFrame(automata);
+	}
+
+    private void createInternalFrame(Automata automata) {
         mxGraph graph = new mxGraph();
 		mxGraphComponent graphComponent = new mxGraphComponent(graph);
         JgraphXInternalFrame frame = 
@@ -724,8 +729,10 @@ public class VGI extends javax.swing.JFrame {
 			e.printStackTrace();
 		}
 		if ((automataList != null) && (automataList.size() > 0)) {
-			this.pmAutomataType = new TAFKitInterface.AutomataType(automataList.get(0));
+			Automata automata = automataList.get(0);
+			this.pmAutomataType = new TAFKitInterface.AutomataType(automata);
 			this.updateAlgorithmMenuItems();
+			this.createInternalFrame(automata);
 		}
 	}//GEN-LAST:event_openMenuItemActionPerformed
 
