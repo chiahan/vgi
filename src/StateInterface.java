@@ -42,6 +42,10 @@ public interface StateInterface {
 
 	public void setIncomingTransitions(List<Transition> transitions);
 
+	public List<Transition> getLoopTransitions();
+
+	public void setLoopTransitions(List<Transition> transitions);
+
 	public List<Transition> getOutgoingTransitions();
 
 	public void setOutgoingTransitions(List<Transition> transitions);

@@ -80,6 +80,7 @@ public class State implements StateInterface {
 	public List<Transition> getTransitions() {
 		ArrayList<Transition> arrayList = new ArrayList<Transition>();
 		arrayList.addAll(this.pmIncomingTransitions);
+		arrayList.addAll(this.pmLoopTransitions);
 		arrayList.addAll(this.pmOutgoingTransitions);
 		return arrayList;
 	}
@@ -95,6 +96,16 @@ public class State implements StateInterface {
 	}
 
 	@Override
+	public List<Transition> getLoopTransitions() {
+		return this.pmLoopTransitions;
+	}
+
+	@Override
+	public void setLoopTransitions(List<Transition> transitions) {
+		this.pmLoopTransitions = transitions;
+	}
+
+	@Override
 	public List<Transition> getOutgoingTransitions() {
 		return this.pmOutgoingTransitions;
 	}
@@ -107,7 +118,11 @@ public class State implements StateInterface {
 	@Override
 	public void addTransition(Transition transition) {
 		if (transition.getSourceState().equals(this)) {
-			this.pmOutgoingTransitions.add(transition);
+			if (transition.getTargetState().equals(this)) {
+				this.pmLoopTransitions.add(transition);
+			} else {
+				this.pmOutgoingTransitions.add(transition);
+			}
 		} else if (transition.getTargetState().equals(this)) {
 			this.pmIncomingTransitions.add(transition);
 		} else {
@@ -118,6 +133,7 @@ public class State implements StateInterface {
 	private Object pmInitialWeight;
 	private Object pmFinalWeight;
 	private List<Transition> pmIncomingTransitions;
+	private List<Transition> pmLoopTransitions;
 	private List<Transition> pmOutgoingTransitions;
 	private GeometricData pmGeometricData;
 
@@ -126,6 +142,7 @@ public class State implements StateInterface {
 		this.pmInitialWeight = null;
 		this.pmFinalWeight = null;
 		this.pmIncomingTransitions = new ArrayList<Transition>();
+		this.pmLoopTransitions = new ArrayList<Transition>();
 		this.pmOutgoingTransitions = new ArrayList<Transition>();
 		this.pmGeometricData = new GeometricData();
 	}
