@@ -833,9 +833,17 @@ public class FsmXml implements FsmXmlInterface {
 			} else if (tag.equals(TAG_MON_ELMT, Tag.Type.START)) {
 				object = parseMonElmtTag(xmlStreamReader, automata);
 			} else if (tag.equals(TAG_ZERO, Tag.Type.START)) {
-				object = new WeightedRegularExpression.Zero();
+				WeightedRegularExpression expression = new WeightedRegularExpression.Zero();
+				expression.setAlphabet(automata.getAlphabet());
+				expression.setWeight(automata.getWeight());
+				expression.setWritingData(automata.getWritingData());
+				object = expression;
 			} else if (tag.equals(TAG_ONE, Tag.Type.START)) {
-				object = new WeightedRegularExpression.One();
+				WeightedRegularExpression expression = new WeightedRegularExpression.One();
+				expression.setAlphabet(automata.getAlphabet());
+				expression.setWeight(automata.getWeight());
+				expression.setWritingData(automata.getWritingData());
+				object = expression;
 			}
 
 			if (object != null) {
