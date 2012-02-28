@@ -1,6 +1,9 @@
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxICell;
+import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
+import java.awt.Color;
 import javax.swing.JComboBox;
 
 /*
@@ -238,5 +241,70 @@ private void Final_weight_TextFieldActionPerformed(java.awt.event.ActionEvent ev
     private String Style;
     private mxCell _cell;
     private mxGraph _graph;
+
+    
+    public void setFillColor(mxGraph graph,Color color){
+        
+        graph.setCellStyles("fillColor", mxUtils.hexString(color));
+        
+    }
+    public void setStrokeColor(mxGraph graph,Color color){
+        
+        graph.setCellStyles("strokeColor", mxUtils.hexString(color));
+        
+    }
+    public void setStrokeWidth(mxGraph graph,float width){
+        
+        String wid=String.valueOf(width);
+        graph.setCellStyles("strokeWidth",wid);
+        
+    }
+    
+    //fill cell with gradient color
+    //fromColor-->toColor
+    //direction: 1-north 2-south 3-east 4-west
+    public void setGradientColor(mxGraph graph,Color fromColor, Color toColor,int direction)
+    {
+        graph.setCellStyles("fillColor", mxUtils.hexString(fromColor));
+        graph.setCellStyles("gradientColor", mxUtils.hexString(toColor));
+        switch(direction){
+            case 1:
+                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_NORTH);
+                break;
+            case 2:
+                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_SOUTH);
+                break;
+            case 3:
+                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_EAST);
+                break;
+            case 4:
+                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_WEST);
+                break;
+                
+        }
+        
+    }
+    
+    public void setShadow(mxGraph graph,boolean hasShadow)
+    {
+        if(hasShadow)
+            graph.setCellStyles("shadow", "true");
+        else
+            graph.setCellStyles("shadow", "false");
+    }
+    
+    //Global
+    public void setShadowColor(Color color)
+    {
+        mxConstants.SHADOW_COLOR = color;
+    }
+    public void setShadowOffset(int offsetx,int offsety)
+    {
+      
+        mxConstants.SHADOW_OFFSETX=offsetx;
+        mxConstants.SHADOW_OFFSETY=offsety;
+        
+    }
+    
 
 }

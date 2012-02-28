@@ -1,5 +1,7 @@
 import com.mxgraph.model.mxCell;
+import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
+import java.awt.Color;
 import javax.swing.JComboBox;
 
 /*
@@ -172,4 +174,17 @@ private void End_StyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {/
     private String Style;
     private mxCell _cell;
     private mxGraph _graph;
+    
+    
+    public void setStrokeColor(mxGraph graph,Color color){
+        
+        graph.setCellStyles("strokeColor", mxUtils.hexString(color));
+        
+    }
+    public void setStrokeWidth(mxGraph graph,float width){
+        
+        String wid=String.valueOf(width);
+        graph.setCellStyles("strokeWidth",wid);
+        
+    }
 }
