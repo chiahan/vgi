@@ -17,12 +17,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.event.InternalFrameAdapter;
@@ -72,7 +67,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         openFrameCount++;
         this.getContentPane().add(graphComponent);
 
-        cellTable = new Hashtable<Integer, mxCell>();
+        //cellTable = new Hashtable<Integer, mxCell>();
+        cellTable = new Hashtable<mxCell,State>();
 
         installRepaintListener();
         installListeners();
@@ -276,12 +272,24 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         int id = cellTable.size();
         Object newVertex = graph.insertVertex(parent, Integer.toString(id), "",
                 x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
-        cellTable.put((Integer) id, (mxCell)newVertex);
+        //cellTable.put((Integer) id, (mxCell)newVertex);
         graph.setSelectionCell(newVertex);
         infoSplitPane.setTopComponent(new state_properties(graph, (mxCell)newVertex));
+        
+        State newState=new State();
+        State.GeometricData geo=new State.GeometricData();
+        geo.location=new Point2D.Double(x, y);;
+        //geo.shape="elipse";
+        newState.setGeometricData(geo);
+        
+        automata.addState(newState);
+        cellTable.put((mxCell)newVertex,newState);
+        
 //        automata.addState(new State((mxCell) newVertex));
 
         System.out.println("add state at" + x + "," + y);
+        System.out.println("total states:"+automata.getAllStates().size());
+    
     }
 
 	public void addState(State state) {
@@ -289,8 +297,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 		Integer id = new Integer(cellTable.size());
 		Point2D point2d = state.getGeometricData().location;
 		mxCell vertex = (mxCell) (this.graph.insertVertex(parent, Integer.toString(id), "", point2d.getX(), point2d.getY(), 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;"));
-		cellTable.put(id, vertex);
-		graph.setSelectionCell(vertex);
+		
+                cellTable.put(vertex, state);
+		
+                
+                graph.setSelectionCell(vertex);
 		infoSplitPane.setTopComponent(new state_properties(graph, (mxCell)vertex));
 		Object initialWeight = state.getInitialWeight();
 		if (initialWeight != null) {
@@ -311,21 +322,53 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     public void addTransition(mxCell source, mxCell target) {
         Object parent = graph.getDefaultParent();
-        Object e = graph.insertEdge(parent, null, "", source, target, "shape=curve");
+        Object e = graph.insertEdge(parent, null, "", source, target, null);
         ArrayList<mxPoint> points = new ArrayList<mxPoint>();
         ((mxCell) e).getGeometry().setPoints(points);
 //        automata.addTransition(
 //                new Transition((mxCell)e, 
 //                automata.getState(source), 
 //                automata.getState(target)));
+
+        Transition newTrans=new Transition();
+        Transition.GeometricData geo=new Transition.GeometricData();
+        newTrans.setGeometricData(geo);
+    
+        newTrans.setSourceState(cellTable.get(source));
+        newTrans.setTargetState(cellTable.get(target));
+        
+        automata.addTransition(newTrans);
+    
+        System.out.println("total trans:"+automata.getAllTransitions().size());
+    
     }
 
 	public void addTransition(Transition transition) {
 		List<State> states = this.automata.getAllStates();
-		int index = states.indexOf(transition.getSourceState());
-		mxCell source = this.cellTable.get(index);
-		index = states.indexOf(transition.getTargetState());
-		mxCell target = this.cellTable.get(index);
+		//int index = states.indexOf(transition.getSourceState());
+		//mxCell source = this.cellTable.get(index);
+		//index = states.indexOf(transition.getTargetState());
+		//mxCell target = this.cellTable.get(index);
+                
+                mxCell source = null,target=null;
+                Enumeration keys=cellTable.keys();
+                while(keys.hasMoreElements()){
+                    mxCell keyCell=(mxCell)keys.nextElement();
+                    if(cellTable.get(keyCell)==transition.getSourceState()){
+                        source=keyCell;
+                        break;
+                    }
+                    
+                }
+                keys=cellTable.keys();
+                while(keys.hasMoreElements()){
+                    mxCell keyCell=(mxCell)keys.nextElement();
+                    if(cellTable.get(keyCell)==transition.getTargetState()){
+                        target=keyCell;
+                        break;
+                    }
+                }
+                
 		this.graph.insertEdge(graph.getDefaultParent(), null, transition.getLabel(), source, target, "shape=curve");
 	}  // End public void addTransition(Transition transition)
 
@@ -418,7 +461,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     protected boolean modified = false;
     protected mxRubberband rubberband;
     protected mxKeyboardHandler keyboardHandler;
-    protected Hashtable<Integer, mxCell> cellTable;
+    //protected Hashtable<Integer, mxCell> cellTable;
+    protected Hashtable<mxCell,State> cellTable;
     protected mxCell transitionFrom, transitionTo;
     protected int popMouseX, popMouseY;
     protected JSplitPane infoSplitPane;

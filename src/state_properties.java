@@ -188,11 +188,11 @@ private void Name_TextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GE
 private void Style_ComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Style_ComboBoxActionPerformed
 // TODO add your handling code here:
     JComboBox cb = (JComboBox)evt.getSource();
-    Style = "shape=" + ((String)cb.getSelectedItem()).toLowerCase();
+    //Style = "shape=" + ((String)cb.getSelectedItem()).toLowerCase();
     Object[] objects = new Object[1];
     objects[0]=_cell;
     System.out.print(Style);
-    _graph.setCellStyle(Style, objects );
+    _graph.setCellStyles("shape",((String)cb.getSelectedItem()).toLowerCase() ,objects );
     
 //    this.repaint();
 //    System.out.println(_cell.getStyle());
@@ -244,19 +244,22 @@ private void Final_weight_TextFieldActionPerformed(java.awt.event.ActionEvent ev
 
     
     public void setFillColor(mxGraph graph,Color color){
-        
-        graph.setCellStyles("fillColor", mxUtils.hexString(color));
+        Object[] objects = new Object[1];
+        objects[0]=_cell;
+        graph.setCellStyles("fillColor", mxUtils.hexString(color),objects);
         
     }
     public void setStrokeColor(mxGraph graph,Color color){
-        
-        graph.setCellStyles("strokeColor", mxUtils.hexString(color));
+        Object[] objects = new Object[1];
+        objects[0]=_cell;
+        graph.setCellStyles("strokeColor", mxUtils.hexString(color),objects);
         
     }
     public void setStrokeWidth(mxGraph graph,float width){
-        
+        Object[] objects = new Object[1];
+        objects[0]=_cell;
         String wid=String.valueOf(width);
-        graph.setCellStyles("strokeWidth",wid);
+        graph.setCellStyles("strokeWidth",wid,objects);
         
     }
     
@@ -265,20 +268,22 @@ private void Final_weight_TextFieldActionPerformed(java.awt.event.ActionEvent ev
     //direction: 1-north 2-south 3-east 4-west
     public void setGradientColor(mxGraph graph,Color fromColor, Color toColor,int direction)
     {
-        graph.setCellStyles("fillColor", mxUtils.hexString(fromColor));
-        graph.setCellStyles("gradientColor", mxUtils.hexString(toColor));
+        Object[] objects = new Object[1];
+        objects[0]=_cell;
+        graph.setCellStyles("fillColor", mxUtils.hexString(fromColor),objects);
+        graph.setCellStyles("gradientColor", mxUtils.hexString(toColor),objects);
         switch(direction){
             case 1:
-                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_NORTH);
+                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_NORTH,objects);
                 break;
             case 2:
-                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_SOUTH);
+                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_SOUTH,objects);
                 break;
             case 3:
-                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_EAST);
+                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_EAST,objects);
                 break;
             case 4:
-                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_WEST);
+                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_WEST,objects);
                 break;
                 
         }
@@ -287,10 +292,12 @@ private void Final_weight_TextFieldActionPerformed(java.awt.event.ActionEvent ev
     
     public void setShadow(mxGraph graph,boolean hasShadow)
     {
+        Object[] objects = new Object[1];
+        objects[0]=_cell;
         if(hasShadow)
-            graph.setCellStyles("shadow", "true");
+            graph.setCellStyles("shadow", "true",objects);
         else
-            graph.setCellStyles("shadow", "false");
+            graph.setCellStyles("shadow", "false",objects);
     }
     
     //Global

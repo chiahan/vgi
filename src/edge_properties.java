@@ -141,20 +141,28 @@ private void Weight_TextField2ActionPerformed(java.awt.event.ActionEvent evt) {/
 private void Style_ComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Style_ComboBoxActionPerformed
 // TODO add your handling code here:
     JComboBox cb = (JComboBox)evt.getSource();
-    Style = "startArrow=" + ((String)cb.getSelectedItem()).toLowerCase();
+    //Style = "startArrow=" + ((String)cb.getSelectedItem()).toLowerCase();
     Object[] objects = new Object[1];
     objects[0]=_cell;
-    _graph.setCellStyle(Style, objects );
+    //_graph.setCellStyle(Style, objects );
+    
+    _graph.setCellStyles("startArrow", ((String)cb.getSelectedItem()).toLowerCase(),objects);
+       
+    
     
 }//GEN-LAST:event_Style_ComboBoxActionPerformed
 
 private void End_StyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_End_StyleComboBoxActionPerformed
 // TODO add your handling code here:
     JComboBox cb = (JComboBox)evt.getSource();
-    Style = "endArrow=" + ((String)cb.getSelectedItem()).toLowerCase();
+    //Style = "endArrow=" + ((String)cb.getSelectedItem()).toLowerCase();
     Object[] objects = new Object[1];
     objects[0]=_cell;
-    _graph.setCellStyle(Style, objects );
+    //_graph.setCellStyle(Style, objects );
+    
+    _graph.setCellStyles("endArrow", ((String)cb.getSelectedItem()).toLowerCase(),objects);
+    
+    
 }//GEN-LAST:event_End_StyleComboBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -177,14 +185,18 @@ private void End_StyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {/
     
     
     public void setStrokeColor(mxGraph graph,Color color){
-        
-        graph.setCellStyles("strokeColor", mxUtils.hexString(color));
+        Object[] objects = new Object[1];
+        objects[0]=_cell;
+        graph.setCellStyles("strokeColor", mxUtils.hexString(color),objects);
         
     }
     public void setStrokeWidth(mxGraph graph,float width){
-        
+        Object[] objects = new Object[1];
+        objects[0]=_cell;
         String wid=String.valueOf(width);
-        graph.setCellStyles("strokeWidth",wid);
+        graph.setCellStyles("strokeWidth",wid,objects);
         
     }
+    
+ 
 }
