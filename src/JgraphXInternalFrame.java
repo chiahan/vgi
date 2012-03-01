@@ -1,4 +1,5 @@
 
+import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.handler.mxKeyboardHandler;
 import com.mxgraph.swing.handler.mxRubberband;
@@ -89,6 +90,31 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			Transition transition = transitionIterator.next();
 			this.addTransition(transition);
 		}  // End while (transitionIterator.hasNext())
+
+		if (!(this.hasGeometricData)) {
+			mxCircleLayout circleLayout = new mxCircleLayout(this.graph);
+			circleLayout.execute(this.graph.getDefaultParent());
+		}
+
+		Iterator<mxCell> cellIterator = this.initialFinalCells.iterator();
+		while (cellIterator.hasNext()) {
+			Object parent = this.graph.getDefaultParent();
+			mxCell vertex = cellIterator.next();
+			State state = this.cellTable.get(vertex);
+			double x = vertex.getGeometry().getCenterX();
+			Object initialWeight = state.getInitialWeight();
+			if (initialWeight != null) {
+				double y = vertex.getGeometry().getY() - 30;
+				mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
+				this.graph.insertEdge(parent, null, initialWeight, hiddenVertex, vertex);
+			}
+			Object finalWeight = state.getInitialWeight();
+			if (finalWeight != null) {
+				double y = vertex.getGeometry().getY() + vertex.getGeometry().getHeight() + 30;
+				mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
+				this.graph.insertEdge(parent, null, finalWeight, vertex, hiddenVertex);
+			}
+		}  // End while (cellIterator.hasNext())
     }
     
     protected void installRepaintListener() {
@@ -295,29 +321,26 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 	public void addState(State state) {
 		Object parent = this.graph.getDefaultParent();
 		Integer id = new Integer(cellTable.size());
-		Point2D point2d = state.getGeometricData().location;
-		mxCell vertex = (mxCell) (this.graph.insertVertex(parent, Integer.toString(id), "", point2d.getX(), point2d.getY(), 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;"));
+		StateInterface.GeometricData geometricData = state.getGeometricData();
+		double x = 0;
+		double y = 0;
+		if ((geometricData == null) || (geometricData.location == null)) {
+			this.hasGeometricData = false;
+		} else {
+			x = geometricData.location.getX();
+			y = geometricData.location.getY();
+		}
+		mxCell vertex = (mxCell) (this.graph.insertVertex(parent, Integer.toString(id), "", x, y, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;"));
 		
                 cellTable.put(vertex, state);
 		
                 
                 graph.setSelectionCell(vertex);
 		infoSplitPane.setTopComponent(new state_properties(graph, (mxCell)vertex));
-		Object initialWeight = state.getInitialWeight();
-		if (initialWeight != null) {
-			double x = vertex.getGeometry().getCenterX();
-			double y = vertex.getGeometry().getY() - 30;
-			mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
-			this.graph.insertEdge(parent, null, initialWeight, hiddenVertex, vertex);
+		if ((state.getInitialWeight() != null) || (state.getFinalWeight() != null)) {
+			this.initialFinalCells.add(vertex);
 		}
-		Object finalWeight = state.getInitialWeight();
-		if (finalWeight != null) {
-			double x = vertex.getGeometry().getCenterX();
-			double y = vertex.getGeometry().getY() + vertex.getGeometry().getHeight() + 30;
-			mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
-			this.graph.insertEdge(parent, null, finalWeight, vertex, hiddenVertex);
-		}
-		System.out.println("add state at (" + point2d.getX() + "," + point2d.getY() + ").");
+		System.out.println("add state at (" + x + "," + y + ").");
 	}  // End public void addState(State state)
 
     public void addTransition(mxCell source, mxCell target) {
@@ -469,6 +492,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     protected JSplitPane infoSplitPane;
     private static JPanel topPanel = null, bottomPanel = null;
     protected Automata automata;
+	private boolean hasGeometricData = true;
+	private List<mxCell> initialFinalCells = new ArrayList<mxCell>();
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
