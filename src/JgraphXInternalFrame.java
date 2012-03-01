@@ -369,7 +369,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     }
                 }
                 
-		this.graph.insertEdge(graph.getDefaultParent(), null, transition.getLabel(), source, target, "shape=curve");
+		mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(), null, transition.getLabel(), source, target, "shape=curve"));
+		edge.getGeometry().setPoints(new ArrayList<mxPoint>());
 	}  // End public void addTransition(Transition transition)
 
     public void addControlPoint() {
