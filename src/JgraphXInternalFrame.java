@@ -106,15 +106,18 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			if (initialWeight != null) {
 				double y = vertex.getGeometry().getY() - 30;
 				mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
-				this.graph.insertEdge(parent, null, initialWeight, hiddenVertex, vertex);
+				mxCell edge = (mxCell) (this.graph.insertEdge(parent, null, initialWeight, hiddenVertex, vertex));
+				edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
 			}
 			Object finalWeight = state.getInitialWeight();
 			if (finalWeight != null) {
 				double y = vertex.getGeometry().getY() + vertex.getGeometry().getHeight() + 30;
 				mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
-				this.graph.insertEdge(parent, null, finalWeight, vertex, hiddenVertex);
+				mxCell edge = (mxCell) (this.graph.insertEdge(parent, null, finalWeight, vertex, hiddenVertex));
+				edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
 			}
 		}  // End while (cellIterator.hasNext())
+		this.graph.refresh();
     }
     
     protected void installRepaintListener() {
@@ -348,6 +351,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         Object e = graph.insertEdge(parent, null, "", source, target, null);
         ArrayList<mxPoint> points = new ArrayList<mxPoint>();
         ((mxCell) e).getGeometry().setPoints(points);
+		((mxCell) e).getGeometry().setY(DEFAULT_LABEL_DISTANCE);
 //        automata.addTransition(
 //                new Transition((mxCell)e, 
 //                automata.getState(source), 
@@ -394,6 +398,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 
 		mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(), null, transition.getLabel(), source, target, "shape=curve"));
 		edge.getGeometry().setPoints(new ArrayList<mxPoint>());
+		edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
 	}  // End public void addTransition(Transition transition)
 
     public void addControlPoint() {
@@ -476,6 +481,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         graph.refresh();
     }
 
+    public static final double DEFAULT_LABEL_DISTANCE = 15;
     private static final long serialVersionUID = -6561623072112577140L;
     private static int openFrameCount = 0;
     private static final int xOffset = 30, yOffset = 30;
