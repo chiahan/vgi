@@ -58,7 +58,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         graph = graphComponent.getGraph();
         graph.setDisconnectOnMove(false);
         graphComponent.setConnectable(false);
-        graphOutline = new mxGraphOutline(getGraphComponent());
+        graphOutline = new mxGraphOutline(graphComponent);
         graphComponent.getViewport().setBackground(Color.WHITE);
         this.automata = automata;
         this.infoSplitPane = infoSplitPane;
@@ -69,7 +69,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         
         this.setBounds(xOffset*openFrameCount, yOffset*openFrameCount, 800, 600);
         openFrameCount++;
-        this.getContentPane().add(graphComponent);
+        this.getContentPane().add(graphComponent, java.awt.BorderLayout.CENTER);
 
         cellTable = new Hashtable<Integer, mxCell>();
 
@@ -390,7 +390,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         deleteMenuItem = new javax.swing.JMenuItem();
         cancelMenuItem = new javax.swing.JMenuItem();
 
-        addStateMenuItem.setText("jMenuItem1");
+        addStateMenuItem.setText("Add State");
         addStateMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addStateMenuItemActionPerformed(evt);
@@ -398,7 +398,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(addStateMenuItem);
 
-        addTransitionFromMenuItem.setText("jMenuItem1");
+        addTransitionFromMenuItem.setText("Add Transition (From)");
         addTransitionFromMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addTransitionFromMenuItemActionPerformed(evt);
@@ -406,7 +406,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(addTransitionFromMenuItem);
 
-        addTransitionToMenuItem.setText("jMenuItem1");
+        addTransitionToMenuItem.setText("add Transition (To)");
         addTransitionToMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addTransitionToMenuItemActionPerformed(evt);
@@ -414,7 +414,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(addTransitionToMenuItem);
 
-        addControlPointMenuItem.setText("jMenuItem1");
+        addControlPointMenuItem.setText("Add Control Point");
         addControlPointMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addControlPointMenuItemActionPerformed(evt);
@@ -422,7 +422,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(addControlPointMenuItem);
 
-        deleteMenuItem.setText("jMenuItem1");
+        deleteMenuItem.setText("Delete");
         deleteMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 deleteMenuItemActionPerformed(evt);
@@ -430,7 +430,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(deleteMenuItem);
 
-        cancelMenuItem.setText("jMenuItem2");
+        cancelMenuItem.setText("Cancel");
         cancelMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelMenuItemActionPerformed(evt);
@@ -443,17 +443,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 formMouseWheelMoved(evt);
             }
         });
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 394, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 274, Short.MAX_VALUE)
-        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents

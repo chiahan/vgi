@@ -117,6 +117,7 @@ public class state_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
         add(Name_TextField, gridBagConstraints);
 
         To_TextField.addActionListener(new java.awt.event.ActionListener() {
@@ -128,6 +129,7 @@ public class state_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
         add(To_TextField, gridBagConstraints);
 
         From_TextField.addActionListener(new java.awt.event.ActionListener() {
@@ -139,6 +141,7 @@ public class state_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
         add(From_TextField, gridBagConstraints);
 
         Initial_Weight_TextField.addActionListener(new java.awt.event.ActionListener() {
@@ -150,6 +153,7 @@ public class state_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
         add(Initial_Weight_TextField, gridBagConstraints);
 
         Name_TextField.setText(Name);
@@ -163,6 +167,7 @@ public class state_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
         add(Final_weight_TextField, gridBagConstraints);
 
         Style_ComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ELLIPSE", "RECTANGLE", "RHOMBUS", "CYLINDER", "ACTOR", "CLOUD", "TRIANGLE", "HEXAGON" }));
@@ -175,6 +180,7 @@ public class state_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
         add(Style_ComboBox, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
