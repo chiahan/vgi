@@ -51,4 +51,8 @@ public interface StateInterface {
 	public void setOutgoingTransitions(List<Transition> transitions);
 
 	public void addTransition(Transition transition);
+
+	public List<State> getHistory();
+
+	public void setHistory(List<State> states);
 }  // End public interface StateInterface

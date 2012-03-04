@@ -129,6 +129,17 @@ public class State implements StateInterface {
 			throw new IllegalArgumentException("Can not add a transition to a state which is neither the source nor the target of the transition.");
 		}
 	}  // End public void addTransition(Transition transition)
+
+	@Override
+	public List<State> getHistory() {
+		return this.pmHistoryStates;
+	}
+
+	@Override
+	public void setHistory(List<State> states) {
+		this.pmHistoryStates = states;
+	}
+
 	private String pmName;
 	private Object pmInitialWeight;
 	private Object pmFinalWeight;
@@ -136,6 +147,7 @@ public class State implements StateInterface {
 	private List<Transition> pmLoopTransitions;
 	private List<Transition> pmOutgoingTransitions;
 	private GeometricData pmGeometricData;
+	private List<State> pmHistoryStates;
 
 	public State() {
 		this.pmName = new String();
