@@ -78,6 +78,7 @@ public class edge_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
         add(Label_TextField1, gridBagConstraints);
 
         Weight_TextField2.addActionListener(new java.awt.event.ActionListener() {
@@ -89,6 +90,7 @@ public class edge_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
         add(Weight_TextField2, gridBagConstraints);
 
         style_label.setText("Start_Style :");
@@ -108,6 +110,7 @@ public class edge_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
         add(Style_ComboBox, gridBagConstraints);
 
         style_label1.setText("End_Style :");
@@ -127,6 +130,7 @@ public class edge_properties extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
         add(End_StyleComboBox, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
