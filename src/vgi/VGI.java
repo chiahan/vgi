@@ -10,15 +10,16 @@ import java.util.prefs.Preferences;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JFileChooser;
+import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.view.mxGraph;
 import java.awt.Dimension;
-import javax.swing.JPanel;
 
 /*
  * To change this template, choose Tools | Templates
@@ -280,7 +281,7 @@ public class VGI extends javax.swing.JFrame {
 		this.pmLastFolderForSaveFile = new File(defaultFolderPath);
 		this.pmAutomataType = null;
 		initComponents();
-		
+
 		Preferences preferences = Preferences.systemRoot().node(this.getClass().getName());
 		String string = preferences.get("TAF-Kit Path", defaultFolderPath);
 		try {
@@ -343,6 +344,9 @@ public class VGI extends javax.swing.JFrame {
         viewMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
         showPropertiesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showStatusBarCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        layoutMenu = new javax.swing.JMenu();
+        circleMenuItem = new javax.swing.JMenuItem();
+        hierarchicalMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -605,6 +609,26 @@ public class VGI extends javax.swing.JFrame {
 
         menuBar.add(viewMenu);
 
+        layoutMenu.setText("Layout");
+
+        circleMenuItem.setText("Circle");
+        circleMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                circleMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(circleMenuItem);
+
+        hierarchicalMenuItem.setText("Hierarchical");
+        hierarchicalMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hierarchicalMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(hierarchicalMenuItem);
+
+        menuBar.add(layoutMenu);
+
         algorithmsMenu.setMnemonic('A');
         algorithmsMenu.setText("Algorithms");
 
@@ -838,6 +862,20 @@ public class VGI extends javax.swing.JFrame {
 
 	}//GEN-LAST:event_saveAsMenuItemActionPerformed
 
+	private void circleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_circleMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (JgraphXInternalFrame.class.isInstance(frame)) {
+			((JgraphXInternalFrame) frame).doCircleLayout();
+		}
+	}//GEN-LAST:event_circleMenuItemActionPerformed
+
+	private void hierarchicalMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hierarchicalMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (JgraphXInternalFrame.class.isInstance(frame)) {
+			((JgraphXInternalFrame) frame).doHierarchicalLayout();
+		}
+	}//GEN-LAST:event_hierarchicalMenuItemActionPerformed
+
 	private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
 		if (fileChooser.getDialogType() != JFileChooser.SAVE_DIALOG) {
@@ -955,6 +993,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JButton addTransitionButton;
     private javax.swing.JMenu algorithmsMenu;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator1;
+    private javax.swing.JMenuItem circleMenuItem;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem currentSettingMenuItem;
     private javax.swing.JButton deleteButton;
@@ -967,8 +1006,10 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JButton fitWindowButton;
     private javax.swing.JMenuItem fitWindowMenuItem;
     private javax.swing.JMenu helpMenu;
+    private javax.swing.JMenuItem hierarchicalMenuItem;
     private javax.swing.JPanel infoPanel;
     private javax.swing.JSplitPane infoSplitPane;
+    private javax.swing.JMenu layoutMenu;
     private javax.swing.JDesktopPane mainDesktopPane;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;

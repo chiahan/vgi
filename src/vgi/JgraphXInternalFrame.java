@@ -1,6 +1,7 @@
 package vgi;
 
 
+import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.handler.mxKeyboardHandler;
@@ -98,27 +99,27 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			circleLayout.execute(this.graph.getDefaultParent());
 		}
 
-		Iterator<mxCell> cellIterator = this.initialFinalCells.iterator();
-		while (cellIterator.hasNext()) {
-			Object parent = this.graph.getDefaultParent();
-			mxCell vertex = cellIterator.next();
-			State state = this.cellTable.get(vertex);
-			double x = vertex.getGeometry().getCenterX();
-			Object initialWeight = state.getInitialWeight();
-			if (initialWeight != null) {
-				double y = vertex.getGeometry().getY() - 30;
-				mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
-				mxCell edge = (mxCell) (this.graph.insertEdge(parent, null, initialWeight, hiddenVertex, vertex));
-				edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
-			}
-			Object finalWeight = state.getInitialWeight();
-			if (finalWeight != null) {
-				double y = vertex.getGeometry().getY() + vertex.getGeometry().getHeight() + 30;
-				mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
-				mxCell edge = (mxCell) (this.graph.insertEdge(parent, null, finalWeight, vertex, hiddenVertex));
-				edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
-			}
-		}  // End while (cellIterator.hasNext())
+//		Iterator<mxCell> cellIterator = this.initialFinalCells.iterator();
+//		while (cellIterator.hasNext()) {
+//			Object parent = this.graph.getDefaultParent();
+//			mxCell vertex = cellIterator.next();
+//			State state = this.cellTable.get(vertex);
+//			double x = vertex.getGeometry().getCenterX();
+//			Object initialWeight = state.getInitialWeight();
+//			if (initialWeight != null) {
+//				double y = vertex.getGeometry().getY() - 30;
+//				mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
+//				mxCell edge = (mxCell) (this.graph.insertEdge(parent, null, initialWeight, hiddenVertex, vertex));
+//				edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
+//			}
+//			Object finalWeight = state.getInitialWeight();
+//			if (finalWeight != null) {
+//				double y = vertex.getGeometry().getY() + vertex.getGeometry().getHeight() + 30;
+//				mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
+//				mxCell edge = (mxCell) (this.graph.insertEdge(parent, null, finalWeight, vertex, hiddenVertex));
+//				edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
+//			}
+//		}  // End while (cellIterator.hasNext())
 		this.graph.refresh();
     }
     
@@ -427,7 +428,18 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         getGraphComponent().refresh();
     }
 
-    /**
+	public void doCircleLayout() {
+		mxCircleLayout layout = new mxCircleLayout(this.graph);
+		layout.setResetEdges(true);
+		layout.execute(this.graph.getDefaultParent());
+	}  // End public void doCircleLayout()
+
+	public void doHierarchicalLayout() {
+		mxHierarchicalLayout layout = new mxHierarchicalLayout(this.graph);
+		layout.execute(this.graph.getDefaultParent());
+	}  // End public void doHierarchicalLayout()
+
+	/**
      * @return the graphOutline
      */
     public mxGraphOutline getGraphOutline() {
