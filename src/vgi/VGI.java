@@ -42,7 +42,8 @@ public class VGI extends javax.swing.JFrame {
 	private File pmLastFolderForSaveFile;
 	private TAFKit pmTAFKit;
 	private TAFKitInterface.AutomataType pmAutomataType;
-
+        
+        
 	private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener {
 
 		public TAFKitInterface.VcsnAlgorithm vcsnAlgorithm;
@@ -748,6 +749,7 @@ public class VGI extends javax.swing.JFrame {
 		List<Automata> automataList = null;
 		try {
 			automataList = fsmXml.read(fileChooser.getSelectedFile());
+                        
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -756,6 +758,10 @@ public class VGI extends javax.swing.JFrame {
 			this.pmAutomataType = new TAFKitInterface.AutomataType(automata);
 			this.updateAlgorithmMenuItems();
 			this.createInternalFrame(automata);
+                        
+                        
+                        JgraphXInternalFrame fr=(JgraphXInternalFrame)mainDesktopPane.getSelectedFrame();
+                        fr.currentFile=fileChooser.getSelectedFile();
 		}
 	}//GEN-LAST:event_openMenuItemActionPerformed
 
@@ -826,12 +832,17 @@ public class VGI extends javax.swing.JFrame {
 
 	private void saveMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveMenuItemActionPerformed
 
-		if (true/*newlyCreatedFile*/) {
+                JgraphXInternalFrame selected=(JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
+                                
+		if (selected.currentFile==null/*newlyCreatedFile*/) {
 			this.saveAsMenuItemActionPerformed(evt);
 		} else {
 			FsmXml fsmXml = new FsmXml();
 			try {
-//				fsmXml.write(currentAutomata, currentFile);
+                                ArrayList<Automata> currentAutomata=new ArrayList<Automata>();
+                                currentAutomata.add(selected.automata);
+                                fsmXml.write(currentAutomata, selected.currentFile);
+                                
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -852,7 +863,14 @@ public class VGI extends javax.swing.JFrame {
 
 		FsmXml fsmXml = new FsmXml();
 		try {
-//			fsmXml.write(currentAutomata, file);
+                    
+                        JgraphXInternalFrame selected=(JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
+                        ArrayList<Automata> currentAutomata=new ArrayList<Automata>();
+                        currentAutomata.add(selected.automata);
+			fsmXml.write(currentAutomata, file);
+                        
+                        selected.currentFile=file;
+                        
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -21,6 +21,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
+import java.io.File;
 import java.util.*;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -189,6 +190,17 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                                 (transitionFrom == null) ? true : false);
                         addTransitionToMenuItem.setVisible(
                                 (transitionFrom == null) ? false : true);
+                        
+                        
+                        //update position
+                        State selectedState=cellTable.get(selectedCell);
+                        
+                        
+                        State.GeometricData geo=new State.GeometricData();
+                        geo.location=new Point2D.Double(e.getX(),e.getY());
+                        selectedState.setGeometricData(geo);
+                        
+                        
                     }
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
@@ -310,7 +322,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         
         State newState=new State();
         State.GeometricData geo=new State.GeometricData();
-        geo.location=new Point2D.Double(x, y);;
+        geo.location=new Point2D.Double(x, y);
         //geo.shape="elipse";
         newState.setGeometricData(geo);
         
@@ -511,6 +523,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     protected Automata automata;
 	private boolean hasGeometricData = true;
 	private List<mxCell> initialFinalCells = new ArrayList<mxCell>();
+        
+    protected File currentFile=null;
+        
+        
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
