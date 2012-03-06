@@ -351,22 +351,19 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     public void addTransition(mxCell source, mxCell target) {
         Object parent = graph.getDefaultParent();
-        Object e = graph.insertEdge(parent, null, "", source, target, null);
+        WeightedRegularExpression.Atomic expression = new WeightedRegularExpression.Atomic();
+        expression.setAlphabet(this.automata.getAlphabet());
+        expression.setWeight(this.automata.getWeight());
+        expression.setWritingData(this.automata.getWritingData());
+        expression.setSymbol(expression.getAlphabet().allSymbols.get(0));
+        Object e = graph.insertEdge(parent, null, expression, source, target, null);
         ArrayList<mxPoint> points = new ArrayList<mxPoint>();
         ((mxCell) e).getGeometry().setPoints(points);
 		((mxCell) e).getGeometry().setY(DEFAULT_LABEL_DISTANCE);
-//        automata.addTransition(
-//                new Transition((mxCell)e, 
-//                automata.getState(source), 
-//                automata.getState(target)));
-
         Transition newTrans=new Transition();
-        Transition.GeometricData geo=new Transition.GeometricData();
-        newTrans.setGeometricData(geo);
-    
         newTrans.setSourceState(cellTable.get(source));
         newTrans.setTargetState(cellTable.get(target));
-        
+        newTrans.setLabel(expression);
         automata.addTransition(newTrans);
     
         System.out.println("total trans:"+automata.getAllTransitions().size());
