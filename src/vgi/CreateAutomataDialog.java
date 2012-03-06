@@ -353,14 +353,44 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
         monoidAlphabetComboBox1.removeItem(monoidAlphabetComboBox.getSelectedItem());
     }//GEN-LAST:event_delAlphabetButton1monoidDelAlphabetActionPerformed
 
-    public Monoid getMonoid() {
-        return monoid;
-    }
-    
-    public Semiring getSemiring() {
-        return semiring;
-    }
-    
+	public AutomataInterface.Alphabet getAlphabet() {
+		AutomataInterface.Alphabet alphabet = new AutomataInterface.Alphabet();
+		alphabet.dataType = TAFKitInterface.AutomataType.AlphabetDataType.CHAR;
+		int count = this.monoidAlphabetComboBox.getItemCount();
+		this.monoidAlphabet = new ArrayList(count);
+		for (int index = 0; index < count; index++) {
+			this.monoidAlphabet.add(this.monoidAlphabetComboBox.getItemAt(index));
+		}
+		alphabet.allSymbols = this.monoidAlphabet;
+		alphabet.identitySymbol = new Character('1');
+		return alphabet;
+	}
+
+	public AutomataInterface.Weight getWeight() {
+		AutomataInterface.Weight weight = new AutomataInterface.Weight();
+		weight.semiring = this.tafKitSemiring;
+		return weight;
+	}
+
+	public AutomataInterface.WritingData getWritingData() {
+		AutomataInterface.WritingData writingData = new AutomataInterface.WritingData();
+		writingData.closePar = new Character(')');
+		writingData.openPar = new Character('(');
+		writingData.plusSym = new Character('+');
+		writingData.spacesSym = new Character(' ');
+		writingData.starSym = new Character('*');
+		writingData.timesSym = new Character('.');
+		writingData.weightClosing = new Character('}');
+		writingData.weightOpening = new Character('{');
+		this.monoidZeroSymbol = this.monoidZeroSymbolTextField.getText();
+		if ((this.monoidZeroSymbol == null) || (this.monoidZeroSymbol.isEmpty())) {
+			writingData.zeroSym = new Character('e');
+		} else {
+			writingData.zeroSym = new Character(this.monoidZeroSymbol.charAt(0));
+		}
+		return writingData;
+	}
+
     public boolean isCreated() {
         return createFlag;
     }

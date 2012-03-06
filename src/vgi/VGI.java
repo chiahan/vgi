@@ -244,11 +244,6 @@ public class VGI extends javax.swing.JFrame {
 	}
     
 
-	private void createInternalFrame() {
-		Automata automata = new Automata();
-		this.createInternalFrame(automata);
-	}
-
     private void createInternalFrame(Automata automata) {
         mxGraph graph = new mxGraph();
 		mxGraphComponent graphComponent = new mxGraphComponent(graph);
@@ -725,12 +720,14 @@ public class VGI extends javax.swing.JFrame {
 		CreateAutomataDialog createDialog = new CreateAutomataDialog(this, true);
 		createDialog.setVisible(true);
 		if (createDialog.isCreated()) {
-			Monoid monoid = createDialog.getMonoid();
-			Semiring semiring = createDialog.getSemiring();
+			Automata automata = new Automata();
+			automata.setAlphabet(createDialog.getAlphabet());
+			automata.setWeight(createDialog.getWeight());
+			automata.setWritingData(createDialog.getWritingData());
 			System.out.println("Create automata from 'NewMenuItem'");
 
 			/* Create draw panel for new automata */
-			this.createInternalFrame();
+			this.createInternalFrame(automata);
 			System.out.println("adding DrawPanel is done! ");
 		}
     }//GEN-LAST:event_newMenuItemActionPerformed
