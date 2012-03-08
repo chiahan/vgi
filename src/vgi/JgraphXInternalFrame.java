@@ -283,7 +283,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                                 State.GeometricData geo=new State.GeometricData();
                                 geo.location=new Point2D.Double(e.getX(),e.getY());
                                 selectedState.setGeometricData(geo);
-                                System.out.println("update location");
+                               // System.out.println("update location");
                             }       
                         }
                     }
