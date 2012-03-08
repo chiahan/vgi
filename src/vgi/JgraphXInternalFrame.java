@@ -183,6 +183,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     
                     vertexSelected = selectedCell.isVertex();
                     if (vertexSelected) {
+                        
+                        
+                        
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new state_properties(graph, selectedCell));
 
@@ -192,14 +195,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                                 (transitionFrom == null) ? false : true);
                         
                         
-                        //update position
-                        State selectedState=cellTable.get(selectedCell);
                         
-                        
-                        State.GeometricData geo=new State.GeometricData();
-                        geo.location=new Point2D.Double(e.getX(),e.getY());
-                        selectedState.setGeometricData(geo);
-                        
+                      
                         
                     }
                 } else {
@@ -254,6 +251,12 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     getGraphPopupMenu().show(getGraphComponent(), popMouseX, popMouseY);
                 }
             }
+            
+            @Override
+            public void mouseExited(MouseEvent e){
+                
+                
+            }
 
         });
 
@@ -264,6 +267,25 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     @Override
                     public void mouseDragged(MouseEvent e) {
                         mouseLocationChanged(e);
+                        boolean selected = !graph.isSelectionEmpty();
+                        mxCell selectedCell = (mxCell) graph.getSelectionCell();
+
+                        boolean vertexSelected = false;
+                
+                        if (selected) {
+                            vertexSelected = selectedCell.isVertex();
+                            if (vertexSelected) {
+                        
+                                //update position
+                                State selectedState=cellTable.get(selectedCell);
+                        
+                        
+                                State.GeometricData geo=new State.GeometricData();
+                                geo.location=new Point2D.Double(e.getX(),e.getY());
+                                selectedState.setGeometricData(geo);
+                                System.out.println("update location");
+                            }       
+                        }
                     }
 
                     @Override
