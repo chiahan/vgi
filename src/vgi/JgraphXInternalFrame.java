@@ -470,6 +470,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 		layout.execute(this.graph.getDefaultParent());
 	}  // End public void doHierarchicalLayout()
 
+	public Automata getAutomata() {
+		return this.automata;
+	}
+
 	/**
      * @return the graphOutline
      */
