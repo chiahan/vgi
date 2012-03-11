@@ -347,6 +347,9 @@ public class VGI extends javax.swing.JFrame {
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
         algorithmsMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
+        accessibleMenuItem = new javax.swing.JMenuItem();
+        coaccessibleMenuItem = new javax.swing.JMenuItem();
+        algorithmsMenuSeparator2 = new javax.swing.JPopupMenu.Separator();
         helpMenu = new javax.swing.JMenu();
         rationalExpressionSymbolsMenuItem = new javax.swing.JMenuItem();
         aboutMenuItem = new javax.swing.JMenuItem();
@@ -641,6 +644,23 @@ public class VGI extends javax.swing.JFrame {
         algorithmsMenu.add(currentSettingMenuItem);
         algorithmsMenu.add(algorithmsMenuSeparator1);
 
+        accessibleMenuItem.setText("Accessible");
+        accessibleMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                accessibleMenuItemActionPerformed(evt);
+            }
+        });
+        algorithmsMenu.add(accessibleMenuItem);
+
+        coaccessibleMenuItem.setText("Coaccessible");
+        coaccessibleMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                coaccessibleMenuItemActionPerformed(evt);
+            }
+        });
+        algorithmsMenu.add(coaccessibleMenuItem);
+        algorithmsMenu.add(algorithmsMenuSeparator2);
+
         menuBar.add(algorithmsMenu);
 
         helpMenu.setMnemonic('H');
@@ -892,6 +912,24 @@ public class VGI extends javax.swing.JFrame {
 		}
 	}//GEN-LAST:event_hierarchicalMenuItemActionPerformed
 
+	private void accessibleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_accessibleMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (JgraphXInternalFrame.class.isInstance(frame)) {
+			Automata inputAutomaton = ((JgraphXInternalFrame) frame).getAutomata();
+			Automata outputAutomaton = Automata.accessible(inputAutomaton);
+			this.createInternalFrame(outputAutomaton);
+		}
+	}//GEN-LAST:event_accessibleMenuItemActionPerformed
+
+	private void coaccessibleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_coaccessibleMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (JgraphXInternalFrame.class.isInstance(frame)) {
+			Automata inputAutomaton = ((JgraphXInternalFrame) frame).getAutomata();
+			Automata outputAutomaton = Automata.coaccessible(inputAutomaton);
+			this.createInternalFrame(outputAutomaton);
+		}
+	}//GEN-LAST:event_coaccessibleMenuItemActionPerformed
+
 	private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
 		if (fileChooser.getDialogType() != JFileChooser.SAVE_DIALOG) {
@@ -922,12 +960,14 @@ public class VGI extends javax.swing.JFrame {
 		try {
 			vcsnAlgorithms = pmTAFKit.listVcsnAlgorithms(pmAutomataType);
 		} catch (FileNotFoundException fileNotFoundException) {
-			if (this.algorithmsMenu.getMenuComponentCount() > 3) {
-				this.algorithmsMenu.removeAll();
-				this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
-				this.algorithmsMenu.add(this.currentSettingMenuItem);
-				this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
-			}
+			this.algorithmsMenu.removeAll();
+			this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
+			this.algorithmsMenu.add(this.currentSettingMenuItem);
+			this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
+			this.algorithmsMenu.add(this.accessibleMenuItem);
+			this.algorithmsMenu.add(this.coaccessibleMenuItem);
+			this.algorithmsMenu.add(this.algorithmsMenuSeparator2);
+
 			JMenuItem menuItem = new JMenuItem();
 			menuItem.setText("TAF-Kit currently does not support this type of automata, \"" + pmAutomataType.toExecutableFileName() + "\".");
 			menuItem.setEnabled(false);
@@ -942,12 +982,13 @@ public class VGI extends javax.swing.JFrame {
 			return;
 		}
 
-		if (this.algorithmsMenu.getMenuComponentCount() > 3) {
-			this.algorithmsMenu.removeAll();
-			this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
-			this.algorithmsMenu.add(this.currentSettingMenuItem);
-			this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
-		}
+		this.algorithmsMenu.removeAll();
+		this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
+		this.algorithmsMenu.add(this.currentSettingMenuItem);
+		this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
+		this.algorithmsMenu.add(this.accessibleMenuItem);
+		this.algorithmsMenu.add(this.coaccessibleMenuItem);
+		this.algorithmsMenu.add(this.algorithmsMenuSeparator2);
 
 		JMenu submenu = null;
 
@@ -1003,14 +1044,17 @@ public class VGI extends javax.swing.JFrame {
 	}
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
+    private javax.swing.JMenuItem accessibleMenuItem;
     private javax.swing.JButton actualSizeButton;
     private javax.swing.JMenuItem actualSizeMenuItem;
     private javax.swing.JButton addStateButton;
     private javax.swing.JButton addTransitionButton;
     private javax.swing.JMenu algorithmsMenu;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator1;
+    private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator2;
     private javax.swing.JMenuItem circleMenuItem;
     private javax.swing.JMenuItem closeMenuItem;
+    private javax.swing.JMenuItem coaccessibleMenuItem;
     private javax.swing.JMenuItem currentSettingMenuItem;
     private javax.swing.JButton deleteButton;
     private javax.swing.JMenuItem deleteMenuItem;

@@ -1,11 +1,13 @@
 package vgi;
 
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * To change this template, choose Tools | Templates and open the template in
+ * the editor.
  */
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 public class Automata implements AutomataInterface {
 
@@ -137,5 +139,170 @@ public class Automata implements AutomataInterface {
 		System.out.println("Creating Automata with Weight");
 		Automata automataWithWeight = new Automata(weight);
 	}
-}  // End public class Automata implements AutomataInterface
 
+	public static Automata accessible(Automata automata) {
+
+		ArrayList<State> accessibleStates = new ArrayList<State>();
+
+		//
+		// Add initial states to the list of accessible states because all initial states are accessible by definition.
+		//
+		Iterator<State> iterateStates = automata.getAllStates().iterator();
+		while (iterateStates.hasNext()) {
+			State state = iterateStates.next();
+			if (state.getInitialWeight() != null) {
+				accessibleStates.add(state);
+			}
+		}  // End while (iterateStates.hasNext())
+
+		//
+		// Go forward from known accessible states to new accessible states until no new accessible state can be found.
+		//
+		for (int index = 0; index < accessibleStates.size(); index++) {
+			State state = accessibleStates.get(index);
+			Iterator<Transition> iterateTransitions = state.getOutgoingTransitions().iterator();
+			while (iterateTransitions.hasNext()) {
+				Transition transition = iterateTransitions.next();
+				State anotherState = transition.getTargetState();
+				if (!(accessibleStates.contains(anotherState))) {
+					accessibleStates.add(anotherState);
+				}
+			}  // End while (iterateTransitions.hasNext())
+		}  // End for (int index = 0; index < accessibleStates.size(); index++)
+
+		//
+		// Build a new automaton containing only the accessibles states of the original automaton.
+		//
+		Automata outputAutomaton = new Automata();
+		outputAutomaton.setName(automata.getName());
+		outputAutomaton.setWritingData(automata.getWritingData());
+		outputAutomaton.setWeight(automata.getWeight());
+		outputAutomaton.setAlphabet(automata.getAlphabet());
+		outputAutomaton.setOutputAlphabet(automata.getOutputAlphabet());
+		HashMap<State, State> mapOldToNewStates = new HashMap<State, State>();
+
+		iterateStates = automata.getAllStates().iterator();
+		while (iterateStates.hasNext()) {
+			State state = iterateStates.next();
+			if (!(accessibleStates.contains(state))) {
+				continue;
+			}
+			State newState = new State();
+			newState.setName(state.getName());
+			newState.setInitialWeight(state.getInitialWeight());
+			newState.setFinalWeight(state.getFinalWeight());
+			newState.setGeometricData(null);
+			ArrayList arrayList = new ArrayList();
+			arrayList.add(state);
+			newState.setHistory(arrayList);
+			arrayList = null;
+			outputAutomaton.addState(newState);
+			mapOldToNewStates.put(state, newState);
+			newState = null;
+		}  // End while (iterateStates.hasNext())
+
+		Iterator<Transition> iterateTransitions = automata.getAllTransitions().iterator();
+		while (iterateTransitions.hasNext()) {
+			Transition transition = iterateTransitions.next();
+			if ((!(accessibleStates.contains(transition.getSourceState())))
+					|| (!(accessibleStates.contains(transition.getTargetState())))) {
+				continue;
+			}
+			Transition newTransition = new Transition();
+			newTransition.setSourceState(mapOldToNewStates.get(transition.getSourceState()));
+			newTransition.setTargetState(mapOldToNewStates.get(transition.getTargetState()));
+			newTransition.setLabel(transition.getLabel());
+			newTransition.setGeometricData(null);
+			outputAutomaton.addTransition(newTransition);
+			newTransition = null;
+		}  // End while (iterateTransitions.hasNext())
+
+		accessibleStates = null;
+		mapOldToNewStates = null;
+
+		return outputAutomaton;
+	}  // End public static Automata accessible(Automata automata)
+
+	public static Automata coaccessible(Automata automata) {
+
+		ArrayList<State> coaccessibleStates = new ArrayList<State>();
+
+		//
+		// Add final states to the list of coaccessible states because all final states are coaccessible by definition.
+		//
+		Iterator<State> iterateStates = automata.getAllStates().iterator();
+		while (iterateStates.hasNext()) {
+			State state = iterateStates.next();
+			if (state.getFinalWeight() != null) {
+				coaccessibleStates.add(state);
+			}
+		}  // End while (iterateStates.hasNext())
+
+		//
+		// Go backward from known coaccessible states to new coaccessible states until no new coaccessible state can be found.
+		//
+		for (int index = 0; index < coaccessibleStates.size(); index++) {
+			State state = coaccessibleStates.get(index);
+			Iterator<Transition> iterateTransitions = state.getIncomingTransitions().iterator();
+			while (iterateTransitions.hasNext()) {
+				Transition transition = iterateTransitions.next();
+				State anotherState = transition.getSourceState();
+				if (!(coaccessibleStates.contains(anotherState))) {
+					coaccessibleStates.add(anotherState);
+				}
+			}  // End while (iterateTransitions.hasNext())
+		}  // End for (int index = 0; index < coaccessibleStates.size(); index++)
+
+		//
+		// Build a new automaton containing only the coaccessibles states of the original automaton.
+		//
+		Automata outputAutomaton = new Automata();
+		outputAutomaton.setName(automata.getName());
+		outputAutomaton.setWritingData(automata.getWritingData());
+		outputAutomaton.setWeight(automata.getWeight());
+		outputAutomaton.setAlphabet(automata.getAlphabet());
+		outputAutomaton.setOutputAlphabet(automata.getOutputAlphabet());
+		HashMap<State, State> mapOldToNewStates = new HashMap<State, State>();
+
+		iterateStates = automata.getAllStates().iterator();
+		while (iterateStates.hasNext()) {
+			State state = iterateStates.next();
+			if (!(coaccessibleStates.contains(state))) {
+				continue;
+			}
+			State newState = new State();
+			newState.setName(state.getName());
+			newState.setInitialWeight(state.getInitialWeight());
+			newState.setFinalWeight(state.getFinalWeight());
+			newState.setGeometricData(null);
+			ArrayList arrayList = new ArrayList();
+			arrayList.add(state);
+			newState.setHistory(arrayList);
+			arrayList = null;
+			outputAutomaton.addState(newState);
+			mapOldToNewStates.put(state, newState);
+			newState = null;
+		}  // End while (iterateStates.hasNext())
+
+		Iterator<Transition> iterateTransitions = automata.getAllTransitions().iterator();
+		while (iterateTransitions.hasNext()) {
+			Transition transition = iterateTransitions.next();
+			if ((!(coaccessibleStates.contains(transition.getSourceState())))
+					|| (!(coaccessibleStates.contains(transition.getTargetState())))) {
+				continue;
+			}
+			Transition newTransition = new Transition();
+			newTransition.setSourceState(mapOldToNewStates.get(transition.getSourceState()));
+			newTransition.setTargetState(mapOldToNewStates.get(transition.getTargetState()));
+			newTransition.setLabel(transition.getLabel());
+			newTransition.setGeometricData(null);
+			outputAutomaton.addTransition(newTransition);
+			newTransition = null;
+		}  // End while (iterateTransitions.hasNext())
+
+		coaccessibleStates = null;
+		mapOldToNewStates = null;
+
+		return outputAutomaton;
+	}  // End public static Automata coaccessible(Automata automata)
+}  // End public class Automata implements AutomataInterface
