@@ -46,7 +46,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     /** Creates new form JgraphXInternalFrame */
     public JgraphXInternalFrame(JSplitPane infoSplitPane,
-                               mxGraphComponent component, Automata automata) {
+                               mxGraphComponent component, Automata automata,String title) {
         super(automata.getName(),
               true, //resizable
               true, //closable
@@ -54,6 +54,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
               true);//iconifiable
 
         initComponents();
+        
+        this.setTitle(title);
+        
         
         graphComponent = component;
         graph = graphComponent.getGraph();
@@ -284,6 +287,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                                 geo.location=new Point2D.Double(e.getX(),e.getY());
                                 selectedState.setGeometricData(geo);
                                // System.out.println("update location");
+                                setModified(true);
                             }       
                         }
                     }
@@ -355,6 +359,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         System.out.println("add state at" + x + "," + y);
         System.out.println("total states:"+automata.getAllStates().size());
+        
+        setModified(true);
     
     }
 
@@ -381,6 +387,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			this.initialFinalCells.add(vertex);
 		}
 		System.out.println("add state at (" + x + "," + y + ").");
+                
+               
 	}  // End public void addState(State state)
 
     public void addTransition(mxCell source, mxCell target) {
@@ -401,6 +409,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         automata.addTransition(newTrans);
     
         System.out.println("total trans:"+automata.getAllTransitions().size());
+        
+        setModified(true);
     
     }
 
@@ -457,6 +467,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         cell.getGeometry().setPoints(points);
         getGraphComponent().refresh();
+        
+        setModified(true);
     }
 
 	public void doCircleLayout() {
@@ -526,6 +538,23 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         graph.refresh();
     }
 
+    
+    public void setModified(boolean mod){
+        modified=mod;
+        
+        String title=null;
+        if(currentFile==null) title="untitled";
+        else title=currentFile.getName();
+            
+        if(!modified){
+            
+            this.setTitle(title);
+        }else{
+            this.setTitle(title+"*");
+        }
+        
+    }
+    
     public static final double DEFAULT_LABEL_DISTANCE = 15;
     private static final long serialVersionUID = -6561623072112577140L;
     private static int openFrameCount = 0;
@@ -546,9 +575,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 	private boolean hasGeometricData = true;
 	private List<mxCell> initialFinalCells = new ArrayList<mxCell>();
         
-    protected File currentFile=null;
-        
-        
+    protected File currentFile=null;  
+    
+    
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is

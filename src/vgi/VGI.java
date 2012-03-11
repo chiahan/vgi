@@ -245,11 +245,11 @@ public class VGI extends javax.swing.JFrame {
 	}
     
 
-    private void createInternalFrame(Automata automata) {
+    private void createInternalFrame(Automata automata,String filename) {
         mxGraph graph = new mxGraph();
 		mxGraphComponent graphComponent = new mxGraphComponent(graph);
         JgraphXInternalFrame frame = 
-                new JgraphXInternalFrame(infoSplitPane, graphComponent, automata);
+                new JgraphXInternalFrame(infoSplitPane, graphComponent, automata,filename);
         frame.setVisible(true);
         mainDesktopPane.add(frame);
         try {
@@ -728,7 +728,7 @@ public class VGI extends javax.swing.JFrame {
 			System.out.println("Create automata from 'NewMenuItem'");
 
 			/* Create draw panel for new automata */
-			this.createInternalFrame(automata);
+			this.createInternalFrame(automata,"untitled");
 			System.out.println("adding DrawPanel is done! ");
 		}
     }//GEN-LAST:event_newMenuItemActionPerformed
@@ -757,7 +757,7 @@ public class VGI extends javax.swing.JFrame {
 			Automata automata = automataList.get(0);
 			this.pmAutomataType = new TAFKitInterface.AutomataType(automata);
 			this.updateAlgorithmMenuItems();
-			this.createInternalFrame(automata);
+			this.createInternalFrame(automata,fileChooser.getSelectedFile().getName());
                         
                         
                         JgraphXInternalFrame fr=(JgraphXInternalFrame)mainDesktopPane.getSelectedFrame();
@@ -842,7 +842,7 @@ public class VGI extends javax.swing.JFrame {
                                 ArrayList<Automata> currentAutomata=new ArrayList<Automata>();
                                 currentAutomata.add(selected.automata);
                                 fsmXml.write(currentAutomata, selected.currentFile);
-                                
+                                selected.setModified(false);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -870,7 +870,8 @@ public class VGI extends javax.swing.JFrame {
 			fsmXml.write(currentAutomata, file);
                         
                         selected.currentFile=file;
-                        
+                        selected.setTitle(fileChooser.getSelectedFile().getName());
+                        selected.setModified(false);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
