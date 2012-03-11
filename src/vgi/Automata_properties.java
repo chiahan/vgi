@@ -1,6 +1,8 @@
 package vgi;
 
 import com.mxgraph.model.mxCell;
+import java.util.Hashtable;
+import java.util.Iterator;
 
 /*
  * To change this template, choose Tools | Templates
@@ -19,10 +21,47 @@ import com.mxgraph.model.mxCell;
 public class Automata_properties extends javax.swing.JPanel {
 
     /** Creates new form Automata_properties */
-    public Automata_properties() {
+   public Automata_properties(Automata automata) {
         initComponents();
+        this.automata = automata;
+        this.cellTable = cellTable;
+        
+        showStates();
+        showTransitions();
+        showInitials();
+        showFinals();
+    }
+    
+    private void showStates() {
+        if (automata != null) {
+            stateTextField.setText(
+                    Integer.toString(automata.getAllStates().size()));
+            
+            Iterator<State> iterator = this.automata.getAllStates().iterator();
+            while (iterator.hasNext()) {
+                State state = iterator.next();
+                stateComboBox.addItem(state.getName());
+            }
+        }
+    }
+    
+    private void showTransitions() {
+        if (automata != null) {
+            transitionTextField.setText(
+                    Integer.toString(automata.getAllTransitions().size()));
+        }
+    }
+    
+    private void showInitials() {
         
     }
+    
+    private void showFinals() {
+        
+    }
+    
+    private Automata automata = null;
+    Hashtable<mxCell, State> cellTable;
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -36,23 +75,23 @@ public class Automata_properties extends javax.swing.JPanel {
 
         stateLabel = new javax.swing.JLabel();
         stateTextField = new javax.swing.JTextField();
-        stateButton = new javax.swing.JButton();
         transitionLabel = new javax.swing.JLabel();
         transitionTextField = new javax.swing.JTextField();
-        transitionButton = new javax.swing.JButton();
         initialLabel = new javax.swing.JLabel();
         initialTextField = new javax.swing.JTextField();
-        initialButton = new javax.swing.JButton();
         finalLabel = new javax.swing.JLabel();
         finalTextField = new javax.swing.JTextField();
-        finalButton = new javax.swing.JButton();
+        stateComboBox = new javax.swing.JComboBox();
+        transitionComboBox = new javax.swing.JComboBox();
+        initialComboBox = new javax.swing.JComboBox();
+        finalComboBox = new javax.swing.JComboBox();
 
         setPreferredSize(new java.awt.Dimension(300, 300));
         setLayout(new java.awt.GridBagLayout());
 
         stateLabel.setText("States :");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipadx = 7;
@@ -61,23 +100,17 @@ public class Automata_properties extends javax.swing.JPanel {
 
         stateTextField.setColumns(5);
         stateTextField.setEditable(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 0.1;
-        add(stateTextField, gridBagConstraints);
-
-        stateButton.setText("detail");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        add(stateButton, gridBagConstraints);
-
-        transitionLabel.setText("Transition :");
+        stateTextField.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        stateTextField.setText("0");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(stateTextField, gridBagConstraints);
+
+        transitionLabel.setText("Transitions :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
@@ -85,23 +118,17 @@ public class Automata_properties extends javax.swing.JPanel {
 
         transitionTextField.setColumns(5);
         transitionTextField.setEditable(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 0.1;
-        add(transitionTextField, gridBagConstraints);
-
-        transitionButton.setText("detail");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        add(transitionButton, gridBagConstraints);
-
-        initialLabel.setText("Initial :");
+        transitionTextField.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        transitionTextField.setText("0");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(transitionTextField, gridBagConstraints);
+
+        initialLabel.setText("Initial states :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
@@ -109,23 +136,17 @@ public class Automata_properties extends javax.swing.JPanel {
 
         initialTextField.setColumns(5);
         initialTextField.setEditable(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 0.1;
-        add(initialTextField, gridBagConstraints);
-
-        initialButton.setText("detail");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        add(initialButton, gridBagConstraints);
-
-        finalLabel.setText("Final :");
+        initialTextField.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        initialTextField.setText("0");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(initialTextField, gridBagConstraints);
+
+        finalLabel.setText("Final states :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
@@ -133,31 +154,49 @@ public class Automata_properties extends javax.swing.JPanel {
 
         finalTextField.setColumns(5);
         finalTextField.setEditable(false);
+        finalTextField.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        finalTextField.setText("0");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 0.1;
         add(finalTextField, gridBagConstraints);
 
-        finalButton.setText("detail");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.weightx = 0.1;
+        add(stateComboBox, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.weightx = 0.1;
+        add(transitionComboBox, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.weightx = 0.1;
+        add(initialComboBox, gridBagConstraints);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        add(finalButton, gridBagConstraints);
+        gridBagConstraints.weightx = 0.1;
+        add(finalComboBox, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton finalButton;
+    private javax.swing.JComboBox finalComboBox;
     private javax.swing.JLabel finalLabel;
     private javax.swing.JTextField finalTextField;
-    private javax.swing.JButton initialButton;
+    private javax.swing.JComboBox initialComboBox;
     private javax.swing.JLabel initialLabel;
     private javax.swing.JTextField initialTextField;
-    private javax.swing.JButton stateButton;
+    private javax.swing.JComboBox stateComboBox;
     private javax.swing.JLabel stateLabel;
     private javax.swing.JTextField stateTextField;
-    private javax.swing.JButton transitionButton;
+    private javax.swing.JComboBox transitionComboBox;
     private javax.swing.JLabel transitionLabel;
     private javax.swing.JTextField transitionTextField;
     // End of variables declaration//GEN-END:variables

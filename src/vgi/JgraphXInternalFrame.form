@@ -56,6 +56,16 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cancelMenuItemActionPerformed"/>
           </Events>
         </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="setInitialMenuItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Set Initial State"/>
+          </Properties>
+        </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="setFinalMenuItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Set Final State"/>
+          </Properties>
+        </MenuItem>
       </SubComponents>
     </Container>
   </NonVisualComponents>

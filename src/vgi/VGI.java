@@ -243,30 +243,35 @@ public class VGI extends javax.swing.JFrame {
         ((JgraphXInternalFrame)panel.getComponent(0)).
                 getGraphComponent().zoomActual();
 	}
-    
 
-    private void createInternalFrame(Automata automata,String filename) {
-        mxGraph graph = new mxGraph();
-		mxGraphComponent graphComponent = new mxGraphComponent(graph);
-        JgraphXInternalFrame frame = 
-                new JgraphXInternalFrame(infoSplitPane, graphComponent, automata,filename);
+    private void createInternalFrame(JgraphXInternalFrame frame) {
         frame.setVisible(true);
         mainDesktopPane.add(frame);
         try {
             frame.setSelected(true);
         } catch (java.beans.PropertyVetoException e) {}
 
-//        infoSplitPane.setTopComponent(new Automata_properties());
         mxGraphOutline graphOutline = frame.getGraphOutline();
-        
-        Dimension minimumSize = new Dimension(298, 284);
-        graphOutline.setMinimumSize(minimumSize);
+        graphOutline.setMinimumSize(new Dimension(298, 284));
         infoSplitPane.setBottomComponent(graphOutline);
-
+        
         this.validate();
-        System.out.println("bound: " + infoSplitPane.getBounds().toString());
-        System.out.println("bound: " + infoSplitPane.getBottomComponent().getBounds().toString());
-        System.out.println("min: " + infoSplitPane.getBottomComponent().getMinimumSize().toString());
+    }
+
+    private void createInternalFrame(Automata automata) {
+        JgraphXInternalFrame frame = 
+                new JgraphXInternalFrame(infoSplitPane, 
+                                         new mxGraphComponent(new mxGraph()), 
+                                         automata, "untitled");
+        createInternalFrame(frame);
+    }
+    
+    private void createInternalFrame(Automata automata, String filename) {
+        JgraphXInternalFrame frame = 
+                new JgraphXInternalFrame(infoSplitPane, 
+                                         new mxGraphComponent(new mxGraph()), 
+                                         automata, filename);
+        createInternalFrame(frame);
     }
 
 	/** Creates new form VGI */
@@ -748,7 +753,7 @@ public class VGI extends javax.swing.JFrame {
 			System.out.println("Create automata from 'NewMenuItem'");
 
 			/* Create draw panel for new automata */
-			this.createInternalFrame(automata,"untitled");
+			this.createInternalFrame(automata);
 			System.out.println("adding DrawPanel is done! ");
 		}
     }//GEN-LAST:event_newMenuItemActionPerformed
@@ -778,10 +783,8 @@ public class VGI extends javax.swing.JFrame {
 			this.pmAutomataType = new TAFKitInterface.AutomataType(automata);
 			this.updateAlgorithmMenuItems();
 			this.createInternalFrame(automata,fileChooser.getSelectedFile().getName());
-                        
-                        
-                        JgraphXInternalFrame fr=(JgraphXInternalFrame)mainDesktopPane.getSelectedFrame();
-                        fr.currentFile=fileChooser.getSelectedFile();
+            JgraphXInternalFrame fr=(JgraphXInternalFrame)mainDesktopPane.getSelectedFrame();
+            fr.currentFile=fileChooser.getSelectedFile();
 		}
 	}//GEN-LAST:event_openMenuItemActionPerformed
 

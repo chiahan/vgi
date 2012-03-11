@@ -46,7 +46,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     /** Creates new form JgraphXInternalFrame */
     public JgraphXInternalFrame(JSplitPane infoSplitPane,
-                               mxGraphComponent component, Automata automata,String title) {
+                               mxGraphComponent component, Automata automata,
+                               String title) {
         super(automata.getName(),
               true, //resizable
               true, //closable
@@ -56,7 +57,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         initComponents();
         
         this.setTitle(title);
-        
         
         graphComponent = component;
         graph = graphComponent.getGraph();
@@ -82,21 +82,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         installListeners();
         installInternalFrameListeners();
 
-		if (this.automata == null) {
-			return;
-		}
-
-		Iterator<State> stateIterator = this.automata.getAllStates().iterator();
-		while (stateIterator.hasNext()) {
-			State state = stateIterator.next();
-			this.addState(state);
-		}  // End while (stateIterator.hasNext())
-
-		Iterator<Transition> transitionIterator = this.automata.getAllTransitions().iterator();
-		while (transitionIterator.hasNext()) {
-			Transition transition = transitionIterator.next();
-			this.addTransition(transition);
-		}  // End while (transitionIterator.hasNext())
+        if (automata != null) {
+            setupStates();
+            setupTranitions();
+        }
 
 		if (!(this.hasGeometricData)) {
 			mxCircleLayout circleLayout = new mxCircleLayout(this.graph);
@@ -186,9 +175,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     
                     vertexSelected = selectedCell.isVertex();
                     if (vertexSelected) {
-                        
-                        
-                        
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new state_properties(graph, selectedCell));
 
@@ -196,15 +182,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                                 (transitionFrom == null) ? true : false);
                         addTransitionToMenuItem.setVisible(
                                 (transitionFrom == null) ? false : true);
-                        
-                        
-                        
-                      
-                        
                     }
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                        new Automata_properties());
+                        new Automata_properties(automata));
                     addTransitionFromMenuItem.setVisible(false);
                     addTransitionToMenuItem.setVisible(false);
                 }
@@ -212,6 +193,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 deleteMenuItem.setVisible(selected);
                 addControlPointMenuItem.setVisible(edgeSelected);
                 cancelMenuItem.setVisible((transitionFrom == null) ? false : true);
+                setInitialMenuItem.setVisible(vertexSelected);
+                setFinalMenuItem.setVisible(vertexSelected);
 
 //                if (vertexSelected) {
 //                    JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
@@ -233,12 +216,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 //                    addTransitionFromMenuItem.setVisible(false);
 //                    addTransitionToMenuItem.setVisible(false);
 //                }
-
-                if (e.isPopupTrigger()) {
-                    popMouseX = e.getX();
-                    popMouseY = e.getY();
-                    getGraphPopupMenu().show(getGraphComponent(), popMouseX, popMouseY);
-                }
                 JgraphXInternalFrame.this.validate();
                 
                 maybeShowPopup(e);
@@ -319,7 +296,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     }
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                        new Automata_properties());
+                        new Automata_properties(automata));
                 }
                 
                 JgraphXInternalFrame.this.infoSplitPane.setBottomComponent(
@@ -337,59 +314,69 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 //        status(e.getX() + ", \n" + e.getY());
     }
     
-    public void addState(int x, int y) {
-        Object parent = graph.getDefaultParent();
-        int id = cellTable.size();
-        Object newVertex = graph.insertVertex(parent, Integer.toString(id), "",
-                x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
-        //cellTable.put((Integer) id, (mxCell)newVertex);
-        graph.setSelectionCell(newVertex);
-        infoSplitPane.setTopComponent(new state_properties(graph, (mxCell)newVertex));
-        
-        State newState=new State();
-        State.GeometricData geo=new State.GeometricData();
-        geo.location=new Point2D.Double(x, y);
+    private void setupStates() {
+        Iterator<State> iterator = this.automata.getAllStates().iterator();
+		while (iterator.hasNext()) {
+			State state = iterator.next();
+			this.addState(state);
+		}  // End while (stateIterator.hasNext())
+    }
+    
+    private void setupTranitions() {
+        Iterator<Transition> iterator = this.automata.getAllTransitions().iterator();
+		while (iterator.hasNext()) {
+			Transition transition = iterator.next();
+			this.addTransition(transition);
+		}  // End while (transitionIterator.hasNext())
+    }
+    
+    public void addState(double x, double y) {
+        State newState = new State();
+        State.GeometricData geo = new State.GeometricData();
+        geo.location = new Point2D.Double(x, y);
         //geo.shape="elipse";
         newState.setGeometricData(geo);
-        
+
         automata.addState(newState);
-        cellTable.put((mxCell)newVertex,newState);
-        
-//        automata.addState(new State((mxCell) newVertex));
+        mxCell vertex = createVertex(x, y);
+        cellTable.put((mxCell) vertex, newState);
 
         System.out.println("add state at" + x + "," + y);
-        System.out.println("total states:"+automata.getAllStates().size());
-        
+        System.out.println("total states:" + automata.getAllStates().size());
+
         setModified(true);
-    
     }
 
 	public void addState(State state) {
-		Object parent = this.graph.getDefaultParent();
-		Integer id = new Integer(cellTable.size());
-		StateInterface.GeometricData geometricData = state.getGeometricData();
-		double x = 0;
-		double y = 0;
-		if ((geometricData == null) || (geometricData.location == null)) {
-			this.hasGeometricData = false;
-		} else {
-			x = geometricData.location.getX();
-			y = geometricData.location.getY();
-		}
-		mxCell vertex = (mxCell) (this.graph.insertVertex(parent, Integer.toString(id), "", x, y, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;"));
-		
-                cellTable.put(vertex, state);
-		
-                
-                graph.setSelectionCell(vertex);
-		infoSplitPane.setTopComponent(new state_properties(graph, (mxCell)vertex));
-		if ((state.getInitialWeight() != null) || (state.getFinalWeight() != null)) {
-			this.initialFinalCells.add(vertex);
-		}
-		System.out.println("add state at (" + x + "," + y + ").");
-                
-               
+        StateInterface.GeometricData geometricData = state.getGeometricData();
+        double x = 0;
+        double y = 0;
+        if ((geometricData == null) || (geometricData.location == null)) {
+            this.hasGeometricData = false;
+        } else {
+            x = geometricData.location.getX();
+            y = geometricData.location.getY();
+        }
+        
+        mxCell vertex = createVertex(x, y);
+        cellTable.put(vertex, state);
+
+        if ((state.getInitialWeight() != null) || (state.getFinalWeight() != null)) {
+            this.initialFinalCells.add(vertex);
+        }
+        System.out.println("add state at (" + x + "," + y + ").");
 	}  // End public void addState(State state)
+    
+    private mxCell createVertex(double x, double y) {
+        Object parent = graph.getDefaultParent();
+        int id = cellTable.size();
+        Object vertex = graph.insertVertex(parent, Integer.toString(id), "",
+                x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
+        graph.setSelectionCell(vertex);
+        infoSplitPane.setTopComponent(new state_properties(graph, (mxCell)vertex));
+        
+        return (mxCell) vertex;
+    }
 
     public void addTransition(mxCell source, mxCell target) {
         Object parent = graph.getDefaultParent();
@@ -570,7 +557,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     protected mxRubberband rubberband;
     protected mxKeyboardHandler keyboardHandler;
     //protected Hashtable<Integer, mxCell> cellTable;
-    protected Hashtable<mxCell,State> cellTable;
+    protected Hashtable<mxCell, State> cellTable;
     protected mxCell transitionFrom, transitionTo;
     protected int popMouseX, popMouseY;
     protected JSplitPane infoSplitPane;
@@ -578,8 +565,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     protected Automata automata;
 	private boolean hasGeometricData = true;
 	private List<mxCell> initialFinalCells = new ArrayList<mxCell>();
-        
-    protected File currentFile=null;  
+    protected File currentFile = null;  
     
     
     /** This method is called from within the constructor to
@@ -598,6 +584,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         addControlPointMenuItem = new javax.swing.JMenuItem();
         deleteMenuItem = new javax.swing.JMenuItem();
         cancelMenuItem = new javax.swing.JMenuItem();
+        setInitialMenuItem = new javax.swing.JMenuItem();
+        setFinalMenuItem = new javax.swing.JMenuItem();
 
         addStateMenuItem.setText("Add State");
         addStateMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -646,6 +634,12 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             }
         });
         graphPopupMenu.add(cancelMenuItem);
+
+        setInitialMenuItem.setText("Set Initial State");
+        graphPopupMenu.add(setInitialMenuItem);
+
+        setFinalMenuItem.setText("Set Final State");
+        graphPopupMenu.add(setFinalMenuItem);
 
         addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -724,5 +718,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     private javax.swing.JMenuItem cancelMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JPopupMenu graphPopupMenu;
+    private javax.swing.JMenuItem setFinalMenuItem;
+    private javax.swing.JMenuItem setInitialMenuItem;
     // End of variables declaration//GEN-END:variables
 }

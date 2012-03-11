@@ -63,7 +63,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
         infoTabbedPane.add(graphOutline, 0);
         infoTabbedPane.setTitleAt(0, "graph outline");
         infoTabbedPane.setSelectedIndex(0);
-        innerSplitPane.setTopComponent(new Automata_properties());
+        innerSplitPane.setTopComponent(new Automata_properties(automata));
         mainSplitPane.setRightComponent(graphComponent);
 
         installRepaintListener();
@@ -164,7 +164,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                                 new edge_properties(graph, selectedCell));
                     } else {
                         DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
-                                new Automata_properties());
+                                new Automata_properties(automata));
                     }
 
                     addTransitionFromMenuItem.setVisible(false);
