@@ -917,7 +917,7 @@ public class VGI extends javax.swing.JFrame {
 		if (JgraphXInternalFrame.class.isInstance(frame)) {
 			Automata inputAutomaton = ((JgraphXInternalFrame) frame).getAutomata();
 			Automata outputAutomaton = Automata.accessible(inputAutomaton);
-			this.createInternalFrame(outputAutomaton);
+			this.createInternalFrame(outputAutomaton,"");
 		}
 	}//GEN-LAST:event_accessibleMenuItemActionPerformed
 
@@ -926,7 +926,7 @@ public class VGI extends javax.swing.JFrame {
 		if (JgraphXInternalFrame.class.isInstance(frame)) {
 			Automata inputAutomaton = ((JgraphXInternalFrame) frame).getAutomata();
 			Automata outputAutomaton = Automata.coaccessible(inputAutomaton);
-			this.createInternalFrame(outputAutomaton);
+			this.createInternalFrame(outputAutomaton,"");
 		}
 	}//GEN-LAST:event_coaccessibleMenuItemActionPerformed
 
