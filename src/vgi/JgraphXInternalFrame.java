@@ -176,7 +176,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     vertexSelected = selectedCell.isVertex();
                     if (vertexSelected) {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new state_properties(graph, selectedCell));
+                                new state_properties(graph, selectedCell, 
+                                                automata, cellTable.get(selectedCell)));
 
                         addTransitionFromMenuItem.setVisible(
                                 (transitionFrom == null) ? true : false);
@@ -292,7 +293,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                                 new edge_properties(graph, selectedCell));
                     } else if (selectedCell.isVertex()) {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new state_properties(graph, selectedCell));
+                                new state_properties(graph, selectedCell, automata,
+                                                     cellTable.get(selectedCell)));
                     }
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
@@ -340,6 +342,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         automata.addState(newState);
         mxCell vertex = createVertex(x, y);
         cellTable.put((mxCell) vertex, newState);
+        
+        infoSplitPane.setTopComponent(
+                new state_properties(graph, (mxCell)vertex, automata, 
+                                     cellTable.get((mxCell)vertex)));
 
         System.out.println("add state at" + x + "," + y);
         System.out.println("total states:" + automata.getAllStates().size());
@@ -364,6 +370,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         if ((state.getInitialWeight() != null) || (state.getFinalWeight() != null)) {
             this.initialFinalCells.add(vertex);
         }
+        
+        infoSplitPane.setTopComponent(
+                new state_properties(graph, (mxCell)vertex, automata, 
+                                     cellTable.get((mxCell)vertex)));
         System.out.println("add state at (" + x + "," + y + ").");
 	}  // End public void addState(State state)
     
@@ -373,7 +383,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         Object vertex = graph.insertVertex(parent, Integer.toString(id), "",
                 x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
         graph.setSelectionCell(vertex);
-        infoSplitPane.setTopComponent(new state_properties(graph, (mxCell)vertex));
         
         return (mxCell) vertex;
     }
@@ -398,38 +407,30 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         System.out.println("total trans:"+automata.getAllTransitions().size());
         
         setModified(true);
-    
     }
 
 	public void addTransition(Transition transition) {
-		List<State> states = this.automata.getAllStates();
-		//int index = states.indexOf(transition.getSourceState());
-		//mxCell source = this.cellTable.get(index);
-		//index = states.indexOf(transition.getTargetState());
-		//mxCell target = this.cellTable.get(index);
-                
-                mxCell source = null,target=null;
-                Enumeration keys=cellTable.keys();
-                while(keys.hasMoreElements()){
-                    mxCell keyCell=(mxCell)keys.nextElement();
-                    if(cellTable.get(keyCell)==transition.getSourceState()){
-                        source=keyCell;
-                        break;
-                    }
-                    
-                }
-                keys=cellTable.keys();
-                while(keys.hasMoreElements()){
-                    mxCell keyCell=(mxCell)keys.nextElement();
-                    if(cellTable.get(keyCell)==transition.getTargetState()){
-                        target=keyCell;
-                        break;
-                    }
-                }
-                
-		mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(), null, transition.getLabel(), source, target, "shape=curve"));
-		edge.getGeometry().setPoints(new ArrayList<mxPoint>());
-		edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
+        mxCell source = null, target = null;
+        Enumeration keys = cellTable.keys();
+        while (keys.hasMoreElements()) {
+            mxCell keyCell = (mxCell) keys.nextElement();
+            if (cellTable.get(keyCell) == transition.getSourceState()) {
+                source = keyCell;
+            }
+            
+            if (cellTable.get(keyCell) == transition.getTargetState()) {
+                target = keyCell;
+            }
+            
+            if ((source != null) && (target != null))
+                break;
+        }
+
+        mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(), 
+                                null, transition.getLabel(), source, target, 
+                                "shape=curve"));
+        edge.getGeometry().setPoints(new ArrayList<mxPoint>());
+        edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
 	}  // End public void addTransition(Transition transition)
 
     public void addControlPoint() {

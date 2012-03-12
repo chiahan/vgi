@@ -140,16 +140,20 @@ public class Automata implements AutomataInterface {
      * @param initialStates the initialStates to set
      */
     public void addInitialState(State state, Object weight) {
-        this.initialStates.add(state);
-        state.setInitialWeight(weight);
+        if (weight != null) {
+            this.initialStates.add(state);
+            state.setInitialWeight(weight);
+        }
     }
 
     /**
      * @param finalStates the finalStates to set
      */
     public void addFinalState(State state, Object weight) {
-        this.finalStates.add(state);
-        state.setFinalWeight(weight);
+        if (weight != null) {
+            this.finalStates.add(state);
+            state.setFinalWeight(weight);
+        }
     }
     
 	private String pmName;
@@ -322,8 +326,10 @@ public class Automata implements AutomataInterface {
 			}
 			State newState = new State();
 			newState.setName(state.getName());
-			newState.setInitialWeight(state.getInitialWeight());
-			newState.setFinalWeight(state.getFinalWeight());
+//			newState.setInitialWeight(state.getInitialWeight());
+            outputAutomaton.addInitialState(newState, state.getInitialWeight());
+//			newState.setFinalWeight(state.getFinalWeight());
+            outputAutomaton.addFinalState(newState, state.getInitialWeight());
 			newState.setGeometricData(null);
 			ArrayList arrayList = new ArrayList();
 			arrayList.add(state);
