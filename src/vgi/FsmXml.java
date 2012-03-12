@@ -698,7 +698,8 @@ public class FsmXml implements FsmXmlInterface {
 				if (state == null) {
 					throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + tag.localName + "\" tag.");
 				}
-				state.setInitialWeight(true);
+//				state.setInitialWeight(true);
+                automata.addInitialState(state, true);
 
 			} // End if (tag.equals(TAG_INITIAL, Tag.Type.START))
 			else if (tag.equals(TAG_FINAL, Tag.Type.START)) {
@@ -711,7 +712,8 @@ public class FsmXml implements FsmXmlInterface {
 				if (state == null) {
 					throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + tag.localName + "\" tag.");
 				}
-				state.setFinalWeight(true);
+//				state.setFinalWeight(true);
+                automata.addFinalState(state, true);
 
 			}  // End if (tag.equals(TAG_FINAL, Tag.Type.START))
 

@@ -26,38 +26,38 @@ public class Automata_properties extends javax.swing.JPanel {
         this.automata = automata;
         this.cellTable = cellTable;
         
-        showStates();
-        showTransitions();
-        showInitials();
-        showFinals();
+        if (automata != null) {
+            showStates();
+            showTransitions();
+            showInitials();
+            showFinals();
+        }
     }
     
     private void showStates() {
-        if (automata != null) {
-            stateTextField.setText(
-                    Integer.toString(automata.getAllStates().size()));
-            
-            Iterator<State> iterator = this.automata.getAllStates().iterator();
-            while (iterator.hasNext()) {
-                State state = iterator.next();
-                stateComboBox.addItem(state.getName());
-            }
+        stateTextField.setText(
+                Integer.toString(automata.getAllStates().size()));
+
+        Iterator<State> iterator = this.automata.getAllStates().iterator();
+        while (iterator.hasNext()) {
+            State state = iterator.next();
+            stateComboBox.addItem(state.getName());
         }
     }
     
     private void showTransitions() {
-        if (automata != null) {
-            transitionTextField.setText(
-                    Integer.toString(automata.getAllTransitions().size()));
-        }
+        transitionTextField.setText(
+                Integer.toString(automata.getAllTransitions().size()));
     }
     
     private void showInitials() {
-        
+        this.initialTextField.setText(
+                Integer.toString(automata.getAllInitialStates().size()));
     }
     
     private void showFinals() {
-        
+        this.finalTextField.setText(
+                Integer.toString(automata.getAllFinalStates().size()));
     }
     
     private Automata automata = null;

@@ -107,6 +107,51 @@ public class Automata implements AutomataInterface {
 		transition.getSourceState().addTransition(transition);
 		transition.getTargetState().addTransition(transition);
 	}
+    
+    /**
+     * @return the initialStates
+     */
+    public List<State> getAllInitialStates() {
+        return initialStates;
+    }
+
+    /**
+     * @return the finalStates
+     */
+    public List<State> getAllFinalStates() {
+        return finalStates;
+    }
+    
+    /**
+     * @param initialStates the initialStates to set
+     */
+    public void setInitialStates(List<State> initialStates) {
+        this.initialStates = initialStates;
+    }
+
+    /**
+     * @param finalStates the finalStates to set
+     */
+    public void setFinalStates(List<State> finalStates) {
+        this.finalStates = finalStates;
+    }
+    
+    /**
+     * @param initialStates the initialStates to set
+     */
+    public void addInitialState(State state, Object weight) {
+        this.initialStates.add(state);
+        state.setInitialWeight(weight);
+    }
+
+    /**
+     * @param finalStates the finalStates to set
+     */
+    public void addFinalState(State state, Object weight) {
+        this.finalStates.add(state);
+        state.setFinalWeight(weight);
+    }
+    
 	private String pmName;
 	private WritingData pmWritingData;
 	private Weight pmWeight;
@@ -114,6 +159,7 @@ public class Automata implements AutomataInterface {
 	private Alphabet pmOutputAlphabet;
 	private List<State> pmAllStates;
 	private List<Transition> pmAllTransitions;
+    private List<State> initialStates, finalStates;
 
 	public Automata() {
 		this.pmName = null;
@@ -123,6 +169,8 @@ public class Automata implements AutomataInterface {
 		this.pmOutputAlphabet = null;
 		this.pmAllStates = new ArrayList<State>();
 		this.pmAllTransitions = new ArrayList<Transition>();
+        this.initialStates = new ArrayList<State>();
+        this.finalStates = new  ArrayList<State>();
 	}
 
 	public Automata(Weight weight) {
@@ -189,8 +237,10 @@ public class Automata implements AutomataInterface {
 			}
 			State newState = new State();
 			newState.setName(state.getName());
-			newState.setInitialWeight(state.getInitialWeight());
-			newState.setFinalWeight(state.getFinalWeight());
+//			newState.setInitialWeight(state.getInitialWeight());
+            outputAutomaton.addInitialState(newState, state.getInitialWeight());
+//			newState.setFinalWeight(state.getFinalWeight());
+            outputAutomaton.addFinalState(newState, state.getFinalWeight());
 			newState.setGeometricData(null);
 			ArrayList arrayList = new ArrayList();
 			arrayList.add(state);

@@ -141,7 +141,7 @@ public class State implements StateInterface {
 	public void setHistory(List<State> states) {
 		this.pmHistoryStates = states;
 	}
-
+    
 	private String pmName;
 	private Object pmInitialWeight;
 	private Object pmFinalWeight;

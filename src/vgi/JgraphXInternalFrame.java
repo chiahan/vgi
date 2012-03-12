@@ -323,7 +323,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }
     
     private void setupTranitions() {
-        Iterator<Transition> iterator = this.automata.getAllTransitions().iterator();
+       Iterator<Transition> iterator = this.automata.getAllTransitions().iterator();
 		while (iterator.hasNext()) {
 			Transition transition = iterator.next();
 			this.addTransition(transition);
