@@ -107,55 +107,38 @@ public class Automata implements AutomataInterface {
 		transition.getSourceState().addTransition(transition);
 		transition.getTargetState().addTransition(transition);
 	}
-    
-    /**
-     * @return the initialStates
-     */
-    public List<State> getAllInitialStates() {
-        return initialStates;
-    }
 
-    /**
-     * @return the finalStates
-     */
-    public List<State> getAllFinalStates() {
-        return finalStates;
-    }
-    
-    /**
-     * @param initialStates the initialStates to set
-     */
-    public void setInitialStates(List<State> initialStates) {
-        this.initialStates = initialStates;
-    }
+	@Override
+	public List<State> getInitialStates() {
+		ArrayList<State> arrayList = new ArrayList<State>();
+		if (this.pmAllStates == null) {
+			return arrayList;
+		}
+		Iterator<State> iterateStates = this.pmAllStates.iterator();
+		while (iterateStates.hasNext()) {
+			State state = iterateStates.next();
+			if (state.getInitialWeight() != null) {
+				arrayList.add(state);
+			}
+		}  // End while (iterateStates.hasNext())
+		return arrayList;
+	}
 
-    /**
-     * @param finalStates the finalStates to set
-     */
-    public void setFinalStates(List<State> finalStates) {
-        this.finalStates = finalStates;
-    }
-    
-    /**
-     * @param initialStates the initialStates to set
-     */
-    public void addInitialState(State state, Object weight) {
-        if (weight != null) {
-            this.initialStates.add(state);
-            state.setInitialWeight(weight);
-        }
-    }
-
-    /**
-     * @param finalStates the finalStates to set
-     */
-    public void addFinalState(State state, Object weight) {
-        if (weight != null) {
-            this.finalStates.add(state);
-            state.setFinalWeight(weight);
-        }
-    }
-    
+	@Override
+	public List<State> getFinalStates() {
+		ArrayList<State> arrayList = new ArrayList<State>();
+		if (this.pmAllStates == null) {
+			return arrayList;
+		}
+		Iterator<State> iterateStates = this.pmAllStates.iterator();
+		while (iterateStates.hasNext()) {
+			State state = iterateStates.next();
+			if (state.getFinalWeight() != null) {
+				arrayList.add(state);
+			}
+		}  // End while (iterateStates.hasNext())
+		return arrayList;
+	}
 	private String pmName;
 	private WritingData pmWritingData;
 	private Weight pmWeight;
@@ -163,7 +146,6 @@ public class Automata implements AutomataInterface {
 	private Alphabet pmOutputAlphabet;
 	private List<State> pmAllStates;
 	private List<Transition> pmAllTransitions;
-    private List<State> initialStates, finalStates;
 
 	public Automata() {
 		this.pmName = null;
@@ -173,8 +155,6 @@ public class Automata implements AutomataInterface {
 		this.pmOutputAlphabet = null;
 		this.pmAllStates = new ArrayList<State>();
 		this.pmAllTransitions = new ArrayList<Transition>();
-        this.initialStates = new ArrayList<State>();
-        this.finalStates = new  ArrayList<State>();
 	}
 
 	public Automata(Weight weight) {
@@ -194,18 +174,10 @@ public class Automata implements AutomataInterface {
 
 	public static Automata accessible(Automata automata) {
 
-		ArrayList<State> accessibleStates = new ArrayList<State>();
-
 		//
 		// Add initial states to the list of accessible states because all initial states are accessible by definition.
 		//
-		Iterator<State> iterateStates = automata.getAllStates().iterator();
-		while (iterateStates.hasNext()) {
-			State state = iterateStates.next();
-			if (state.getInitialWeight() != null) {
-				accessibleStates.add(state);
-			}
-		}  // End while (iterateStates.hasNext())
+		List<State> accessibleStates = automata.getInitialStates();
 
 		//
 		// Go forward from known accessible states to new accessible states until no new accessible state can be found.
@@ -233,7 +205,7 @@ public class Automata implements AutomataInterface {
 		outputAutomaton.setOutputAlphabet(automata.getOutputAlphabet());
 		HashMap<State, State> mapOldToNewStates = new HashMap<State, State>();
 
-		iterateStates = automata.getAllStates().iterator();
+		Iterator<State> iterateStates = automata.getAllStates().iterator();
 		while (iterateStates.hasNext()) {
 			State state = iterateStates.next();
 			if (!(accessibleStates.contains(state))) {
@@ -241,10 +213,8 @@ public class Automata implements AutomataInterface {
 			}
 			State newState = new State();
 			newState.setName(state.getName());
-//			newState.setInitialWeight(state.getInitialWeight());
-            outputAutomaton.addInitialState(newState, state.getInitialWeight());
-//			newState.setFinalWeight(state.getFinalWeight());
-            outputAutomaton.addFinalState(newState, state.getFinalWeight());
+			newState.setInitialWeight(state.getInitialWeight());
+			newState.setFinalWeight(state.getFinalWeight());
 			newState.setGeometricData(null);
 			ArrayList arrayList = new ArrayList();
 			arrayList.add(state);
@@ -271,7 +241,6 @@ public class Automata implements AutomataInterface {
 			newTransition = null;
 		}  // End while (iterateTransitions.hasNext())
 
-		accessibleStates = null;
 		mapOldToNewStates = null;
 
 		return outputAutomaton;
@@ -279,18 +248,10 @@ public class Automata implements AutomataInterface {
 
 	public static Automata coaccessible(Automata automata) {
 
-		ArrayList<State> coaccessibleStates = new ArrayList<State>();
-
 		//
 		// Add final states to the list of coaccessible states because all final states are coaccessible by definition.
 		//
-		Iterator<State> iterateStates = automata.getAllStates().iterator();
-		while (iterateStates.hasNext()) {
-			State state = iterateStates.next();
-			if (state.getFinalWeight() != null) {
-				coaccessibleStates.add(state);
-			}
-		}  // End while (iterateStates.hasNext())
+		List<State> coaccessibleStates = automata.getFinalStates();
 
 		//
 		// Go backward from known coaccessible states to new coaccessible states until no new coaccessible state can be found.
@@ -318,7 +279,7 @@ public class Automata implements AutomataInterface {
 		outputAutomaton.setOutputAlphabet(automata.getOutputAlphabet());
 		HashMap<State, State> mapOldToNewStates = new HashMap<State, State>();
 
-		iterateStates = automata.getAllStates().iterator();
+		Iterator<State> iterateStates = automata.getAllStates().iterator();
 		while (iterateStates.hasNext()) {
 			State state = iterateStates.next();
 			if (!(coaccessibleStates.contains(state))) {
@@ -326,10 +287,8 @@ public class Automata implements AutomataInterface {
 			}
 			State newState = new State();
 			newState.setName(state.getName());
-//			newState.setInitialWeight(state.getInitialWeight());
-            outputAutomaton.addInitialState(newState, state.getInitialWeight());
-//			newState.setFinalWeight(state.getFinalWeight());
-            outputAutomaton.addFinalState(newState, state.getInitialWeight());
+			newState.setInitialWeight(state.getInitialWeight());
+			newState.setFinalWeight(state.getFinalWeight());
 			newState.setGeometricData(null);
 			ArrayList arrayList = new ArrayList();
 			arrayList.add(state);
@@ -356,7 +315,6 @@ public class Automata implements AutomataInterface {
 			newTransition = null;
 		}  // End while (iterateTransitions.hasNext())
 
-		coaccessibleStates = null;
 		mapOldToNewStates = null;
 
 		return outputAutomaton;

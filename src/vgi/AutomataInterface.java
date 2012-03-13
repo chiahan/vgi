@@ -1,6 +1,5 @@
 package vgi;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,14 +76,10 @@ public interface AutomataInterface {
 	public List<State> getAllStates();
 
 	public void setAllStates(List<State> allStates);
-    
-    public List<State> getAllInitialStates();
-    public void setInitialStates(List<State> states);
-    public void addInitialState(State state, Object weight);
-    
-    public List<State> getAllFinalStates();
-    public void setFinalStates(List<State> states);
-    public void addFinalState(State state, Object weight);
+
+	public List<State> getInitialStates();
+
+	public List<State> getFinalStates();
 
 	public void addState(State state);
 

@@ -52,12 +52,12 @@ public class Automata_properties extends javax.swing.JPanel {
     
     private void showInitials() {
         this.initialTextField.setText(
-                Integer.toString(automata.getAllInitialStates().size()));
+                Integer.toString(automata.getInitialStates().size()));
     }
     
     private void showFinals() {
         this.finalTextField.setText(
-                Integer.toString(automata.getAllFinalStates().size()));
+                Integer.toString(automata.getFinalStates().size()));
     }
     
     private Automata automata = null;
