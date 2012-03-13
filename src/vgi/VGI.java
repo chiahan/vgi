@@ -354,6 +354,7 @@ public class VGI extends javax.swing.JFrame {
         algorithmsMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
         accessibleMenuItem = new javax.swing.JMenuItem();
         coaccessibleMenuItem = new javax.swing.JMenuItem();
+        removeEpsilonTransitionsMenuItem = new javax.swing.JMenuItem();
         algorithmsMenuSeparator2 = new javax.swing.JPopupMenu.Separator();
         helpMenu = new javax.swing.JMenu();
         rationalExpressionSymbolsMenuItem = new javax.swing.JMenuItem();
@@ -664,6 +665,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         algorithmsMenu.add(coaccessibleMenuItem);
+
+        removeEpsilonTransitionsMenuItem.setText("Remove Epsilon Transitions");
+        removeEpsilonTransitionsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeEpsilonTransitionsMenuItemActionPerformed(evt);
+            }
+        });
+        algorithmsMenu.add(removeEpsilonTransitionsMenuItem);
         algorithmsMenu.add(algorithmsMenuSeparator2);
 
         menuBar.add(algorithmsMenu);
@@ -920,7 +929,7 @@ public class VGI extends javax.swing.JFrame {
 		if (JgraphXInternalFrame.class.isInstance(frame)) {
 			Automata inputAutomaton = ((JgraphXInternalFrame) frame).getAutomata();
 			Automata outputAutomaton = Automata.accessible(inputAutomaton);
-			this.createInternalFrame(outputAutomaton,"");
+			this.createInternalFrame(outputAutomaton, "Accessible of " + frame.getTitle());
 		}
 	}//GEN-LAST:event_accessibleMenuItemActionPerformed
 
@@ -929,9 +938,18 @@ public class VGI extends javax.swing.JFrame {
 		if (JgraphXInternalFrame.class.isInstance(frame)) {
 			Automata inputAutomaton = ((JgraphXInternalFrame) frame).getAutomata();
 			Automata outputAutomaton = Automata.coaccessible(inputAutomaton);
-			this.createInternalFrame(outputAutomaton,"");
+			this.createInternalFrame(outputAutomaton, "Coccessible of " + frame.getTitle());
 		}
 	}//GEN-LAST:event_coaccessibleMenuItemActionPerformed
+
+	private void removeEpsilonTransitionsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeEpsilonTransitionsMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (JgraphXInternalFrame.class.isInstance(frame)) {
+			Automata inputAutomaton = ((JgraphXInternalFrame) frame).getAutomata();
+			Automata outputAutomaton = Automata.removeEpsilonTransitions(inputAutomaton);
+			this.createInternalFrame(outputAutomaton, "Removed epsilon transitions of " + frame.getTitle());
+		}
+	}//GEN-LAST:event_removeEpsilonTransitionsMenuItemActionPerformed
 
 	private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
@@ -1080,6 +1098,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JPanel outlinePanel;
     private javax.swing.JMenuItem rationalExpressionSymbolsMenuItem;
+    private javax.swing.JMenuItem removeEpsilonTransitionsMenuItem;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
     private javax.swing.JButton setAsFinalStateButton;
