@@ -151,8 +151,8 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                 cancelMenuItem.setVisible((transitionFrom == null) ? false : true);
 
                 if (vertexSelected) {
-                    DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
-                            new state_properties(graph, selectedCell));
+//                    DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
+//                            new state_properties(graph, selectedCell));
 
                     addTransitionFromMenuItem.setVisible(
                             (transitionFrom == null) ? true : false);
