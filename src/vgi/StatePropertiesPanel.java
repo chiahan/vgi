@@ -23,46 +23,44 @@ import javax.swing.JComboBox;
  *
  * @author bl606
  */
-public class state_properties extends javax.swing.JPanel {
+public class StatePropertiesPanel extends javax.swing.JPanel {
 
     /** Creates new form state_properties */
-    public state_properties(mxGraph graph, mxCell cell,
+    public StatePropertiesPanel(mxGraph graph, mxCell cell,
                          Automata automata, State state) {
-        _graph=graph;
-        _cell=cell;
-        this.automata = automata;
-        this.state = state;
-        Style = cell.getStyle();
-       
         initComponents();
         
-        if (cell != null) {
-            showName();
-            showTransition();
-            showInitialWeight();
-            showFinalWeight();
-        }
+        this.graph = graph;
+        this.cell = cell;
+        this.automata = automata;
+        this.state = state;
+        style = cell.getStyle();
+        
+        showName();
+        showTransition();
+        showInitialWeight();
+        showFinalWeight();
     }
     
     private void showName() {
-        this.Name_TextField.setText(_cell.getId());
+        this.Name_TextField.setText(cell.getValue().toString());
     }
     
     private void showTransition() {
         String transitionStr = "";
         boolean self = false;
-        int count = _cell.getEdgeCount();
+        int count = cell.getEdgeCount();
         
         for (int i=0; i<count; i++) {
-            mxCell source = (mxCell)_cell.getEdgeAt(i).getTerminal(true);
-            mxCell target = (mxCell)_cell.getEdgeAt(i).getTerminal(false);
+            mxCell source = (mxCell)cell.getEdgeAt(i).getTerminal(true);
+            mxCell target = (mxCell)cell.getEdgeAt(i).getTerminal(false);
 
             transitionStr += source.getId();
             transitionStr += " to ";
             transitionStr += target.getId();
             transitionStr += ", ";
             
-            if ((source == target) && (source == _cell)) {
+            if ((source == target) && (source == cell)) {
                 self = true;
             }
         }
@@ -182,9 +180,9 @@ private void Style_ComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GE
     JComboBox cb = (JComboBox)evt.getSource();
     //Style = "shape=" + ((String)cb.getSelectedItem()).toLowerCase();
     Object[] objects = new Object[1];
-    objects[0]=_cell;
-    System.out.print(Style);
-    _graph.setCellStyles("shape",((String)cb.getSelectedItem()).toLowerCase() ,objects );
+    objects[0]=cell;
+    System.out.print(style);
+    graph.setCellStyles("shape",((String)cb.getSelectedItem()).toLowerCase() ,objects );
     
 //    this.repaint();
 //    System.out.println(_cell.getStyle());
@@ -203,28 +201,28 @@ private void Style_ComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GE
     private javax.swing.JLabel transitionLabel;
     // End of variables declaration//GEN-END:variables
 
-    private String Style;
-    private mxCell _cell;
-    private mxGraph _graph;
+    private String style;
+    private mxCell cell;
+    private mxGraph graph;
     private State state;
     private Automata automata;
 
     
     public void setFillColor(mxGraph graph,Color color){
         Object[] objects = new Object[1];
-        objects[0]=_cell;
+        objects[0]=cell;
         graph.setCellStyles("fillColor", mxUtils.hexString(color),objects);
         
     }
     public void setStrokeColor(mxGraph graph,Color color){
         Object[] objects = new Object[1];
-        objects[0]=_cell;
+        objects[0]=cell;
         graph.setCellStyles("strokeColor", mxUtils.hexString(color),objects);
         
     }
     public void setStrokeWidth(mxGraph graph,float width){
         Object[] objects = new Object[1];
-        objects[0]=_cell;
+        objects[0]=cell;
         String wid=String.valueOf(width);
         graph.setCellStyles("strokeWidth",wid,objects);
         
@@ -236,7 +234,7 @@ private void Style_ComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GE
     public void setGradientColor(mxGraph graph,Color fromColor, Color toColor,int direction)
     {
         Object[] objects = new Object[1];
-        objects[0]=_cell;
+        objects[0]=cell;
         graph.setCellStyles("fillColor", mxUtils.hexString(fromColor),objects);
         graph.setCellStyles("gradientColor", mxUtils.hexString(toColor),objects);
         switch(direction){
@@ -260,7 +258,7 @@ private void Style_ComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GE
     public void setShadow(mxGraph graph,boolean hasShadow)
     {
         Object[] objects = new Object[1];
-        objects[0]=_cell;
+        objects[0]=cell;
         if(hasShadow)
             graph.setCellStyles("shadow", "true",objects);
         else

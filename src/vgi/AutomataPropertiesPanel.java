@@ -1,8 +1,11 @@
 package vgi;
 
 import com.mxgraph.model.mxCell;
+import com.mxgraph.view.mxGraph;
 import java.util.Hashtable;
 import java.util.Iterator;
+import javax.swing.JComboBox;
+import javax.swing.JSplitPane;
 
 /*
  * To change this template, choose Tools | Templates
@@ -18,19 +21,19 @@ import java.util.Iterator;
  *
  * @author bl606
  */
-public class Automata_properties extends javax.swing.JPanel {
+public class AutomataPropertiesPanel extends javax.swing.JPanel {
 
     /** Creates new form Automata_properties */
-   public Automata_properties(Automata automata) {
+   public AutomataPropertiesPanel(mxGraph graph, Automata automata) {
         initComponents();
         this.automata = automata;
-        this.cellTable = cellTable;
+        this.graph = graph;
         
         if (automata != null) {
-            showStates();
             showTransitions();
-            showInitials();
+            showStates();
             showFinals();
+            showInitials();
         }
     }
     
@@ -41,27 +44,62 @@ public class Automata_properties extends javax.swing.JPanel {
         Iterator<State> iterator = this.automata.getAllStates().iterator();
         while (iterator.hasNext()) {
             State state = iterator.next();
-            stateComboBox.addItem(state.getName());
+            stateComboBox.addItem((Object)state);
         }
     }
     
     private void showTransitions() {
         transitionTextField.setText(
                 Integer.toString(automata.getAllTransitions().size()));
+        
+        Iterator<Transition> iterator = automata.getAllTransitions().iterator();
+        while(iterator.hasNext()) {
+            Transition transition = iterator.next();
+            transitionComboBox.addItem(transition);
+        }
     }
     
     private void showInitials() {
         this.initialTextField.setText(
                 Integer.toString(automata.getInitialStates().size()));
+        
+        Iterator<State> iterator = this.automata.getInitialStates().iterator();
+        while (iterator.hasNext()) {
+            State state = iterator.next();
+            initialComboBox.addItem((Object)state);
+        }
     }
     
     private void showFinals() {
         this.finalTextField.setText(
                 Integer.toString(automata.getFinalStates().size()));
+        
+        Iterator<State> iterator = this.automata.getFinalStates().iterator();
+        while (iterator.hasNext()) {
+            State state = iterator.next();
+            finalComboBox.addItem((Object)state);
+        }
     }
     
-    private Automata automata = null;
-    Hashtable<mxCell, State> cellTable;
+    private void setSelectionCell(Object[] cells, Object object, Boolean state) {
+        for (int i=0; i<cells.length; i++) {
+            String cellString = (state) ?
+                                ((mxCell)cells[i]).getValue().toString():
+                                ((mxCell)cells[i]).getValue().toString() + " : '" + 
+                                    ((mxCell)cells[i]).getSource().getValue() + "' to '" + 
+                                    ((mxCell)cells[i]).getTarget().getValue() +"'";
+            String itemString = (state) ? 
+                                ((State)object).getName() :
+                                ((Transition)object).toString();
+            if (cellString.compareTo(itemString) == 0) {
+                graph.setSelectionCell(cells[i]);
+                break;
+            }
+        }
+    }
+    
+    private Automata automata;
+    private mxGraph graph;
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -162,30 +200,79 @@ public class Automata_properties extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         add(finalTextField, gridBagConstraints);
 
+        stateComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                stateComboBoxActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.weightx = 0.1;
         add(stateComboBox, gridBagConstraints);
 
+        transitionComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                transitionComboBoxActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.weightx = 0.1;
         add(transitionComboBox, gridBagConstraints);
 
+        initialComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                initialComboBoxActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.weightx = 0.1;
         add(initialComboBox, gridBagConstraints);
 
+        finalComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                finalComboBoxActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.weightx = 0.1;
         add(finalComboBox, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void stateComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stateComboBoxActionPerformed
+        JComboBox comboBox = (JComboBox) evt.getSource();
+        State state = (State)comboBox.getSelectedItem();
+        Object[] cells = graph.getChildCells(graph.getDefaultParent(), true, false);
+        setSelectionCell(cells, state, true);
+    }//GEN-LAST:event_stateComboBoxActionPerformed
+
+    private void transitionComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transitionComboBoxActionPerformed
+        JComboBox comboBox = (JComboBox) evt.getSource();
+        Transition transition = (Transition)comboBox.getSelectedItem();
+        Object[] cells = graph.getChildCells(graph.getDefaultParent(), false, true);
+        setSelectionCell(cells, transition, false);
+    }//GEN-LAST:event_transitionComboBoxActionPerformed
+
+    private void initialComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_initialComboBoxActionPerformed
+        JComboBox comboBox = (JComboBox) evt.getSource();
+        State state = (State)comboBox.getSelectedItem();
+        Object[] cells = graph.getChildCells(graph.getDefaultParent(), true, false);
+        setSelectionCell(cells, state, true);
+    }//GEN-LAST:event_initialComboBoxActionPerformed
+
+    private void finalComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_finalComboBoxActionPerformed
+        JComboBox comboBox = (JComboBox) evt.getSource();
+        State state = (State)comboBox.getSelectedItem();
+        Object[] cells = graph.getChildCells(graph.getDefaultParent(), true, false);
+        setSelectionCell(cells, state, true);
+    }//GEN-LAST:event_finalComboBoxActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox finalComboBox;
     private javax.swing.JLabel finalLabel;

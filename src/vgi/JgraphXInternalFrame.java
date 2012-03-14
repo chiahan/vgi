@@ -177,7 +177,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     vertexSelected = selectedCell.isVertex();
                     if (vertexSelected) {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new state_properties(graph, selectedCell, automata, 
+                                new StatePropertiesPanel(graph, selectedCell, automata, 
                                 JgraphXInternalFrame.this.cellToState(selectedCell)));
 
                         addTransitionFromMenuItem.setVisible(
@@ -187,7 +187,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     }
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                        new Automata_properties(automata));
+                        new AutomataPropertiesPanel(graph, automata));
                     addTransitionFromMenuItem.setVisible(false);
                     addTransitionToMenuItem.setVisible(false);
                 }
@@ -292,12 +292,12 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                                 JgraphXInternalFrame.this.cellToTransition(selectedCell)));
                     } else if (selectedCell.isVertex()) {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new state_properties(graph, selectedCell, automata,
+                                new StatePropertiesPanel(graph, selectedCell, automata,
                                 JgraphXInternalFrame.this.cellToState(selectedCell)));
                     }
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                        new Automata_properties(automata));
+                        new AutomataPropertiesPanel(graph, automata));
                 }
                 
                 JgraphXInternalFrame.this.infoSplitPane.setBottomComponent(
@@ -339,12 +339,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         newState.setGeometricData(geo);
 
         automata.addState(newState);
-        mxCell vertex = createVertex(x, y);
-        cellTable.put((mxCell) vertex, newState);
+        mxCell vertex = createVertex(x, y, newState.getName());
+        cellTable.put(vertex, newState);
         
         infoSplitPane.setTopComponent(
-                new state_properties(graph, (mxCell)vertex, automata, 
-                                     this.cellToState(vertex)));
+                new StatePropertiesPanel(graph, (mxCell)vertex, automata, newState));
 
         System.out.println("add state at" + x + "," + y);
         System.out.println("total states:" + automata.getAllStates().size());
@@ -363,7 +362,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             y = geometricData.location.getY();
         }
         
-        mxCell vertex = createVertex(x, y);
+        mxCell vertex = createVertex(x, y, state.getName());
         cellTable.put(vertex, state);
 
         if ((state.getInitialWeight() != null) || (state.getFinalWeight() != null)) {
@@ -371,15 +370,15 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         }
         
         infoSplitPane.setTopComponent(
-                new state_properties(graph, (mxCell)vertex, automata, 
+                new StatePropertiesPanel(graph, (mxCell)vertex, automata, 
                 JgraphXInternalFrame.this.cellToState(vertex)));
         System.out.println("add state at (" + x + "," + y + ").");
 	}  // End public void addState(State state)
     
-    private mxCell createVertex(double x, double y) {
+    private mxCell createVertex(double x, double y, String name) {
         Object parent = graph.getDefaultParent();
         int id = cellTable.size();
-        Object vertex = graph.insertVertex(parent, Integer.toString(id), "",
+        Object vertex = graph.insertVertex(parent, Integer.toString(id), name,
                 x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
         graph.setSelectionCell(vertex);
         

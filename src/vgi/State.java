@@ -142,6 +142,11 @@ public class State implements StateInterface {
 		this.pmHistoryStates = states;
 	}
     
+    @Override
+    public String toString() {
+        return pmName;
+    }
+    
 	private String pmName;
 	private Object pmInitialWeight;
 	private Object pmFinalWeight;
@@ -152,7 +157,7 @@ public class State implements StateInterface {
 	private List<State> pmHistoryStates;
 
 	public State() {
-		this.pmName = new String();
+		this.pmName = null;
 		this.pmInitialWeight = null;
 		this.pmFinalWeight = null;
 		this.pmIncomingTransitions = new ArrayList<Transition>();

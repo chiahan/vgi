@@ -73,6 +73,12 @@ public class Transition implements TransitionInterface {
 	public void setGeometricData(GeometricData geometricData) {
 		this.pmGeometricData = geometricData;
 	}
+    
+    @Override
+    public String toString() {
+        return pmLabel + " : '" + pmSourceState + "' to '" + pmTargetState + "'";
+    }
+    
 	private State pmSourceState;
 	private State pmTargetState;
 	private WeightedRegularExpression pmLabel;

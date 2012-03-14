@@ -83,6 +83,9 @@ public class Automata implements AutomataInterface {
 	@Override
 	public void addState(State state) {
 		pmAllStates.add(state);
+        String name = state.getName();
+        if (name == null)
+            state.setName("s" + Integer.toString(counter++));
 	}
 
 	/**
@@ -150,6 +153,7 @@ public class Automata implements AutomataInterface {
 	private Alphabet pmOutputAlphabet;
 	private List<State> pmAllStates;
 	private List<Transition> pmAllTransitions;
+    private int counter;
 
 	public Automata() {
 		this.pmName = null;
@@ -159,6 +163,7 @@ public class Automata implements AutomataInterface {
 		this.pmOutputAlphabet = null;
 		this.pmAllStates = new ArrayList<State>();
 		this.pmAllTransitions = new ArrayList<Transition>();
+        this.counter = 0;
 	}
 
 	public Automata(Weight weight) {
