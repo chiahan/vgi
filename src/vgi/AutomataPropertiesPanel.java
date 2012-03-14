@@ -93,6 +93,7 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
                                 ((Transition)object).toString();
             if (cellString.compareTo(itemString) == 0) {
                 graph.setSelectionCell(cells[i]);
+                selectedCell = (mxCell) cells[i];
                 break;
             }
         }
@@ -100,6 +101,8 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
     
     private Automata automata;
     private mxGraph graph;
+    private Object selectedItem;
+    private mxCell selectedCell;
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -123,6 +126,7 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
         transitionComboBox = new javax.swing.JComboBox();
         initialComboBox = new javax.swing.JComboBox();
         finalComboBox = new javax.swing.JComboBox();
+        goButton = new javax.swing.JButton();
 
         setPreferredSize(new java.awt.Dimension(300, 300));
         setLayout(new java.awt.GridBagLayout());
@@ -208,6 +212,7 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.1;
         add(stateComboBox, gridBagConstraints);
 
@@ -219,6 +224,7 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.1;
         add(transitionComboBox, gridBagConstraints);
 
@@ -230,6 +236,7 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.1;
         add(initialComboBox, gridBagConstraints);
 
@@ -241,42 +248,65 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.1;
         add(finalComboBox, gridBagConstraints);
+
+        goButton.setText("Go");
+        goButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                goButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        add(goButton, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void stateComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stateComboBoxActionPerformed
-        JComboBox comboBox = (JComboBox) evt.getSource();
-        State state = (State)comboBox.getSelectedItem();
+        selectedItem = ((JComboBox)evt.getSource()).getSelectedItem();
         Object[] cells = graph.getChildCells(graph.getDefaultParent(), true, false);
-        setSelectionCell(cells, state, true);
+        setSelectionCell(cells, (State)selectedItem, true);        
     }//GEN-LAST:event_stateComboBoxActionPerformed
 
     private void transitionComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transitionComboBoxActionPerformed
-        JComboBox comboBox = (JComboBox) evt.getSource();
-        Transition transition = (Transition)comboBox.getSelectedItem();
+        selectedItem = ((JComboBox)evt.getSource()).getSelectedItem();
         Object[] cells = graph.getChildCells(graph.getDefaultParent(), false, true);
-        setSelectionCell(cells, transition, false);
+        setSelectionCell(cells, (Transition)selectedItem, false);
     }//GEN-LAST:event_transitionComboBoxActionPerformed
 
     private void initialComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_initialComboBoxActionPerformed
-        JComboBox comboBox = (JComboBox) evt.getSource();
-        State state = (State)comboBox.getSelectedItem();
+        selectedItem = ((JComboBox)evt.getSource()).getSelectedItem();
         Object[] cells = graph.getChildCells(graph.getDefaultParent(), true, false);
-        setSelectionCell(cells, state, true);
+        setSelectionCell(cells, (State)selectedItem, true);        
     }//GEN-LAST:event_initialComboBoxActionPerformed
 
     private void finalComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_finalComboBoxActionPerformed
-        JComboBox comboBox = (JComboBox) evt.getSource();
-        State state = (State)comboBox.getSelectedItem();
+        selectedItem = ((JComboBox)evt.getSource()).getSelectedItem();
         Object[] cells = graph.getChildCells(graph.getDefaultParent(), true, false);
-        setSelectionCell(cells, state, true);
+        setSelectionCell(cells, (State)selectedItem, true);        
     }//GEN-LAST:event_finalComboBoxActionPerformed
+
+    private void goButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goButtonActionPerformed
+        JSplitPane parent = (JSplitPane) this.getParent();
+        if (selectedCell.isVertex()) {
+            parent.setTopComponent(
+                    new StatePropertiesPanel(graph, selectedCell, 
+                                             automata, (State)selectedItem));
+        } else if (selectedCell.isEdge()) {
+            parent.setTopComponent(
+                    new EdgePropertiesPanel(graph, selectedCell, 
+                                           (Transition)selectedItem));
+        }
+    }//GEN-LAST:event_goButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox finalComboBox;
     private javax.swing.JLabel finalLabel;
     private javax.swing.JTextField finalTextField;
+    private javax.swing.JButton goButton;
     private javax.swing.JComboBox initialComboBox;
     private javax.swing.JLabel initialLabel;
     private javax.swing.JTextField initialTextField;

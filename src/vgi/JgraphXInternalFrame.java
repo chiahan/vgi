@@ -510,7 +510,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             } else {
                 return flag;
             }
-
         }
     }
     

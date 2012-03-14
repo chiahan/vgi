@@ -6,8 +6,11 @@ import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
-import java.util.Iterator;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JTextField;
 
 /*
  * To change this template, choose Tools | Templates
@@ -43,30 +46,34 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     }
     
     private void showName() {
-        this.Name_TextField.setText(cell.getValue().toString());
+        this.nameTextField.setText(cell.getValue().toString());
     }
     
     private void showTransition() {
-        String transitionStr = "";
-        boolean self = false;
-        int count = cell.getEdgeCount();
-        
-        for (int i=0; i<count; i++) {
-            mxCell source = (mxCell)cell.getEdgeAt(i).getTerminal(true);
-            mxCell target = (mxCell)cell.getEdgeAt(i).getTerminal(false);
-
-            transitionStr += source.getId();
-            transitionStr += " to ";
-            transitionStr += target.getId();
-            transitionStr += ", ";
-            
-            if ((source == target) && (source == cell)) {
-                self = true;
-            }
+        // from automata
+        ArrayList<Transition> transitions = (ArrayList<Transition>) state.getTransitions();
+        int size = transitions.size();
+        for (int i=0; i<size; i++) {
+            transitionComboBox.addItem(transitions.get(i));
         }
         
-        if (transitionStr.length() > 0)
-            this.To_TextField.setText(transitionStr.substring(0, transitionStr.length()-2));
+        // from Jgraph
+//        String transitionStr;
+//        int count = cell.getEdgeCount();
+//        
+//        for (int i=0; i<count; i++) {
+//            mxCell source = (mxCell)cell.getEdgeAt(i).getTerminal(true);
+//            mxCell target = (mxCell)cell.getEdgeAt(i).getTerminal(false);
+//
+//            transitionStr = cell.getValue().toString();
+//            transitionStr += " : '";
+//            transitionStr += source.getValue().toString();
+//            transitionStr += "' to '";
+//            transitionStr += target.getValue().toString();
+//            transitionStr += "'";
+//            
+//            transitionComboBox.addItem(transitionStr);
+//        }
     }
 
     private void showInitialWeight() {
@@ -89,25 +96,25 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        Name_label = new javax.swing.JLabel();
+        nameLabel = new javax.swing.JLabel();
         transitionLabel = new javax.swing.JLabel();
-        Iweight_label = new javax.swing.JLabel();
-        Fweight_label = new javax.swing.JLabel();
-        Style_label = new javax.swing.JLabel();
-        Name_TextField = new javax.swing.JTextField();
-        To_TextField = new javax.swing.JTextField();
+        initialWeightLabel = new javax.swing.JLabel();
+        finalweightLabel = new javax.swing.JLabel();
+        styleLabel = new javax.swing.JLabel();
+        nameTextField = new javax.swing.JTextField();
         initialWeightTextField = new javax.swing.JTextField();
         finalWeightTextField = new javax.swing.JTextField();
-        Style_ComboBox = new javax.swing.JComboBox();
+        styleComboBox = new javax.swing.JComboBox();
+        transitionComboBox = new javax.swing.JComboBox();
 
         setLayout(new java.awt.GridBagLayout());
 
-        Name_label.setText("Name :");
+        nameLabel.setText("Name :");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(Name_label, gridBagConstraints);
+        add(nameLabel, gridBagConstraints);
 
         transitionLabel.setText("Transition :");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -116,88 +123,133 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(transitionLabel, gridBagConstraints);
 
-        Iweight_label.setText("Initial weight :");
+        initialWeightLabel.setText("Initial weight :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        add(initialWeightLabel, gridBagConstraints);
+
+        finalweightLabel.setText("Final weight :");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(Iweight_label, gridBagConstraints);
+        add(finalweightLabel, gridBagConstraints);
 
-        Fweight_label.setText("Final weight :");
+        styleLabel.setText("Style :");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(Fweight_label, gridBagConstraints);
+        add(styleLabel, gridBagConstraints);
 
-        Style_label.setText("Style :");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(Style_label, gridBagConstraints);
+        nameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                nameTextFieldKeyPressed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
-        add(Name_TextField, gridBagConstraints);
+        add(nameTextField, gridBagConstraints);
+
+        initialWeightTextField.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                initialWeightTextFieldMouseClicked(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
-        add(To_TextField, gridBagConstraints);
+        add(initialWeightTextField, gridBagConstraints);
+
+        finalWeightTextField.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                finalWeightTextFieldMouseClicked(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
-        add(initialWeightTextField, gridBagConstraints);
+        add(finalWeightTextField, gridBagConstraints);
+
+        styleComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ELLIPSE", "RECTANGLE", "RHOMBUS", "CYLINDER", "ACTOR", "CLOUD", "TRIANGLE", "HEXAGON" }));
+        styleComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                styleComboBoxActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
-        add(finalWeightTextField, gridBagConstraints);
+        add(styleComboBox, gridBagConstraints);
 
-        Style_ComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ELLIPSE", "RECTANGLE", "RHOMBUS", "CYLINDER", "ACTOR", "CLOUD", "TRIANGLE", "HEXAGON" }));
-        Style_ComboBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                Style_ComboBoxActionPerformed(evt);
-            }
-        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.1;
-        add(Style_ComboBox, gridBagConstraints);
+        add(transitionComboBox, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
-private void Style_ComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Style_ComboBoxActionPerformed
-// TODO add your handling code here:
-    JComboBox cb = (JComboBox)evt.getSource();
-    //Style = "shape=" + ((String)cb.getSelectedItem()).toLowerCase();
-    Object[] objects = new Object[1];
-    objects[0]=cell;
-    System.out.print(style);
-    graph.setCellStyles("shape",((String)cb.getSelectedItem()).toLowerCase() ,objects );
-    
-//    this.repaint();
-//    System.out.println(_cell.getStyle());
-}//GEN-LAST:event_Style_ComboBoxActionPerformed
+    private void nameTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nameTextFieldKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            String name = ((JTextField)evt.getSource()).getText();
+            if (name.compareTo("") == 0)
+                name = null;
+            cell.setValue(name);
+            state.setName(name);
+        }
+        graph.refresh();
+    }//GEN-LAST:event_nameTextFieldKeyPressed
+
+    private void initialWeightTextFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_initialWeightTextFieldMouseClicked
+        ExpressionEditor editor =
+                new ExpressionEditor(new JFrame(), true, automata.getAlphabet(),
+                                     automata.getWeight(), automata.getWritingData());
+        editor.setVisible(true);
+        state.setInitialWeight(editor.getExpression());
+        // TODO cell.setValue(editor.getExpression());
+        initialWeightTextField.setText(editor.getExpression().toString());
+    }//GEN-LAST:event_initialWeightTextFieldMouseClicked
+
+    private void finalWeightTextFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_finalWeightTextFieldMouseClicked
+        ExpressionEditor editor =
+                new ExpressionEditor(new JFrame(), true, automata.getAlphabet(),
+                                     automata.getWeight(), automata.getWritingData());
+        editor.setVisible(true);
+        state.setFinalWeight(editor.getExpression());
+        // TODO cell.setValue(editor.getExpression());
+        finalWeightTextField.setText(editor.getExpression().toString());
+    }//GEN-LAST:event_finalWeightTextFieldMouseClicked
+
+    private void styleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_styleComboBoxActionPerformed
+        JComboBox cb = (JComboBox)evt.getSource();
+        //Style = "shape=" + ((String)cb.getSelectedItem()).toLowerCase();
+        Object[] objects = {cell};
+//        System.out.print(style);
+        graph.setCellStyles("shape", ((String) cb.getSelectedItem()).toLowerCase(), objects);
+    }//GEN-LAST:event_styleComboBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel Fweight_label;
-    private javax.swing.JLabel Iweight_label;
-    private javax.swing.JTextField Name_TextField;
-    private javax.swing.JLabel Name_label;
-    private javax.swing.JComboBox Style_ComboBox;
-    private javax.swing.JLabel Style_label;
-    private javax.swing.JTextField To_TextField;
     private javax.swing.JTextField finalWeightTextField;
+    private javax.swing.JLabel finalweightLabel;
+    private javax.swing.JLabel initialWeightLabel;
     private javax.swing.JTextField initialWeightTextField;
+    private javax.swing.JLabel nameLabel;
+    private javax.swing.JTextField nameTextField;
+    private javax.swing.JComboBox styleComboBox;
+    private javax.swing.JLabel styleLabel;
+    private javax.swing.JComboBox transitionComboBox;
     private javax.swing.JLabel transitionLabel;
     // End of variables declaration//GEN-END:variables
 
