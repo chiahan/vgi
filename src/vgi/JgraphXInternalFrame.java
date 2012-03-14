@@ -76,7 +76,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         this.getContentPane().add(graphComponent, java.awt.BorderLayout.CENTER);
 
         //cellTable = new Hashtable<Integer, mxCell>();
-        cellTable = new Hashtable<mxCell,State>();
+        cellTable = new Hashtable<mxCell,Object>();
 
         installRepaintListener();
         installListeners();
@@ -96,7 +96,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 		while (cellIterator.hasNext()) {
 			Object parent = this.graph.getDefaultParent();
 			mxCell vertex = cellIterator.next();
-			State state = this.cellTable.get(vertex);
+			State state = this.cellToState(vertex);
 			double x = vertex.getGeometry().getCenterX();
 			Object initialWeight = state.getInitialWeight();
 			if (initialWeight != null) {
@@ -170,14 +170,15 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     edgeSelected = selectedCell.isEdge();
                     if (edgeSelected) {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new edge_properties(graph, selectedCell));
+                                new EdgePropertiesPanel(graph, selectedCell,
+                                JgraphXInternalFrame.this.cellToTransition(selectedCell)));
                     }
                     
                     vertexSelected = selectedCell.isVertex();
                     if (vertexSelected) {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new state_properties(graph, selectedCell, 
-                                                automata, cellTable.get(selectedCell)));
+                                new state_properties(graph, selectedCell, automata, 
+                                JgraphXInternalFrame.this.cellToState(selectedCell)));
 
                         addTransitionFromMenuItem.setVisible(
                                 (transitionFrom == null) ? true : false);
@@ -256,11 +257,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         if (selected) {
                             vertexSelected = selectedCell.isVertex();
                             if (vertexSelected) {
-                        
                                 //update position
-                                State selectedState=cellTable.get(selectedCell);
-                        
-                        
+                                State selectedState = cellToState(selectedCell);
                                 State.GeometricData geo=new State.GeometricData();
                                 geo.location=new Point2D.Double(e.getX(),e.getY());
                                 selectedState.setGeometricData(geo);
@@ -290,11 +288,12 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 if (selected) {
                     if (selectedCell.isEdge()) {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new edge_properties(graph, selectedCell));
+                                new EdgePropertiesPanel(graph, selectedCell,
+                                JgraphXInternalFrame.this.cellToTransition(selectedCell)));
                     } else if (selectedCell.isVertex()) {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new state_properties(graph, selectedCell, automata,
-                                                     cellTable.get(selectedCell)));
+                                JgraphXInternalFrame.this.cellToState(selectedCell)));
                     }
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
@@ -345,7 +344,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         
         infoSplitPane.setTopComponent(
                 new state_properties(graph, (mxCell)vertex, automata, 
-                                     cellTable.get((mxCell)vertex)));
+                                     this.cellToState(vertex)));
 
         System.out.println("add state at" + x + "," + y);
         System.out.println("total states:" + automata.getAllStates().size());
@@ -373,7 +372,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         
         infoSplitPane.setTopComponent(
                 new state_properties(graph, (mxCell)vertex, automata, 
-                                     cellTable.get((mxCell)vertex)));
+                JgraphXInternalFrame.this.cellToState(vertex)));
         System.out.println("add state at (" + x + "," + y + ").");
 	}  // End public void addState(State state)
     
@@ -398,9 +397,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         ArrayList<mxPoint> points = new ArrayList<mxPoint>();
         ((mxCell) e).getGeometry().setPoints(points);
 		((mxCell) e).getGeometry().setY(DEFAULT_LABEL_DISTANCE);
-        Transition newTrans=new Transition();
-        newTrans.setSourceState(cellTable.get(source));
-        newTrans.setTargetState(cellTable.get(target));
+        Transition newTrans = new Transition();
+        cellTable.put((mxCell)e, newTrans);
+        newTrans.setSourceState(cellToState(source));
+        newTrans.setTargetState(cellToState(target));
         newTrans.setLabel(expression);
         automata.addTransition(newTrans);
     
@@ -429,6 +429,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(), 
                                 null, transition.getLabel(), source, target, 
                                 "shape=curve"));
+        cellTable.put(edge, transition);
         edge.getGeometry().setPoints(new ArrayList<mxPoint>());
         edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
 	}  // End public void addTransition(Transition transition)
@@ -547,6 +548,14 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         
     }
     
+    private State cellToState(mxCell cell) {
+        return (State) cellTable.get(cell);
+    }
+    
+    private Transition cellToTransition(mxCell cell) {
+        return (Transition) cellTable.get(cell);
+    }
+    
     public static final double DEFAULT_LABEL_DISTANCE = 15;
     private static final long serialVersionUID = -6561623072112577140L;
     private static int openFrameCount = 0;
@@ -558,7 +567,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     protected mxRubberband rubberband;
     protected mxKeyboardHandler keyboardHandler;
     //protected Hashtable<Integer, mxCell> cellTable;
-    protected Hashtable<mxCell, State> cellTable;
+    protected Hashtable<mxCell, Object> cellTable;
     protected mxCell transitionFrom, transitionTo;
     protected int popMouseX, popMouseY;
     protected JSplitPane infoSplitPane;

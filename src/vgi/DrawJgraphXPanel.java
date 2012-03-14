@@ -161,7 +161,7 @@ public class DrawJgraphXPanel extends javax.swing.JPanel {
                 } else {
                     if (edgeSelected) {
                         DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
-                                new edge_properties(graph, selectedCell));
+                                new EdgePropertiesPanel(graph, selectedCell));
                     } else {
                         DrawJgraphXPanel.this.innerSplitPane.setTopComponent(
                                 new Automata_properties(automata));
