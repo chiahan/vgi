@@ -29,16 +29,10 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         this.transition = transition;
         
         showLabel();
-        showWeight();
     }
     
     private void showLabel() {
         labelTextField.setText(cell.getValue().toString());
-    }
-    
-    private void showWeight() {
-        this.weightTextField.setText(transition.getLabel().getWeight().toString());
-        System.out.println("trans label => " + transition.getLabel().toString());
     }
     
     private void setStartEndArrow(JComboBox comboBox, Boolean startEnd) {
@@ -72,9 +66,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
 
         jLabel3 = new javax.swing.JLabel();
         labelLabel = new javax.swing.JLabel();
-        weightLabel = new javax.swing.JLabel();
         labelTextField = new javax.swing.JTextField();
-        weightTextField = new javax.swing.JTextField();
         startStyleLabel = new javax.swing.JLabel();
         startStyleComboBox = new javax.swing.JComboBox();
         ednStyleLabel = new javax.swing.JLabel();
@@ -91,25 +83,12 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(labelLabel, gridBagConstraints);
-
-        weightLabel.setText("Weight :");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(weightLabel, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         add(labelTextField, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 0.1;
-        add(weightTextField, gridBagConstraints);
 
         startStyleLabel.setText("Start_Style :");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -168,8 +147,6 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     private javax.swing.JTextField labelTextField;
     private javax.swing.JComboBox startStyleComboBox;
     private javax.swing.JLabel startStyleLabel;
-    private javax.swing.JLabel weightLabel;
-    private javax.swing.JTextField weightTextField;
     // End of variables declaration//GEN-END:variables
     private mxCell cell;
     private mxGraph graph;

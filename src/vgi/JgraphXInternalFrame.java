@@ -4,17 +4,16 @@ package vgi;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGeometry;
 import com.mxgraph.swing.handler.mxKeyboardHandler;
 import com.mxgraph.swing.handler.mxRubberband;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.mxGraphOutline;
-import com.mxgraph.util.mxEvent;
-import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.*;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
-import com.mxgraph.util.mxPoint;
-import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -85,34 +84,15 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         if (automata != null) {
             setupStates();
             setupTranitions();
+            
+            if (!(this.hasGeometricData)) {
+                mxCircleLayout circleLayout = new mxCircleLayout(this.graph);
+                circleLayout.execute(this.graph.getDefaultParent());
+                this.graphComponent.scrollToCenter(false);
+            }
+            
+            setupInitialFinal();
         }
-
-		if (!(this.hasGeometricData)) {
-			mxCircleLayout circleLayout = new mxCircleLayout(this.graph);
-			circleLayout.execute(this.graph.getDefaultParent());
-		}
-
-		Iterator<mxCell> cellIterator = this.initialFinalCells.iterator();
-		while (cellIterator.hasNext()) {
-			Object parent = this.graph.getDefaultParent();
-			mxCell vertex = cellIterator.next();
-			State state = this.cellToState(vertex);
-			double x = vertex.getGeometry().getCenterX();
-			Object initialWeight = state.getInitialWeight();
-			if (initialWeight != null) {
-				double y = vertex.getGeometry().getY() - 30;
-				mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
-				mxCell edge = (mxCell) (this.graph.insertEdge(parent, null, initialWeight, hiddenVertex, vertex));
-				edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
-			}
-			Object finalWeight = state.getFinalWeight();
-			if (finalWeight != null) {
-				double y = vertex.getGeometry().getY() + vertex.getGeometry().getHeight() + 30;
-				mxCell hiddenVertex = (mxCell) (this.graph.insertVertex(parent, null, "", x, y, 0, 0));
-				mxCell edge = (mxCell) (this.graph.insertEdge(parent, null, finalWeight, vertex, hiddenVertex));
-				edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
-			}
-		}  // End while (cellIterator.hasNext())
 		this.graph.refresh();
     }
     
@@ -329,6 +309,136 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			Transition transition = iterator.next();
 			this.addTransition(transition);
 		}  // End while (transitionIterator.hasNext())
+    }
+    
+    private void setupInitialFinal() {
+        Iterator<mxCell> cellIterator = this.initialFinalCells.iterator();
+		while (cellIterator.hasNext()) {
+			Object parent = this.graph.getDefaultParent();
+			mxCell vertex = cellIterator.next();
+			State state = this.cellToState(vertex);
+
+			Object initialWeight = state.getInitialWeight();
+			if (initialWeight != null) {
+				setupInitialFinal(parent, initialWeight, vertex, false);
+			}
+            
+			Object finalWeight = state.getFinalWeight();
+			if (finalWeight != null) {
+				setupInitialFinal(parent, finalWeight, vertex, true);
+			}
+		}  // End while (cellIterator.hasNext())
+    }
+    
+    private void setupInitialFinal(Object parent, Object weight, Object vertex, boolean isSource) {
+        Object edge;
+        mxGeometry geo = graph.getCellGeometry(vertex);
+        mxPoint terminalPoint;
+        if (isSource) {
+            Point2D p = createTerminalPoint((mxCell)vertex);
+            terminalPoint = new mxPoint(p.getX(), p.getY());
+            edge = this.graph.insertEdge(parent, null, weight, null, vertex);
+        }
+        else {
+            Point2D p = createTerminalPoint((mxCell)vertex);
+            terminalPoint = new mxPoint(p.getX(), p.getY());
+            edge = this.graph.insertEdge(parent, null, weight, vertex, null);
+        }
+
+        Object[] cell = {edge};
+        graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cell);
+        graph.getCellGeometry(edge).setTerminalPoint(terminalPoint, isSource);
+        ((mxCell)edge).getGeometry().setY(DEFAULT_LABEL_DISTANCE);
+    }
+    
+    private Point2D createTerminalPoint(mxCell vertex) {
+        int counter = vertex.getEdgeCount();
+        int i = 0, j = 0;
+        Point2D p1 = new Point(), p2 = new Point(),
+                p3 = new Point(), p4 = new Point();
+        while (j < 4) {
+            boolean flag = false;
+            mxGeometry geo = vertex.getGeometry();
+            switch (j) {
+                case 0:
+                    p3.setLocation(geo.getCenterX(), geo.getCenterY() - geo.getHeight()/2);
+                    p4.setLocation(geo.getCenterX(), geo.getCenterY() - geo.getHeight());
+                    break;
+                case 1:
+                    p3.setLocation(geo.getCenterX(), geo.getCenterY() + geo.getHeight()/2);
+                    p4.setLocation(geo.getCenterX(), geo.getCenterY() + geo.getHeight());
+                    break;
+                case 2:
+                    p3.setLocation(geo.getCenterX() - geo.getWidth()/2, geo.getCenterY());
+                    p4.setLocation(geo.getCenterX() - geo.getWidth(), geo.getCenterY());
+                    break;
+                case 3:
+                    p3.setLocation(geo.getCenterX() + geo.getWidth()/2, geo.getCenterY());
+                    p4.setLocation(geo.getCenterX() + geo.getWidth(), geo.getCenterY());
+                    break;
+            }
+            
+            for (; i < counter; i++) {
+                mxCell edge = (mxCell) vertex.getEdgeAt(i);
+                p1 = getTerminalPoint(edge, true);
+                p2 = getTerminalPoint(edge, false);
+                
+                if (isIntersect (p1, p2, p3, p4)) {
+                    flag = true;
+                    break;
+                }
+            }
+            
+            if ((i == counter) && !flag)
+                return p4;
+                
+            j++;
+        }
+        return p4;
+    }
+    
+    private Point2D getTerminalPoint(mxCell edge, boolean isSource) {
+        mxCell cell = (mxCell) edge.getTerminal(isSource);
+        Point2D p = new Point();
+        
+        if (cell != null) {
+            p.setLocation(cell.getGeometry().getCenterX(), cell.getGeometry().getCenterY());
+        }
+        else {
+            p.setLocation(graph.getCellGeometry(edge).getTerminalPoint(isSource).getPoint());
+        }
+        
+        return p;
+    }
+    
+    private boolean isIntersect(Point2D p, Point2D q, Point2D r, Point2D s) {
+        double rCrossPQ = cross(p, q, r);
+        double sCrossPQ = cross(p, q, s);
+        double pCrossRS = cross(r, s, p);
+        double qCrossRS = cross(r, s, q);
+        
+        if ((rCrossPQ * sCrossPQ < 0) && (pCrossRS * qCrossRS < 0))
+            return true;
+        if (rCrossPQ == 0) return isIntersect(p, q, r); 
+        if (sCrossPQ == 0) return isIntersect(p, q, r); 
+        if (pCrossRS == 0) return isIntersect(r, s, p); 
+        if (qCrossRS == 0) return isIntersect(r, s, q); 
+
+        return false;
+    }
+    
+    private double cross(Point2D p, Point2D q, Point2D r) {
+        return (q.getX()-p.getX()) * (r.getY()-p.getY()) - 
+               (q.getY()-p.getY()) * (r.getX()-p.getX());
+    }
+    
+    private boolean isIntersect(Point2D p, Point2D q, Point2D r) {
+        return (cross(p, q, r) == 0 && dot(r, p, q) <= 0);
+    }
+    
+    private double dot(Point2D p, Point2D q, Point2D r) {
+        return (q.getX()-p.getX()) * (r.getX()-p.getX()) - 
+               (q.getY()-p.getY()) * (r.getY()-p.getY()); 
     }
     
     public void addState(double x, double y) {
