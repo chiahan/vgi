@@ -22,6 +22,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.util.*;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.event.InternalFrameAdapter;
@@ -44,9 +45,8 @@ import javax.swing.event.InternalFrameEvent;
 public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     /** Creates new form JgraphXInternalFrame */
-    public JgraphXInternalFrame(JSplitPane infoSplitPane,
-                               mxGraphComponent component, Automata automata,
-                               String title) {
+    public JgraphXInternalFrame(JSplitPane infoSplitPane, mxGraph graph, 
+                               Automata automata, String title) {
         super(automata.getName(),
               true, //resizable
               true, //closable
@@ -57,8 +57,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         
         this.setTitle(title);
         
-        graphComponent = component;
-        graph = graphComponent.getGraph();
+        this.graph = graph;
+        graphComponent = getGraphComponent();
         graph.setDisconnectOnMove(false);
         graphComponent.setConnectable(false);
         graphOutline = new mxGraphOutline(graphComponent);
@@ -88,7 +88,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             if (!(this.hasGeometricData)) {
                 mxCircleLayout circleLayout = new mxCircleLayout(this.graph);
                 circleLayout.execute(this.graph.getDefaultParent());
-                this.graphComponent.scrollToCenter(false);
             }
             
             setupInitialFinal();
@@ -133,6 +132,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 maybeShowPopup(e);
+                if (graphComponent.getCellEditor() != null)
+                    graphComponent.getCellEditor().stopEditing(true);
             }
 
             /**
@@ -216,8 +217,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             
             @Override
             public void mouseExited(MouseEvent e){
-                
-                
             }
 
         });
@@ -332,23 +331,36 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     
     private void setupInitialFinal(Object parent, Object weight, Object vertex, boolean isSource) {
         Object edge;
-        mxGeometry geo = graph.getCellGeometry(vertex);
+        WeightedRegularExpression.Atomic expression = 
+                WeightedRegularExpression.Atomic.createAtomic(automata);
+        expression.setSymbol(weight);
+        Transition newTrans = new Transition();
+        newTrans.setLabel(expression);
+
         mxPoint terminalPoint;
         if (isSource) {
             Point2D p = createTerminalPoint((mxCell)vertex);
             terminalPoint = new mxPoint(p.getX(), p.getY());
-            edge = this.graph.insertEdge(parent, null, weight, null, vertex);
+            edge = this.graph.insertEdge(parent, null, expression, null, vertex);
+            
+            newTrans.setSourceState(null);
+            newTrans.setTargetState(cellToState((mxCell)vertex));
         }
         else {
             Point2D p = createTerminalPoint((mxCell)vertex);
             terminalPoint = new mxPoint(p.getX(), p.getY());
-            edge = this.graph.insertEdge(parent, null, weight, vertex, null);
+            edge = this.graph.insertEdge(parent, null, expression, vertex, null);
+            
+            newTrans.setSourceState(cellToState((mxCell)vertex));
+            newTrans.setTargetState(null);
         }
 
         Object[] cell = {edge};
         graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cell);
         graph.getCellGeometry(edge).setTerminalPoint(terminalPoint, isSource);
         ((mxCell)edge).getGeometry().setY(DEFAULT_LABEL_DISTANCE);
+        
+        cellTable.put((mxCell)edge, newTrans);
     }
     
     private Point2D createTerminalPoint(mxCell vertex) {
@@ -497,10 +509,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     public void addTransition(mxCell source, mxCell target) {
         Object parent = graph.getDefaultParent();
-        WeightedRegularExpression.Atomic expression = new WeightedRegularExpression.Atomic();
-        expression.setAlphabet(this.automata.getAlphabet());
-        expression.setWeight(this.automata.getWeight());
-        expression.setWritingData(this.automata.getWritingData());
+        WeightedRegularExpression.Atomic expression = 
+                WeightedRegularExpression.Atomic.createAtomic(automata);
         expression.setSymbol(expression.getAlphabet().allSymbols.get(0));
         Object e = graph.insertEdge(parent, null, expression, source, target, null);
         ArrayList<mxPoint> points = new ArrayList<mxPoint>();
@@ -595,6 +605,39 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
      * @return the graphComponent
      */
     public mxGraphComponent getGraphComponent() {
+        if (graphComponent == null) {
+            graphComponent = new mxGraphComponent(graph) {
+                @Override
+                protected void installDoubleClickHandler() {
+                    graphControl.addMouseListener(new MouseAdapter() {
+
+                        public void mouseReleased(MouseEvent e) {
+                            if (isEnabled()) {
+                                if (!e.isConsumed() && isEditEvent(e)) {
+                                    Object cell = getCellAt(e.getX(), e.getY(), false);
+
+                                    if (cell != null && getGraph().isCellEditable(cell)) {
+                                        if (((mxCell) cell).isVertex()) {
+                                            startEditingAtCell(cell, e);
+                                        } else {
+                                            ExpressionEditor editor =
+                                                    new ExpressionEditor(new JFrame(), true, (WeightedRegularExpression)((mxCell)cell).getValue());
+                                            editor.setVisible(true);
+                                            ((mxCell)cell).setValue(editor.getExpression());
+                                        }
+                                    }
+                                } else {
+                                    // Other languages use focus traversal here, in Java
+                                    // we explicitely stop editing after a click elsewhere
+                                    stopEditing(!invokesStopCellEditing);
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+        }
+        
         return graphComponent;
     }
 
@@ -668,7 +711,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     private static final long serialVersionUID = -6561623072112577140L;
     private static int openFrameCount = 0;
     private static final int xOffset = 30, yOffset = 30;
-    private mxGraphComponent graphComponent;
+    private mxGraphComponent graphComponent = null;
     private mxGraphOutline graphOutline;
     final mxGraph graph;
     protected boolean modified = false;

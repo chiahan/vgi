@@ -356,6 +356,15 @@ public abstract class WeightedRegularExpression {
 		public final void setSymbol(Object symbol) {
 			this.symbol = symbol;
 		}
+        
+        static public Atomic createAtomic(Automata automata) {
+            Atomic expression = new WeightedRegularExpression.Atomic();
+            expression.setAlphabet(automata.getAlphabet());
+            expression.setWeight(automata.getWeight());
+            expression.setWritingData(automata.getWritingData());
+            
+            return expression;
+        }
 
 		@Override
 		public String toString() {

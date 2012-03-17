@@ -260,16 +260,14 @@ public class VGI extends javax.swing.JFrame {
 
     private void createInternalFrame(Automata automata) {
         JgraphXInternalFrame frame = 
-                new JgraphXInternalFrame(infoSplitPane, 
-                                         new mxGraphComponent(new mxGraph()), 
+                new JgraphXInternalFrame(infoSplitPane, new mxGraph(), 
                                          automata, "untitled");
         createInternalFrame(frame);
     }
     
     private void createInternalFrame(Automata automata, String filename) {
         JgraphXInternalFrame frame = 
-                new JgraphXInternalFrame(infoSplitPane, 
-                                         new mxGraphComponent(new mxGraph()), 
+                new JgraphXInternalFrame(infoSplitPane, new mxGraph(), 
                                          automata, filename);
         createInternalFrame(frame);
     }

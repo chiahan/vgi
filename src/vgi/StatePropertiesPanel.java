@@ -213,23 +213,24 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_nameTextFieldKeyPressed
 
     private void initialWeightTextFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_initialWeightTextFieldMouseClicked
-        ExpressionEditor editor =
-                new ExpressionEditor(new JFrame(), true, automata.getAlphabet(),
-                                     automata.getWeight(), automata.getWritingData());
+        ExpressionEditor editor = new ExpressionEditor(
+                new JFrame(), 
+                true, 
+                (WeightedRegularExpression) ((mxCell) cell).getValue());
         editor.setVisible(true);
-        state.setInitialWeight(editor.getExpression());
-        // TODO cell.setValue(editor.getExpression());
         initialWeightTextField.setText(editor.getExpression().toString());
+        state.setInitialWeight(editor.getExpression());
     }//GEN-LAST:event_initialWeightTextFieldMouseClicked
 
     private void finalWeightTextFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_finalWeightTextFieldMouseClicked
-        ExpressionEditor editor =
-                new ExpressionEditor(new JFrame(), true, automata.getAlphabet(),
-                                     automata.getWeight(), automata.getWritingData());
+        ExpressionEditor editor = new ExpressionEditor(
+                new JFrame(), 
+                true, 
+                (WeightedRegularExpression) ((mxCell) cell).getValue());
         editor.setVisible(true);
         state.setFinalWeight(editor.getExpression());
-        // TODO cell.setValue(editor.getExpression());
         finalWeightTextField.setText(editor.getExpression().toString());
+        state.setInitialWeight(editor.getExpression());
     }//GEN-LAST:event_finalWeightTextFieldMouseClicked
 
     private void styleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_styleComboBoxActionPerformed

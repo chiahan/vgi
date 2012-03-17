@@ -5,6 +5,7 @@ import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 
 /*
  * edge_properties.java
@@ -83,6 +84,12 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(labelLabel, gridBagConstraints);
+
+        labelTextField.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelTextFieldMouseClicked(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -138,6 +145,15 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     private void endStyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_endStyleComboBoxActionPerformed
         setStartEndArrow((JComboBox)evt.getSource(), false);
     }//GEN-LAST:event_endStyleComboBoxActionPerformed
+
+    private void labelTextFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelTextFieldMouseClicked
+        ExpressionEditor editor = new ExpressionEditor(
+                new JFrame(), 
+                true, 
+                (WeightedRegularExpression) ((mxCell) cell).getValue());
+        editor.setVisible(true);
+        ((mxCell) cell).setValue(editor.getExpression());
+    }//GEN-LAST:event_labelTextFieldMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel ednStyleLabel;

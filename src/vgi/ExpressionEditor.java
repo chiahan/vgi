@@ -83,6 +83,10 @@ public class ExpressionEditor extends javax.swing.JDialog {
 	public WeightedRegularExpression getExpression() {
 		return this.expressionRoot;
 	}
+    
+    public void setWeightedRegularExpression (WeightedRegularExpression expression) {
+        this.expressionRoot = expression;
+    }
 
 	private void setSelectedExpression(WeightedRegularExpression newExpression) {
 		this.selectedExpression = newExpression;
@@ -560,7 +564,7 @@ public class ExpressionEditor extends javax.swing.JDialog {
 	}//GEN-LAST:event_deleteButtonActionPerformed
 
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-		this.expressionRoot = null;
+//		this.expressionRoot = null;
 		Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}//GEN-LAST:event_cancelButtonActionPerformed
 
