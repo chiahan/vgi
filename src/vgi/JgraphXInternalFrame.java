@@ -750,7 +750,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     public void updateUndoChangedCell(){
         
         //update cells in changedCell[]
-        for(Object cel:changedCell){
+       /* for(Object cel:changedCell){
             mxCell cell=(mxCell)cel;
            
             //if cell is deleted
@@ -796,7 +796,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 }
             
             }
-        }
+        }*/
         
     }
     public void updateRedoChangedCell(){
