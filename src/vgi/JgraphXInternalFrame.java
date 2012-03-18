@@ -22,11 +22,13 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.util.*;
+import java.util.Stack;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import vgi.TransitionInterface.GeometricData;
 
 /*
  * To change this template, choose Tools | Templates
@@ -107,7 +109,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 						.getProperty("edit")).getChanges();
 				graph.setSelectionCells(graph
 						.getSelectionCellsForChanges(changes));
+                                
                                 changedCell= graph.getSelectionCells();
+                                
 			}
 		};
 
@@ -493,6 +497,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         System.out.println("total states:" + automata.getAllStates().size());
 
         setModified(true);
+        undoStack.push(STATUS_ADD);
+        
+        
     }
 
 	public void addState(State state) {
@@ -548,6 +555,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         System.out.println("total trans:"+automata.getAllTransitions().size());
         
         setModified(true);
+        undoStack.push(STATUS_ADD);
     }
 
 	public void addTransition(Transition transition) {
@@ -599,6 +607,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         getGraphComponent().refresh();
         
         setModified(true);
+        undoStack.push(STATUS_CHANGE);
     }
 
 	public void doCircleLayout() {
@@ -691,17 +700,43 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     public void deleteSelectedCell() {
         mxCell selectedCell = (mxCell) graph.getSelectionCell();
         deleteCell(selectedCell);
+        if(selectedCell!=null) undoStack.push(STATUS_DELETE);
+         
     }
 
     public void deleteCell(mxCell cell) {
         if (cell != null) {
+            
+            
+            //remove state in automata
+            if(cell.isVertex()){
+                State state=cellToState(cell);
+                List<State> stateList=automata.getAllStates();
+                stateList.remove(state);
+                automata.setAllStates(stateList);
+                //System.out.println("state list size: "+automata.getAllStates().size());
+            //related transitions?
+            }else{
+                Transition trans=cellToTransition(cell);
+                List<Transition> transList=automata.getAllTransitions();
+                transList.remove(trans);
+                automata.setAllTransitions(transList);
+                
+            }
+            
+            
             cellTable.remove(cell);
             mxCell[] cells = {cell};
             graph.removeCells(cells);
+            
+            
+           
+        
         } else {
             System.out.println("Cell is empty");
         }
         graph.refresh();
+        
     }
 
     
@@ -750,104 +785,175 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     public void updateUndoChangedCell(){
         
         //update cells in changedCell[]
+     if(!undoStack.isEmpty()){
+        int stat=undoStack.pop();
+        redoStack.push(stat);
+        
+        System.out.println("stack pop:"+stat);
+        
         for(Object cel:changedCell){
+            
             mxCell cell=(mxCell)cel;
            
-            //if cell is deleted
-            if(graph.getCellBounds(cell)==null){
-                if(cell.isVertex()){
+            switch(stat){
+                case STATUS_ADD: //so remove it!
                     
-                    State state=cellToState(cell);
-                    cellTable.remove(cell);
-                    List<State> list=automata.getAllStates();
-                    list.remove(state);
-                    automata.setAllStates(list);
+                    deleteCell(cell);
+                    break;
                 
-                //remove transitions
+                case STATUS_DELETE: //so add it again!
+                    if(cell.isVertex()){
+                    
+                        State state=new State();
+                        state.setName(cell.getValue().toString());
+                        State.GeometricData geo = new State.GeometricData();
+                        geo.location = new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY());
+                        state.setGeometricData(geo);
+                        
+                        cellTable.put(cell,state);
+                        automata.addState(state);
+                        //related transitions
                 
-                }else{
-                    Transition trans=cellToTransition(cell);
-                    List<Transition> list=automata.getAllTransitions();
-                    list.remove(trans);
-                    automata.setAllTransitions(list);
-                 }
-                 
-            }else{ 
-                
-                //update geometry
-                if(((mxCell)cell).isVertex()){
-                    State state=cellToState(cell);
-                    State.GeometricData geo = new State.GeometricData();
-                    geo.location = new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY());
-                    state.setGeometricData(geo);
-                    
-                    
-                }else{
-                    
-                    Transition trans=cellToTransition(cell);
-                    List<mxPoint> jpt=cell.getGeometry().getPoints();
-                    ArrayList<Point2D> apt=new ArrayList<Point2D>();
-                    for(mxPoint pt:jpt){
-                        apt.add(new Point2D.Double(pt.getX(),pt.getY()));
+                    }else{
+                        Transition trans=new Transition();
+                        List<mxPoint> jpt=cell.getGeometry().getPoints();
+                        ArrayList<Point2D> apt=new ArrayList<Point2D>();
+                        for(mxPoint pt:jpt){
+                            apt.add(new Point2D.Double(pt.getX(),pt.getY()));
+                        }
+                        Transition.GeometricData geo=new GeometricData();
+                        geo.controlPoints=apt;
+                        trans.setGeometricData(geo);
+                        
+                        trans.setLabel((WeightedRegularExpression)cell.getValue());
+                        trans.setSourceState(cellToState((mxCell)cell.getSource()));
+                        trans.setTargetState(cellToState((mxCell)cell.getTarget()));
+                        
+                        
+                        automata.addTransition(trans);
                     }
+                    break;
+                    
+                case STATUS_CHANGE:
+                    
+                    if(((mxCell)cell).isVertex()){
+                        State state=cellToState(cell);
+                        State.GeometricData geo = new State.GeometricData();
+                        geo.location = new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY());
+                        state.setGeometricData(geo);
+                    
+                    
+                    }else{
+                    
+                        Transition trans=cellToTransition(cell);
+                        List<mxPoint> jpt=cell.getGeometry().getPoints();
+                        ArrayList<Point2D> apt=new ArrayList<Point2D>();
+                        for(mxPoint pt:jpt){
+                            apt.add(new Point2D.Double(pt.getX(),pt.getY()));
+                        }
                 
-                    trans.getGeometricData().controlPoints=apt;
+                        trans.getGeometricData().controlPoints=apt;
                 
-                }
-            
+                    }
+                    
+                    break;
+                default:
+                    break;
+                           
             }
+            
+           
         }
-        
+      }
     }
     public void updateRedoChangedCell(){
         
-        //update cells in changedCell[]
-     /*   for(Object cel:changedCell){
-            mxCell cell=(mxCell)cel;
+        if(!redoStack.isEmpty()){
+            int stat=redoStack.pop();
+            undoStack.push(stat);
+        
+            System.out.println("stack pop:"+stat);
+        
+            for(Object cel:changedCell){
+            
+                mxCell cell=(mxCell)cel;
            
-            //if cell is deleted
-            if(cell.isVertex()){
+                switch(stat){
+                    case STATUS_DELETE: //so remove it!
+                        
+                        deleteCell(cell);
+                        
+                        break;
                 
-                if(!cellTable.contains(cell)){
+                    case STATUS_ADD: //so add it again!
+                    if(cell.isVertex()){
                     
-                    State newState = new State();
-                    State.GeometricData geo = new State.GeometricData();
-                    geo.location = new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY());
-                    newState.setGeometricData(geo);
-
-                    automata.addState(newState);
-                    cellTable.put(cell, newState);
-                    //add transitions
-                
-                }else{ //update geometry
-                    
-                    State state=cellToState(cell);
-                    State.GeometricData geo = new State.GeometricData();
-                    geo.location = new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY());
-                    state.setGeometricData(geo);
-                    
-                }
-            }else{ 
-                
-                List<Transition> list=automata.getAllTransitions();
-                if(!list.contains(cell)){
-                    
-                    
-                }else{
-                    
-                    Transition trans=cellToTransition(cell);
-                    List<mxPoint> jpt=cell.getGeometry().getPoints();
-                    ArrayList<Point2D> apt=new ArrayList<Point2D>();
-                    for(mxPoint pt:jpt){
-                        apt.add(new Point2D.Double(pt.getX(),pt.getY()));
+                        State state=new State();
+                        state.setName(cell.getValue().toString());
+                        State.GeometricData geo = new State.GeometricData();
+                        geo.location = new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY());
+                        state.setGeometricData(geo);
+                        
+                        cellTable.put(cell,state);
+                        automata.addState(state);
+                        //related transitions
+                        
+                        
+                        
+                    }else{
+                        Transition trans=new Transition();
+                        List<mxPoint> jpt=cell.getGeometry().getPoints();
+                        ArrayList<Point2D> apt=new ArrayList<Point2D>();
+                        for(mxPoint pt:jpt){
+                            apt.add(new Point2D.Double(pt.getX(),pt.getY()));
+                        }
+                        Transition.GeometricData geo=new GeometricData();
+                        geo.controlPoints=apt;
+                        trans.setGeometricData(geo);
+                        
+                        trans.setLabel((WeightedRegularExpression)cell.getValue());
+                        trans.setSourceState(cellToState((mxCell)cell.getSource()));
+                        trans.setTargetState(cellToState((mxCell)cell.getTarget()));
+                        
+                        
+                        automata.addTransition(trans);
                     }
                 
-                    trans.getGeometricData().controlPoints=apt;
+                    //undoStack.push(STATUS_ADD);
+                    break;
+                    
+                case STATUS_CHANGE:
+                    
+                    if(((mxCell)cell).isVertex()){
+                        State state=cellToState(cell);
+                        State.GeometricData geo = new State.GeometricData();
+                        geo.location = new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY());
+                        state.setGeometricData(geo);
+                    
+                    
+                    }else{
+                    
+                        Transition trans=cellToTransition(cell);
+                        List<mxPoint> jpt=cell.getGeometry().getPoints();
+                        ArrayList<Point2D> apt=new ArrayList<Point2D>();
+                        for(mxPoint pt:jpt){
+                            apt.add(new Point2D.Double(pt.getX(),pt.getY()));
+                        }
                 
-                }
-            
+                        trans.getGeometricData().controlPoints=apt;
+                
+                    }
+                    //undoStack.push(STATUS_CHANGE);
+                    break;
+                default:
+                    break;
+                           
             }
-        }*/
+            
+           
+        }
+      }
+     
         
     }
     
@@ -884,6 +990,13 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 	}
     };
     protected Object changedCell[]=new Object[0];
+    
+    protected Stack<Integer> undoStack=new Stack<Integer>();
+    protected Stack<Integer> redoStack=new Stack<Integer>();
+    
+    static final int STATUS_ADD=1;
+    static final int STATUS_DELETE=2;
+    static final int STATUS_CHANGE=3;
     
     ////
     
