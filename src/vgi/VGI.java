@@ -16,10 +16,12 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.view.mxGraph;
 import java.awt.Dimension;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import vgi.FsmXmlInterface.FsmXmlException;
 
 /*
  * To change this template, choose Tools | Templates
@@ -356,6 +358,7 @@ public class VGI extends javax.swing.JFrame {
         accessibleMenuItem = new javax.swing.JMenuItem();
         coaccessibleMenuItem = new javax.swing.JMenuItem();
         removeEpsilonTransitionsMenuItem = new javax.swing.JMenuItem();
+        productMenuItem = new javax.swing.JMenuItem();
         algorithmsMenuSeparator2 = new javax.swing.JPopupMenu.Separator();
         helpMenu = new javax.swing.JMenu();
         rationalExpressionSymbolsMenuItem = new javax.swing.JMenuItem();
@@ -697,6 +700,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         algorithmsMenu.add(removeEpsilonTransitionsMenuItem);
+
+        productMenuItem.setText("Product");
+        productMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                productMenuItemActionPerformed(evt);
+            }
+        });
+        algorithmsMenu.add(productMenuItem);
         algorithmsMenu.add(algorithmsMenuSeparator2);
 
         menuBar.add(algorithmsMenu);
@@ -989,6 +1000,39 @@ public class VGI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_undoButtonActionPerformed
 
+	private void productMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (!(JgraphXInternalFrame.class.isInstance(frame))) {
+			return;
+		}
+		Automata firstInput = ((JgraphXInternalFrame) frame).getAutomata();
+		JFileChooser fileChooser = new JFileChooser(pmLastFolderForOpenFile);
+		fileChooser.setDialogTitle("Please choose a FSM XML file");
+		fileChooser.setFileFilter(FsmXmlInterface.fileNameExtensionFilter);
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fileChooser.setMultiSelectionEnabled(false);
+		int returnValue = fileChooser.showOpenDialog(pmVGI);
+		if (returnValue != JFileChooser.APPROVE_OPTION) {
+			return;
+		}
+		pmLastFolderForOpenFile = fileChooser.getCurrentDirectory();
+		File file = fileChooser.getSelectedFile();
+		List<Automata> automataList = null;
+		try {
+			FsmXml fsmXml = new FsmXml();
+			automataList = fsmXml.read(file);
+		} catch (FileNotFoundException ex) {
+			Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (FsmXmlException ex) {
+			Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		if ((automataList == null) || (automataList.isEmpty())) {
+			return;
+		}
+		Automata outputAutomaton = Automata.product(firstInput, automataList.get(0));
+		this.createInternalFrame(outputAutomaton, "Product automaton of " + frame.getTitle() + " and " + file.getName());
+	}//GEN-LAST:event_productMenuItemActionPerformed
+
 	private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
 		if (fileChooser.getDialogType() != JFileChooser.SAVE_DIALOG) {
@@ -1025,6 +1069,8 @@ public class VGI extends javax.swing.JFrame {
 			this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
 			this.algorithmsMenu.add(this.accessibleMenuItem);
 			this.algorithmsMenu.add(this.coaccessibleMenuItem);
+			this.algorithmsMenu.add(this.removeEpsilonTransitionsMenuItem);
+			this.algorithmsMenu.add(this.productMenuItem);
 			this.algorithmsMenu.add(this.algorithmsMenuSeparator2);
 
 			JMenuItem menuItem = new JMenuItem();
@@ -1047,6 +1093,8 @@ public class VGI extends javax.swing.JFrame {
 		this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
 		this.algorithmsMenu.add(this.accessibleMenuItem);
 		this.algorithmsMenu.add(this.coaccessibleMenuItem);
+		this.algorithmsMenu.add(this.removeEpsilonTransitionsMenuItem);
+		this.algorithmsMenu.add(this.productMenuItem);
 		this.algorithmsMenu.add(this.algorithmsMenuSeparator2);
 
 		JMenu submenu = null;
@@ -1135,6 +1183,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem newMenuItem;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JPanel outlinePanel;
+    private javax.swing.JMenuItem productMenuItem;
     private javax.swing.JMenuItem rationalExpressionSymbolsMenuItem;
     private javax.swing.JButton redoButton;
     private javax.swing.JMenuItem removeEpsilonTransitionsMenuItem;

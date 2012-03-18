@@ -83,9 +83,10 @@ public class Automata implements AutomataInterface {
 	@Override
 	public void addState(State state) {
 		pmAllStates.add(state);
-        String name = state.getName();
-        if (name == null)
-            state.setName("s" + Integer.toString(counter++));
+		String name = state.getName();
+		if (name == null) {
+			state.setName("s" + Integer.toString(counter++));
+		}
 	}
 
 	/**
@@ -153,7 +154,7 @@ public class Automata implements AutomataInterface {
 	private Alphabet pmOutputAlphabet;
 	private List<State> pmAllStates;
 	private List<Transition> pmAllTransitions;
-    private int counter;
+	private int counter;
 
 	public Automata() {
 		this.pmName = null;
@@ -163,7 +164,7 @@ public class Automata implements AutomataInterface {
 		this.pmOutputAlphabet = null;
 		this.pmAllStates = new ArrayList<State>();
 		this.pmAllTransitions = new ArrayList<Transition>();
-        this.counter = 0;
+		this.counter = 0;
 	}
 
 	public Automata(Weight weight) {
@@ -207,7 +208,7 @@ public class Automata implements AutomataInterface {
 		// Build a new automaton containing only the accessibles states of the original automaton.
 		//
 		Automata outputAutomaton = new Automata();
-		outputAutomaton.setName(automata.getName());
+		outputAutomaton.setName("Accessible of " + automata.getName());
 		outputAutomaton.setWritingData(automata.getWritingData());
 		outputAutomaton.setWeight(automata.getWeight());
 		outputAutomaton.setAlphabet(automata.getAlphabet());
@@ -225,10 +226,10 @@ public class Automata implements AutomataInterface {
 			newState.setInitialWeight(state.getInitialWeight());
 			newState.setFinalWeight(state.getFinalWeight());
 			newState.setGeometricData(null);
-			ArrayList arrayList = new ArrayList();
+			ArrayList<State> arrayList = new ArrayList<State>();
 			arrayList.add(state);
 			newState.setHistory(arrayList);
-			arrayList = null;  // ArrayList arrayList = new ArrayList();
+			arrayList = null;  // ArrayList<State> arrayList = new ArrayList<State>();
 			outputAutomaton.addState(newState);
 			mapOldToNewStates.put(state, newState);
 			newState = null;  // State newState = new State();
@@ -281,7 +282,7 @@ public class Automata implements AutomataInterface {
 		// Build a new automaton containing only the coaccessibles states of the original automaton.
 		//
 		Automata outputAutomaton = new Automata();
-		outputAutomaton.setName(automata.getName());
+		outputAutomaton.setName("Coccessible of " + automata.getName());
 		outputAutomaton.setWritingData(automata.getWritingData());
 		outputAutomaton.setWeight(automata.getWeight());
 		outputAutomaton.setAlphabet(automata.getAlphabet());
@@ -299,10 +300,10 @@ public class Automata implements AutomataInterface {
 			newState.setInitialWeight(state.getInitialWeight());
 			newState.setFinalWeight(state.getFinalWeight());
 			newState.setGeometricData(null);
-			ArrayList arrayList = new ArrayList();
+			ArrayList<State> arrayList = new ArrayList<State>();
 			arrayList.add(state);
 			newState.setHistory(arrayList);
-			arrayList = null;  // ArrayList arrayList = new ArrayList();
+			arrayList = null;  // ArrayList<State> arrayList = new ArrayList<State>();
 			outputAutomaton.addState(newState);
 			mapOldToNewStates.put(state, newState);
 			newState = null;  // State newState = new State();
@@ -332,7 +333,7 @@ public class Automata implements AutomataInterface {
 	public static Automata removeEpsilonTransitions(Automata automata) {
 
 		Automata outputAutomaton = new Automata();
-		outputAutomaton.setName(automata.getName());
+		outputAutomaton.setName("Removed epsilon transitions of " + automata.getName());
 		outputAutomaton.setWritingData(automata.getWritingData());
 		outputAutomaton.setWeight(automata.getWeight());
 		outputAutomaton.setAlphabet(automata.getAlphabet());
@@ -351,10 +352,10 @@ public class Automata implements AutomataInterface {
 			newState.setInitialWeight(state.getInitialWeight());
 			newState.setFinalWeight(state.getFinalWeight());
 			newState.setGeometricData(null);
-			ArrayList arrayList = new ArrayList();
+			ArrayList<State> arrayList = new ArrayList<State>();
 			arrayList.add(state);
 			newState.setHistory(arrayList);
-			arrayList = null;  // ArrayList arrayList = new ArrayList();
+			arrayList = null;  // ArrayList<State> arrayList = new ArrayList<State>();
 			outputAutomaton.addState(newState);
 			mapOldToNewStates.put(state, newState);
 			newState = null;  // State newState = new State();
@@ -475,4 +476,216 @@ public class Automata implements AutomataInterface {
 
 		return outputAutomaton;  // Automata outputAutomaton = new Automata();
 	}  // End public static Automata removeEpsilonTransitions(Automata automata)
+
+	public static Automata product(Automata firstInput, Automata secondInput) {
+
+		if ((firstInput == null)
+				|| (secondInput == null)
+				|| (firstInput.getWeight().semiring != secondInput.getWeight().semiring)
+				|| (firstInput.getAlphabet().dataType != secondInput.getAlphabet().dataType)
+				|| (firstInput.getOutputAlphabet() != null)
+				|| (secondInput.getOutputAlphabet() != null)) {
+			throw new IllegalArgumentException();
+		}
+
+		Automata outputAutomaton = new Automata();
+		outputAutomaton.setName("Product of " + firstInput.getName() + " and " + secondInput.getName());
+		outputAutomaton.setWritingData(firstInput.getWritingData());
+		outputAutomaton.setWeight(firstInput.getWeight());
+		outputAutomaton.setAlphabet(firstInput.getAlphabet());
+		outputAutomaton.setOutputAlphabet(firstInput.getOutputAlphabet());
+		HashMap<State, Integer> stateToInt1 = new HashMap<State, Integer>();
+		HashMap<State, Integer> stateToInt2 = new HashMap<State, Integer>();
+		HashMap<Integer, State> intToNewState = new HashMap<Integer, State>();
+
+		int count1 = firstInput.getAllStates().size();
+		int count2 = firstInput.getAllStates().size();
+		for (int index1 = 0; index1 < count1; index1++) {
+
+			for (int index2 = 0; index2 < count2; index2++) {
+
+				State state1 = firstInput.getAllStates().get(index1);
+				stateToInt1.put(state1, index1);
+				State state2 = secondInput.getAllStates().get(index2);
+				stateToInt2.put(state2, index2);
+				State newState = new State();
+				Object initialWeight1 = state1.getInitialWeight();
+				Object initialWeight2 = state2.getInitialWeight();
+				Object finalWeight1 = state1.getFinalWeight();
+				Object finalWeight2 = state2.getFinalWeight();
+				if ((initialWeight1 != null) && (initialWeight2 != null)) {
+					Object newWeightValue = multiplyWeights(outputAutomaton.getWeight().semiring, initialWeight1, initialWeight2);
+					newState.setInitialWeight(newWeightValue);
+				}
+				if ((finalWeight1 != null) && (finalWeight2 != null)) {
+					Object newWeightValue = multiplyWeights(outputAutomaton.getWeight().semiring, finalWeight1, finalWeight2);
+					newState.setFinalWeight(newWeightValue);
+				}
+				newState.setGeometricData(null);
+				ArrayList<State> arrayList = new ArrayList<State>();
+				arrayList.add(state1);
+				arrayList.add(state2);
+				newState.setHistory(arrayList);
+				arrayList = null;  // ArrayList<State> arrayList = new ArrayList<State>();
+				outputAutomaton.addState(newState);
+				intToNewState.put(index1 * count2 + index2, newState);
+				newState = null;  // State newState = new State();
+
+			}  // End for (int index2 = 0; index2 < count2; index2++)
+
+		}  // End for (int index1 = 0; index1 < count1; index1++)
+
+		Iterator<State> iterateStates = outputAutomaton.getAllStates().iterator();
+		while (iterateStates.hasNext()) {
+
+			State newState = iterateStates.next();
+			State state1 = newState.getHistory().get(0);
+			State state2 = newState.getHistory().get(1);
+
+			ArrayList<Transition> allOutgoingTransitions1 = new ArrayList<Transition>();
+			allOutgoingTransitions1.addAll(state1.getLoopTransitions());
+			allOutgoingTransitions1.addAll(state1.getOutgoingTransitions());
+
+			Iterator<Transition> iterateTransitions1 = allOutgoingTransitions1.iterator();
+			while (iterateTransitions1.hasNext()) {
+
+				Transition transition1 = iterateTransitions1.next();
+				ArrayList<Transition> allOutgoingTransitions2 = new ArrayList<Transition>();
+				allOutgoingTransitions2.addAll(state2.getLoopTransitions());
+				allOutgoingTransitions2.addAll(state2.getOutgoingTransitions());
+
+				Iterator<Transition> iterateTransitions2 = allOutgoingTransitions2.iterator();
+				while (iterateTransitions2.hasNext()) {
+
+					Transition transition2 = iterateTransitions2.next();
+					LabelData labelData1 = getLabelData(transition1.getLabel());
+					LabelData labelData2 = getLabelData(transition2.getLabel());
+					WeightedRegularExpression newLabel = null;
+
+					if (!(labelData1.symbol.toString().equals(labelData2.symbol.toString()))) {
+						continue;
+					}
+
+					if (labelData1.weightValue == null) {
+						if (labelData2.weightValue == null) {
+							newLabel = new WeightedRegularExpression.Atomic(labelData1.symbol);
+						} else {
+							WeightedRegularExpression.Atomic atomic = new WeightedRegularExpression.Atomic(labelData1.symbol);
+							newLabel = new WeightedRegularExpression.LeftMultiply(labelData2.weightValue, atomic);
+						}
+					} else {  // End if (labelData1.weightValue == null)
+						if (labelData2.weightValue == null) {
+							WeightedRegularExpression.Atomic atomic = new WeightedRegularExpression.Atomic(labelData1.symbol);
+							newLabel = new WeightedRegularExpression.LeftMultiply(labelData1.weightValue, atomic);
+						} else {
+							WeightedRegularExpression.Atomic atomic = new WeightedRegularExpression.Atomic(labelData1.symbol);
+							Object newWeightValue = multiplyWeights(outputAutomaton.getWeight().semiring, labelData1.weightValue, labelData2.weightValue);
+							newLabel = new WeightedRegularExpression.LeftMultiply(newWeightValue, atomic);
+						}
+					}  // End else part of if (labelData1.weightValue == null)
+
+					newLabel.setWritingData(outputAutomaton.getWritingData());
+					newLabel.setWeight(outputAutomaton.getWeight());
+					newLabel.setAlphabet(outputAutomaton.getAlphabet());
+
+					Transition newTransition = new Transition();
+					newTransition.setSourceState(newState);
+					int index1 = stateToInt1.get(transition1.getTargetState());
+					int index2 = stateToInt2.get(transition2.getTargetState());
+					State newTargetState = intToNewState.get(index1 * count2 + index2);
+					newTransition.setTargetState(newTargetState);
+					newTransition.setLabel(newLabel);
+					newTransition.setGeometricData(null);
+					outputAutomaton.addTransition(newTransition);
+					newTransition = null;  // Transition newTransition = new Transition();
+
+				}  // End while (iterateTransitions2.hasNext())
+
+			}  // End while (iterateTransitions1.hasNext())
+
+		} // End while (iterateStates.hasNext())
+
+		return outputAutomaton;
+	}
+
+	protected static class LabelData {
+
+		Object symbol;
+		Object weightValue;
+	}
+
+	protected static LabelData getLabelData(WeightedRegularExpression label) {
+		LabelData output = new LabelData();
+
+		if (WeightedRegularExpression.Atomic.class.isInstance(label)) {
+
+			output.symbol = ((WeightedRegularExpression.Atomic) label).getSymbol();
+			output.weightValue = null;
+
+		} else if (WeightedRegularExpression.LeftMultiply.class.isInstance(label)) {
+
+			WeightedRegularExpression.LeftMultiply leftMultiply = (WeightedRegularExpression.LeftMultiply) label;
+			if (WeightedRegularExpression.Atomic.class.isInstance(leftMultiply.getExpression())) {
+				output.symbol = ((WeightedRegularExpression.Atomic) (leftMultiply.getExpression())).getSymbol();
+				output.weightValue = leftMultiply.getWeightValue();
+			} else {
+				throw new IllegalArgumentException("Input automata to the product algorithm must have no epsilon transitions and their labels must have only one symbol (weight optional).");
+			}
+
+		} else if (WeightedRegularExpression.RightMultiply.class.isInstance(label)) {
+
+			WeightedRegularExpression.RightMultiply righttMultiply = (WeightedRegularExpression.RightMultiply) label;
+			if (WeightedRegularExpression.Atomic.class.isInstance(righttMultiply.getExpression())) {
+				output.symbol = ((WeightedRegularExpression.Atomic) (righttMultiply.getExpression())).getSymbol();
+				output.weightValue = righttMultiply.getWeightValue();
+			} else {
+				throw new IllegalArgumentException("Input automata to the product algorithm must have no epsilon transitions and their labels must have only one symbol (weight optional).");
+			}
+
+		} else {
+			throw new IllegalArgumentException("Input automata to the product algorithm must have no epsilon transitions and their labels must have only one symbol (weight optional).");
+		}
+
+		return output;
+	}  // End protected static LabelData getLabelData(WeightedRegularExpression label)
+
+	protected static Object multiplyWeights(
+			TAFKitInterface.AutomataType.Semiring semiring,
+			Object weight1,
+			Object weight2) {
+
+		switch (semiring) {
+			case B_BOOLEAN:
+			case F2_TWO_ELEMENT_FIELD:
+				if ((Boolean.class.isInstance(weight1))
+						&& (((Boolean) weight1) == true)
+						&& (Boolean.class.isInstance(weight2))
+						&& (((Boolean) weight2) == true)) {
+					return new Boolean(true);
+				}
+				break;
+			case Z_INTEGER:
+				if ((Integer.class.isInstance(weight1))
+						&& (Integer.class.isInstance(weight2))) {
+					return new Integer(((Integer) weight1) * ((Integer) weight2));
+				}
+				break;
+			case Q_RATIONAL:
+			case R_REAL:
+				if ((Double.class.isInstance(weight1))
+						&& (Double.class.isInstance(weight2))) {
+					return new Double(((Double) weight1) * ((Double) weight2));
+				}
+				break;
+			case ZMIN_MIN_TROPICAL:
+			case ZMAX_MAX_TROPICAL:
+				if ((Integer.class.isInstance(weight1))
+						&& (Integer.class.isInstance(weight2))) {
+					return new Integer(((Integer) weight1) + ((Integer) weight2));
+				}
+				break;
+		}  // End switch (semiring)
+
+		throw new IllegalArgumentException();
+	}  // End protected static Object productOfWeights()
 }  // End public class Automata implements AutomataInterface
