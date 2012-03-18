@@ -315,6 +315,9 @@ public class VGI extends javax.swing.JFrame {
         toolBarSeparator2 = new javax.swing.JToolBar.Separator();
         setAsInitialStateButton = new javax.swing.JButton();
         setAsFinalStateButton = new javax.swing.JButton();
+        toolBarSeparator3 = new javax.swing.JToolBar.Separator();
+        undoButton = new javax.swing.JButton();
+        redoButton = new javax.swing.JButton();
         mainPanel = new javax.swing.JPanel();
         statusLabel = new javax.swing.JLabel();
         mainDesktopPane = new javax.swing.JDesktopPane();
@@ -445,6 +448,29 @@ public class VGI extends javax.swing.JFrame {
         setAsFinalStateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         setAsFinalStateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBar.add(setAsFinalStateButton);
+        toolBar.add(toolBarSeparator3);
+
+        undoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/object_05.png"))); // NOI18N
+        undoButton.setFocusable(false);
+        undoButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        undoButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        undoButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                undoButtonActionPerformed(evt);
+            }
+        });
+        toolBar.add(undoButton);
+
+        redoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/object_04.png"))); // NOI18N
+        redoButton.setFocusable(false);
+        redoButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        redoButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        redoButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                redoButtonActionPerformed(evt);
+            }
+        });
+        toolBar.add(redoButton);
 
         getContentPane().add(toolBar, java.awt.BorderLayout.NORTH);
 
@@ -949,6 +975,20 @@ public class VGI extends javax.swing.JFrame {
 		}
 	}//GEN-LAST:event_removeEpsilonTransitionsMenuItemActionPerformed
 
+    private void redoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_redoButtonActionPerformed
+        JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
+        if (selected != null) {
+            selected.redo();
+        }
+    }//GEN-LAST:event_redoButtonActionPerformed
+
+    private void undoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_undoButtonActionPerformed
+        JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
+        if (selected != null) {
+            selected.undo();
+        }
+    }//GEN-LAST:event_undoButtonActionPerformed
+
 	private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
 		if (fileChooser.getDialogType() != JFileChooser.SAVE_DIALOG) {
@@ -1096,6 +1136,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JPanel outlinePanel;
     private javax.swing.JMenuItem rationalExpressionSymbolsMenuItem;
+    private javax.swing.JButton redoButton;
     private javax.swing.JMenuItem removeEpsilonTransitionsMenuItem;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
@@ -1110,6 +1151,8 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JToolBar toolBar;
     private javax.swing.JToolBar.Separator toolBarSeparator1;
     private javax.swing.JToolBar.Separator toolBarSeparator2;
+    private javax.swing.JToolBar.Separator toolBarSeparator3;
+    private javax.swing.JButton undoButton;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JPopupMenu.Separator viewMenuSeparator1;
     private javax.swing.JButton zoomInButton;
