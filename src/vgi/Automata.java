@@ -499,7 +499,7 @@ public class Automata implements AutomataInterface {
 		HashMap<Integer, State> intToNewState = new HashMap<Integer, State>();
 
 		int count1 = firstInput.getAllStates().size();
-		int count2 = firstInput.getAllStates().size();
+		int count2 = secondInput.getAllStates().size();
 		for (int index1 = 0; index1 < count1; index1++) {
 
 			for (int index2 = 0; index2 < count2; index2++) {
