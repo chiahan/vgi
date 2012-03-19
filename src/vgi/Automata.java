@@ -485,7 +485,7 @@ public class Automata implements AutomataInterface {
 				|| (firstInput.getAlphabet().dataType != secondInput.getAlphabet().dataType)
 				|| (firstInput.getOutputAlphabet() != null)
 				|| (secondInput.getOutputAlphabet() != null)) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("The input automata are not compatible (different weight semiring, different alphabet data type, transducer, etc.) so their product is undefined.");
 		}
 
 		Automata outputAutomaton = new Automata();
@@ -629,7 +629,7 @@ public class Automata implements AutomataInterface {
 				output.symbol = ((WeightedRegularExpression.Atomic) (leftMultiply.getExpression())).getSymbol();
 				output.weightValue = leftMultiply.getWeightValue();
 			} else {
-				throw new IllegalArgumentException("Input automata to the product algorithm must have no epsilon transitions and their labels must have only one symbol (weight optional).");
+				throw new IllegalArgumentException("Input automata to the product algorithm must have no epsilon transitions, and their labels must have only one symbol (with one optional weight).");
 			}
 
 		} else if (WeightedRegularExpression.RightMultiply.class.isInstance(label)) {
@@ -639,11 +639,11 @@ public class Automata implements AutomataInterface {
 				output.symbol = ((WeightedRegularExpression.Atomic) (righttMultiply.getExpression())).getSymbol();
 				output.weightValue = righttMultiply.getWeightValue();
 			} else {
-				throw new IllegalArgumentException("Input automata to the product algorithm must have no epsilon transitions and their labels must have only one symbol (weight optional).");
+				throw new IllegalArgumentException("Input automata to the product algorithm must have no epsilon transitions, and their labels must have only one symbol (with one optional weight).");
 			}
 
 		} else {
-			throw new IllegalArgumentException("Input automata to the product algorithm must have no epsilon transitions and their labels must have only one symbol (weight optional).");
+			throw new IllegalArgumentException("Input automata to the product algorithm must have no epsilon transitions and, their labels must have only one symbol (with one optional weight).");
 		}
 
 		return output;
