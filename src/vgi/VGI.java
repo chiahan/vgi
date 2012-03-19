@@ -138,12 +138,15 @@ public class VGI extends javax.swing.JFrame {
 				switch (outputInfo.type) {
 
 					case AUTOMATON:
-						// TODO:  Convert stream to a FSM XML file and open it in VGI.
+						if (Automata.class.isInstance(object)) {
+							createInternalFrame((Automata) object, "Output of \"" + this.vcsnAlgorithm.name);
+						} else {
 						JOptionPane.showMessageDialog(
 								pmVGI,
-								"Output of \"" + this.vcsnAlgorithm.name + "\" is an automaton, but we cannot display it yet.",
+								"Output of \"" + this.vcsnAlgorithm.name + "\" should be an automaton, but the returned data does not have the right type.",
 								null,
-								JOptionPane.INFORMATION_MESSAGE);
+								JOptionPane.WARNING_MESSAGE);
+						}
 						break;
 
 					case BOOLEAN:

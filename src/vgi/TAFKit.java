@@ -1,17 +1,12 @@
 package vgi;
 
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import vgi.FsmXmlInterface.FsmXmlException;
 
 /**
  *
@@ -400,8 +395,17 @@ public class TAFKit implements TAFKitInterface {
 			switch (algorithm.outputsInfo.get(index).type) {
 
 				case AUTOMATON:
-					// TODO:  Convert stream to Automata.
-					outputs.add("an automaton");
+					inputStream = new ByteArrayInputStream(string.getBytes());
+					FsmXml fsmXml = new FsmXml();
+					try {
+						List<Automata> automataList = fsmXml.read(inputStream);
+						outputs.add(automataList.get(0));
+					} catch (FsmXmlException fsmXmlException) {
+						throw new TAFKitException(fsmXmlException);
+					} finally {
+						fsmXml = null;  // FsmXml fsmXml = new FsmXml();
+						inputStream = null;  // inputStream = new ByteArrayInputStream(string.getBytes());
+					}
 					break;
 
 				case BOOLEAN:
