@@ -1,7 +1,6 @@
 /**
- * $Id: GraphEditor.java,v 1.10 2011-11-30 20:46:17 david Exp $
- * Copyright (c) 2006-2010, Gaudenz Alder, David Benson
- */
+ * $Id: GraphEditor.java,v 1.11 2012-01-13 12:51:15 david Exp $
+ * Copyright (c) 2006-2012, JGraph Ltd */
 package com.mxgraph.examples.swing;
 
 import java.awt.Color;
@@ -26,6 +25,7 @@ import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.util.mxGraphTransferable;
+import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
@@ -663,7 +663,7 @@ public class GraphEditor extends BasicGraphEditor
 			e1.printStackTrace();
 		}
 
-		mxConstants.SHADOW_COLOR = Color.LIGHT_GRAY;
+		mxSwingConstants.SHADOW_COLOR = Color.LIGHT_GRAY;
 		mxConstants.W3C_SHADOWCOLOR = "#D3D3D3";
 		
 		GraphEditor editor = new GraphEditor();

@@ -334,7 +334,8 @@ public class mxDomOutputParser
 						.parseDouble(elt.getAttribute("h")), elt
 						.getAttribute("str"), elt.getAttribute("align"), elt
 						.getAttribute("valign"), elt.getAttribute("vertical")
-						.equals("1"));
+						.equals("1"), elt.getAttribute("wrap")
+						.equals("1"), elt.getAttribute("format"));
 			}
 		});
 

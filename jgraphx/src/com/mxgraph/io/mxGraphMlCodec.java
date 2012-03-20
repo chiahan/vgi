@@ -1,6 +1,6 @@
 /**
- * $Id: mxGraphMlCodec.java,v 1.1 2011-09-19 15:10:46 gaudenz Exp $
- * Copyright (c) 2010 David Benson, Gaudenz Alder
+ * $Id: mxGraphMlCodec.java,v 1.2 2012-01-13 13:07:08 david Exp $
+ * Copyright (c) 2010-2012, JGraph Ltd
  */
 package com.mxgraph.io;
 
@@ -16,8 +16,8 @@ import com.mxgraph.io.graphml.mxGraphMlShapeNode;
 import com.mxgraph.io.graphml.mxGraphMlUtils;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxDomUtils;
 import com.mxgraph.util.mxPoint;
-import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxConnectionConstraint;
 
@@ -84,7 +84,7 @@ public class mxGraphMlCodec
 	 */
 	public static Document encodeXML(mxGraphMlGraph gmlGraph)
 	{
-		Document doc = mxUtils.createDocument();
+		Document doc = mxDomUtils.createDocument();
 
 		Element graphml = doc.createElement(mxGraphMlConstants.GRAPHML);
 

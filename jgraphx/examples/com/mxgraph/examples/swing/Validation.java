@@ -1,3 +1,7 @@
+/**
+ * $Id: Validation.java,v 1.4 2012-01-13 11:20:55 david Exp $
+ * Copyright (c) 2007-2012, JGraph Ltd
+ */
 package com.mxgraph.examples.swing;
 
 import java.util.Arrays;
@@ -10,9 +14,9 @@ import org.w3c.dom.Element;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.handler.mxKeyboardHandler;
 import com.mxgraph.swing.handler.mxRubberband;
+import com.mxgraph.util.mxDomUtils;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
-import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxMultiplicity;
@@ -29,7 +33,7 @@ public class Validation extends JFrame
 	{
 		super("Hello, World!");
 
-		Document xmlDocument = mxUtils.createDocument();
+		Document xmlDocument = mxDomUtils.createDocument();
 		Element sourceNode = xmlDocument.createElement("Source");
 		Element targetNode = xmlDocument.createElement("Target");
 		Element subtargetNode = xmlDocument.createElement("Subtarget");

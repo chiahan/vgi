@@ -1,20 +1,8 @@
 /**
- * $Id: mxConstants.java,v 1.71 2011-07-18 15:28:02 david Exp $
- * Copyright (c) 2007-2010, Gaudenz Alder, David Benson
+ * $Id: mxConstants.java,v 1.75 2012-01-13 13:21:51 david Exp $
+ * Copyright (c) 2007-2012, JGraph Ltd
  */
 package com.mxgraph.util;
-
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Stroke;
-import java.awt.image.BufferedImage;
-
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 
 /**
  * Contains all global constants.
@@ -71,26 +59,6 @@ public class mxConstants
 	public static String NS_XLINK = "http://www.w3.org/1999/xlink";
 
 	/**
-	 * Contains an empty image of size 1, 1.
-	 */
-	public static BufferedImage EMPTY_IMAGE;
-
-	static
-	{
-		try
-		{
-			mxConstants.EMPTY_IMAGE = new BufferedImage(1, 1,
-					BufferedImage.TYPE_INT_RGB);
-		}
-		catch (Exception e)
-		{
-			// Occurs when running on GAE, BufferedImage is a
-			// blacklisted class
-			mxConstants.EMPTY_IMAGE = null;
-		}
-	}
-	
-	/**
 	 * Comma separated list of default fonts for CSS properties.
 	 * Default is Arial, Helvetica.
 	 */
@@ -140,11 +108,6 @@ public class mxConstants
 	public static int DEFAULT_IMAGESIZE = 24;
 
 	/**
-	 * Defines the color to be used for shadows. Default is gray.
-	 */
-	public static Color SHADOW_COLOR = Color.gray;
-
-	/**
 	 * Defines the x-offset to be used for shadows. Default is 2.
 	 */
 	public static int SHADOW_OFFSETX = 2;
@@ -166,16 +129,6 @@ public class mxConstants
 	public static String SVG_SHADOWTRANSFORM = "translate(2 3)";
 
 	/**
-	 * Specifies the default valid color. Default is green.
-	 */
-	public static Color DEFAULT_VALID_COLOR = Color.GREEN;
-
-	/**
-	 * Specifies the default invalid color. Default is red.
-	 */
-	public static Color DEFAULT_INVALID_COLOR = Color.RED;
-
-	/**
 	 * Specifies the default dash pattern, 3 pixels solid, 3 pixels clear.
 	 */
 	public static float[] DEFAULT_DASHED_PATTERN = new float[] {3.0f , 3.0f};
@@ -185,16 +138,6 @@ public class mxConstants
 	 * created from its base curve
 	 */
 	public static double DEFAULT_LABEL_BUFFER = 12.0;
-
-	/**
-	 * Defines the rubberband border color. 
-	 */
-	public static Color RUBBERBAND_BORDERCOLOR = new Color(51, 153, 255);
-
-	/**
-	 * Defines the rubberband fill color with an alpha of 80.
-	 */
-	public static Color RUBBERBAND_FILLCOLOR = new Color(51, 153, 255, 80);
 
 	/**
 	 * Defines the handle size. Default is 7.
@@ -207,31 +150,6 @@ public class mxConstants
 	public static int LABEL_HANDLE_SIZE = 4;
 
 	/**
-	 * Defines the handle border color. Default is black.
-	 */
-	public static Color HANDLE_BORDERCOLOR = Color.black;
-
-	/**
-	 * Defines the handle fill color. Default is green.
-	 */
-	public static Color HANDLE_FILLCOLOR = Color.green;
-
-	/**
-	 * Defines the label handle fill color. Default is yellow.
-	 */
-	public static Color LABEL_HANDLE_FILLCOLOR = Color.yellow;
-
-	/**
-	 * Defines the connect handle fill color. Default is blue.
-	 */
-	public static Color CONNECT_HANDLE_FILLCOLOR = Color.blue;
-
-	/**
-	 * Defines the handle fill color for locked handles. Default is red.
-	 */
-	public static Color LOCKED_HANDLE_FILLCOLOR = Color.red;
-
-	/**
 	 * Defines the default value for the connect handle. Default is false.
 	 */
 	public static boolean CONNECT_HANDLE_ENABLED = false;
@@ -240,60 +158,6 @@ public class mxConstants
 	 * Defines the connect handle size. Default is 8.
 	 */
 	public static int CONNECT_HANDLE_SIZE = 8;
-
-	/**
-	 * Defines the selection color for edges. Default is green.
-	 */
-	public static Color EDGE_SELECTION_COLOR = Color.green;
-
-	/**
-	 * Defines the selection color for vertices. Default is green.
-	 */
-	public static Color VERTEX_SELECTION_COLOR = Color.green;
-
-	/**
-	 * Defines the stroke used for painting selected edges. Default is a dashed
-	 * line.
-	 */
-	public static Stroke EDGE_SELECTION_STROKE = new BasicStroke(1,
-			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] {
-					3, 3 }, 0.0f);
-
-	/**
-	 * Defines the stroke used for painting the border of selected vertices.
-	 * Default is a dashed line.
-	 */
-	public static Stroke VERTEX_SELECTION_STROKE = new BasicStroke(1,
-			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] {
-					3, 3 }, 0.0f);
-
-	/**
-	 * Defines the stroke used for painting the preview for new and existing edges
-	 * that are being changed. Default is a dashed line.
-	 */
-	public static Stroke PREVIEW_STROKE = new BasicStroke(1,
-			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] {
-					3, 3 }, 0.0f);
-
-	/**
-	 * Defines the border used for painting the preview when vertices are being
-	 * resized, or cells and labels are being moved.
-	 */
-	public static Border PREVIEW_BORDER = new LineBorder(
-			mxConstants.HANDLE_BORDERCOLOR)
-	{
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1348016511717964310L;
-
-		public void paintBorder(Component c, Graphics g, int x, int y,
-				int width, int height)
-		{
-			((Graphics2D) g).setStroke(VERTEX_SELECTION_STROKE);
-			super.paintBorder(c, g, x, y, width, height);
-		}
-	};
 
 	/**
 	 * Defines the length of the horizontal segment of an Entity Relation.

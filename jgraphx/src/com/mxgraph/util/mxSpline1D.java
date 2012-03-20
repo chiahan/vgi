@@ -1,5 +1,5 @@
 /**
- * $Id: mxSpline1D.java,v 1.3 2010-12-15 10:01:21 david Exp $
+ * $Id: mxSpline1D.java,v 1.4 2011-12-05 17:22:09 david Exp $
  * Copyright (c) 2010, David Benson
  */
 package com.mxgraph.util;
@@ -22,10 +22,12 @@ public class mxSpline1D
 	/** tracks the last index found since that is mostly commonly the next one used */
 	private int storageIndex = 0;
 	
-			/**
+	/**
 	 * Creates a new Spline.
-	 * @param len
-	 * @param pos1D
+	 * @param controlPointProportions the proportion along the curve, from 0->1
+	 * 			that each control point lies on
+	 * @param positions1D the co-ordinate position in the current dimension that
+	 * 			each control point lies on
 	 */
 	public mxSpline1D(double[] controlPointProportions, double[] positions1D)
 	{
@@ -34,8 +36,10 @@ public class mxSpline1D
 
 	/**
 	 * Set values for this Spline.
-	 * @param len
-	 * @param pos1D
+	 * @param controlPointProportions the proportion along the curve, from 0->1
+	 * 			that each control point lies on
+	 * @param positions1D the co-ordinate position in the current dimension that
+	 * 			each control point lies on
 	 */
 	public void setValues(double[] controlPointProportions, double[] positions1D)
 	{

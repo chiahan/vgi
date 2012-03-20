@@ -1,3 +1,7 @@
+/**
+ * $Id: EditorPalette.java,v 1.9 2012-01-13 12:52:28 david Exp $
+ * Copyright (c) 2007-2012, JGraph Ltd
+ */
 package com.mxgraph.examples.swing.editor;
 
 import java.awt.Color;
@@ -26,7 +30,7 @@ import javax.swing.TransferHandler;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.swing.util.mxGraphTransferable;
-import com.mxgraph.util.mxConstants;
+import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource;
@@ -339,7 +343,7 @@ public class EditorPalette extends JPanel
 			public void dragGestureRecognized(DragGestureEvent e)
 			{
 				e
-						.startDrag(null, mxConstants.EMPTY_IMAGE, new Point(),
+						.startDrag(null, mxSwingConstants.EMPTY_IMAGE, new Point(),
 								t, null);
 			}
 

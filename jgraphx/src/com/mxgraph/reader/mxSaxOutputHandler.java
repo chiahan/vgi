@@ -195,7 +195,7 @@ public class mxSaxOutputHandler extends DefaultHandler
 				canvas.setFontFamily(atts.getValue("family"));
 			}
 		});
-		
+
 		handlers.put("fontstyle", new IElementHandler()
 		{
 			public void parseElement(Attributes atts)
@@ -303,7 +303,9 @@ public class mxSaxOutputHandler extends DefaultHandler
 						.parseDouble(atts.getValue("w")), Double
 						.parseDouble(atts.getValue("h")), atts.getValue("str"),
 						atts.getValue("align"), atts.getValue("valign"), atts
-								.getValue("vertical").equals("1"));
+								.getValue("vertical").equals("1"), atts
+								.getValue("wrap").equals("1"), atts
+								.getValue("format"));
 			}
 		});
 

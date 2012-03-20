@@ -18,13 +18,11 @@
  */
 package com.mxgraph.util.svg;
 
-import java.io.Reader;
-
 /**
  * This interface represents a parser.
  *
  * @author <a href="mailto:stephane@hillion.org">Stephane Hillion</a>
- * @version $Id: Parser.java,v 1.1 2010-09-03 19:14:06 david Exp $
+ * @version $Id: Parser.java,v 1.2 2012-01-13 11:09:54 david Exp $
  */
 public interface Parser
 {

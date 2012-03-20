@@ -1,5 +1,5 @@
 /**
- * $Id: mxConnectionHandler.java,v 1.30 2011-09-05 08:43:32 gaudenz Exp $
+ * $Id: mxConnectionHandler.java,v 1.33 2012-02-14 08:17:01 gaudenz Exp $
  * Copyright (c) 2008, Gaudenz Alder
  */
 package com.mxgraph.swing.handler;
@@ -113,6 +113,11 @@ public class mxConnectionHandler extends mxMouseAdapter
 	 * 
 	 */
 	protected transient Point first;
+
+	/**
+	 * 
+	 */
+	protected transient boolean active = false;
 
 	/**
 	 * 
@@ -329,6 +334,14 @@ public class mxConnectionHandler extends mxMouseAdapter
 	}
 
 	/**
+	 * 
+	 */
+	public boolean isActive()
+	{
+		return active;
+	}
+	
+	/**
 	 * Returns true if no connectIcon is specified and handleEnabled is false.
 	 */
 	public boolean isHighlighting()
@@ -472,6 +485,7 @@ public class mxConnectionHandler extends mxMouseAdapter
 		connectPreview.stop(false);
 		setBounds(null);
 		marker.reset();
+		active = false;
 		source = null;
 		first = null;
 		error = null;
@@ -623,21 +637,36 @@ public class mxConnectionHandler extends mxMouseAdapter
 	 */
 	public void mouseDragged(MouseEvent e)
 	{
-		if (!e.isConsumed() && graphComponent.isEnabled() && isEnabled()
-				&& (e.getButton() == 0 || connectPreview.isActive()))
+		if (!e.isConsumed() && graphComponent.isEnabled() && isEnabled())
 		{
-			mxCellState state = marker.process(e);
-
-			if (connectPreview.isActive())
+			// Activates the handler
+			if (!active && first != null)
 			{
-				connectPreview.update(e, marker.getValidState(), e.getX(),
-						e.getY());
-				setBounds(null);
-				e.consume();
+				double dx = Math.abs(first.getX() - e.getX());
+				double dy = Math.abs(first.getY() - e.getY());
+				int tol = graphComponent.getTolerance();
+				
+				if (dx > tol || dy > tol)
+				{
+					active = true;
+				}
 			}
-			else
+			
+			if (e.getButton() == 0 || (isActive() && connectPreview.isActive()))
 			{
-				source = state;
+				mxCellState state = marker.process(e);
+	
+				if (connectPreview.isActive())
+				{
+					connectPreview.update(e, marker.getValidState(), e.getX(),
+							e.getY());
+					setBounds(null);
+					e.consume();
+				}
+				else
+				{
+					source = state;
+				}
 			}
 		}
 	}
@@ -647,89 +676,92 @@ public class mxConnectionHandler extends mxMouseAdapter
 	 */
 	public void mouseReleased(MouseEvent e)
 	{
-		if (error != null)
+		if (isActive())
 		{
-			if (error.length() > 0)
+			if (error != null)
 			{
-				JOptionPane.showMessageDialog(graphComponent, error);
-			}
-		}
-		else if (first != null)
-		{
-			mxGraph graph = graphComponent.getGraph();
-			double dx = first.getX() - e.getX();
-			double dy = first.getY() - e.getY();
-
-			if (connectPreview.isActive()
-					&& (marker.hasValidState() || isCreateTarget() || graph
-							.isAllowDanglingEdges()))
-			{
-				graph.getModel().beginUpdate();
-
-				try
+				if (error.length() > 0)
 				{
-					Object dropTarget = null;
-
-					if (!marker.hasValidState() && isCreateTarget())
-					{
-						Object vertex = createTargetVertex(e, source.getCell());
-						dropTarget = graph.getDropTarget(
-								new Object[] { vertex }, e.getPoint(),
-								graphComponent.getCellAt(e.getX(), e.getY()));
-
-						if (vertex != null)
-						{
-							// Disables edges as drop targets if the target cell was created
-							if (dropTarget == null
-									|| !graph.getModel().isEdge(dropTarget))
-							{
-								mxCellState pstate = graph.getView().getState(
-										dropTarget);
-
-								if (pstate != null)
-								{
-									mxGeometry geo = graph.getModel()
-											.getGeometry(vertex);
-
-									mxPoint origin = pstate.getOrigin();
-									geo.setX(geo.getX() - origin.getX());
-									geo.setY(geo.getY() - origin.getY());
-								}
-							}
-							else
-							{
-								dropTarget = graph.getDefaultParent();
-							}
-
-							graph.addCells(new Object[] { vertex }, dropTarget);
-						}
-
-						// FIXME: Here we pre-create the state for the vertex to be
-						// inserted in order to invoke update in the connectPreview.
-						// This means we have a cell state which should be created
-						// after the model.update, so this should be fixed.
-						mxCellState targetState = graph.getView().getState(
-								vertex, true);
-						connectPreview.update(e, targetState, e.getX(),
-								e.getY());
-					}
-
-					Object cell = connectPreview.stop(
-							graphComponent.isSignificant(dx, dy), e);
-
-					if (cell != null)
-					{
-						graphComponent.getGraph().setSelectionCell(cell);
-						eventSource.fireEvent(new mxEventObject(
-								mxEvent.CONNECT, "cell", cell, "event", e,
-								"target", dropTarget));
-					}
-
-					e.consume();
+					JOptionPane.showMessageDialog(graphComponent, error);
 				}
-				finally
+			}
+			else if (first != null)
+			{
+				mxGraph graph = graphComponent.getGraph();
+				double dx = first.getX() - e.getX();
+				double dy = first.getY() - e.getY();
+	
+				if (connectPreview.isActive()
+						&& (marker.hasValidState() || isCreateTarget() || graph
+								.isAllowDanglingEdges()))
 				{
-					graph.getModel().endUpdate();
+					graph.getModel().beginUpdate();
+	
+					try
+					{
+						Object dropTarget = null;
+	
+						if (!marker.hasValidState() && isCreateTarget())
+						{
+							Object vertex = createTargetVertex(e, source.getCell());
+							dropTarget = graph.getDropTarget(
+									new Object[] { vertex }, e.getPoint(),
+									graphComponent.getCellAt(e.getX(), e.getY()));
+	
+							if (vertex != null)
+							{
+								// Disables edges as drop targets if the target cell was created
+								if (dropTarget == null
+										|| !graph.getModel().isEdge(dropTarget))
+								{
+									mxCellState pstate = graph.getView().getState(
+											dropTarget);
+	
+									if (pstate != null)
+									{
+										mxGeometry geo = graph.getModel()
+												.getGeometry(vertex);
+	
+										mxPoint origin = pstate.getOrigin();
+										geo.setX(geo.getX() - origin.getX());
+										geo.setY(geo.getY() - origin.getY());
+									}
+								}
+								else
+								{
+									dropTarget = graph.getDefaultParent();
+								}
+	
+								graph.addCells(new Object[] { vertex }, dropTarget);
+							}
+	
+							// FIXME: Here we pre-create the state for the vertex to be
+							// inserted in order to invoke update in the connectPreview.
+							// This means we have a cell state which should be created
+							// after the model.update, so this should be fixed.
+							mxCellState targetState = graph.getView().getState(
+									vertex, true);
+							connectPreview.update(e, targetState, e.getX(),
+									e.getY());
+						}
+	
+						Object cell = connectPreview.stop(
+								graphComponent.isSignificant(dx, dy), e);
+	
+						if (cell != null)
+						{
+							graphComponent.getGraph().setSelectionCell(cell);
+							eventSource.fireEvent(new mxEventObject(
+									mxEvent.CONNECT, "cell", cell, "event", e,
+									"target", dropTarget));
+						}
+	
+						e.consume();
+					}
+					finally
+					{
+						graph.getModel().endUpdate();
+					}
 				}
 			}
 		}

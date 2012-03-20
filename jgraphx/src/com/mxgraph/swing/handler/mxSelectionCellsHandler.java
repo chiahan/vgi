@@ -1,5 +1,5 @@
 /**
- * $Id: mxSelectionCellsHandler.java,v 1.9 2011-09-05 08:42:15 gaudenz Exp $
+ * $Id: mxSelectionCellsHandler.java,v 1.10 2012-03-06 06:48:55 gaudenz Exp $
  * Copyright (c) 2008, Gaudenz Alder
  * 
  * Known issue: Drag image size depends on the initial position and may sometimes
@@ -377,7 +377,7 @@ public class mxSelectionCellsHandler implements MouseListener,
 		{
 			mxCellState state = graph.getView().getState(tmp[i]);
 
-			if (state != null)
+			if (state != null && state.getCell() != graph.getView().getCurrentRoot())
 			{
 				mxCellHandler handler = oldHandlers.get(tmp[i]);
 

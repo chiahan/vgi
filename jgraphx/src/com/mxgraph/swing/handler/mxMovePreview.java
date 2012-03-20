@@ -1,6 +1,6 @@
 /**
- * $Id: mxMovePreview.java,v 1.8 2011-03-18 16:10:49 gaudenz Exp $
- * Copyright (c) 2008, Gaudenz Alder
+ * $Id: mxMovePreview.java,v 1.9 2012-01-13 13:19:25 david Exp $
+ * Copyright (c) 2008-2012, JGraph Ltd
  */
 package com.mxgraph.swing.handler;
 
@@ -11,8 +11,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.swing.view.mxCellStatePreview;
-import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource;
@@ -492,7 +492,7 @@ public class mxMovePreview extends mxEventSource
 	{
 		if (placeholder != null)
 		{
-			mxConstants.PREVIEW_BORDER.paintBorder(graphComponent, g,
+			mxSwingConstants.PREVIEW_BORDER.paintBorder(graphComponent, g,
 					placeholder.x, placeholder.y, placeholder.width,
 					placeholder.height);
 		}

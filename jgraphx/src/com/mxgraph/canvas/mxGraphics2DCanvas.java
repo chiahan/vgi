@@ -1,6 +1,6 @@
 /**
- * $Id: mxGraphics2DCanvas.java,v 1.195 2011-09-28 11:31:50 gaudenz Exp $
- * Copyright (c) 2007-2010, Gaudenz Alder, David Benson
+ * $Id: mxGraphics2DCanvas.java,v 1.196 2012-01-13 13:05:20 david Exp $
+ * Copyright (c) 2007-2012, JGraph Ltd
  */
 package com.mxgraph.canvas;
 
@@ -42,6 +42,7 @@ import com.mxgraph.shape.mxRectangleShape;
 import com.mxgraph.shape.mxRhombusShape;
 import com.mxgraph.shape.mxSwimlaneShape;
 import com.mxgraph.shape.mxTriangleShape;
+import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
@@ -471,7 +472,7 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 			// Saves the state and configures the graphics object
 			Paint p = g.getPaint();
 			Color previousColor = g.getColor();
-			g.setColor(mxConstants.SHADOW_COLOR);
+			g.setColor(mxSwingConstants.SHADOW_COLOR);
 			g.translate(shadowOffsetX, shadowOffsetY);
 
 			// Paints the shadow

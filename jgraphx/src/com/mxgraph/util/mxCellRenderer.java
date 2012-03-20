@@ -1,3 +1,7 @@
+/**
+ * $Id: mxCellRenderer.java,v 1.12 2012-01-13 11:34:10 david Exp $
+ * Copyright (c) 2007-2012, JGraph Ltd
+ */
 package com.mxgraph.util;
 
 import java.awt.Color;
@@ -149,7 +153,7 @@ public class mxCellRenderer
 				{
 					public mxICanvas createCanvas(int width, int height)
 					{
-						return new mxHtmlCanvas(mxUtils.createHtmlDocument());
+						return new mxHtmlCanvas(mxDomUtils.createHtmlDocument());
 					}
 
 				});
@@ -168,7 +172,7 @@ public class mxCellRenderer
 				{
 					public mxICanvas createCanvas(int width, int height)
 					{
-						return new mxSvgCanvas(mxUtils.createSvgDocument(width,
+						return new mxSvgCanvas(mxDomUtils.createSvgDocument(width,
 								height));
 					}
 
@@ -188,7 +192,7 @@ public class mxCellRenderer
 				{
 					public mxICanvas createCanvas(int width, int height)
 					{
-						return new mxVmlCanvas(mxUtils.createVmlDocument());
+						return new mxVmlCanvas(mxDomUtils.createVmlDocument());
 					}
 
 				});

@@ -1,5 +1,5 @@
 /*
- * $Id: JTableRenderer.java,v 1.4 2010-05-28 13:57:32 gaudenz Exp $
+ * $Id: JTableRenderer.java,v 1.5 2012-01-13 11:04:36 david Exp $
  * Copyright (c) 2001-2005, Gaudenz Alder
  * 
  * All rights reserved.
@@ -487,8 +487,7 @@ public class JTableRenderer extends JComponent
 					return data[row][col];
 				}
 
-				@SuppressWarnings("unchecked")
-				public Class getColumnClass(int c)
+				public Class<? extends Object> getColumnClass(int c)
 				{
 					Object value = getValueAt(0, c);
 					return (value != null) ? value.getClass() : ImageIcon.class;

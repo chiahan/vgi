@@ -1,7 +1,7 @@
 package vgi;
 
 import com.mxgraph.model.mxCell;
-import com.mxgraph.model.mxICell;
+import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
@@ -321,7 +321,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     //Global
     public void setShadowColor(Color color)
     {
-        mxConstants.SHADOW_COLOR = color;
+        mxSwingConstants.SHADOW_COLOR = color;
     }
     public void setShadowOffset(int offsetx,int offsety)
     {

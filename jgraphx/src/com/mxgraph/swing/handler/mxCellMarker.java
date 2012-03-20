@@ -1,6 +1,6 @@
 /**
- * $Id: mxCellMarker.java,v 1.21 2011-09-30 06:01:58 gaudenz Exp $
- * Copyright (c) 2008, Gaudenz Alder
+ * $Id: mxCellMarker.java,v 1.22 2012-01-13 13:14:42 david Exp $
+ * Copyright (c) 2008-2012, JGraph Ltd
  */
 package com.mxgraph.swing.handler;
 
@@ -16,6 +16,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
 
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
@@ -195,7 +196,7 @@ public class mxCellMarker extends JComponent
 	 */
 	public mxCellMarker(mxGraphComponent graphComponent)
 	{
-		this(graphComponent, mxConstants.DEFAULT_VALID_COLOR);
+		this(graphComponent, mxSwingConstants.DEFAULT_VALID_COLOR);
 	}
 
 	/**
@@ -203,7 +204,7 @@ public class mxCellMarker extends JComponent
 	 */
 	public mxCellMarker(mxGraphComponent graphComponent, Color validColor)
 	{
-		this(graphComponent, validColor, mxConstants.DEFAULT_INVALID_COLOR);
+		this(graphComponent, validColor, mxSwingConstants.DEFAULT_INVALID_COLOR);
 	}
 
 	/**

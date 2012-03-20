@@ -1,5 +1,5 @@
 /**
- * $Id: mxGraphView.java,v 1.155 2011-11-17 14:10:53 gaudenz Exp $
+ * $Id: mxGraphView.java,v 1.156 2012-03-09 07:42:54 gaudenz Exp $
  * Copyright (c) 2007-2010, Gaudenz Alder, David Benson
  */
 package com.mxgraph.view;
@@ -626,6 +626,7 @@ public class mxGraphView extends mxEventSource
 				{
 					// Updates the points on the source terminal if its an edge
 					mxCellState source = getState(getVisibleTerminal(cell, true));
+					state.setVisibleTerminalState(source, true);
 
 					if (source != null && model.isEdge(source.getCell())
 							&& !model.isAncestor(source, cell))
@@ -638,6 +639,7 @@ public class mxGraphView extends mxEventSource
 					// Updates the points on the source terminal if its an edge
 					mxCellState target = getState(getVisibleTerminal(cell,
 							false));
+					state.setVisibleTerminalState(target, false);
 
 					if (target != null && model.isEdge(target.getCell())
 							&& !model.isAncestor(target, cell))

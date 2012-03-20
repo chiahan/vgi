@@ -1,5 +1,5 @@
 /**
- * $Id: mxPerimeter.java,v 1.21 2011-04-12 06:56:22 gaudenz Exp $
+ * $Id: mxPerimeter.java,v 1.22 2012-01-11 09:06:56 gaudenz Exp $
  * Copyright (c) 2007-2010, Gaudenz Alder, David Benson
  */
 package com.mxgraph.view;
@@ -158,6 +158,10 @@ public class mxPerimeter
 			if (dx == 0 && dy != 0)
 			{
 				return new mxPoint(cx, cy + b * dy / Math.abs(dy));
+			}
+			else if (dx == 0 && dy == 0)
+			{
+				return new mxPoint(px, py);
 			}
 
 			if (orthogonal)

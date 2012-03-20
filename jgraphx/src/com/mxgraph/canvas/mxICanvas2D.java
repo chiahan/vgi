@@ -225,7 +225,8 @@ public interface mxICanvas2D
 			boolean aspect, boolean flipH, boolean flipV);
 
 	/**
-	 * Draws the given string.
+	 * Draws the given string.  Possible values for format are empty string for
+	 * plain text and html for HTML markup.
 	 * 
 	 * @param x
 	 * @param y
@@ -237,7 +238,7 @@ public interface mxICanvas2D
 	 * @param vertical
 	 */
 	void text(double x, double y, double w, double h, String str, String align,
-			String valign, boolean vertical);
+			String valign, boolean vertical, boolean wrap, String format);
 
 	/**
 	 * Begins a new path.

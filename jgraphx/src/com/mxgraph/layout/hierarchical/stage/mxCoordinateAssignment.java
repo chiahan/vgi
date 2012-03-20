@@ -1,5 +1,5 @@
 /**
- * $Id: mxCoordinateAssignment.java,v 1.11 2011-10-21 21:05:13 david Exp $
+ * $Id: mxCoordinateAssignment.java,v 1.13 2012-01-09 15:02:51 david Exp $
  * Copyright (c) 2005-2010, David Benson, Gaudenz Alder
  */
 
@@ -1067,7 +1067,7 @@ public class mxCoordinateAssignment implements mxHierarchicalLayoutStage
 
 					if (currentX == nextX)
 					{
-						upXPositions[i - cell.minRank - 1] = cell.getX(i);
+						upXPositions[i - cell.minRank - 1] = currentX;
 						upSegCount++;
 					}
 					else if (repositionValid(model, cell, i + 1, currentX))
@@ -1093,7 +1093,7 @@ public class mxCoordinateAssignment implements mxHierarchicalLayoutStage
 
 					if (currentX == nextX)
 					{
-						downXPositions[i - cell.minRank - 2] = cell.getX(i);
+						downXPositions[i - cell.minRank - 2] = currentX;
 						downSegCount++;
 					}
 					else if (repositionValid(model, cell, i - 1, currentX))
@@ -1146,7 +1146,7 @@ public class mxCoordinateAssignment implements mxHierarchicalLayoutStage
 	/**
 	 * Determines whether or not a node may be moved to the specified x 
 	 * position on the specified rank
-	 * @model the layout model
+	 * @param model the layout model
 	 * @param cell the cell being analysed
 	 * @param rank the layer of the cell
 	 * @param position the x position being sought

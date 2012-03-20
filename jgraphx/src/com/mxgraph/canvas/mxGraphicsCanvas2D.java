@@ -21,7 +21,10 @@ import java.awt.geom.Rectangle2D;
 import java.text.AttributedString;
 import java.util.Stack;
 
+import javax.swing.CellRendererPane;
+
 import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxLightweightLabel;
 import com.mxgraph.util.mxUtils;
 
 /**
@@ -108,12 +111,27 @@ public class mxGraphicsCanvas2D implements mxICanvas2D
 	protected transient Color currentShadowColor;
 
 	/**
+	 * Optional renderer pane to be used for HTML label rendering.
+	 */
+	protected CellRendererPane rendererPane;
+
+	/**
 	 * Constructs a new graphics export canvas.
 	 */
 	public mxGraphicsCanvas2D(Graphics2D g)
 	{
 		setGraphics(g);
 		state.g = g;
+
+		// Initializes the cell renderer pane for drawing HTML markup
+		try
+		{
+			rendererPane = new CellRendererPane();
+		}
+		catch (Exception e)
+		{
+			// ignore
+		}
 	}
 
 	/**
@@ -644,11 +662,52 @@ public class mxGraphicsCanvas2D implements mxICanvas2D
 		return g2;
 	}
 
+	protected String createHtmlDocument(String text, String align,
+			String valign, int w, int h)
+	{
+		StringBuffer css = new StringBuffer();
+		css.append("font-family:" + state.fontFamily + ";");
+		css.append("font-size:"
+				+ (int) Math.round(state.fontSize * state.scale) + " pt;");
+		css.append("color:" + state.fontColorValue + ";");
+
+		if ((state.fontStyle & mxConstants.FONT_BOLD) == mxConstants.FONT_BOLD)
+		{
+			css.append("font-weight:bold;");
+		}
+
+		if ((state.fontStyle & mxConstants.FONT_ITALIC) == mxConstants.FONT_ITALIC)
+		{
+			css.append("font-style:italic;");
+		}
+
+		if ((state.fontStyle & mxConstants.FONT_UNDERLINE) == mxConstants.FONT_UNDERLINE)
+		{
+			css.append("text-decoration:underline;");
+		}
+
+		if (align != null)
+		{
+			if (align.equals(mxConstants.ALIGN_CENTER))
+			{
+				css.append("text-align:center;");
+			}
+			else if (align.equals(mxConstants.ALIGN_RIGHT))
+			{
+				css.append("text-align:right;");
+			}
+		}
+
+		return "<html><div style=\"width:" + w + "px;height:" + h + "px;"
+				+ css.toString() + "\">" + text + "</div></html>";
+	}
+
 	/**
 	 * Draws the given text.
 	 */
 	public void text(double x, double y, double w, double h, String str,
-			String align, String valign, boolean vertical)
+			String align, String valign, boolean vertical, boolean wrap,
+			String format)
 	{
 		if (!state.fontColorValue.equals(mxConstants.NONE))
 		{
@@ -657,53 +716,74 @@ public class mxGraphicsCanvas2D implements mxICanvas2D
 			w *= state.scale;
 			h *= state.scale;
 
-			// Font-metrics needed below this line
-			Graphics2D g2 = createTextGraphics(x, y, w, h, vertical);
-			FontMetrics fm = g2.getFontMetrics();
-			String[] lines = str.split("\n");
-
-			y = getVerticalTextPosition(x, y, w, h, align, valign, vertical,
-					fm, lines);
-			x = getHorizontalTextPosition(x, y, w, h, align, valign, vertical,
-					fm, lines);
-
-			for (int i = 0; i < lines.length; i++)
+			if (format != null && format.equals("html"))
 			{
-				double dx = 0;
+				mxLightweightLabel textRenderer = mxLightweightLabel
+						.getSharedInstance();
 
-				if (align != null)
+				if (textRenderer != null && rendererPane != null)
 				{
-					if (align.equals(mxConstants.ALIGN_CENTER))
+					// Renders the scaled text with a correction factor of
+					// 0.77 for pixels in HTML vs pixels in the bitmap
+					str = createHtmlDocument(str, align, valign,
+							(int) Math.round(w * 0.77),
+							(int) Math.round(h * 0.77));
+					textRenderer.setText(str);
+					rendererPane.paintComponent(state.g, textRenderer,
+							rendererPane, (int) Math.round(x),
+							(int) Math.round(y), (int) Math.round(w),
+							(int) Math.round(h), true);
+				}
+			}
+			else
+			{
+				// Font-metrics needed below this line
+				Graphics2D g2 = createTextGraphics(x, y, w, h, vertical);
+				FontMetrics fm = g2.getFontMetrics();
+				String[] lines = str.split("\n");
+
+				y = getVerticalTextPosition(x, y, w, h, align, valign,
+						vertical, fm, lines);
+				x = getHorizontalTextPosition(x, y, w, h, align, valign,
+						vertical, fm, lines);
+
+				for (int i = 0; i < lines.length; i++)
+				{
+					double dx = 0;
+
+					if (align != null)
 					{
-						int sw = fm.stringWidth(lines[i]);
-						dx = (w - sw) / 2;
+						if (align.equals(mxConstants.ALIGN_CENTER))
+						{
+							int sw = fm.stringWidth(lines[i]);
+							dx = (w - sw) / 2;
+						}
+						else if (align.equals(mxConstants.ALIGN_RIGHT))
+						{
+							int sw = fm.stringWidth(lines[i]);
+							dx = w - sw;
+						}
 					}
-					else if (align.equals(mxConstants.ALIGN_RIGHT))
+
+					// Adds support for underlined text via attributed character iterator
+					if ((state.fontStyle & mxConstants.FONT_UNDERLINE) == mxConstants.FONT_UNDERLINE)
 					{
-						int sw = fm.stringWidth(lines[i]);
-						dx = w - sw;
+						AttributedString as = new AttributedString(lines[i]);
+						as.addAttribute(TextAttribute.FONT, g2.getFont());
+						as.addAttribute(TextAttribute.UNDERLINE,
+								TextAttribute.UNDERLINE_ON);
+
+						g2.drawString(as.getIterator(),
+								(int) Math.round(x + dx), (int) Math.round(y));
 					}
-				}
+					else
+					{
+						g2.drawString(lines[i], (int) Math.round(x + dx),
+								(int) Math.round(y));
+					}
 
-				// Adds support for underlined text via attributed character iterator
-				if ((state.fontStyle & mxConstants.FONT_UNDERLINE) == mxConstants.FONT_UNDERLINE)
-				{
-
-					AttributedString as = new AttributedString(lines[i]);
-					as.addAttribute(TextAttribute.FONT, g2.getFont());
-					as.addAttribute(TextAttribute.UNDERLINE,
-							TextAttribute.UNDERLINE_ON);
-
-					g2.drawString(as.getIterator(), (int) Math.round(x + dx),
-							(int) Math.round(y));
+					y += fm.getHeight() + mxConstants.LINESPACING;
 				}
-				else
-				{
-					g2.drawString(lines[i], (int) Math.round(x + dx),
-							(int) Math.round(y));
-				}
-				
-				y += fm.getHeight() + mxConstants.LINESPACING;
 			}
 		}
 	}

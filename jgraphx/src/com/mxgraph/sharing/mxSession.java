@@ -1,8 +1,11 @@
+/**
+ * $Id: mxSession.java,v 1.15 2012-01-13 11:07:37 david Exp $
+ * Copyright (c) 2007-2012, JGraph Ltd
+ */
 package com.mxgraph.sharing;
 
 import org.w3c.dom.Node;
 
-import com.mxgraph.io.mxCodec;
 import com.mxgraph.sharing.mxSharedState.mxDiagramChangeListener;
 import com.mxgraph.util.mxUtils;
 

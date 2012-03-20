@@ -1,6 +1,6 @@
 /**
- * $Id: mxCurve.java,v 1.52 2011-02-02 11:13:06 david Exp $
- * Copyright (c) 2009-2010, David Benson, Gaudenz Alder
+ * $Id: mxCurve.java,v 1.53 2012-01-13 11:17:38 david Exp $
+ * Copyright (c) 2009-2012, JGraph Ltd
  */
 package com.mxgraph.util;
 
@@ -515,6 +515,7 @@ public class mxCurve
 			double height = rect.getHeight();
 
 			// Whether the intersection is one of the horizontal sides of the rect
+			@SuppressWarnings("unused")
 			boolean horizIncident = false;
 			mxPoint hitPoint = mxUtils.intersection(x, y, x + width, y, x0, y0, x1, y1);
 			

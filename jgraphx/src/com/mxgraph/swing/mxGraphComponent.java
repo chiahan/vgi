@@ -1,5 +1,5 @@
 /**
- * $Id: mxGraphComponent.java,v 1.139 2011-09-26 15:11:03 gaudenz Exp $
+ * $Id: mxGraphComponent.java,v 1.144 2012-03-05 08:57:38 gaudenz Exp $
  * Copyright (c) 2009-2010, Gaudenz Alder, David Benson
  */
 package com.mxgraph.swing;
@@ -290,7 +290,7 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	 * Specifies if a dashed line should be drawn between multiple pages.
 	 */
 	protected boolean pageBreaksVisible = true;
-	
+
 	/**
 	 * Specifies the color of page breaks
 	 */
@@ -1374,7 +1374,7 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	{
 		double s = graph.getView().getScale();
 		mxPoint tr = graph.getView().getTranslate();
-		
+
 		double off = (addOffset) ? graph.getGridSize() / 2 : 0;
 		double x = graph.snap(e.getX() / s - tr.getX() - off);
 		double y = graph.snap(e.getY() / s - tr.getY() - off);
@@ -1586,7 +1586,7 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		mxGraphView view = graph.getView();
 		double newScale = (double) ((int) (view.getScale() * 100 * factor)) / 100;
 
-		if (newScale != view.getScale() && newScale > 0.01)
+		if (newScale != view.getScale() && newScale > 0.04)
 		{
 			mxPoint translate = (pageVisible && centerPage) ? getPageTranslate(newScale)
 					: new mxPoint();
@@ -1701,9 +1701,11 @@ public class mxGraphComponent extends JScrollPane implements Printable
 
 			try
 			{
+				int off = (getPageShadowColor() != null) ? 8 : 0;
+				
 				// Adds some extra space for the shadow and border
-				double width = getViewport().getWidth() - 8;
-				double height = getViewport().getHeight() - 8;
+				double width = getViewport().getWidth() - off;
+				double height = getViewport().getHeight() - off;
 
 				Dimension d = getPreferredSizeForPage();
 				double pageWidth = d.width;
@@ -2096,7 +2098,8 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	 */
 	public ImageIcon getFoldingIcon(mxCellState state)
 	{
-		if (state != null && isFoldingEnabled() && !getGraph().getModel().isEdge(state.getCell()))
+		if (state != null && isFoldingEnabled()
+				&& !getGraph().getModel().isEdge(state.getCell()))
 		{
 			Object cell = state.getCell();
 			boolean tmp = graph.isCellCollapsed(cell);
@@ -2818,7 +2821,9 @@ public class mxGraphComponent extends JScrollPane implements Printable
 	 */
 	public mxInteractiveCanvas createCanvas()
 	{
-		return new mxInteractiveCanvas(this);
+		// NOTE: http://forum.jgraph.com/questions/3354/ reports that we should not
+		// pass image observer here as it will cause JVM to enter infinite loop.
+		return new mxInteractiveCanvas();
 	}
 
 	/**
@@ -3518,14 +3523,24 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		if (isPageVisible())
 		{
 			// Draws the background behind the page
-			g.setColor(getPageBackgroundColor());
-			mxUtils.fillClippedRect(g, 0, 0, getGraphControl().getWidth(),
-					getGraphControl().getHeight());
+			Color c = getPageBackgroundColor();
+			
+			if (c != null)
+			{
+				g.setColor(c);
+				mxUtils.fillClippedRect(g, 0, 0, getGraphControl().getWidth(),
+						getGraphControl().getHeight());
+			}
 
 			// Draws the page drop shadow
-			g.setColor(getPageShadowColor());
-			mxUtils.fillClippedRect(g, x0 + w, y0 + 6, 6, h - 6);
-			mxUtils.fillClippedRect(g, x0 + 8, y0 + h, w - 2, 6);
+			c = getPageShadowColor();
+			
+			if (c != null)
+			{
+				g.setColor(c);
+				mxUtils.fillClippedRect(g, x0 + w, y0 + 6, 6, h - 6);
+				mxUtils.fillClippedRect(g, x0 + 8, y0 + h, w - 2, 6);
+			}
 
 			// Draws the page
 			Color bg = getBackground();
@@ -3539,8 +3554,13 @@ public class mxGraphComponent extends JScrollPane implements Printable
 			mxUtils.fillClippedRect(g, x0 + 1, y0 + 1, w, h);
 
 			// Draws the page border
-			g.setColor(getPageBorderColor());
-			g.drawRect(x0, y0, w, h);
+			c = getPageBorderColor();
+			
+			if (c != null)
+			{
+				g.setColor(c);
+				g.drawRect(x0, y0, w, h);
+			}
 		}
 
 		if (isPageBreaksVisible()
@@ -4305,8 +4325,8 @@ public class mxGraphComponent extends JScrollPane implements Printable
 		}
 
 		/**
-		 * @param state
-		 * @return
+		 * @param state the cached state of the cell whose extended bounds are to be calculated
+		 * @return the bounds of the cell, including the label and shadow and allowing for rotation
 		 */
 		protected Rectangle getExtendedCellBounds(mxCellState state)
 		{

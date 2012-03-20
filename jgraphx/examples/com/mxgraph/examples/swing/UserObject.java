@@ -1,3 +1,7 @@
+/**
+ * $Id: UserObject.java,v 1.4 2012-01-18 08:32:10 gaudenz Exp $
+ * Copyright (c) 2007-2012, JGraph Ltd
+ */
 package com.mxgraph.examples.swing;
 
 import java.util.EventObject;
@@ -10,7 +14,7 @@ import org.w3c.dom.Node;
 
 import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxUtils;
+import com.mxgraph.util.mxDomUtils;
 import com.mxgraph.view.mxGraph;
 
 public class UserObject extends JFrame
@@ -38,9 +42,11 @@ public class UserObject extends JFrame
 		//	new com.example.CustomUserObject()));
 		//
 		// Note that the object must have an empty constructor and a setter and
-		// getter for each property to be persisted.
+		// getter for each property to be persisted. The object must not have
+		// a property called ID as this property is reserved for resolving cell
+		// references and will cause problems when used inside the user object.
 		//
-		Document doc = mxUtils.createDocument();
+		Document doc = mxDomUtils.createDocument();
 		Element person1 = doc.createElement("Person");
 		person1.setAttribute("firstName", "Daffy");
 		person1.setAttribute("lastName", "Duck");

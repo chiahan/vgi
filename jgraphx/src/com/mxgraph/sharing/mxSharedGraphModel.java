@@ -1,3 +1,7 @@
+/**
+ * $Id: mxSharedGraphModel.java,v 1.3 2012-01-13 12:35:04 david Exp $
+ * Copyright (c) 2007-2012, JGraph Ltd
+ */
 package com.mxgraph.sharing;
 
 import java.util.LinkedList;
@@ -12,7 +16,7 @@ import com.mxgraph.model.mxIGraphModel.mxAtomicGraphModelChange;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxUndoableEdit;
-import com.mxgraph.util.mxUtils;
+import com.mxgraph.util.mxXmlUtils;
 
 /**
  * Implements a diagram that may be shared among multiple sessions.
@@ -82,7 +86,7 @@ public class mxSharedGraphModel extends mxSharedState
 	 */
 	public String getState()
 	{
-		return mxUtils.getXml(codec.encode(model));
+		return mxXmlUtils.getXml(codec.encode(model));
 	}
 
 	/**

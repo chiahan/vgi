@@ -1,6 +1,6 @@
 /**
- * $Id: mxCellHandler.java,v 1.25 2011-01-17 11:14:44 gaudenz Exp $
- * Copyright (c) 2008, Gaudenz Alder
+ * $Id: mxCellHandler.java,v 1.26 2012-01-13 13:14:21 david Exp $
+ * Copyright (c) 2008-2012, JGraph Ltd
  */
 package com.mxgraph.swing.handler;
 
@@ -15,7 +15,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
 
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxConstants;
+import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
@@ -413,10 +413,10 @@ public class mxCellHandler
 	{
 		if (isLabel(index))
 		{
-			return mxConstants.LABEL_HANDLE_FILLCOLOR;
+			return mxSwingConstants.LABEL_HANDLE_FILLCOLOR;
 		}
 
-		return mxConstants.HANDLE_FILLCOLOR;
+		return mxSwingConstants.HANDLE_FILLCOLOR;
 	}
 
 	/**
@@ -424,7 +424,7 @@ public class mxCellHandler
 	 */
 	protected Color getHandleBorderColor(int index)
 	{
-		return mxConstants.HANDLE_BORDERCOLOR;
+		return mxSwingConstants.HANDLE_BORDERCOLOR;
 	}
 
 }

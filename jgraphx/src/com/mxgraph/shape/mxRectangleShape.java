@@ -1,9 +1,14 @@
+/**
+ * $Id: mxRectangleShape.java,v 1.5 2012-01-13 13:12:37 david Exp $
+ * Copyright (c) 2007-2012, JGraph Ltd
+ */
 package com.mxgraph.shape;
 
 import java.awt.Rectangle;
 import java.util.Map;
 
 import com.mxgraph.canvas.mxGraphics2DCanvas;
+import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxCellState;
@@ -38,7 +43,7 @@ public class mxRectangleShape extends mxBasicShape
 				// Paints the optional shadow
 				if (shadow)
 				{
-					canvas.getGraphics().setColor(mxConstants.SHADOW_COLOR);
+					canvas.getGraphics().setColor(mxSwingConstants.SHADOW_COLOR);
 					canvas.getGraphics().fillRoundRect(
 							x + mxConstants.SHADOW_OFFSETX,
 							y + mxConstants.SHADOW_OFFSETY, w, h, radius,

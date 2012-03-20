@@ -1,6 +1,6 @@
 /**
- * $Id: mxGraphHandler.java,v 1.75 2011-11-29 13:40:08 gaudenz Exp $
- * Copyright (c) 2008, Gaudenz Alder
+ * $Id: mxGraphHandler.java,v 1.80 2012-03-10 08:05:31 gaudenz Exp $
+ * Copyright (c) 2008-2012, JGraph Ltd
  * 
  * Known issue: Drag image size depends on the initial position and may sometimes
  * not align with the grid when dragging. This is because the rounding of the width
@@ -44,8 +44,8 @@ import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.util.mxGraphTransferable;
 import com.mxgraph.swing.util.mxMouseAdapter;
+import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxCellRenderer;
-import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxEvent;
 import com.mxgraph.util.mxEventObject;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
@@ -257,7 +257,6 @@ public class mxGraphHandler extends mxMouseAdapter implements
 		// Listens to changes of the transferhandler
 		graphComponent.addPropertyChangeListener(new PropertyChangeListener()
 		{
-
 			public void propertyChange(PropertyChangeEvent evt)
 			{
 				if (evt.getPropertyName().equals("transferHandler"))
@@ -297,7 +296,7 @@ public class mxGraphHandler extends mxMouseAdapter implements
 
 						if (t != null)
 						{
-							e.startDrag(null, mxConstants.EMPTY_IMAGE,
+							e.startDrag(null, mxSwingConstants.EMPTY_IMAGE,
 									new Point(), t, new DragSourceAdapter()
 									{
 
@@ -414,6 +413,14 @@ public class mxGraphHandler extends mxMouseAdapter implements
 	protected mxMovePreview createMovePreview()
 	{
 		return new mxMovePreview(graphComponent);
+	}
+	
+	/**
+	 * 
+	 */
+	public mxMovePreview getMovePreview()
+	{
+		return movePreview;
 	}
 
 	/**
@@ -1442,7 +1449,7 @@ public class mxGraphHandler extends mxMouseAdapter implements
 			}
 			else if (!imagePreview)
 			{
-				mxConstants.PREVIEW_BORDER.paintBorder(graphComponent, g,
+				mxSwingConstants.PREVIEW_BORDER.paintBorder(graphComponent, g,
 						previewBounds.x, previewBounds.y, previewBounds.width,
 						previewBounds.height);
 			}

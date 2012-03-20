@@ -1,5 +1,5 @@
 /*
- * $Id: mxGraphAnalysis.java,v 1.3 2009-11-24 12:00:28 gaudenz Exp $
+ * $Id: mxGraphAnalysis.java,v 1.4 2012-03-09 07:42:54 gaudenz Exp $
  * Copyright (c) 2001-2005, Gaudenz Alder
  * 
  * All rights reserved. 
@@ -190,8 +190,13 @@ public class mxGraphAnalysis
 			{
 				list.add(0, edge);
 
-				boolean isSource = view.getVisibleTerminal(edge, true) == obj;
-				obj = view.getVisibleTerminal(edge, !isSource);
+				mxCellState state = view.getState(edge);
+				Object source = (state != null) ? state
+						.getVisibleTerminal(true) : view.getVisibleTerminal(
+						edge, true);
+				boolean isSource = source == obj;
+				obj = (state != null) ? state.getVisibleTerminal(!isSource)
+						: view.getVisibleTerminal(edge, !isSource);
 				list.add(0, obj);
 
 				edge = pred.get(obj);
@@ -330,10 +335,8 @@ public class mxGraphAnalysis
 
 		for (int i = 0; i < edgeStates.length; i++)
 		{
-			Object edge = edgeStates[i].getCell();
-
-			Object source = view.getVisibleTerminal(edge, true);
-			Object target = view.getVisibleTerminal(edge, false);
+			Object source = edgeStates[i].getVisibleTerminal(true);
+			Object target = edgeStates[i].getVisibleTerminal(false);
 
 			mxUnionFind.Node setA = uf.find(uf.getNode(source));
 			mxUnionFind.Node setB = uf.find(uf.getNode(target));
@@ -341,7 +344,7 @@ public class mxGraphAnalysis
 			if (setA == null || setB == null || setA != setB)
 			{
 				uf.union(setA, setB);
-				result.add(edge);
+				result.add(edgeStates[i].getCell());
 			}
 		}
 
@@ -367,8 +370,11 @@ public class mxGraphAnalysis
 
 		for (int i = 0; i < e.length; i++)
 		{
-			Object source = view.getVisibleTerminal(e[i], true);
-			Object target = view.getVisibleTerminal(e[i], false);
+			mxCellState state = view.getState(e[i]);
+			Object source = (state != null) ? state.getVisibleTerminal(true)
+					: view.getVisibleTerminal(e[i], true);
+			Object target = (state != null) ? state.getVisibleTerminal(false)
+					: view.getVisibleTerminal(e[i], false);
 
 			uf.union(uf.find(uf.getNode(source)), uf.find(uf.getNode(target)));
 		}

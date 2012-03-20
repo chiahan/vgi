@@ -1,5 +1,5 @@
 /**
- * $Id: mxGraphModel.java,v 1.91 2011-03-21 16:52:13 gaudenz Exp $
+ * $Id: mxGraphModel.java,v 1.92 2011-12-22 23:43:51 david Exp $
  * Copyright (c) 2007, Gaudenz Alder
  */
 package com.mxgraph.model;
@@ -1410,11 +1410,10 @@ public class mxGraphModel extends mxEventSource implements mxIGraphModel,
 			Object edge = model.getEdgeAt(terminal, i);
 			Object src = model.getTerminal(edge, true);
 			Object trg = model.getTerminal(edge, false);
-			boolean isSource = src == source;
+			boolean directedMatch = (src == source) && (trg == target);
+			boolean oppositeMatch = (trg == source) && (src == target);
 
-			if (isSource
-					&& trg == target
-					|| (!directed && model.getTerminal(edge, !isSource) == target))
+			if (directedMatch || (!directed && oppositeMatch))
 			{
 				result.add(edge);
 			}

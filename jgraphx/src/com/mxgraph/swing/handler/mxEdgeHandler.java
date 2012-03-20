@@ -1,6 +1,6 @@
 /**
- * $Id: mxEdgeHandler.java,v 1.29 2011-10-20 17:00:14 gaudenz Exp $
- * Copyright (c) 2008, Gaudenz Alder
+ * $Id: mxEdgeHandler.java,v 1.32 2012-03-09 07:42:53 gaudenz Exp $
+ * Copyright (c) 2008-2012, JGraph Ltd
  */
 package com.mxgraph.swing.handler;
 
@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.view.mxCellState;
@@ -184,7 +185,8 @@ public class mxEdgeHandler extends mxCellHandler
 	 */
 	protected boolean isHandleVisible(int index)
 	{
-		return super.isHandleVisible(index) && (index != 1 || isCellBendable());
+		return super.isHandleVisible(index)
+				&& (isSource(index) || isTarget(index) || isCellBendable());
 	}
 
 	/**
@@ -231,13 +233,13 @@ public class mxEdgeHandler extends mxCellHandler
 					&& !graphComponent.getGraph().isTerminalPointMovable(
 							state.getCell(), source))
 			{
-				return mxConstants.LOCKED_HANDLE_FILLCOLOR;
+				return mxSwingConstants.LOCKED_HANDLE_FILLCOLOR;
 			}
 			else if (terminal != null)
 			{
 				return (graphComponent.getGraph().isCellDisconnectable(
-						state.getCell(), terminal, source)) ? mxConstants.CONNECT_HANDLE_FILLCOLOR
-						: mxConstants.LOCKED_HANDLE_FILLCOLOR;
+						state.getCell(), terminal, source)) ? mxSwingConstants.CONNECT_HANDLE_FILLCOLOR
+						: mxSwingConstants.LOCKED_HANDLE_FILLCOLOR;
 			}
 		}
 
@@ -314,7 +316,7 @@ public class mxEdgeHandler extends mxCellHandler
 
 				if (!isLabel(index) && p != null)
 				{
-					((Graphics2D) g).setStroke(mxConstants.PREVIEW_STROKE);
+					((Graphics2D) g).setStroke(mxSwingConstants.PREVIEW_STROKE);
 
 					if (isSource(index) || isTarget(index))
 					{
@@ -322,11 +324,11 @@ public class mxEdgeHandler extends mxCellHandler
 								|| graphComponent.getGraph()
 										.isAllowDanglingEdges())
 						{
-							g.setColor(mxConstants.DEFAULT_VALID_COLOR);
+							g.setColor(mxSwingConstants.DEFAULT_VALID_COLOR);
 						}
 						else
 						{
-							g.setColor(mxConstants.DEFAULT_INVALID_COLOR);
+							g.setColor(mxSwingConstants.DEFAULT_INVALID_COLOR);
 						}
 					}
 					else
@@ -349,7 +351,7 @@ public class mxEdgeHandler extends mxCellHandler
 
 		if (isLabel(index))
 		{
-			preview.setBorder(mxConstants.PREVIEW_BORDER);
+			preview.setBorder(mxSwingConstants.PREVIEW_BORDER);
 		}
 
 		preview.setOpaque(false);
@@ -499,9 +501,7 @@ public class mxEdgeHandler extends mxCellHandler
 				{
 					marker.process(e);
 					mxCellState currentState = marker.getValidState();
-
-					target = view
-							.getVisibleTerminal(state.getCell(), !isSource);
+					target = state.getVisibleTerminal(!isSource);
 
 					if (currentState != null)
 					{
@@ -846,7 +846,7 @@ public class mxEdgeHandler extends mxCellHandler
 	 */
 	public Color getSelectionColor()
 	{
-		return mxConstants.EDGE_SELECTION_COLOR;
+		return mxSwingConstants.EDGE_SELECTION_COLOR;
 	}
 
 	/**
@@ -854,7 +854,7 @@ public class mxEdgeHandler extends mxCellHandler
 	 */
 	public Stroke getSelectionStroke()
 	{
-		return mxConstants.EDGE_SELECTION_STROKE;
+		return mxSwingConstants.EDGE_SELECTION_STROKE;
 	}
 
 	/**

@@ -1,6 +1,6 @@
 /**
- * $Id: mxUtils.java,v 1.113 2011-07-25 20:45:46 gaudenz Exp $
- * Copyright (c) 2007-2011, Gaudenz Alder, David Benson
+ * $Id: mxUtils.java,v 1.116 2012-01-13 12:18:35 david Exp $
+ * Copyright (c) 2007-2012, JGraph Ltd
  */
 package com.mxgraph.util;
 
@@ -24,8 +24,6 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -45,11 +43,6 @@ import javax.imageio.ImageIO;
 import javax.swing.text.html.HTMLDocument;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -59,7 +52,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
 
 import com.mxgraph.io.mxCodecRegistry;
 import com.mxgraph.model.mxCellPath;
@@ -594,7 +586,8 @@ public class mxUtils
 	 * @param text the string to test for the presence of the input character
 	 * @param inputChar the test character
 	 * @param fromIndex the index position of the string to start from
-	 * @return 
+	 * @return the position of the first character matching the input character
+	 * 			in the given string where the character has no letter preceding it.
 	 */
 	public static int firstCharAt(String text, int inputChar, int fromIndex)
 	{
@@ -693,7 +686,11 @@ public class mxUtils
 
 	/**
 	 * Returns an integer mask of the port constraints of the given map
-	 * @param dict the style map to determine the port constraints for
+	 * @param terminal the cached cell state of the cell to determine the
+	 * 			port constraints for
+	 * @param edge the edge connected to the constrained terminal
+	 * @param source whether or not the edge specified is connected to the
+	 * 			terminal specified at its source end
 	 * @return the mask of port constraint directions
 	 */
 	public static int getPortConstraints(mxCellState terminal,
@@ -705,7 +702,11 @@ public class mxUtils
 
 	/**
 	 * Returns an integer mask of the port constraints of the given map
-	 * @param dict the style map to determine the port constraints for
+	 * @param terminal the cached cell state of the cell to determine the
+	 * 			port constraints for
+	 * @param edge the edge connected to the constrained terminal
+	 * @param source whether or not the edge specified is connected to the
+	 * 			terminal specified at its source end
 	 * @param defaultValue Default value to return if the key is undefined.
 	 * @return the mask of port constraint directions
 	 */
@@ -950,21 +951,11 @@ public class mxUtils
 	 * @param style
 	 *            String of the form stylename[;key=value].
 	 * @return Returns the stylename from the given formatted string.
+	 * @deprecated Use <code>mxStyleUtils.getStylename(String)</code> (Jan 2012)
 	 */
 	public static String getStylename(String style)
 	{
-		if (style != null)
-		{
-			String[] pairs = style.split(";");
-			String stylename = pairs[0];
-
-			if (stylename.indexOf("=") < 0)
-			{
-				return stylename;
-			}
-		}
-
-		return "";
+		return mxStyleUtils.getStylename(style);
 	}
 
 	/**
@@ -974,125 +965,32 @@ public class mxUtils
 	 * @param style
 	 *            String of the form stylename[;stylename][;key=value].
 	 * @return Returns the stylename from the given formatted string.
+	 * @deprecated Use <code>mxStyleUtils.getStylenames(String)</code> (Jan 2012)
 	 */
 	public static String[] getStylenames(String style)
 	{
-		List<String> result = new ArrayList<String>();
-
-		if (style != null)
-		{
-			String[] pairs = style.split(";");
-
-			for (int i = 0; i < pairs.length; i++)
-			{
-				if (pairs[i].indexOf("=") < 0)
-				{
-					result.add(pairs[i]);
-				}
-			}
-		}
-
-		return result.toArray(new String[result.size()]);
+		return mxStyleUtils.getStylenames(style);
 	}
 
 	/**
 	 * Returns the index of the given stylename in the given style. This returns
 	 * -1 if the given stylename does not occur (as a stylename) in the given
 	 * style, otherwise it returns the index of the first character.
+	 * @deprecated Use <code>mxStyleUtils.indexOfStylename(String, String)</code> (Jan 2012)
 	 */
 	public static int indexOfStylename(String style, String stylename)
 	{
-		if (style != null && stylename != null)
-		{
-			String[] tokens = style.split(";");
-			int pos = 0;
-
-			for (int i = 0; i < tokens.length; i++)
-			{
-				if (tokens[i].equals(stylename))
-				{
-					return pos;
-				}
-
-				pos += tokens[i].length() + 1;
-			}
-		}
-
-		return -1;
-	}
-
-	/**
-	 * Adds the specified stylename to the given style if it does not already
-	 * contain the stylename.
-	 */
-	public String addStylename(String style, String stylename)
-	{
-		if (indexOfStylename(style, stylename) < 0)
-		{
-			if (style == null)
-			{
-				style = "";
-			}
-			else if (style.length() > 0
-					&& style.charAt(style.length() - 1) != ';')
-			{
-				style += ';';
-			}
-
-			style += stylename;
-		}
-
-		return style;
-	}
-
-	/**
-	 * Removes all occurrences of the specified stylename in the given style and
-	 * returns the updated style. Trailing semicolons are preserved.
-	 */
-	public String removeStylename(String style, String stylename)
-	{
-		StringBuffer buffer = new StringBuffer();
-
-		if (style != null)
-		{
-			String[] tokens = style.split(";");
-
-			for (int i = 0; i < tokens.length; i++)
-			{
-				if (!tokens[i].equals(stylename))
-				{
-					buffer.append(tokens[i] + ";");
-				}
-			}
-		}
-
-		return (buffer.length() > 1) ? buffer.substring(0, buffer.length() - 1)
-				: buffer.toString();
+		return mxStyleUtils.indexOfStylename(style, stylename);
 	}
 
 	/**
 	 * Removes all stylenames from the given style and returns the updated
 	 * style.
+	 * @deprecated Use <code>mxStyleUtils.removeAllStylenames(String)</code> (Jan 2012)
 	 */
 	public static String removeAllStylenames(String style)
 	{
-		StringBuffer buffer = new StringBuffer();
-
-		if (style != null)
-		{
-			String[] tokens = style.split(";");
-
-			for (int i = 0; i < tokens.length; i++)
-			{
-				if (tokens[i].indexOf('=') >= 0)
-				{
-					buffer.append(tokens[i] + ";");
-				}
-			}
-		}
-
-		return (buffer.length() > 1) ? buffer.substring(0, buffer.length() - 1)
-				: buffer.toString();
+		return mxStyleUtils.removeAllStylenames(style);
 	}
 
 	/**
@@ -1107,30 +1005,12 @@ public class mxUtils
 	 *            Key of the style to be changed.
 	 * @param value
 	 *            New value for the given key.
+	 * @deprecated Use <code>mxStyleUtils.setCellStyles(mxIGraphModel, Object[], String, String)</code> (Jan 2012)
 	 */
 	public static void setCellStyles(mxIGraphModel model, Object[] cells,
 			String key, String value)
 	{
-		if (cells != null && cells.length > 0)
-		{
-			model.beginUpdate();
-			try
-			{
-				for (int i = 0; i < cells.length; i++)
-				{
-					if (cells[i] != null)
-					{
-						String style = setStyle(model.getStyle(cells[i]), key,
-								value);
-						model.setStyle(cells[i], style);
-					}
-				}
-			}
-			finally
-			{
-				model.endUpdate();
-			}
-		}
+		mxStyleUtils.setCellStyles(model, cells, key, value);
 	}
 
 	/**
@@ -1145,46 +1025,11 @@ public class mxUtils
 	 * @param value
 	 *            New value for the given key.
 	 * @return Returns the new style.
+	 * @deprecated Use <code>mxStyleUtils.setStyle(String, String, String)</code> (Jan 2012)
 	 */
 	public static String setStyle(String style, String key, String value)
 	{
-		boolean isValue = value != null && value.length() > 0;
-
-		if (style == null || style.length() == 0)
-		{
-			if (isValue)
-			{
-				style = key + "=" + value;
-			}
-		}
-		else
-		{
-			int index = style.indexOf(key + "=");
-
-			if (index < 0)
-			{
-				if (isValue)
-				{
-					String sep = (style.endsWith(";")) ? "" : ";";
-					style = style + sep + key + '=' + value;
-				}
-			}
-			else
-			{
-				String tmp = (isValue) ? key + "=" + value : "";
-				int cont = style.indexOf(";", index);
-
-				if (!isValue)
-				{
-					cont++;
-				}
-
-				style = style.substring(0, index) + tmp
-						+ ((cont > index) ? style.substring(cont) : "");
-			}
-		}
-
-		return style;
+		return mxStyleUtils.setStyle(style, key, value);
 	}
 
 	/**
@@ -1210,30 +1055,12 @@ public class mxUtils
 	 *            Integer for the bit to be changed.
 	 * @param value
 	 *            Optional boolean value for the flag.
+	 * @deprecated Use <code>mxStyleUtils.setCellStyleFlags(mxIGraphModel, Object[],String, int, Boolean)</code> (Jan 2012)
 	 */
 	public static void setCellStyleFlags(mxIGraphModel model, Object[] cells,
 			String key, int flag, Boolean value)
 	{
-		if (cells != null && cells.length > 0)
-		{
-			model.beginUpdate();
-			try
-			{
-				for (int i = 0; i < cells.length; i++)
-				{
-					if (cells[i] != null)
-					{
-						String style = setStyleFlag(model.getStyle(cells[i]),
-								key, flag, value);
-						model.setStyle(cells[i], style);
-					}
-				}
-			}
-			finally
-			{
-				model.endUpdate();
-			}
-		}
+		mxStyleUtils.setCellStyleFlags(model, cells, key, flag, value);
 	}
 
 	/**
@@ -1248,72 +1075,12 @@ public class mxUtils
 	 *            Integer for the bit to be changed.
 	 * @param value
 	 *            Optional boolean value for the given flag.
+	 * @deprecated Use <code>mxStyleUtils.setStyleFlag(String, String, int, Boolean)</code> (Jan 2012)
 	 */
 	public static String setStyleFlag(String style, String key, int flag,
 			Boolean value)
 	{
-		if (style == null || style.length() == 0)
-		{
-			if (value == null || value.booleanValue())
-			{
-				style = key + "=" + flag;
-			}
-			else
-			{
-				style = key + "=0";
-			}
-		}
-		else
-		{
-			int index = style.indexOf(key + "=");
-
-			if (index < 0)
-			{
-				String sep = (style.endsWith(";")) ? "" : ";";
-
-				if (value == null || value.booleanValue())
-				{
-					style = style + sep + key + "=" + flag;
-				}
-				else
-				{
-					style = style + sep + key + "=0";
-				}
-			}
-			else
-			{
-				int cont = style.indexOf(";", index);
-				String tmp = "";
-				int result = 0;
-
-				if (cont < 0)
-				{
-					tmp = style.substring(index + key.length() + 1);
-				}
-				else
-				{
-					tmp = style.substring(index + key.length() + 1, cont);
-				}
-
-				if (value == null)
-				{
-					result = Integer.parseInt(tmp) ^ flag;
-				}
-				else if (value.booleanValue())
-				{
-					result = Integer.parseInt(tmp) | flag;
-				}
-				else
-				{
-					result = Integer.parseInt(tmp) & ~flag;
-				}
-
-				style = style.substring(0, index) + key + "=" + result
-						+ ((cont >= 0) ? style.substring(cont) : "");
-			}
-		}
-
-		return style;
+		return mxStyleUtils.setStyleFlag(style, key, flag, value);
 	}
 
 	public static boolean intersectsHotspot(mxCellState state, int x, int y,
@@ -2143,97 +1910,38 @@ public class mxUtils
 	 * Returns a new, empty DOM document.
 	 * 
 	 * @return Returns a new DOM document.
+	 * @deprecated Use <code>mxDomUtils.createDocument</code> (Jan 2012)
 	 */
 	public static Document createDocument()
 	{
-		Document result = null;
-
-		try
-		{
-			DocumentBuilderFactory factory = DocumentBuilderFactory
-					.newInstance();
-			DocumentBuilder parser = factory.newDocumentBuilder();
-
-			result = parser.newDocument();
-		}
-		catch (Exception e)
-		{
-			System.out.println(e.getMessage());
-		}
-
-		return result;
+		return mxDomUtils.createDocument();
 	}
 
 	/**
 	 * Creates a new SVG document for the given width and height.
+	 * @deprecated Use <code>mxDomUtils.createSvgDocument(int, int)</code> (Jan 2012)
 	 */
 	public static Document createSvgDocument(int width, int height)
 	{
-		Document document = createDocument();
-		Element root = document.createElement("svg");
-
-		String w = String.valueOf(width);
-		String h = String.valueOf(height);
-
-		root.setAttribute("width", w);
-		root.setAttribute("height", h);
-		root.setAttribute("viewBox", "0 0 " + w + " " + h);
-		root.setAttribute("version", "1.1");
-		root.setAttribute("xmlns", mxConstants.NS_SVG);
-		root.setAttribute("xmlns:xlink", mxConstants.NS_XLINK);
-
-		document.appendChild(root);
-
-		return document;
+		return mxDomUtils.createSvgDocument(width, height);
 	}
 
 	/**
 	 * 
+	 * @deprecated Use <code>mxDomUtils.createVmlDocument</code> (Jan 2012)
 	 */
 	public static Document createVmlDocument()
 	{
-		Document document = createDocument();
-
-		Element root = document.createElement("html");
-		root.setAttribute("xmlns:v", "urn:schemas-microsoft-com:vml");
-		root.setAttribute("xmlns:o", "urn:schemas-microsoft-com:office:office");
-
-		document.appendChild(root);
-
-		Element head = document.createElement("head");
-
-		Element style = document.createElement("style");
-		style.setAttribute("type", "text/css");
-		style.appendChild(document
-				.createTextNode("<!-- v\\:* {behavior: url(#default#VML);} -->"));
-
-		head.appendChild(style);
-		root.appendChild(head);
-
-		Element body = document.createElement("body");
-		root.appendChild(body);
-
-		return document;
+		return mxDomUtils.createVmlDocument();
 	}
 
 	/**
 	 * Returns a document with a HTML node containing a HEAD and BODY node.
+	 * @deprecated Use <code>mxDomUtils.createHtmlDocument</code> (Jan 2012)
 	 */
 	public static Document createHtmlDocument()
 	{
-		Document document = createDocument();
-
-		Element root = document.createElement("html");
-
-		document.appendChild(root);
-
-		Element head = document.createElement("head");
-		root.appendChild(head);
-
-		Element body = document.createElement("body");
-		root.appendChild(body);
-
-		return document;
+		return mxDomUtils.createHtmlDocument();
 	}
 
 	/**
@@ -2394,36 +2102,11 @@ public class mxUtils
 	 * @param xml
 	 *            String that represents the XML data.
 	 * @return Returns a new XML document.
-	 * @deprecated as of 31.08.2010. Use parseXML(String xml) instead
-	 */
-	public static Document parse(String xml)
-	{
-		return mxUtils.parseXml(xml);
-	}
-
-	/**
-	 * Returns a new document for the given XML string.
-	 * 
-	 * @param xml
-	 *            String that represents the XML data.
-	 * @return Returns a new XML document.
+	 * @deprecated Use <code>mxXmlUtils.parseXml</code> (Jan 2012)
 	 */
 	public static Document parseXml(String xml)
 	{
-		try
-		{
-			DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory
-					.newInstance();
-			DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-
-			return docBuilder.parse(new InputSource(new StringReader(xml)));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-
-		return null;
+		return mxXmlUtils.parseXml(xml);
 	}
 
 	/**
@@ -2530,27 +2213,11 @@ public class mxUtils
 	 * @param node
 	 *            Node to return the XML for.
 	 * @return Returns an XML string.
+	 * @deprecated Use <code>mxXmlUtils.getXml(Node)</code> (Jan 2012)
 	 */
 	public static String getXml(Node node)
 	{
-		try
-		{
-			Transformer tf = TransformerFactory.newInstance().newTransformer();
-
-			tf.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-			tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-
-			StreamResult dest = new StreamResult(new StringWriter());
-			tf.transform(new DOMSource(node), dest);
-
-			return dest.getWriter().toString();
-		}
-		catch (Exception e)
-		{
-			// ignore
-		}
-
-		return "";
+		return mxXmlUtils.getXml(node);
 	}
 
 	/**

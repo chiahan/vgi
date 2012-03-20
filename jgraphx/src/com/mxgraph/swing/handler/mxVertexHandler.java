@@ -1,6 +1,6 @@
 /**
- * $Id: mxVertexHandler.java,v 1.14 2011-01-17 18:13:58 gaudenz Exp $
- * Copyright (c) 2008, Gaudenz Alder
+ * $Id: mxVertexHandler.java,v 1.15 2012-01-13 13:20:06 david Exp $
+ * Copyright (c) 2008-2012, JGraph Ltd
  */
 package com.mxgraph.swing.handler;
 
@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
@@ -115,7 +116,7 @@ public class mxVertexHandler extends mxCellHandler
 	protected JComponent createPreview()
 	{
 		JPanel preview = new JPanel();
-		preview.setBorder(mxConstants.PREVIEW_BORDER);
+		preview.setBorder(mxSwingConstants.PREVIEW_BORDER);
 		preview.setOpaque(false);
 		preview.setVisible(false);
 
@@ -391,7 +392,7 @@ public class mxVertexHandler extends mxCellHandler
 	 */
 	public Color getSelectionColor()
 	{
-		return mxConstants.VERTEX_SELECTION_COLOR;
+		return mxSwingConstants.VERTEX_SELECTION_COLOR;
 	}
 
 	/**
@@ -399,7 +400,7 @@ public class mxVertexHandler extends mxCellHandler
 	 */
 	public Stroke getSelectionStroke()
 	{
-		return mxConstants.VERTEX_SELECTION_STROKE;
+		return mxSwingConstants.VERTEX_SELECTION_STROKE;
 	}
 
 	/**

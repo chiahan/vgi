@@ -1,6 +1,6 @@
 /**
- * $Id: mxStencilShape.java,v 1.11 2011-10-22 13:46:21 david Exp $
- * Copyright (c) 2010, Gaudenz Alder, David Benson
+ * $Id: mxStencilShape.java,v 1.12 2012-01-13 12:42:10 david Exp $
+ * Copyright (c) 2010-2012, JGraph Ltd
  */
 package com.mxgraph.shape;
 
@@ -8,6 +8,7 @@ import org.w3c.dom.Node;
 
 import com.mxgraph.canvas.mxGraphics2DCanvas;
 import com.mxgraph.util.mxUtils;
+import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.util.svg.AWTPathProducer;
 import com.mxgraph.util.svg.AWTPolygonProducer;
 import com.mxgraph.util.svg.AWTPolylineProducer;
@@ -71,7 +72,7 @@ public class mxStencilShape extends mxBasicShape
 	 */
 	public mxStencilShape(String shapeXml)
 	{
-		this(mxUtils.parseXml(shapeXml));
+		this(mxXmlUtils.parseXml(shapeXml));
 	}
 
 	public mxStencilShape(Document document)

@@ -1,5 +1,5 @@
 /**
- * $Id: mxObjectCodec.java,v 1.36 2011-01-31 13:23:55 gaudenz Exp $
+ * $Id: mxObjectCodec.java,v 1.37 2012-03-06 11:12:54 gaudenz Exp $
  * Copyright (c) 2006, Gaudenz Alder
  */
 package com.mxgraph.io;
@@ -740,25 +740,48 @@ public class mxObjectCodec
 			{
 				if (field != null)
 				{
-					value = field.get(obj);
+					if (Modifier.isPublic(field.getModifiers()))
+					{
+						value = field.get(obj);
+					}
+					else
+					{
+						value = getFieldValueWithAccessor(obj, field);
+					}
 				}
 			}
 			catch (IllegalAccessException e1)
 			{
-				if (field != null)
-				{
-					try
-					{
-						Method method = getAccessor(obj, field, true);
-						value = method.invoke(obj, (Object[]) null);
-					}
-					catch (Exception e2)
-					{
-						// ignore
-					}
-				}
+				value = getFieldValueWithAccessor(obj, field);
 			}
 			catch (Exception e)
+			{
+				// ignore
+			}
+		}
+
+		return value;
+	}
+
+	/**
+	 * Returns the value of the field using the accessor for the field if one exists.
+	 */
+	protected Object getFieldValueWithAccessor(Object obj, Field field)
+	{
+		Object value = null;
+
+		if (field != null)
+		{
+			try
+			{
+				Method method = getAccessor(obj, field, true);
+
+				if (method != null)
+				{
+					value = method.invoke(obj, (Object[]) null);
+				}
+			}
+			catch (Exception e2)
 			{
 				// ignore
 			}
@@ -778,26 +801,53 @@ public class mxObjectCodec
 		try
 		{
 			field = getField(obj, fieldname);
-
-			if (field.getType() == Boolean.class)
+			
+			if (field != null)
 			{
-				value = (value.equals("1") || String.valueOf(value)
-						.equalsIgnoreCase("true")) ? Boolean.TRUE
-						: Boolean.FALSE;
-			}
+				if (field.getType() == Boolean.class)
+				{
+					value = (value.equals("1") || String.valueOf(value)
+							.equalsIgnoreCase("true")) ? Boolean.TRUE
+							: Boolean.FALSE;
+				}
 
-			field.set(obj, value);
+				if (Modifier.isPublic(field.getModifiers()))
+				{
+					field.set(obj, value);
+				}
+				else
+				{
+					setFieldValueWithAccessor(obj, field, value);
+				}
+			}
 		}
 		catch (IllegalAccessException e1)
 		{
-			if (field != null)
+			setFieldValueWithAccessor(obj, field, value);
+		}
+		catch (Exception e)
+		{
+			// ignore
+		}
+	}
+
+	/**
+	 * Sets the value of the given field using the accessor if one exists.
+	 */
+	protected void setFieldValueWithAccessor(Object obj, Field field,
+			Object value)
+	{
+		if (field != null)
+		{
+			try
 			{
-				try
+				Method method = getAccessor(obj, field, false);
+				
+				if (method != null)
 				{
-					Method method = getAccessor(obj, field, false);
 					Class<?> type = method.getParameterTypes()[0];
 					value = convertValueFromXml(type, value);
-
+	
 					// Converts collection to a typed array before setting
 					if (type.isArray() && value instanceof Collection)
 					{
@@ -805,22 +855,18 @@ public class mxObjectCodec
 						value = coll.toArray((Object[]) Array.newInstance(
 								type.getComponentType(), coll.size()));
 					}
-
+	
 					method.invoke(obj, new Object[] { value });
 				}
-				catch (Exception e2)
-				{
-					System.err.println("setFieldValue: " + e2 + " on "
-							+ obj.getClass().getSimpleName() + "." + fieldname
-							+ " (" + field.getType().getSimpleName() + ") = "
-							+ value + " (" + value.getClass().getSimpleName()
-							+ ")");
-				}
 			}
-		}
-		catch (Exception e)
-		{
-			// ignore
+			catch (Exception e2)
+			{
+				System.err.println("setFieldValue: " + e2 + " on "
+						+ obj.getClass().getSimpleName() + "."
+						+ field.getName() + " ("
+						+ field.getType().getSimpleName() + ") = " + value
+						+ " (" + value.getClass().getSimpleName() + ")");
+			}
 		}
 	}
 

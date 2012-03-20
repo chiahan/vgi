@@ -1,11 +1,6 @@
 /*
- * $Id: EditorActions.java,v 1.36 2011-11-17 21:07:12 david Exp $
- * Copyright (c) 2001-2010, Gaudenz Alder, David Benson
- * 
- * All rights reserved.
- * 
- * See LICENSE file for license details. If you are unable to locate
- * this file please contact info (at) jgraph (dot) com.
+ * $Id: EditorActions.java,v 1.37 2012-01-13 11:36:35 david Exp $
+ * Copyright (c) 2001-2012, JGraph Ltd
  */
 package com.mxgraph.examples.swing.editor;
 
@@ -70,8 +65,10 @@ import com.mxgraph.swing.view.mxCellEditor;
 import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxCellRenderer.CanvasFactory;
 import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxDomUtils;
 import com.mxgraph.util.mxResources;
 import com.mxgraph.util.mxUtils;
+import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.util.png.mxPngEncodeParam;
 import com.mxgraph.util.png.mxPngImageEncoder;
 import com.mxgraph.util.png.mxPngTextDecoder;
@@ -558,7 +555,7 @@ public class EditorActions
 			// Creates the URL-encoded XML data
 			mxCodec codec = new mxCodec();
 			String xml = URLEncoder.encode(
-					mxUtils.getXml(codec.encode(graph.getModel())), "UTF-8");
+					mxXmlUtils.getXml(codec.encode(graph.getModel())), "UTF-8");
 			mxPngEncodeParam param = mxPngEncodeParam
 					.getDefaultEncodeParam(image);
 			param.setCompressedText(new String[] { "mxGraphModel", xml });
@@ -724,7 +721,7 @@ public class EditorActions
 													int width, int height)
 											{
 												mxSvgCanvas canvas = new mxSvgCanvas(
-														mxUtils.createSvgDocument(
+														mxDomUtils.createSvgDocument(
 																width, height));
 												canvas.setEmbedded(true);
 
@@ -733,18 +730,18 @@ public class EditorActions
 
 										});
 
-						mxUtils.writeFile(mxUtils.getXml(canvas.getDocument()),
+						mxUtils.writeFile(mxXmlUtils.getXml(canvas.getDocument()),
 								filename);
 					}
 					else if (selectedFilter == vmlFileFilter)
 					{
-						mxUtils.writeFile(mxUtils.getXml(mxCellRenderer
+						mxUtils.writeFile(mxXmlUtils.getXml(mxCellRenderer
 								.createVmlDocument(graph, null, 1, null, null)
 								.getDocumentElement()), filename);
 					}
 					else if (ext.equalsIgnoreCase("html"))
 					{
-						mxUtils.writeFile(mxUtils.getXml(mxCellRenderer
+						mxUtils.writeFile(mxXmlUtils.getXml(mxCellRenderer
 								.createHtmlDocument(graph, null, 1, null, null)
 								.getDocumentElement()), filename);
 					}
@@ -752,7 +749,7 @@ public class EditorActions
 							|| ext.equalsIgnoreCase("xml"))
 					{
 						mxCodec codec = new mxCodec();
-						String xml = mxUtils.getXml(codec.encode(graph
+						String xml = mxXmlUtils.getXml(codec.encode(graph
 								.getModel()));
 
 						mxUtils.writeFile(xml, filename);
@@ -1617,7 +1614,7 @@ public class EditorActions
 
 				if (value != null)
 				{
-					Document document = mxUtils.parseXml(URLDecoder.decode(
+					Document document = mxXmlUtils.parseXml(URLDecoder.decode(
 							value, "UTF-8"));
 					mxCodec codec = new mxCodec(document);
 					codec.decode(document.getDocumentElement(), editor
@@ -1743,7 +1740,7 @@ public class EditorActions
 								}
 								else
 								{
-									Document document = mxUtils
+									Document document = mxXmlUtils
 											.parseXml(mxUtils.readFile(fc
 													.getSelectedFile()
 													.getAbsolutePath()));

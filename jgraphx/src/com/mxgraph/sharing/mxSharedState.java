@@ -1,3 +1,7 @@
+/**
+ * $Id: mxSharedState.java,v 1.3 2012-01-13 12:35:44 david Exp $
+ * Copyright (c) 2007-2012, JGraph Ltd
+ */
 package com.mxgraph.sharing;
 
 import java.util.ArrayList;
@@ -7,7 +11,7 @@ import java.util.List;
 import org.w3c.dom.Node;
 
 import com.mxgraph.util.mxEventSource;
-import com.mxgraph.util.mxUtils;
+import com.mxgraph.util.mxXmlUtils;
 
 /**
  * Implements a diagram that may be shared among multiple sessions. This
@@ -111,7 +115,7 @@ public class mxSharedState extends mxEventSource
 	 */
 	protected String processEdit(Node node)
 	{
-		return mxUtils.getXml(node);
+		return mxXmlUtils.getXml(node);
 	}
 
 	/**

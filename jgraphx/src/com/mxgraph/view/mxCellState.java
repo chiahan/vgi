@@ -1,5 +1,5 @@
 /**
- * $Id: mxCellState.java,v 1.33 2011-03-23 13:30:21 gaudenz Exp $
+ * $Id: mxCellState.java,v 1.34 2012-03-09 07:42:53 gaudenz Exp $
  * Copyright (c) 2007, Gaudenz Alder
  */
 package com.mxgraph.view;
@@ -87,6 +87,11 @@ public class mxCellState extends mxRectangle
 	protected boolean invalid = true;
 
 	/**
+	 * Caches the visible source and target terminal states.
+	 */
+	protected mxCellState visibleSourceState, visibleTargetState;
+
+	/**
 	 * Constructs an empty cell state.
 	 */
 	public mxCellState()
@@ -144,7 +149,7 @@ public class mxCellState extends mxRectangle
 	{
 		this.view = view;
 	}
-	
+
 	/**
 	 * Returns the current label.
 	 */
@@ -152,7 +157,7 @@ public class mxCellState extends mxRectangle
 	{
 		return label;
 	}
-	
+
 	/**
 	 * Returns the current label.
 	 */
@@ -465,6 +470,49 @@ public class mxCellState extends mxRectangle
 	}
 
 	/**
+	 * Returns the visible source or target terminal cell.
+	 * 
+	 * @param source Boolean that specifies if the source or target cell should be
+	 * returned.
+	 */
+	public Object getVisibleTerminal(boolean source)
+	{
+		mxCellState tmp = getVisibleTerminalState(source);
+
+		return (tmp != null) ? tmp.getCell() : null;
+	}
+
+	/**
+	 * Returns the visible source or target terminal state.
+	 * 
+	 * @param Boolean that specifies if the source or target state should be
+	 * returned.
+	 */
+	public mxCellState getVisibleTerminalState(boolean source)
+	{
+		return (source) ? visibleSourceState : visibleTargetState;
+	}
+
+	/**
+	 * Sets the visible source or target terminal state.
+	 * 
+	 * @param terminalState Cell state that represents the terminal.
+	 * @param source Boolean that specifies if the source or target state should be set.
+	 */
+	public void setVisibleTerminalState(mxCellState terminalState,
+			boolean source)
+	{
+		if (source)
+		{
+			visibleSourceState = terminalState;
+		}
+		else
+		{
+			visibleTargetState = terminalState;
+		}
+	}
+
+	/**
 	 * Returns a clone of this state where all members are deeply cloned
 	 * except the view and cell references, which are copied with no
 	 * cloning to the new instance.
@@ -493,7 +541,7 @@ public class mxCellState extends mxRectangle
 		{
 			clone.absoluteOffset = (mxPoint) absoluteOffset.clone();
 		}
-		
+
 		if (labelBounds != null)
 		{
 			clone.labelBounds = (mxRectangle) labelBounds.clone();
