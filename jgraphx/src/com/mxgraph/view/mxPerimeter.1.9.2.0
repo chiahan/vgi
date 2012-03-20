@@ -155,14 +155,6 @@ public class mxPerimeter
 			double dx = px - cx;
 			double dy = py - cy;
 
-			//
-			// If dx is too small, dividing dy by dx will have too much error,
-			// and the end result is very glitchy.
-			//
-			if (Math.abs(dx) < 0.5) {
-				dx = 0;
-			}
-
 			if (dx == 0 && dy != 0)
 			{
 				return new mxPoint(cx, cy + b * dy / Math.abs(dy));
