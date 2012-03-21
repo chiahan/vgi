@@ -581,6 +581,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         ArrayList<mxPoint> points = new ArrayList<mxPoint>();
         ((mxCell) e).getGeometry().setPoints(points);
         ((mxCell) e).getGeometry().setY(DEFAULT_LABEL_DISTANCE);
+        
         Transition newTrans = new Transition();
         cellTable.put((mxCell) e, newTrans);
         newTrans.setSourceState(cellToState(source));
@@ -751,17 +752,34 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
             //remove state in automata
             if (cell.isVertex()) {
+                
                 State state = cellToState(cell);
+                
+                List<Transition> relatedTrans=state.getTransitions();
+                for(Transition trans : relatedTrans){
+                    List<Transition> transList=automata.getAllTransitions();
+                    transList.remove(trans);
+                    automata.setAllTransitions(transList);
+                }
+                
+                
                 List<State> stateList = automata.getAllStates();
                 stateList.remove(state);
                 automata.setAllStates(stateList);
                 //System.out.println("state list size: "+automata.getAllStates().size());
                 //related transitions?
+                
+                
+                
             } else if (cell.isEdge()) {
                 Transition trans = cellToTransition(cell);
+                if(trans==null) System.out.println("can't find trans");
                 List<Transition> transList = automata.getAllTransitions();
                 transList.remove(trans);
                 automata.setAllTransitions(transList);
+                System.out.println("trans list size: "+automata.getAllTransitions().size());
+                
+                
             }
 
 
@@ -769,7 +787,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             mxCell[] cells = {cell};
             graph.removeCells(cells);
 
-
+            System.out.println("cell table size: "+cellTable.size());
 
 
         } else {
@@ -868,9 +886,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                             trans.setLabel((WeightedRegularExpression) cell.getValue());
                             trans.setSourceState(cellToState((mxCell) cell.getSource()));
                             trans.setTargetState(cellToState((mxCell) cell.getTarget()));
-
+                            
 
                             automata.addTransition(trans);
+                            cellTable.put(cell,trans);
                         }
                         break;
 
@@ -881,7 +900,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                             State.GeometricData geo = new State.GeometricData();
                             geo.location = new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY());
                             state.setGeometricData(geo);
-
+                            state.setName((String)cell.getValue());
 
                         } else {
 
@@ -893,6 +912,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                             }
 
                             trans.getGeometricData().controlPoints = apt;
+                            
+                            trans.setLabel((WeightedRegularExpression)cell.getValue());
                         }
                         break;
                     default:
@@ -954,6 +975,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
 
                             automata.addTransition(trans);
+                            cellTable.put(cell,trans);
                         }
 
                         //undoStack.push(STATUS_ADD);
@@ -969,7 +991,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                                     cell.getGeometry().getY());
                             state.setGeometricData(geo);
 
-
+                            state.setName((String)cell.getValue());
+                            
                         } else {
 
                             Transition trans = cellToTransition(cell);
@@ -980,7 +1003,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                             }
 
                             trans.getGeometricData().controlPoints = apt;
-
+                            trans.setLabel((WeightedRegularExpression)cell.getValue());
                         }
                         //undoStack.push(STATUS_CHANGE);
                         break;

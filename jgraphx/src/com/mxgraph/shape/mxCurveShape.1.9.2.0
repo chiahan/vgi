@@ -58,7 +58,6 @@ public class mxCurveShape extends mxConnectorShape
 				RenderingHints.KEY_STROKE_CONTROL,
 				RenderingHints.VALUE_STROKE_PURE);
 
-		validateCurve(state.getAbsolutePoints(), canvas.getScale(), state.getStyle());
 		super.paintShape(canvas, state);
 
 		canvas.getGraphics().setRenderingHint(
@@ -71,8 +70,8 @@ public class mxCurveShape extends mxConnectorShape
 	protected void paintPolyline(mxGraphics2DCanvas canvas,
 			List<mxPoint> points, Map<String, Object> style)
 	{
-//		double scale = canvas.getScale();
-//		validateCurve(points, scale, style);
+		double scale = canvas.getScale();
+		validateCurve(points, scale, style);
 
 		canvas.paintPolyline(curve.getCurvePoints(mxCurve.CORE_CURVE), false);
 	}
