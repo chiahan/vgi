@@ -6,6 +6,7 @@ import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import javax.swing.JComboBox;
@@ -56,34 +57,84 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         for (int i=0; i<size; i++) {
             transitionComboBox.addItem(transitions.get(i));
         }
-        
-        // from Jgraph
-//        String transitionStr;
-//        int count = cell.getEdgeCount();
-//        
-//        for (int i=0; i<count; i++) {
-//            mxCell source = (mxCell)cell.getEdgeAt(i).getTerminal(true);
-//            mxCell target = (mxCell)cell.getEdgeAt(i).getTerminal(false);
-//
-//            transitionStr = cell.getValue().toString();
-//            transitionStr += " : '";
-//            transitionStr += source.getValue().toString();
-//            transitionStr += "' to '";
-//            transitionStr += target.getValue().toString();
-//            transitionStr += "'";
-//            
-//            transitionComboBox.addItem(transitionStr);
-//        }
     }
 
     private void showInitialWeight() {
-        if (state.getInitialWeight() != null)
+        if (state.getInitialWeight() != null) {
+            initialCheckBox.setSelected(true);
             initialWeightTextField.setText(state.getInitialWeight().toString());
+        }
     }
     
     private void showFinalWeight() {
-        if (state.getFinalWeight() != null)
+        if (state.getFinalWeight() != null) {
+            finalCheckBox.setSelected(true);
             finalWeightTextField.setText(state.getFinalWeight().toString());
+        }
+    }
+    
+    private void setStateToInitialFinal(boolean isSet, boolean isInitial, Object expression) {
+        if (expression != null) {
+            if (isSet) {
+                if (isInitial) {
+                    initialWeightTextField.setText(expression.toString());
+                } else {
+                    finalWeightTextField.setText(expression.toString());
+                }
+            } else {
+                if (isInitial) {
+                    initialWeightTextField.setText("");
+                    state.setInitialWeight(null);
+                } else {
+                    finalWeightTextField.setText("");
+                    state.setFinalWeight(null);
+                }
+                Object[] edges = graph.getEdges(cell);
+                if (edges != null)
+                    for (int i=0; i<edges.length; i++) {
+                        if (((mxCell)edges[i]).getValue().toString().equals(expression.toString())) {
+                            Object[] cell = {edges[i]};
+                            graph.removeCells(cell);
+                        }
+                    }
+            }
+        } else {
+            if (isSet) {
+                expression = WeightedRegularExpression.Atomic.createAtomic(automata);
+                ((WeightedRegularExpression.Atomic)expression).setSymbol(true);
+                ExpressionEditor editor = new ExpressionEditor(
+                        new JFrame(),
+                        true,
+                        (WeightedRegularExpression)expression);
+                editor.setVisible(true);
+                if (isInitial) {
+                    initialWeightTextField.setText(editor.getExpression().toString());
+                    state.setInitialWeight(editor.getExpression());
+//                    initialCheckBox.setSelected(true);
+                } else {
+                    finalWeightTextField.setText(editor.getExpression().toString());
+                    state.setFinalWeight(editor.getExpression());
+//                    finalCheckBox.setSelected(true);
+                }
+            } else {
+                if (isInitial) {
+                    initialWeightTextField.setText("");
+                    state.setInitialWeight(null);
+                } else {
+                    finalWeightTextField.setText("");
+                    state.setFinalWeight(null);
+                }
+                Object[] edges = graph.getEdges(cell);
+                if (edges != null)
+                    for (int i=0; i<edges.length; i++) {
+                        if (((mxCell)edges[i]).getValue().toString().equals(expression.toString())) {
+                            Object[] cell = {edges[i]};
+                            graph.removeCells(cell);
+                        }
+                    }
+            }
+        }
+        graph.refresh();
     }
     
     /** This method is called from within the constructor to
@@ -98,14 +149,14 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 
         nameLabel = new javax.swing.JLabel();
         transitionLabel = new javax.swing.JLabel();
-        initialWeightLabel = new javax.swing.JLabel();
-        finalweightLabel = new javax.swing.JLabel();
         styleLabel = new javax.swing.JLabel();
         nameTextField = new javax.swing.JTextField();
         initialWeightTextField = new javax.swing.JTextField();
         finalWeightTextField = new javax.swing.JTextField();
         styleComboBox = new javax.swing.JComboBox();
         transitionComboBox = new javax.swing.JComboBox();
+        initialCheckBox = new javax.swing.JCheckBox();
+        finalCheckBox = new javax.swing.JCheckBox();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -119,23 +170,9 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         transitionLabel.setText("Transition :");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(transitionLabel, gridBagConstraints);
-
-        initialWeightLabel.setText("Initial weight :");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(initialWeightLabel, gridBagConstraints);
-
-        finalweightLabel.setText("Final weight :");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(finalweightLabel, gridBagConstraints);
+        add(transitionLabel, gridBagConstraints);
 
         styleLabel.setText("Style :");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -174,8 +211,9 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         add(finalWeightTextField, gridBagConstraints);
@@ -195,10 +233,34 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 0.1;
         add(transitionComboBox, gridBagConstraints);
+
+        initialCheckBox.setText("Initial State");
+        initialCheckBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                initialCheckBoxItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        add(initialCheckBox, gridBagConstraints);
+
+        finalCheckBox.setText("Final State");
+        finalCheckBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                finalCheckBoxItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        add(finalCheckBox, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void nameTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nameTextFieldKeyPressed
@@ -216,7 +278,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         ExpressionEditor editor = new ExpressionEditor(
                 new JFrame(), 
                 true, 
-                (WeightedRegularExpression) ((mxCell) cell).getValue());
+                (WeightedRegularExpression) state.getInitialWeight());
         editor.setVisible(true);
         initialWeightTextField.setText(editor.getExpression().toString());
         state.setInitialWeight(editor.getExpression());
@@ -226,7 +288,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         ExpressionEditor editor = new ExpressionEditor(
                 new JFrame(), 
                 true, 
-                (WeightedRegularExpression) ((mxCell) cell).getValue());
+                (WeightedRegularExpression) state.getFinalWeight());
         editor.setVisible(true);
         state.setFinalWeight(editor.getExpression());
         finalWeightTextField.setText(editor.getExpression().toString());
@@ -241,10 +303,26 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         graph.setCellStyles("shape", ((String) cb.getSelectedItem()).toLowerCase(), objects);
     }//GEN-LAST:event_styleComboBoxActionPerformed
 
+    private void initialCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_initialCheckBoxItemStateChanged
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            setStateToInitialFinal(true, true, state.getInitialWeight());
+        } else if (evt.getStateChange() == ItemEvent.DESELECTED) {
+            setStateToInitialFinal(false, true, state.getInitialWeight());
+        }
+    }//GEN-LAST:event_initialCheckBoxItemStateChanged
+
+    private void finalCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_finalCheckBoxItemStateChanged
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            setStateToInitialFinal(true, false, state.getFinalWeight());
+        } else if (evt.getStateChange() == ItemEvent.DESELECTED) {
+            setStateToInitialFinal(false, false, state.getFinalWeight());
+        }
+    }//GEN-LAST:event_finalCheckBoxItemStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox finalCheckBox;
     private javax.swing.JTextField finalWeightTextField;
-    private javax.swing.JLabel finalweightLabel;
-    private javax.swing.JLabel initialWeightLabel;
+    private javax.swing.JCheckBox initialCheckBox;
     private javax.swing.JTextField initialWeightTextField;
     private javax.swing.JLabel nameLabel;
     private javax.swing.JTextField nameTextField;
