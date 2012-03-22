@@ -577,7 +577,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         WeightedRegularExpression.Atomic expression =
                 WeightedRegularExpression.Atomic.createAtomic(automata);
         expression.setSymbol(expression.getAlphabet().allSymbols.get(0));
-        Object e = graph.insertEdge(parent, null, expression, source, target, null);
+        Object e = graph.insertEdge(parent, null, expression, source, target, "shape=curve");
         ArrayList<mxPoint> points = new ArrayList<mxPoint>();
         ((mxCell) e).getGeometry().setPoints(points);
         ((mxCell) e).getGeometry().setY(DEFAULT_LABEL_DISTANCE);
