@@ -10,10 +10,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Map;
-import javax.swing.JColorChooser;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 /*
  * To change this template, choose Tools | Templates
@@ -93,68 +90,75 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         }
     }
     
-    private void setStateToInitialFinal(boolean isSet, boolean isInitial, Object expression) {
-        if (expression != null) {
-            if (isSet) {
-                if (isInitial) {
-                    initialWeightTextField.setText(expression.toString());
-                } else {
-                    finalWeightTextField.setText(expression.toString());
-                }
-            } else {
-                if (isInitial) {
-                    initialWeightTextField.setText("");
-                    state.setInitialWeight(null);
-                } else {
-                    finalWeightTextField.setText("");
-                    state.setFinalWeight(null);
-                }
-                Object[] edges = graph.getEdges(cell);
-                if (edges != null)
-                    for (int i=0; i<edges.length; i++) {
-                        if (((mxCell)edges[i]).getValue().toString().equals(expression.toString())) {
-                            Object[] cell = {edges[i]};
-                            graph.removeCells(cell);
-                        }
-                    }
+    public Object getDefaultExpression() {
+        Object expression = WeightedRegularExpression.Atomic.createAtomic(automata);
+        ((WeightedRegularExpression.Atomic) expression).setSymbol(true);
+        ExpressionEditor editor = new ExpressionEditor(
+                new JFrame(),
+                true,
+                (WeightedRegularExpression) expression);
+        editor.setVisible(true);
+        
+        return expression;
+    }
+    
+    private void setFinalState(boolean isSet) {
+        Object expression = state.getFinalWeight();
+        
+        if (isSet) {
+            if (expression == null) {
+                expression = getDefaultExpression();
+                state.setFinalWeight(expression);
             }
-        } else {
-            if (isSet) {
-                expression = WeightedRegularExpression.Atomic.createAtomic(automata);
-                ((WeightedRegularExpression.Atomic)expression).setSymbol(true);
-                ExpressionEditor editor = new ExpressionEditor(
-                        new JFrame(),
-                        true,
-                        (WeightedRegularExpression)expression);
-                editor.setVisible(true);
-                if (isInitial) {
-                    initialWeightTextField.setText(editor.getExpression().toString());
-                    state.setInitialWeight(editor.getExpression());
-//                    initialCheckBox.setSelected(true);
-                } else {
-                    finalWeightTextField.setText(editor.getExpression().toString());
-                    state.setFinalWeight(editor.getExpression());
-//                    finalCheckBox.setSelected(true);
+            setInitialFinal(false, expression);
+        }else {
+            Object[] edges = graph.getEdges(cell);
+
+            for (int i=0; i<edges.length; i++) {
+                if (((mxCell)edges[i]).getTarget() == null) {
+                    Object[] cell = {edges[i]};
+                    graph.removeCells(cell);
+                    break;
                 }
-            } else {
-                if (isInitial) {
-                    initialWeightTextField.setText("");
-                    state.setInitialWeight(null);
-                } else {
-                    finalWeightTextField.setText("");
-                    state.setFinalWeight(null);
-                }
-                Object[] edges = graph.getEdges(cell);
-                if (edges != null)
-                    for (int i=0; i<edges.length; i++) {
-                        if (((mxCell)edges[i]).getValue().toString().equals(expression.toString())) {
-                            Object[] cell = {edges[i]};
-                            graph.removeCells(cell);
-                        }
-                    }
             }
+            
+            finalWeightTextField.setText("");
+            state.setFinalWeight(null);
         }
-        graph.refresh();
+    }
+    
+    private void setInitialState(boolean isSet) {
+        if (isSet) {
+            Object expression = state.getInitialWeight();
+            if (expression == null) {
+                expression = getDefaultExpression();
+                state.setInitialWeight(expression);
+            }
+            setInitialFinal(true, expression);
+        }else {
+            Object[] edges = graph.getEdges(cell);
+
+            for (int i=0; i<edges.length; i++) {
+                if (((mxCell)edges[i]).getSource() == null) {
+                    Object[] cell = {edges[i]};
+                    graph.removeCells(cell);
+                    break;
+                }
+            }
+            
+            initialWeightTextField.setText("");
+            state.setInitialWeight(null);
+        }
+    }
+    
+    private void setInitialFinal(boolean isInitial, Object expression) {
+        if (isInitial) {
+            initialWeightTextField.setText(expression.toString());
+            // JgraphXInternalFram . setupInitialFinal(Object parent, Object weight, Object vertex, boolean vertexIsSource)
+        } else {
+            finalWeightTextField.setText(expression.toString());
+            // JgraphXInternalFram . setupInitialFinal(Object parent, Object weight, Object vertex, boolean vertexIsSource)
+        }
     }
     
     /** This method is called from within the constructor to
@@ -363,7 +367,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         editor.setVisible(true);
         state.setFinalWeight(editor.getExpression());
         finalWeightTextField.setText(editor.getExpression().toString());
-        state.setInitialWeight(editor.getExpression());
+        state.setFinalWeight(editor.getExpression());
     }//GEN-LAST:event_finalWeightTextFieldMouseClicked
 
     private void styleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_styleComboBoxActionPerformed
@@ -376,17 +380,19 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 
     private void initialCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_initialCheckBoxItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
-            setStateToInitialFinal(true, true, state.getInitialWeight());
+            setInitialState(true);
         } else if (evt.getStateChange() == ItemEvent.DESELECTED) {
-            setStateToInitialFinal(false, true, state.getInitialWeight());
+            setInitialState(false);
         }
     }//GEN-LAST:event_initialCheckBoxItemStateChanged
 
     private void finalCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_finalCheckBoxItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
-            setStateToInitialFinal(true, false, state.getFinalWeight());
+            setFinalState(true);
+            ((JCheckBox)evt.getSource()).setSelected(true);
         } else if (evt.getStateChange() == ItemEvent.DESELECTED) {
-            setStateToInitialFinal(false, false, state.getFinalWeight());
+            setFinalState(false);
+            ((JCheckBox)evt.getSource()).setSelected(false);
         }
     }//GEN-LAST:event_finalCheckBoxItemStateChanged
 
