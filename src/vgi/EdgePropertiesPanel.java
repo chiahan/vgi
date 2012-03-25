@@ -4,6 +4,9 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -31,7 +34,17 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         this.transition = transition;
         
         showLabel();
+        Map<String,Object> styles=graph.getCellStyle(cell);
+        String color=(String)styles.get("strokeColor");
+        strokeColor=Color.decode(color);
         strokeColorButton.setBackground(strokeColor);
+        
+        strokeWidth=(String)styles.get("strokeWidth");
+        if(strokeWidth!=null){
+            float width=Float.parseFloat(strokeWidth);
+            int ind=(int)width;
+            strokeWidthBox.setSelectedIndex(ind-1);
+        }
     }
     
     private void showLabel() {
@@ -76,7 +89,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         endStyleComboBox = new javax.swing.JComboBox();
         strokeLabel = new javax.swing.JLabel();
         strokeColorButton = new javax.swing.JButton();
-        stokeWidth = new javax.swing.JComboBox();
+        strokeWidthBox = new javax.swing.JComboBox();
 
         jLabel3.setText("jLabel3");
 
@@ -159,16 +172,16 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         add(strokeColorButton, gridBagConstraints);
 
-        stokeWidth.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" }));
-        stokeWidth.addActionListener(new java.awt.event.ActionListener() {
+        strokeWidthBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" }));
+        strokeWidthBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                stokeWidthActionPerformed(evt);
+                strokeWidthBoxActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
-        add(stokeWidth, gridBagConstraints);
+        add(strokeWidthBox, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void startStyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startStyleComboBoxActionPerformed
@@ -195,12 +208,12 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         strokeColorButton.setBackground(strokeColor);
     }//GEN-LAST:event_strokeColorButtonActionPerformed
 
-    private void stokeWidthActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stokeWidthActionPerformed
+    private void strokeWidthBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeWidthBoxActionPerformed
         JComboBox cb = (JComboBox)evt.getSource();
         String width=(String)cb.getSelectedItem();
         float wid=Float.parseFloat(width);
         setStrokeWidth(graph,wid);
-    }//GEN-LAST:event_stokeWidthActionPerformed
+    }//GEN-LAST:event_strokeWidthBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel ednStyleLabel;
@@ -210,13 +223,14 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     private javax.swing.JTextField labelTextField;
     private javax.swing.JComboBox startStyleComboBox;
     private javax.swing.JLabel startStyleLabel;
-    private javax.swing.JComboBox stokeWidth;
     private javax.swing.JButton strokeColorButton;
     private javax.swing.JLabel strokeLabel;
+    private javax.swing.JComboBox strokeWidthBox;
     // End of variables declaration//GEN-END:variables
     private mxCell cell;
     private mxGraph graph;
     private Automata automata;
     private Transition transition;
     private Color strokeColor=Color.white;
+    private String strokeWidth=null;
 }
