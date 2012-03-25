@@ -59,23 +59,32 @@ public class VGI extends javax.swing.JFrame {
 		public void actionPerformed(ActionEvent actionEvent) {
 
 			ArrayList<Object> inputs = new ArrayList<Object>();
+			int automataCount = 0;
 
 			for (int index = 0; index < this.vcsnAlgorithm.inputsInfo.size(); index++) {
 				TAFKitInterface.VcsnAlgorithm.IoInfo inputInfo = this.vcsnAlgorithm.inputsInfo.get(index);
 				switch (inputInfo.type) {
 
 					case AUTOMATON:
-						JFileChooser fileChooser = new JFileChooser(pmLastFolderForOpenFile);
-						fileChooser.setDialogTitle("Please choose a FSM XML file");
-						fileChooser.setFileFilter(FsmXmlInterface.fileNameExtensionFilter);
-						fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-						fileChooser.setMultiSelectionEnabled(false);
-						int returnValue = fileChooser.showOpenDialog(pmVGI);
-						if (returnValue != JFileChooser.APPROVE_OPTION) {
-							return;
-						}
-						pmLastFolderForOpenFile = fileChooser.getCurrentDirectory();
-						inputs.add(fileChooser.getSelectedFile());
+						automataCount++;
+						if (automataCount == 1) {
+							JInternalFrame frame = mainDesktopPane.getSelectedFrame();
+							if (JgraphXInternalFrame.class.isInstance(frame)) {
+								inputs.add(((JgraphXInternalFrame) frame).getAutomata());
+							}
+						} else {  // End if (automataCount == 1)
+							JFileChooser fileChooser = new JFileChooser(pmLastFolderForOpenFile);
+							fileChooser.setDialogTitle("Please choose a FSM XML file");
+							fileChooser.setFileFilter(FsmXmlInterface.fileNameExtensionFilter);
+							fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+							fileChooser.setMultiSelectionEnabled(false);
+							int returnValue = fileChooser.showOpenDialog(pmVGI);
+							if (returnValue != JFileChooser.APPROVE_OPTION) {
+								return;
+							}
+							pmLastFolderForOpenFile = fileChooser.getCurrentDirectory();
+							inputs.add(fileChooser.getSelectedFile());
+						}  // End else part of if (automataCount == 1)
 						break;
 
 					case BOOLEAN:
@@ -141,11 +150,11 @@ public class VGI extends javax.swing.JFrame {
 						if (Automata.class.isInstance(object)) {
 							createInternalFrame((Automata) object, "Output of \"" + this.vcsnAlgorithm.name);
 						} else {
-						JOptionPane.showMessageDialog(
-								pmVGI,
-								"Output of \"" + this.vcsnAlgorithm.name + "\" should be an automaton, but the returned data does not have the right type.",
-								null,
-								JOptionPane.WARNING_MESSAGE);
+							JOptionPane.showMessageDialog(
+									pmVGI,
+									"Output of \"" + this.vcsnAlgorithm.name + "\" should be an automaton, but the returned data does not have the right type.",
+									null,
+									JOptionPane.WARNING_MESSAGE);
 						}
 						break;
 

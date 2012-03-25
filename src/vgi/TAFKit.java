@@ -275,6 +275,7 @@ public class TAFKit implements TAFKitInterface {
 		commandTokens.add("./" + tafKitExecutableFileName);
 		commandTokens.add("-v");
 		commandTokens.add(algorithm.name);
+		List<Automata> automataList = new ArrayList<Automata>();
 
 		for (int index = 0; index < inputs.size(); index++) {
 
@@ -283,7 +284,8 @@ public class TAFKit implements TAFKitInterface {
 
 				case AUTOMATON:
 					if (object instanceof Automata) {
-						// TODO:  Prepare temporary XML file and append the file name to command.
+						automataList.add((Automata) object);
+						commandTokens.add("-");
 					} else if (object instanceof File) {
 						File file = (File) object;
 						String string = file.getAbsolutePath();
@@ -353,6 +355,12 @@ public class TAFKit implements TAFKitInterface {
 			String[] cmdArray = new String[commandTokens.size()];
 			commandTokens.toArray(cmdArray);
 			process = Runtime.getRuntime().exec(cmdArray, null, pmTafKitPath);
+			if (!(automataList.isEmpty())) {
+				BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(process.getOutputStream());
+				FsmXml fsmXml = new FsmXml();
+				fsmXml.write(automataList, bufferedOutputStream);
+				bufferedOutputStream.close();
+			}
 			inputStream = process.getInputStream();
 			string = convertInputStreamToString(inputStream);
 			inputStream.close();
@@ -361,6 +369,8 @@ public class TAFKit implements TAFKitInterface {
 			throw new Error(ioException);
 		} catch (InterruptedException interruptedException) {
 			throw new Error(interruptedException);
+		} catch (FsmXmlException fsmXmlException) {
+			throw new Error(fsmXmlException);
 		}
 
 		switch (exitValue) {
@@ -398,7 +408,7 @@ public class TAFKit implements TAFKitInterface {
 					inputStream = new ByteArrayInputStream(string.getBytes());
 					FsmXml fsmXml = new FsmXml();
 					try {
-						List<Automata> automataList = fsmXml.read(inputStream);
+						automataList = fsmXml.read(inputStream);
 						outputs.add(automataList.get(0));
 					} catch (FsmXmlException fsmXmlException) {
 						throw new TAFKitException(fsmXmlException);
