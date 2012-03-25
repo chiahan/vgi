@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
@@ -44,6 +45,9 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         showTransition();
         showInitialWeight();
         showFinalWeight();
+        
+        strokeColorButton.setBackground(strokeColor);
+        colorButton.setBackground(fillColor);
     }
     
     private void showName() {
@@ -149,7 +153,6 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 
         nameLabel = new javax.swing.JLabel();
         transitionLabel = new javax.swing.JLabel();
-        styleLabel = new javax.swing.JLabel();
         nameTextField = new javax.swing.JTextField();
         initialWeightTextField = new javax.swing.JTextField();
         finalWeightTextField = new javax.swing.JTextField();
@@ -157,6 +160,12 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         transitionComboBox = new javax.swing.JComboBox();
         initialCheckBox = new javax.swing.JCheckBox();
         finalCheckBox = new javax.swing.JCheckBox();
+        styleLabel1 = new javax.swing.JLabel();
+        colorLabel = new javax.swing.JLabel();
+        colorButton = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        strokeWidth = new javax.swing.JComboBox();
+        strokeColorButton = new javax.swing.JButton();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -173,13 +182,6 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(transitionLabel, gridBagConstraints);
-
-        styleLabel.setText("Style :");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(styleLabel, gridBagConstraints);
 
         nameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
@@ -261,6 +263,59 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(finalCheckBox, gridBagConstraints);
+
+        styleLabel1.setText("Style :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        add(styleLabel1, gridBagConstraints);
+
+        colorLabel.setText("FillColor :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        add(colorLabel, gridBagConstraints);
+
+        colorButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        add(colorButton, gridBagConstraints);
+
+        jLabel1.setText("Stroke:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        add(jLabel1, gridBagConstraints);
+
+        strokeWidth.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" }));
+        strokeWidth.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                strokeWidthActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 6;
+        add(strokeWidth, gridBagConstraints);
+
+        strokeColorButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                strokeColorButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        add(strokeColorButton, gridBagConstraints);
+        strokeColorButton.getAccessibleContext().setAccessibleName("strokeColorButton");
     }// </editor-fold>//GEN-END:initComponents
 
     private void nameTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nameTextFieldKeyPressed
@@ -319,15 +374,44 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_finalCheckBoxItemStateChanged
 
+    private void colorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorButtonActionPerformed
+        
+        fillColor=JColorChooser.showDialog( this,
+                     "Fill color", fillColor );
+        setFillColor(graph,fillColor);
+        colorButton.setBackground(fillColor);
+        
+    }//GEN-LAST:event_colorButtonActionPerformed
+
+    private void strokeColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeColorButtonActionPerformed
+        strokeColor=JColorChooser.showDialog( this,
+                     "Fill color", strokeColor );
+        setStrokeColor(graph,strokeColor);
+        strokeColorButton.setBackground(strokeColor);
+    }//GEN-LAST:event_strokeColorButtonActionPerformed
+
+    private void strokeWidthActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeWidthActionPerformed
+        JComboBox cb = (JComboBox)evt.getSource();
+        String width=(String)cb.getSelectedItem();
+        float wid=Float.parseFloat(width);
+        setStrokeWidth(graph,wid);
+        
+    }//GEN-LAST:event_strokeWidthActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton colorButton;
+    private javax.swing.JLabel colorLabel;
     private javax.swing.JCheckBox finalCheckBox;
     private javax.swing.JTextField finalWeightTextField;
     private javax.swing.JCheckBox initialCheckBox;
     private javax.swing.JTextField initialWeightTextField;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel nameLabel;
     private javax.swing.JTextField nameTextField;
+    private javax.swing.JButton strokeColorButton;
+    private javax.swing.JComboBox strokeWidth;
     private javax.swing.JComboBox styleComboBox;
-    private javax.swing.JLabel styleLabel;
+    private javax.swing.JLabel styleLabel1;
     private javax.swing.JComboBox transitionComboBox;
     private javax.swing.JLabel transitionLabel;
     // End of variables declaration//GEN-END:variables
@@ -337,7 +421,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     private mxGraph graph;
     private State state;
     private Automata automata;
-
+    private Color fillColor=Color.white;
+    private Color strokeColor=Color.white;
     
     public void setFillColor(mxGraph graph,Color color){
         Object[] objects = new Object[1];
