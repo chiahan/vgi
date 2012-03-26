@@ -1275,8 +1275,10 @@ public class FsmXml implements FsmXmlInterface {
 				writeWeightedRegularExpression(xmlStreamWriter, label);
 				xmlStreamWriter.writeEndElement();  // End TAG_LABEL
 			}
-			List<Point2D> controlPoints = transition.getGeometricData().controlPoints;
-			if (!(controlPoints.isEmpty())) {
+			TransitionInterface.GeometricData geometricData = transition.getGeometricData();
+			if (geometricData != null) {
+			List<Point2D> controlPoints = geometricData.controlPoints;
+			if ((controlPoints != null) && !(controlPoints.isEmpty())) {
 				xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
 				Iterator<Point2D> iteratePoints = controlPoints.iterator();
 				while (iteratePoints.hasNext()) {
@@ -1287,7 +1289,8 @@ public class FsmXml implements FsmXmlInterface {
 					xmlStreamWriter.writeEndElement();  // End TAG_CONTROL_POINT
 				}  // End while (iteratePoints.hasNext())
 				xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
-			}  // End if (controlPoints != null)
+			}  // End if ((controlPoints != null) && !(controlPoints.isEmpty()))
+			} // End if (geometricData != null)
 			xmlStreamWriter.writeEndElement();  // End TAG_TRANSITION
 		}  // End while (allTransitionsIterator.hasNext())
 
