@@ -39,6 +39,7 @@ public interface FsmXmlInterface {
 	public List<Automata> read(File fsmXmlFile)
 			throws
 			FileNotFoundException,
+			IOException,
 			FsmXmlException;
 
 	public List<Automata> read(InputStream inputStream)

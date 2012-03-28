@@ -241,9 +241,12 @@ public class FsmXml implements FsmXmlInterface {
 	public List<Automata> read(File fsmXmlFile)
 			throws
 			FileNotFoundException,
+			IOException,
 			FsmXmlException {
 		InputStream inputStream = new FileInputStream(fsmXmlFile);
-		return this.read(inputStream);
+		List<Automata> automataList = this.read(inputStream);
+		inputStream.close();
+		return automataList;
 	}  // End public List<Automata> read(File fsmXmlFile)
 
 	@Override
@@ -933,6 +936,7 @@ public class FsmXml implements FsmXmlInterface {
 		}
 		OutputStream outputStream = new FileOutputStream(fsmXmlFile);
 		this.write(automataList, outputStream);
+		outputStream.close();
 	}  // End public void write(List<Automata> automataList, File fsmXmlFile)
 
 	@Override
