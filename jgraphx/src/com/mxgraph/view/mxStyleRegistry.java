@@ -39,6 +39,10 @@ public class mxStyleRegistry
 		putValue(mxConstants.PERIMETER_RHOMBUS, mxPerimeter.RhombusPerimeter);
 		putValue(mxConstants.PERIMETER_TRIANGLE, mxPerimeter.TrianglePerimeter);
 		putValue(mxConstants.PERIMETER_HEXAGON, mxPerimeter.HexagonPerimeter);
+                
+                // for loop with arbitrary direction
+                putValue(mxConstants.EDGESTYLE_ALOOP, mxEdgeStyle.ALoop);
+		
 	}
 
 	/**

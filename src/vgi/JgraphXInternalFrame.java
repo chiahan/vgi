@@ -579,8 +579,17 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         expression.setSymbol(expression.getAlphabet().allSymbols.get(0));
         Object e = graph.insertEdge(parent, null, expression, source, target, "shape=curve");
         ArrayList<mxPoint> points = new ArrayList<mxPoint>();
+        
+        
+        if(source==target) graph.setCellStyles("loopStyle", "aloopEdgeStyle",new Object[]{e});
+        
+        
+        
         ((mxCell) e).getGeometry().setPoints(points);
         ((mxCell) e).getGeometry().setY(DEFAULT_LABEL_DISTANCE);
+        
+        
+        
         
         Transition newTrans = new Transition();
         cellTable.put((mxCell) e, newTrans);
@@ -616,6 +625,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(),
                 null, transition.getLabel(), source, target,
                 "shape=curve"));
+        
+        
+        
         cellTable.put(edge, transition);
         edge.getGeometry().setPoints(new ArrayList<mxPoint>());
         edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);

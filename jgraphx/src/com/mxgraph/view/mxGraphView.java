@@ -1072,8 +1072,8 @@ public class mxGraphView extends mxEventSource
 		if (source != null && source == target)
 		{
 			edgeStyle = edge.getStyle().get(mxConstants.STYLE_LOOP);
-
-			if (edgeStyle == null)
+                        
+                        if (edgeStyle == null)
 			{
 				edgeStyle = graph.getDefaultLoopStyle();
 			}

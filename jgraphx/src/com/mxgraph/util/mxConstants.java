@@ -1094,6 +1094,12 @@ public class mxConstants
 	 * for the STYLE_EDGE style.
 	 */
 	public static final String EDGESTYLE_LOOP = "loopEdgeStyle";
+        
+        /**
+         * for loop with arbitrary direction
+        */        
+        public static final String EDGESTYLE_ALOOP="aloopEdgeStyle";
+        
 
 	/**
 	 * Name of the side to side edge style. Can be used as a string value
