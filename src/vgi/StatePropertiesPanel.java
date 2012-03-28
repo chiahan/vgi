@@ -29,38 +29,37 @@ import javax.swing.*;
 public class StatePropertiesPanel extends javax.swing.JPanel {
 
     /** Creates new form state_properties */
-    public StatePropertiesPanel(mxGraph graph, mxCell cell,
-                         Automata automata, State state) {
+    public StatePropertiesPanel(mxCell cell, State state, DisplayUtil display) {
         initComponents();
         
-        this.graph = graph;
         this.cell = cell;
-        this.automata = automata;
         this.state = state;
+        this.graph = display.getGraph();
+        this.automata = display.getAutomata();
+        this.display = display;
         style = cell.getStyle();
         
         showName();
         showTransition();
         showInitialWeight();
         showFinalWeight();
-        
-        
-        Map<String,Object> styles=graph.getCellStyle(cell);
-        String color=(String)styles.get("strokeColor");
-        strokeColor=Color.decode(color);
+
+        Map<String, Object> styles = graph.getCellStyle(cell);
+        String color = (String) styles.get("strokeColor");
+        strokeColor = Color.decode(color);
         strokeColorButton.setBackground(strokeColor);
-        
-        fillColor=Color.decode((String)styles.get("fillColor"));
+
+        fillColor = Color.decode((String) styles.get("fillColor"));
         colorButton.setBackground(fillColor);
-        
-        strokeWidth=(String)styles.get("strokeWidth");
+
+        strokeWidth = (String) styles.get("strokeWidth");
         //System.out.println(strokeWidth);
-        if(strokeWidth!=null){
-            float width=Float.parseFloat(strokeWidth);
-            int ind=(int)width;
-            strokeWidthBox.setSelectedIndex(ind-1);
+        if (strokeWidth != null) {
+            float width = Float.parseFloat(strokeWidth);
+            int ind = (int) width;
+            strokeWidthBox.setSelectedIndex(ind - 1);
         }
-        
+
     }
     
     private void showName() {
@@ -93,24 +92,23 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     public Object getDefaultExpression() {
         Object expression = WeightedRegularExpression.Atomic.createAtomic(automata);
         ((WeightedRegularExpression.Atomic) expression).setSymbol(true);
-        ExpressionEditor editor = new ExpressionEditor(
-                new JFrame(),
-                true,
-                (WeightedRegularExpression) expression);
-        editor.setVisible(true);
+//        ExpressionEditor editor = new ExpressionEditor(
+//                new JFrame(),
+//                true,
+//                (WeightedRegularExpression) expression);
+//        editor.setVisible(true);
         
         return expression;
     }
     
     private void setFinalState(boolean isSet) {
-        Object expression = state.getFinalWeight();
-        
         if (isSet) {
-            if (expression == null) {
-                expression = getDefaultExpression();
+            Object edge = display.getFinalEdge(cell);
+            if (edge == null) {
+                Object expression = getDefaultExpression();
                 state.setFinalWeight(expression);
+                setInitialFinal(false, expression);
             }
-            setInitialFinal(false, expression);
         }else {
             Object[] edges = graph.getEdges(cell);
 
@@ -129,12 +127,12 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     
     private void setInitialState(boolean isSet) {
         if (isSet) {
-            Object expression = state.getInitialWeight();
-            if (expression == null) {
-                expression = getDefaultExpression();
+            Object edge = display.getInitialEdge(cell);
+            if (edge == null) {
+                Object expression = getDefaultExpression();
                 state.setInitialWeight(expression);
+                setInitialFinal(true, expression);
             }
-            setInitialFinal(true, expression);
         }else {
             Object[] edges = graph.getEdges(cell);
 
@@ -159,6 +157,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
             finalWeightTextField.setText(expression.toString());
             // JgraphXInternalFram . setupInitialFinal(Object parent, Object weight, Object vertex, boolean vertexIsSource)
         }
+        display.showInitialFinal(graph.getDefaultParent(), expression, cell, !isInitial);
     }
     
     /** This method is called from within the constructor to
@@ -443,9 +442,10 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     private mxGraph graph;
     private State state;
     private Automata automata;
-    private Color fillColor=Color.white;
-    private Color strokeColor=Color.white;
-    private String strokeWidth=null;
+    DisplayUtil display;
+    private Color fillColor = Color.white;
+    private Color strokeColor = Color.white;
+    private String strokeWidth = null;
     
     public void setFillColor(mxGraph graph,Color color){
         Object[] objects = new Object[1];
