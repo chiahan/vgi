@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.view.mxGraph;
 import java.awt.Dimension;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import vgi.FsmXmlInterface.FsmXmlException;
@@ -1035,6 +1036,8 @@ public class VGI extends javax.swing.JFrame {
 			FsmXml fsmXml = new FsmXml();
 			automataList = fsmXml.read(file);
 		} catch (FileNotFoundException ex) {
+			Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (IOException ex) {
 			Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (FsmXmlException ex) {
 			Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
