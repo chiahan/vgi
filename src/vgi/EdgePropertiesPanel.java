@@ -26,13 +26,13 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     /**
      * Creates new form edge_properties
      */
-    public EdgePropertiesPanel(mxGraph graph, mxCell cell, Transition transition) {
+    public EdgePropertiesPanel(mxCell cell, Transition transition, DisplayUtil display) {
         
         initComponents();
-        this.graph = graph;
         this.cell = cell;
-        this.automata = automata;
         this.transition = transition;
+        this.graph = display.getGraph();
+        this.automata = display.getAutomata();
         
         showLabel();
         Map<String,Object> styles=graph.getCellStyle(cell);
@@ -279,6 +279,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     private mxGraph graph;
     private Automata automata;
     private Transition transition;
-    private Color strokeColor=Color.white;
-    private String strokeWidth=null;
+    private DisplayUtil display;
+    private Color strokeColor = Color.white;
+    private String strokeWidth = null;
 }

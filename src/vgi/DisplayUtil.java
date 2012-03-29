@@ -30,11 +30,11 @@ public class DisplayUtil {
         this.cellTable = cellTable;
     }
     
-    private State cellToState(mxCell cell) {
+    public State cellToState(mxCell cell) {
         return (State) getCellTable().get(cell);
     }
 
-    private Transition cellToTransition(mxCell cell) {
+    public Transition cellToTransition(mxCell cell) {
         return (Transition) getCellTable().get(cell);
     }
     

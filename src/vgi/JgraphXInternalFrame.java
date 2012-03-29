@@ -198,16 +198,18 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 boolean vertexSelected = false;
 
                 if (selected) {
+                    DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
+                    
                     edgeSelected = selectedCell.isEdge();
                     if (edgeSelected) {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new EdgePropertiesPanel(graph, selectedCell,
-                                JgraphXInternalFrame.this.cellToTransition(selectedCell)));
+                                new EdgePropertiesPanel(selectedCell, 
+                                                   display.cellToTransition(selectedCell), 
+                                                   display));
                     }
 
                     vertexSelected = selectedCell.isVertex();
                     if (vertexSelected) {
-                        DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new StatePropertiesPanel(selectedCell, 
                                 JgraphXInternalFrame.this.cellToState(selectedCell), 
@@ -221,7 +223,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     }
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                            new AutomataPropertiesPanel(graph, automata));
+                            new AutomataPropertiesPanel(
+                                new DisplayUtil(graph, automata, cellTable)));
                     addTransitionFromMenuItem.setVisible(false);
                     addTransitionToMenuItem.setVisible(false);
                     graph.setSelectionCell(null);
@@ -300,12 +303,14 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 mxCell selectedCell = (mxCell) graph.getSelectionCell();
 
                 if (selected) {
+                    DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
+                    
                     if (selectedCell.isEdge()) {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new EdgePropertiesPanel(graph, selectedCell,
-                                JgraphXInternalFrame.this.cellToTransition(selectedCell)));
+                                new EdgePropertiesPanel(selectedCell,
+                                                   display.cellToTransition(selectedCell), 
+                                                   display));
                     } else if (selectedCell.isVertex()) {
-                        DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new StatePropertiesPanel(selectedCell,
                                 JgraphXInternalFrame.this.cellToState(selectedCell), 
@@ -313,7 +318,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     }
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                            new AutomataPropertiesPanel(graph, automata));
+                            new AutomataPropertiesPanel(
+                                new DisplayUtil(graph, automata, cellTable)));
                 }
 
                 JgraphXInternalFrame.this.infoSplitPane.setBottomComponent(

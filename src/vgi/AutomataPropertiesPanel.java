@@ -24,10 +24,11 @@ import javax.swing.JSplitPane;
 public class AutomataPropertiesPanel extends javax.swing.JPanel {
 
     /** Creates new form Automata_properties */
-   public AutomataPropertiesPanel(mxGraph graph, Automata automata) {
+   public AutomataPropertiesPanel(DisplayUtil display) {
         initComponents();
-        this.automata = automata;
-        this.graph = graph;
+        this.display = display;
+        this.automata = display.getAutomata();
+        this.graph = display.getGraph();
         
         if (automata != null) {
             showTransitions();
@@ -99,6 +100,7 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
         }
     }
     
+    private DisplayUtil display;
     private Automata automata;
     private mxGraph graph;
     private Object selectedItem;
@@ -293,12 +295,14 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
         JSplitPane parent = (JSplitPane) this.getParent();
         if (selectedCell.isVertex()) {
             parent.setTopComponent(
-                    new StatePropertiesPanel(graph, selectedCell, 
-                                             automata, (State)selectedItem));
+                    new StatePropertiesPanel(selectedCell, 
+                                             display.cellToState(selectedCell), 
+                                             display));
         } else if (selectedCell.isEdge()) {
             parent.setTopComponent(
-                    new EdgePropertiesPanel(graph, selectedCell, 
-                                           (Transition)selectedItem));
+                    new EdgePropertiesPanel(selectedCell, 
+                                       display.cellToTransition(selectedCell),
+                                       display));
         }
     }//GEN-LAST:event_goButtonActionPerformed
 
