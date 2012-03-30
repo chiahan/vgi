@@ -921,7 +921,7 @@ public class VGI extends javax.swing.JFrame {
 			FsmXml fsmXml = new FsmXml();
 			try {
 				ArrayList<Automata> currentAutomata = new ArrayList<Automata>();
-				currentAutomata.add(selected.automata);
+				currentAutomata.add(selected.getAutomata());
 				fsmXml.write(currentAutomata, selected.currentFile);
 				selected.setModified(false);
 			} catch (Exception e) {
@@ -947,7 +947,7 @@ public class VGI extends javax.swing.JFrame {
 
 			JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
 			ArrayList<Automata> currentAutomata = new ArrayList<Automata>();
-			currentAutomata.add(selected.automata);
+			currentAutomata.add(selected.getAutomata());
 			fsmXml.write(currentAutomata, file);
 
 			selected.currentFile = file;

@@ -513,7 +513,19 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         
         
         cellTable.put(edge, transition);
-        edge.getGeometry().setPoints(new ArrayList<mxPoint>());
+		if ((transition.getGeometricData() == null)
+				|| (transition.getGeometricData().controlPoints == null)
+				|| (transition.getGeometricData().controlPoints.isEmpty())) {
+			edge.getGeometry().setPoints(new ArrayList<mxPoint>());
+		} else {
+			List<mxPoint> points = new ArrayList<mxPoint>();
+			Iterator<Point2D> iterateControlPoints = transition.getGeometricData().controlPoints.iterator();
+			while (iterateControlPoints.hasNext()) {
+				Point2D controlPoint = iterateControlPoints.next();
+				points.add(new mxPoint(controlPoint));
+			}  // End while (iterateControlPoints.hasNext())
+			edge.getGeometry().setPoints(points);
+		}
         edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
     }  // End public void addTransition(Transition transition)
 
@@ -555,9 +567,105 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         layout.execute(this.graph.getDefaultParent());
     }  // End public void doHierarchicalLayout()
 
-    public Automata getAutomata() {
-        return this.automata;
-    }
+	public Automata getAutomata() {
+
+		Automata automata = new Automata();
+		automata.setName(this.automata.getName());
+		automata.setWritingData(this.automata.getWritingData());
+		automata.setWeight(this.automata.getWeight());
+		automata.setAlphabet(this.automata.getAlphabet());
+		automata.setOutputAlphabet(this.automata.getOutputAlphabet());
+		HashMap<mxCell, State> cellToStateMap = new HashMap<mxCell, State>();
+
+		Object[] vertices = this.graph.getChildVertices(graph.getDefaultParent());
+
+		for (int index = 0; index < vertices.length; index++) {
+
+			if (!(vertices[index] instanceof mxCell)) {
+				continue;
+			}
+
+			mxCell vertex = (mxCell) vertices[index];
+			State state = new State();
+			mxGeometry geometry = vertex.getGeometry();
+			Point2D point2d = new Point2D.Double();
+			point2d.setLocation(geometry.getCenterX(), geometry.getCenterY());
+			StateInterface.GeometricData geometricData = new StateInterface.GeometricData();
+			geometricData.location = point2d;
+			state.setGeometricData(geometricData);
+			automata.addState(state);
+			cellToStateMap.put(vertex, state);
+			Object object = vertex.getValue();
+			if (object instanceof String) {
+				state.setName((String) object);
+			}
+
+		}  // End for (int index = 0; index < vertices.length; index++)
+
+		Object[] edges = this.graph.getChildEdges(graph.getDefaultParent());
+
+		for (int index = 0; index < edges.length; index++) {
+
+			if (!(edges[index] instanceof mxCell)) {
+				continue;
+			}
+
+			mxCell edge = (mxCell) edges[index];
+			mxCell sourceVertex = null;
+			mxCell targetVertex = null;
+			Object object = edge.getSource();
+			if (object instanceof mxCell) {
+				sourceVertex = (mxCell) object;
+			}
+			object = edge.getTarget();
+			if (object instanceof mxCell) {
+				targetVertex = (mxCell) object;
+			}
+
+			if (sourceVertex == null) {
+				if (targetVertex == null) {
+					throw new IllegalArgumentException("An edge can not have null for both source and target!  " + edge.toString());
+				} else {
+					/*
+					* This edge is an arrow pointing to an initial state.
+					*/
+					State state = cellToStateMap.get(targetVertex);
+					state.setInitialWeight(targetVertex.getValue());
+					continue;
+				}
+			} else {
+				if (targetVertex == null) {
+					/*
+					 * This edge is an arrow pointing from a final state.
+					 */
+					State state = cellToStateMap.get(sourceVertex);
+					state.setFinalWeight(sourceVertex.getValue());
+					continue;
+				}
+			}
+
+			Transition transition = new Transition();
+			transition.setSourceState(cellToStateMap.get(sourceVertex));
+			transition.setTargetState(cellToStateMap.get(targetVertex));
+			object = edge.getValue();
+			if (object instanceof WeightedRegularExpression) {
+				transition.setLabel((WeightedRegularExpression) object);
+			}
+			List<mxPoint> points = edge.getGeometry().getPoints();
+			if ((points != null) && (!points.isEmpty())) {
+				List<Point2D> controlPoints = transition.getGeometricData().controlPoints;
+				Iterator<mxPoint> iteratePoints = points.iterator();
+				while (iteratePoints.hasNext()) {
+					mxPoint point = iteratePoints.next();
+					controlPoints.add(new Point2D.Double(point.getX(), point.getY()));
+				}  // End while (iteratePoints.hasNext())
+			}  // End if ((points != null) && (!points.isEmpty()))
+			automata.addTransition(transition);
+
+		}  // End for (int index = 0; index < edges.length; index++)
+
+		return automata;
+	}  // End public Automata getAutomata()
 
     /**
      * @return the graphOutline
