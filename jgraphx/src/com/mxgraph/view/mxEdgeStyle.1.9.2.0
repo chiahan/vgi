@@ -271,69 +271,6 @@ public class mxEdgeStyle
 			}
 		}
 	};
-        
-        /*
-         * Loop with arbitrary direction
-         * direction set in style "direction" = some float
-         * 
-         */
-        
-        public static mxEdgeStyleFunction ALoop = new mxEdgeStyleFunction()
-	{
-
-		/* (non-Javadoc)
-		 * @see com.mxgraph.view.mxEdgeStyle.mxEdgeStyleFunction#apply(com.mxgraph.view.mxCellState, com.mxgraph.view.mxCellState, com.mxgraph.view.mxCellState, java.util.List, java.util.List)
-		 */
-		public void apply(mxCellState state, mxCellState source,
-				mxCellState target, List<mxPoint> points, List<mxPoint> result)
-		{
-                    
-                       // System.out.println("Aloop!");
-			if (source != null)
-			{
-				
-                                mxGraphView view = state.getView();
-				mxGraph graph = view.getGraph();
-				mxPoint pt = (points != null && points.size() > 0) ? points
-						.get(0) : null;
-
-				if (pt != null)
-				{
-					pt = view.transformControlPoint(state, pt);
-
-					if (source.contains(pt.getX(), pt.getY()))
-					{
-						pt = null;
-					}
-				}
-
-				double x = 0;
-				double y = 0;
-				
-				double seg = mxUtils.getDouble(state.getStyle(),
-						mxConstants.STYLE_SEGMENT, graph.getGridSize())
-						* view.getScale();
-                                double dir=mxUtils.getDouble(state.getStyle(),mxConstants.STYLE_DIRECTION,0);
-                                
-                                x = view.getRoutingCenterX(source);
-                                y = view.getRoutingCenterY(source);
-                            
-                                double R=state.getWidth()+6*seg;
-                                double d=2*seg;
-                                dir=dir/180*Math.PI;
-                                mxPoint pta=new mxPoint(x+R*Math.cos(dir)+d*Math.sin(dir),y+R*Math.sin(dir)-d*Math.cos(dir));
-                                mxPoint ptb=new mxPoint(x+R*Math.cos(dir)-d*Math.sin(dir),y+R*Math.sin(dir)+d*Math.cos(dir));
-                            
-                                System.out.println("x= "+x+" y= "+y+" R= "+R+" d= "+d);
-                                System.out.println("a:"+pta.toString()+"b: "+ptb.toString());
-                                
-                               result.add(pta);
-                               result.add(ptb);
-                            
-                               
-			}
-		}
-	};
 
 	/**
 	 * Uses either SideToSide or TopToBottom depending on the horizontal
