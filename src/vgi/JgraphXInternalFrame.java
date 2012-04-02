@@ -45,6 +45,30 @@ import vgi.TransitionInterface.GeometricData;
  */
 public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
+	protected static class StateValue {
+
+		public String name;
+		public List<State> history;
+
+		@Override
+		public String toString() {
+			return this.name;
+		}
+
+	}  // End protected static class StateValue
+
+	protected static class TransitionValue {
+
+		public WeightedRegularExpression label;
+		public List<Transition> history;
+
+		@Override
+		public String toString() {
+			return this.label.toString();
+		}
+
+	}  // End protected static class TransitionValue
+
     /**
      * Creates new form JgraphXInternalFrame
      */
