@@ -1,6 +1,7 @@
 package vgi;
 
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
@@ -38,7 +39,16 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         this.automata = display.getAutomata();
         this.display = display;
         style = cell.getStyle();
-        
+
+		this.initialEdge = (mxCell) this.display.getInitialEdge(cell);
+		this.finalEdge = (mxCell) this.display.getFinalEdge(cell);
+
+		if ((this.automata.getWeight().semiring == TAFKitInterface.AutomataType.Semiring.B_BOOLEAN)
+				|| (this.automata.getWeight().semiring == TAFKitInterface.AutomataType.Semiring.F2_TWO_ELEMENT_FIELD)) {
+			this.initialWeightTextField.setVisible(false);
+			this.finalWeightTextField.setVisible(false);
+		}
+
         showName();
         showTransition();
         showInitialWeight();
@@ -90,24 +100,29 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     }
     
     public Object getDefaultExpression() {
-        Object expression = WeightedRegularExpression.Atomic.createAtomic(automata);
-        ((WeightedRegularExpression.Atomic) expression).setSymbol(true);
-//        ExpressionEditor editor = new ExpressionEditor(
-//                new JFrame(),
-//                true,
-//                (WeightedRegularExpression) expression);
-//        editor.setVisible(true);
-        
-        return expression;
-    }
-    
+		switch (automata.getWeight().semiring) {
+			case Z_INTEGER:
+			case ZMIN_MIN_TROPICAL:
+			case ZMAX_MAX_TROPICAL:
+				return new Integer(1);
+			case Q_RATIONAL:
+			case R_REAL:
+				return new Double(1);
+			case B_BOOLEAN:
+			case F2_TWO_ELEMENT_FIELD:
+				return new Boolean(true);
+			default:
+				return null;
+		}  // End switch (automata.getWeight().semiring)
+	}  // End public Object getDefaultExpression()
+
     private void setFinalState(boolean isSet) {
         if (isSet) {
-            Object edge = display.getFinalEdge(cell);
-            if (edge == null) {
+            if (this.finalEdge == null) {
                 Object expression = getDefaultExpression();
                 state.setFinalWeight(expression);
                 setInitialFinal(false, expression);
+                this.finalEdge = (mxCell) this.display.getFinalEdge(this.cell);
             }
         }else {
             Object[] edges = graph.getEdges(cell);
@@ -119,7 +134,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
                     break;
                 }
             }
-            
+
+            this.finalEdge = null;
             finalWeightTextField.setText("");
             state.setFinalWeight(null);
         }
@@ -128,10 +144,11 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     private void setInitialState(boolean isSet) {
         if (isSet) {
             Object edge = display.getInitialEdge(cell);
-            if (edge == null) {
+            if (this.initialEdge == null) {
                 Object expression = getDefaultExpression();
                 state.setInitialWeight(expression);
                 setInitialFinal(true, expression);
+                this.initialEdge = (mxCell) this.display.getInitialEdge(this.cell);
             }
         }else {
             Object[] edges = graph.getEdges(cell);
@@ -143,7 +160,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
                     break;
                 }
             }
-            
+
+            this.initialEdge = null;
             initialWeightTextField.setText("");
             state.setInitialWeight(null);
         }
@@ -214,9 +232,14 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 0.1;
         add(nameTextField, gridBagConstraints);
 
-        initialWeightTextField.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                initialWeightTextFieldMouseClicked(evt);
+        initialWeightTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                initialWeightTextFieldActionPerformed(evt);
+            }
+        });
+        initialWeightTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                initialWeightTextFieldKeyPressed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -226,9 +249,14 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 0.1;
         add(initialWeightTextField, gridBagConstraints);
 
-        finalWeightTextField.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                finalWeightTextFieldMouseClicked(evt);
+        finalWeightTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                finalWeightTextFieldActionPerformed(evt);
+            }
+        });
+        finalWeightTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                finalWeightTextFieldKeyPressed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -348,26 +376,71 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         graph.refresh();
     }//GEN-LAST:event_nameTextFieldKeyPressed
 
-    private void initialWeightTextFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_initialWeightTextFieldMouseClicked
-        ExpressionEditor editor = new ExpressionEditor(
-                new JFrame(), 
-                true, 
-                (WeightedRegularExpression) state.getInitialWeight());
-        editor.setVisible(true);
-        initialWeightTextField.setText(editor.getExpression().toString());
-        state.setInitialWeight(editor.getExpression());
-    }//GEN-LAST:event_initialWeightTextFieldMouseClicked
+	private void initialWeightTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_initialWeightTextFieldActionPerformed
+		if (this.initialEdge == null) {
+			return;
+		}
+		Object weight = null;
+		switch (automata.getWeight().semiring) {
+			case Z_INTEGER:
+			case ZMIN_MIN_TROPICAL:
+			case ZMAX_MAX_TROPICAL:
+				weight = Integer.valueOf(this.initialWeightTextField.getText());
+				break;
+			case Q_RATIONAL:
+			case R_REAL:
+				weight = Double.valueOf(this.initialWeightTextField.getText());
+				break;
+			case B_BOOLEAN:
+			case F2_TWO_ELEMENT_FIELD:
+				weight = new Boolean(true);
+				break;
+			default:
+				return;
+		}  // End switch (automata.getWeight().semiring)
+		this.initialEdge.setValue(weight);
+		this.state.setInitialWeight(weight);
+	}//GEN-LAST:event_initialWeightTextFieldActionPerformed
 
-    private void finalWeightTextFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_finalWeightTextFieldMouseClicked
-        ExpressionEditor editor = new ExpressionEditor(
-                new JFrame(), 
-                true, 
-                (WeightedRegularExpression) state.getFinalWeight());
-        editor.setVisible(true);
-        state.setFinalWeight(editor.getExpression());
-        finalWeightTextField.setText(editor.getExpression().toString());
-        state.setFinalWeight(editor.getExpression());
-    }//GEN-LAST:event_finalWeightTextFieldMouseClicked
+	private void finalWeightTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_finalWeightTextFieldActionPerformed
+		if (this.finalEdge == null) {
+			return;
+		}
+		Object weight = null;
+		switch (automata.getWeight().semiring) {
+			case Z_INTEGER:
+			case ZMIN_MIN_TROPICAL:
+			case ZMAX_MAX_TROPICAL:
+				weight = Integer.valueOf(this.finalWeightTextField.getText());
+				break;
+			case Q_RATIONAL:
+			case R_REAL:
+				weight = Double.valueOf(this.finalWeightTextField.getText());
+				break;
+			case B_BOOLEAN:
+			case F2_TWO_ELEMENT_FIELD:
+				weight = new Boolean(true);
+				break;
+			default:
+				return;
+		}  // End switch (automata.getWeight().semiring)
+		this.finalEdge.setValue(weight);
+		this.state.setFinalWeight(weight);
+	}//GEN-LAST:event_finalWeightTextFieldActionPerformed
+
+	private void initialWeightTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_initialWeightTextFieldKeyPressed
+		if ((evt.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE)
+				&& (this.initialEdge != null)){
+			this.initialWeightTextField.setText(this.initialEdge.getValue().toString());
+		}
+	}//GEN-LAST:event_initialWeightTextFieldKeyPressed
+
+	private void finalWeightTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_finalWeightTextFieldKeyPressed
+		if ((evt.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE)
+				&& (this.finalEdge != null)){
+			this.finalWeightTextField.setText(this.finalEdge.getValue().toString());
+		}
+	}//GEN-LAST:event_finalWeightTextFieldKeyPressed
 
     private void styleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_styleComboBoxActionPerformed
         JComboBox cb = (JComboBox)evt.getSource();
@@ -439,6 +512,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 
     private String style;
     private mxCell cell;
+	protected mxCell initialEdge;
+	protected mxCell finalEdge;
     private mxGraph graph;
     private State state;
     private Automata automata;
