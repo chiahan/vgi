@@ -1,6 +1,5 @@
 package vgi;
 
-
 import java.awt.geom.Point2D;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -701,7 +700,16 @@ public class FsmXml implements FsmXmlInterface {
 				if (state == null) {
 					throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + tag.localName + "\" tag.");
 				}
-				state.setInitialWeight(true);
+				tag = Tag.nextStartOrEnd(xmlStreamReader);
+				if (tag.equals(TAG_INITIAL, Tag.Type.END)) {
+					state.setInitialWeight(getSemiringIdentityValue(automata.getWeight().semiring));
+				} else if (tag.equals(TAG_WEIGHT, Tag.Type.START)
+						|| (Tag.findNextSpecified(xmlStreamReader, TAG_WEIGHT, Tag.Type.START))) {
+					Object weight = parseWeightTag(xmlStreamReader, automata);
+					state.setInitialWeight(weight);
+				} else {
+					Tag.assertTag(TAG_WEIGHT, Tag.Type.START);
+				}
 
 			} // End if (tag.equals(TAG_INITIAL, Tag.Type.START))
 			else if (tag.equals(TAG_FINAL, Tag.Type.START)) {
@@ -714,7 +722,16 @@ public class FsmXml implements FsmXmlInterface {
 				if (state == null) {
 					throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + tag.localName + "\" tag.");
 				}
-				state.setFinalWeight(true);
+				tag = Tag.nextStartOrEnd(xmlStreamReader);
+				if (tag.equals(TAG_FINAL, Tag.Type.END)) {
+					state.setFinalWeight(getSemiringIdentityValue(automata.getWeight().semiring));
+				} else if (tag.equals(TAG_WEIGHT, Tag.Type.START)
+						|| (Tag.findNextSpecified(xmlStreamReader, TAG_WEIGHT, Tag.Type.START))) {
+					Object weight = parseWeightTag(xmlStreamReader, automata);
+					state.setFinalWeight(weight);
+				} else {
+					Tag.assertTag(TAG_WEIGHT, Tag.Type.START);
+				}
 
 			}  // End if (tag.equals(TAG_FINAL, Tag.Type.START))
 
@@ -924,6 +941,23 @@ public class FsmXml implements FsmXmlInterface {
 		}  // End while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END))))
 
 	}  // End private void parseTransitionGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
+
+	public static Object getSemiringIdentityValue(TAFKitInterface.AutomataType.Semiring semiring) {
+		switch (semiring) {
+			case Z_INTEGER:
+			case ZMIN_MIN_TROPICAL:
+			case ZMAX_MAX_TROPICAL:
+				return new Integer(1);
+			case Q_RATIONAL:
+			case R_REAL:
+				return new Double(1);
+			case B_BOOLEAN:
+			case F2_TWO_ELEMENT_FIELD:
+				return new Boolean(true);
+			default:
+				throw new IllegalArgumentException("Unrecognizable semiring set.");
+		}  // End switch (automata.getWeight().semiring)
+	} // End public Object getSemiringIdentityValue(TAFKitInterface.AutomataType.Semiring semiring)
 
 	@Override
 	public void write(List<Automata> automataList, File fsmXmlFile)
@@ -1281,19 +1315,19 @@ public class FsmXml implements FsmXmlInterface {
 			}
 			TransitionInterface.GeometricData geometricData = transition.getGeometricData();
 			if (geometricData != null) {
-			List<Point2D> controlPoints = geometricData.controlPoints;
-			if ((controlPoints != null) && !(controlPoints.isEmpty())) {
-				xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
-				Iterator<Point2D> iteratePoints = controlPoints.iterator();
-				while (iteratePoints.hasNext()) {
-					Point2D point2d = iteratePoints.next();
-					xmlStreamWriter.writeStartElement(TAG_CONTROL_POINT);
-					xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(point2d.getX()));
-					xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
-					xmlStreamWriter.writeEndElement();  // End TAG_CONTROL_POINT
-				}  // End while (iteratePoints.hasNext())
-				xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
-			}  // End if ((controlPoints != null) && !(controlPoints.isEmpty()))
+				List<Point2D> controlPoints = geometricData.controlPoints;
+				if ((controlPoints != null) && !(controlPoints.isEmpty())) {
+					xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
+					Iterator<Point2D> iteratePoints = controlPoints.iterator();
+					while (iteratePoints.hasNext()) {
+						Point2D point2d = iteratePoints.next();
+						xmlStreamWriter.writeStartElement(TAG_CONTROL_POINT);
+						xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(point2d.getX()));
+						xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
+						xmlStreamWriter.writeEndElement();  // End TAG_CONTROL_POINT
+					}  // End while (iteratePoints.hasNext())
+					xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
+				}  // End if ((controlPoints != null) && !(controlPoints.isEmpty()))
 			} // End if (geometricData != null)
 			xmlStreamWriter.writeEndElement();  // End TAG_TRANSITION
 		}  // End while (allTransitionsIterator.hasNext())
@@ -1301,9 +1335,19 @@ public class FsmXml implements FsmXmlInterface {
 		Iterator<State> allStatesIterator = allStates.iterator();
 		while (allStatesIterator.hasNext()) {
 			State state = allStatesIterator.next();
-			if (state.getInitialWeight() != null) {
+			Object weight = state.getInitialWeight();
+			if (weight != null) {
 				xmlStreamWriter.writeStartElement(TAG_INITIAL);
 				xmlStreamWriter.writeAttribute(ATR_STATE, "s" + allStates.indexOf(state));
+				if (!(weight instanceof Boolean)) {
+					xmlStreamWriter.writeStartElement(TAG_LABEL);
+					xmlStreamWriter.writeStartElement(TAG_LEFT_EXT_MUL);
+					writeWeightTag(xmlStreamWriter, weight);
+					xmlStreamWriter.writeStartElement(TAG_ONE);
+					xmlStreamWriter.writeEndElement();  // End TAG_ONE
+					xmlStreamWriter.writeEndElement();  // End TAG_LEFT_EXT_MUL
+					xmlStreamWriter.writeEndElement();  // End TAG_LABEL
+				}  // End if (!(weight instanceof Boolean))
 				xmlStreamWriter.writeEndElement();  // End TAG_INITIAL
 			}
 		}  // End while (allStatesIterator.hasNext())
@@ -1311,9 +1355,19 @@ public class FsmXml implements FsmXmlInterface {
 		allStatesIterator = allStates.iterator();
 		while (allStatesIterator.hasNext()) {
 			State state = allStatesIterator.next();
-			if (state.getFinalWeight() != null) {
+			Object weight = state.getFinalWeight();
+			if (weight != null) {
 				xmlStreamWriter.writeStartElement(TAG_FINAL);
 				xmlStreamWriter.writeAttribute(ATR_STATE, "s" + allStates.indexOf(state));
+				if (!(weight instanceof Boolean)) {
+					xmlStreamWriter.writeStartElement(TAG_LABEL);
+					xmlStreamWriter.writeStartElement(TAG_LEFT_EXT_MUL);
+					writeWeightTag(xmlStreamWriter, weight);
+					xmlStreamWriter.writeStartElement(TAG_ONE);
+					xmlStreamWriter.writeEndElement();  // End TAG_ONE
+					xmlStreamWriter.writeEndElement();  // End TAG_LEFT_EXT_MUL
+					xmlStreamWriter.writeEndElement();  // End TAG_LABEL
+				}  // End if (!(weight instanceof Boolean))
 				xmlStreamWriter.writeEndElement();  // End TAG_FINAL
 			}
 		}  // End while (allStatesIterator.hasNext())
