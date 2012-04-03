@@ -654,7 +654,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 					* This edge is an arrow pointing to an initial state.
 					*/
 					State state = cellToStateMap.get(targetVertex);
-					state.setInitialWeight(targetVertex.getValue());
+					state.setInitialWeight(edge.getValue());
 					continue;
 				}
 			} else {
@@ -663,7 +663,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 					 * This edge is an arrow pointing from a final state.
 					 */
 					State state = cellToStateMap.get(sourceVertex);
-					state.setFinalWeight(sourceVertex.getValue());
+					state.setFinalWeight(edge.getValue());
 					continue;
 				}
 			}

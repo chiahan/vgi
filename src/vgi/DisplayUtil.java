@@ -101,12 +101,12 @@ public class DisplayUtil {
         Point2D p = createTerminalPoint((mxCell) vertex);
         mxPoint terminalPoint = new mxPoint(p.getX(), p.getY());;
         if (vertexIsSource) {
-            edge = getGraph().insertEdge(parent, null, expression, vertex, null);
+            edge = getGraph().insertEdge(parent, null, weight, vertex, null);
 
             newTrans.setSourceState(cellToState((mxCell) vertex));
             newTrans.setTargetState(null);
         } else {
-            edge = getGraph().insertEdge(parent, null, expression, null, vertex);
+            edge = getGraph().insertEdge(parent, null, weight, null, vertex);
 
             newTrans.setSourceState(null);
             newTrans.setTargetState(cellToState((mxCell) vertex));
