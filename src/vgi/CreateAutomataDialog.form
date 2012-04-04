@@ -75,7 +75,7 @@
                 <Property name="text" type="java.lang.String" value="Boolean"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="seiringSetOperationRadioButtonActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="semiringSetOperationRadioButtonActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JRadioButton" name="semiringIntegerRadioButton">
@@ -85,6 +85,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Integer"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="semiringSetOperationRadioButtonActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JRadioButton" name="semiringRationalRadioButton">
               <Properties>
@@ -93,6 +96,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Rational"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="semiringSetOperationRadioButtonActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JRadioButton" name="semiringRealRadioButton">
               <Properties>
@@ -101,6 +107,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Real"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="semiringSetOperationRadioButtonActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JRadioButton" name="semiringF2RadioButton">
               <Properties>
@@ -109,6 +118,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Two Element Field"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="semiringSetOperationRadioButtonActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JRadioButton" name="semiringMinTropicalRadioButton">
               <Properties>
@@ -117,6 +129,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Min Tropical"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="semiringSetOperationRadioButtonActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JRadioButton" name="semiringMaxTropicalRadioButton">
               <Properties>
@@ -125,6 +140,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Max Tropical"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="semiringSetOperationRadioButtonActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -330,20 +348,12 @@
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
           <SubComponents>
-            <Component class="javax.swing.JButton" name="booleanButton">
+            <Component class="javax.swing.JButton" name="defaultButton">
               <Properties>
-                <Property name="text" type="java.lang.String" value="boolean"/>
+                <Property name="text" type="java.lang.String" value="Default"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="booleanButtonActionPerformed"/>
-              </Events>
-            </Component>
-            <Component class="javax.swing.JButton" name="weightedButton">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="weighted"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="weightedButtonActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="defaultButtonActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JButton" name="FMPButton">
