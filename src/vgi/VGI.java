@@ -1,5 +1,6 @@
 package vgi;
 
+import com.mxgraph.swing.mxGraphComponent;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,11 +14,12 @@ import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import com.mxgraph.swing.mxGraphOutline;
+import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -237,22 +239,6 @@ public class VGI extends javax.swing.JFrame {
 		}  // End public void actionPerformed(ActionEvent actionEvent)
 	}  // End private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener
 
-	public void graphFitWindow(JPanel panel) {
-		((JgraphXInternalFrame) panel.getComponent(0)).getGraphComponent().zoomTo(1, false);
-	}
-
-	public void graphZoomIn(JPanel panel) {
-		((JgraphXInternalFrame) panel.getComponent(0)).getGraphComponent().zoomIn();
-	}
-
-	public void graphZoomOut(JPanel panel) {
-		((JgraphXInternalFrame) panel.getComponent(0)).getGraphComponent().zoomOut();
-	}
-
-	public void graphActualSize(JPanel panel) {
-		((JgraphXInternalFrame) panel.getComponent(0)).getGraphComponent().zoomActual();
-	}
-
 	private void createInternalFrame(JgraphXInternalFrame frame) {
 		frame.setVisible(true);
 		mainDesktopPane.add(frame);
@@ -292,6 +278,7 @@ public class VGI extends javax.swing.JFrame {
 		this.pmLastFolderForSaveFile = new File(defaultFolderPath);
 		this.pmAutomataType = null;
 		initComponents();
+		this.viewMenu.setVisible(false);
 
 		Preferences preferences = Preferences.systemRoot().node(this.getClass().getName());
 		String string = preferences.get("TAF-Kit Path", defaultFolderPath);
@@ -596,38 +583,18 @@ public class VGI extends javax.swing.JFrame {
 
         fitWindowMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoom.png"))); // NOI18N
         fitWindowMenuItem.setText("Fit Window");
-        fitWindowMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                fitWindowMenuItemActionPerformed(evt);
-            }
-        });
         viewMenu.add(fitWindowMenuItem);
 
         zoomInMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoomin.png"))); // NOI18N
         zoomInMenuItem.setText("Zoom In");
-        zoomInMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                zoomInMenuItemActionPerformed(evt);
-            }
-        });
         viewMenu.add(zoomInMenuItem);
 
         zoomOutMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoomout.png"))); // NOI18N
         zoomOutMenuItem.setText("Zoom Out");
-        zoomOutMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                zoomOutMenuItemActionPerformed(evt);
-            }
-        });
         viewMenu.add(zoomOutMenuItem);
 
         actualSizeMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/refresh.png"))); // NOI18N
         actualSizeMenuItem.setText("Actual Size");
-        actualSizeMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                actualSizeMenuItemActionPerformed(evt);
-            }
-        });
         viewMenu.add(actualSizeMenuItem);
         viewMenu.add(viewMenuSeparator1);
 
@@ -845,49 +812,47 @@ public class VGI extends javax.swing.JFrame {
 	}//GEN-LAST:event_openMenuItemActionPerformed
 
     private void zoomInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInButtonActionPerformed
-		// TODO add your handling code here:
-		this.graphZoomIn(mainPanel);
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			((JgraphXInternalFrame) frame).getGraphComponent().zoomIn();
+		}
     }//GEN-LAST:event_zoomInButtonActionPerformed
 
     private void zoomOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOutButtonActionPerformed
-		// TODO add your handling code here:
-		this.graphZoomOut(mainPanel);
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			((JgraphXInternalFrame) frame).getGraphComponent().zoomOut();
+		}
     }//GEN-LAST:event_zoomOutButtonActionPerformed
 
     private void fitWindowButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fitWindowButtonActionPerformed
-		// TODO add your handling code here:
-		this.graphFitWindow(mainPanel);
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			mxGraphComponent graphComponent = ((JgraphXInternalFrame) frame).getGraphComponent();
+			graphComponent.zoomActual();
+			mxRectangle graphBounds = graphComponent.getGraph().getGraphBounds();
+			Rectangle viewRect = graphComponent.getViewport().getVisibleRect();
+			double xScale = viewRect.getWidth() * 0.99 / graphBounds.getWidth();
+			double yScale = viewRect.getHeight() * 0.99 / graphBounds.getHeight();
+			if (xScale < yScale) {
+				graphComponent.zoomTo(xScale, true);
+			} else {
+				graphComponent.zoomTo(yScale, true);
+			}
+		}  // End if (frame instanceof JgraphXInternalFrame)
     }//GEN-LAST:event_fitWindowButtonActionPerformed
 
     private void actualSizeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_actualSizeButtonActionPerformed
-		// TODO add your handling code here:
-		this.graphActualSize(mainPanel);
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			((JgraphXInternalFrame) frame).getGraphComponent().zoomActual();
+		}
     }//GEN-LAST:event_actualSizeButtonActionPerformed
 
     private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
 		// TODO add your handling code here:
 		((JgraphXInternalFrame) mainPanel.getComponent(0)).deleteSelectedCell();
     }//GEN-LAST:event_deleteMenuItemActionPerformed
-
-    private void fitWindowMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fitWindowMenuItemActionPerformed
-		// TODO add your handling code here:
-		this.graphFitWindow(mainPanel);
-    }//GEN-LAST:event_fitWindowMenuItemActionPerformed
-
-    private void zoomInMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInMenuItemActionPerformed
-		// TODO add your handling code here:
-		this.graphZoomIn(mainPanel);
-    }//GEN-LAST:event_zoomInMenuItemActionPerformed
-
-    private void zoomOutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOutMenuItemActionPerformed
-		// TODO add your handling code here:
-		this.graphZoomOut(mainPanel);
-    }//GEN-LAST:event_zoomOutMenuItemActionPerformed
-
-    private void actualSizeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_actualSizeMenuItemActionPerformed
-		// TODO add your handling code here:
-		this.graphActualSize(mainPanel);
-    }//GEN-LAST:event_actualSizeMenuItemActionPerformed
 
     private void showPropertiesCheckBoxMenuItemStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_showPropertiesCheckBoxMenuItemStateChanged
 		this.infoSplitPane.getTopComponent().

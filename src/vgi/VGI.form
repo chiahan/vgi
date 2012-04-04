@@ -138,9 +138,6 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Fit Window"/>
               </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fitWindowMenuItemActionPerformed"/>
-              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="zoomInMenuItem">
               <Properties>
@@ -149,9 +146,6 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Zoom In"/>
               </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="zoomInMenuItemActionPerformed"/>
-              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="zoomOutMenuItem">
               <Properties>
@@ -160,9 +154,6 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Zoom Out"/>
               </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="zoomOutMenuItemActionPerformed"/>
-              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="actualSizeMenuItem">
               <Properties>
@@ -171,9 +162,6 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Actual Size"/>
               </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="actualSizeMenuItemActionPerformed"/>
-              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="viewMenuSeparator1">
             </MenuItem>
