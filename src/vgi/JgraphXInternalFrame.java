@@ -102,6 +102,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     private void initGraph() {
         graph.setDisconnectOnMove(false);
         graph.setSplitEnabled(false);
+        graph.setCellsDisconnectable(false);
         graphComponent = getGraphComponent();
         graphComponent.setConnectable(false);
         graphComponent.getViewport().setBackground(Color.WHITE);
