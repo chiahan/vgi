@@ -187,151 +187,129 @@ public class mxEdgeStyle
 		public void apply(mxCellState state, mxCellState source,
 				mxCellState target, List<mxPoint> points, List<mxPoint> result)
 		{
-			if (source != null)
-			{
-				mxGraphView view = state.getView();
-				mxGraph graph = view.getGraph();
-				mxPoint pt = (points != null && points.size() > 0) ? points
-						.get(0) : null;
-
-				if (pt != null)
-				{
-					pt = view.transformControlPoint(state, pt);
-
-					if (source.contains(pt.getX(), pt.getY()))
-					{
-						pt = null;
-					}
-				}
-
-				double x = 0;
-				double dx = 0;
-				double y = 0;
-				double dy = 0;
-
-				double seg = mxUtils.getDouble(state.getStyle(),
-						mxConstants.STYLE_SEGMENT, graph.getGridSize())
-						* view.getScale();
-				String dir = mxUtils
-						.getString(state.getStyle(),
-								mxConstants.STYLE_DIRECTION,
-								mxConstants.DIRECTION_WEST);
-
-				if (dir.equals(mxConstants.DIRECTION_NORTH)
-						|| dir.equals(mxConstants.DIRECTION_SOUTH))
-				{
-					x = view.getRoutingCenterX(source);
-					dx = seg;
-				}
-				else
-				{
-					y = view.getRoutingCenterY(source);
-					dy = seg;
-				}
-
-				if (pt == null || pt.getX() < source.getX()
-						|| pt.getX() > source.getX() + source.getWidth())
-				{
-					if (pt != null)
-					{
-						x = pt.getX();
-						dy = Math.max(Math.abs(y - pt.getY()), dy);
-					}
-					else
-					{
-						if (dir.equals(mxConstants.DIRECTION_NORTH))
-						{
-							y = source.getY() - 2 * dx;
-						}
-						else if (dir.equals(mxConstants.DIRECTION_SOUTH))
-						{
-							y = source.getY() + source.getHeight() + 2 * dx;
-						}
-						else if (dir.equals(mxConstants.DIRECTION_EAST))
-						{
-							x = source.getX() - 2 * dy;
-						}
-						else
-						{
-							x = source.getX() + source.getWidth() + 2 * dy;
-						}
-					}
-				}
-				else
-				{
-					// pt != null
-					x = view.getRoutingCenterX(source);
-					dx = Math.max(Math.abs(x - pt.getX()), dy);
-					y = pt.getY();
-					dy = 0;
-				}
-
-				result.add(new mxPoint(x - dx, y - dy));
-				result.add(new mxPoint(x + dx, y + dy));
+//			if (source != null)
+//			{
+//				mxGraphView view = state.getView();
+//				mxGraph graph = view.getGraph();
+//				mxPoint pt = (points != null && points.size() > 0) ? points
+//						.get(0) : null;
+//
+//				if (pt != null)
+//				{
+//					pt = view.transformControlPoint(state, pt);
+//
+//					if (source.contains(pt.getX(), pt.getY()))
+//					{
+//						pt = null;
+//					}
+//				}
+//
+//				double x = 0;
+//				double dx = 0;
+//				double y = 0;
+//				double dy = 0;
+//
+//				double seg = mxUtils.getDouble(state.getStyle(),
+//						mxConstants.STYLE_SEGMENT, graph.getGridSize())
+//						* view.getScale();
+//				String dir = mxUtils
+//						.getString(state.getStyle(),
+//								mxConstants.STYLE_DIRECTION,
+//								mxConstants.DIRECTION_WEST);
+//
+//				if (dir.equals(mxConstants.DIRECTION_NORTH)
+//						|| dir.equals(mxConstants.DIRECTION_SOUTH))
+//				{
+//					x = view.getRoutingCenterX(source);
+//					dx = seg;
+//				}
+//				else
+//				{
+//					y = view.getRoutingCenterY(source);
+//					dy = seg;
+//				}
+//
+//				if (pt == null || pt.getX() < source.getX()
+//						|| pt.getX() > source.getX() + source.getWidth())
+//				{
+//					if (pt != null)
+//					{
+//						x = pt.getX();
+//						dy = Math.max(Math.abs(y - pt.getY()), dy);
+//					}
+//					else
+//					{
+//						if (dir.equals(mxConstants.DIRECTION_NORTH))
+//						{
+//							y = source.getY() - 2 * dx;
+//						}
+//						else if (dir.equals(mxConstants.DIRECTION_SOUTH))
+//						{
+//							y = source.getY() + source.getHeight() + 2 * dx;
+//						}
+//						else if (dir.equals(mxConstants.DIRECTION_EAST))
+//						{
+//							x = source.getX() - 2 * dy;
+//						}
+//						else
+//						{
+//							x = source.getX() + source.getWidth() + 2 * dy;
+//						}
+//					}
+//				}
+//				else
+//				{
+//					// pt != null
+//					x = view.getRoutingCenterX(source);
+//					dx = Math.max(Math.abs(x - pt.getX()), dy);
+//					y = pt.getY();
+//					dy = 0;
+//				}
+//
+//				result.add(new mxPoint(x - dx, y - dy));
+//				result.add(new mxPoint(x + dx, y + dy));
+//			}
+			if ((source == null) || (!source.equals(target))) {
+				return;
 			}
-		}
-	};
-        
-        /*
-         * Loop with arbitrary direction
-         * direction set in style "direction" = some float
-         * 
-         */
-        
-        public static mxEdgeStyleFunction ALoop = new mxEdgeStyleFunction()
-	{
 
-		/* (non-Javadoc)
-		 * @see com.mxgraph.view.mxEdgeStyle.mxEdgeStyleFunction#apply(com.mxgraph.view.mxCellState, com.mxgraph.view.mxCellState, com.mxgraph.view.mxCellState, java.util.List, java.util.List)
-		 */
-		public void apply(mxCellState state, mxCellState source,
-				mxCellState target, List<mxPoint> points, List<mxPoint> result)
-		{
-                    
-                       // System.out.println("Aloop!");
-			if (source != null)
-			{
-				
-                                mxGraphView view = state.getView();
-				mxGraph graph = view.getGraph();
-				mxPoint pt = (points != null && points.size() > 0) ? points
-						.get(0) : null;
-
-				if (pt != null)
-				{
-					pt = view.transformControlPoint(state, pt);
-
-					if (source.contains(pt.getX(), pt.getY()))
-					{
-						pt = null;
-					}
-				}
-
-				double x = 0;
-				double y = 0;
-				
-				double seg = mxUtils.getDouble(state.getStyle(),
-						mxConstants.STYLE_SEGMENT, graph.getGridSize())
-						* view.getScale();
-                                double dir=mxUtils.getDouble(state.getStyle(),mxConstants.STYLE_DIRECTION,0);
-                                
-                                x = view.getRoutingCenterX(source);
-                                y = view.getRoutingCenterY(source);
-                            
-                                double R=state.getWidth()+6*seg;
-                                double d=2*seg;
-                                dir=dir/180*Math.PI;
-                                mxPoint pta=new mxPoint(x+R*Math.cos(dir)+d*Math.sin(dir),y+R*Math.sin(dir)-d*Math.cos(dir));
-                                mxPoint ptb=new mxPoint(x+R*Math.cos(dir)-d*Math.sin(dir),y+R*Math.sin(dir)+d*Math.cos(dir));
-                            
-                                System.out.println("x= "+x+" y= "+y+" R= "+R+" d= "+d);
-                                System.out.println("a:"+pta.toString()+"b: "+ptb.toString());
-                                
-                               result.add(pta);
-                               result.add(ptb);
-                            
-                               
+			mxGraphView view = state.getView();
+			double centerX = view.getRoutingCenterX(source);
+			double centerY = view.getRoutingCenterY(source);
+			double width = source.getWidth();
+			mxPoint controlPoint;
+			if ((points != null) && (!(points.isEmpty()))) {
+				controlPoint = view.transformControlPoint(state, points.get(0));
+			} else {
+				controlPoint = new mxPoint(centerX + width, centerY);
 			}
+
+			double offsetX = controlPoint.getX() - centerX;
+			double offsetY = controlPoint.getY() - centerY;
+			/*
+			 * Rotate the offset vector from vertex center to control point by
+			 * 90 degrees counterclockwise and reduce the length to 1/10.
+			 */
+			double dx = offsetY / 10;
+			double dy = -offsetX / 10;
+
+			if ((source.contains(centerX + offsetX * 0.7 + dx * 9, centerY + offsetY * 0.7 + dy * 0.9))
+					|| (source.contains(centerX + offsetX * 0.7 - dx * 9, centerY + offsetY * 0.7 - dy * 0.9))) {
+				controlPoint = new mxPoint(centerX + width, centerY);
+				offsetX = controlPoint.getX() - centerX;
+				offsetY = controlPoint.getY() - centerY;
+				dx = offsetY / 10;
+				dy = -offsetX / 10;
+			}
+
+			result.add(new mxPoint(centerX + offsetX * 0.7 + dx * 0.9, centerY + offsetY * 0.7 + dy * 0.9));
+			result.add(new mxPoint(centerX + offsetX * 0.8 + dx, centerY + offsetY * 0.8 + dy));
+			result.add(new mxPoint(centerX + offsetX * 0.9 + dx * 0.9, centerY + offsetY * 0.9 + dy * 0.9));
+			result.add(new mxPoint(controlPoint.getX() + dx * 0.3, controlPoint.getY() + dy * 0.3));
+			result.add(new mxPoint(controlPoint.getX() - dx * 0.3, controlPoint.getY() - dy * 0.3));
+			result.add(new mxPoint(centerX + offsetX * 0.9 - dx * 0.9, centerY + offsetY * 0.9 - dy * 0.9));
+			result.add(new mxPoint(centerX + offsetX * 0.8 - dx, centerY + offsetY * 0.8 - dy));
+			result.add(new mxPoint(centerX + offsetX * 0.7 - dx * 0.9, centerY + offsetY * 0.7 - dy * 0.9));
 		}
 	};
 

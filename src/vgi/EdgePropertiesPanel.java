@@ -4,13 +4,10 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JTextField;
 
 /*
  * edge_properties.java
@@ -46,15 +43,6 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             int ind=(int)width;
             strokeWidthBox.setSelectedIndex(ind-1);
         }
-        
-        if(cell.getSource()==cell.getTarget()){
-            directionText.setEnabled(true);
-            String dir=(String)styles.get("direction");
-            if(dir!=null) directionText.setText(dir);
-            else directionText.setText(String.valueOf(0));
-        }
-        else directionText.setEnabled(false);
-        
     }
     
     private void showLabel() {
@@ -80,13 +68,6 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         graph.setCellStyles("strokeWidth", wid, edge);
     }
 
-    public void setLoopDirection(mxGraph graph, float direction) {
-        Object[] edge = {cell};
-        String dir = String.valueOf(direction);
-        graph.setCellStyles("direction", dir, edge);
-    }
-
-    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -107,8 +88,6 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         strokeLabel = new javax.swing.JLabel();
         strokeColorButton = new javax.swing.JButton();
         strokeWidthBox = new javax.swing.JComboBox();
-        directionLabel = new javax.swing.JLabel();
-        directionText = new javax.swing.JTextField();
 
         jLabel3.setText("jLabel3");
 
@@ -201,22 +180,6 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
         add(strokeWidthBox, gridBagConstraints);
-
-        directionLabel.setText("Direction:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        add(directionLabel, gridBagConstraints);
-
-        directionText.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                directionTextActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        add(directionText, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void startStyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startStyleComboBoxActionPerformed
@@ -250,20 +213,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         setStrokeWidth(graph,wid);
     }//GEN-LAST:event_strokeWidthBoxActionPerformed
 
-    private void directionTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_directionTextActionPerformed
-        
-        JTextField text=(JTextField)evt.getSource();
-        String str=(String)text.getText();
-        float dir=Float.parseFloat(str);
-        dir=dir%360;
-        
-        setLoopDirection(graph,dir);
-        
-    }//GEN-LAST:event_directionTextActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel directionLabel;
-    private javax.swing.JTextField directionText;
     private javax.swing.JLabel ednStyleLabel;
     private javax.swing.JComboBox endStyleComboBox;
     private javax.swing.JLabel jLabel3;
