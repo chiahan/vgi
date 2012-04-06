@@ -205,7 +205,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                maybeShowPopup(e);
+                isPopupTrigger = e.isPopupTrigger();
                 if (graphComponent.getCellEditor() != null) {
                     graphComponent.getCellEditor().stopEditing(true);
                 }
@@ -269,7 +269,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             }
 
             private void maybeShowPopup(MouseEvent e) {
-                if (e.isPopupTrigger()) {
+                if (isPopupTrigger || e.isPopupTrigger()) {
+					isPopupTrigger = false;
                     popMouseX = e.getX();
                     popMouseY = e.getY();
                     getGraphPopupMenu().show(getGraphComponent(), popMouseX, popMouseY);
@@ -1043,6 +1044,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     private mxGraphOutline graphOutline;
     final mxGraph graph;
     protected boolean modified = false;
+	protected boolean isPopupTrigger;
     protected mxRubberband rubberband;
     protected mxKeyboardHandler keyboardHandler;
     //protected Hashtable<Integer, mxCell> cellTable;
