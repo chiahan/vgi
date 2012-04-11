@@ -969,12 +969,31 @@ public class FsmXml implements FsmXmlInterface {
 			fsmXmlFile.createNewFile();
 		}
 		OutputStream outputStream = new FileOutputStream(fsmXmlFile);
-		this.write(automataList, outputStream);
+		this.write(automataList, outputStream, true);
+		outputStream.close();
+	}  // End public void write(List<Automata> automataList, File fsmXmlFile)
+
+	protected void write(List<Automata> automataList, File fsmXmlFile, boolean writeGeometricAndDrawingData)
+			throws
+			IOException,
+			FsmXmlException {
+		if (!(fsmXmlFile.exists())) {
+			fsmXmlFile.getParentFile().mkdirs();
+			fsmXmlFile.createNewFile();
+		}
+		OutputStream outputStream = new FileOutputStream(fsmXmlFile);
+		this.write(automataList, outputStream, writeGeometricAndDrawingData);
 		outputStream.close();
 	}  // End public void write(List<Automata> automataList, File fsmXmlFile)
 
 	@Override
 	public void write(List<Automata> automataList, OutputStream outputStream)
+			throws
+			FsmXmlException {
+		this.write(automataList, outputStream, true);
+	}
+
+	protected void write(List<Automata> automataList, OutputStream outputStream, boolean writeGeometricAndDrawingData)
 			throws
 			FsmXmlException {
 
@@ -996,8 +1015,8 @@ public class FsmXml implements FsmXmlInterface {
 				xmlStreamWriter.writeStartElement(TAG_AUTOMATON);
 				writeValueTypeTag(xmlStreamWriter, automata);
 				xmlStreamWriter.writeStartElement(TAG_AUTOMATON_STRUCT);
-				writeStatesTag(xmlStreamWriter, automata);
-				writeTransitionsTag(xmlStreamWriter, automata);
+				writeStatesTag(xmlStreamWriter, automata, writeGeometricAndDrawingData);
+				writeTransitionsTag(xmlStreamWriter, automata, writeGeometricAndDrawingData);
 				xmlStreamWriter.writeEndElement();  // TAG_AUTOMATON_STRUCT
 				xmlStreamWriter.writeEndElement();  // TAG_AUTOMATON
 			}  // End while (automataIterator.hasNext())
@@ -1259,7 +1278,7 @@ public class FsmXml implements FsmXmlInterface {
 
 	}  // End private void writeMonGenTag(XMLStreamWriter xmlStreamWriter, Object symbol)
 
-	private void writeStatesTag(XMLStreamWriter xmlStreamWriter, Automata automata)
+	private void writeStatesTag(XMLStreamWriter xmlStreamWriter, Automata automata, boolean writeGeometricAndDrawingData)
 			throws
 			XMLStreamException,
 			FsmXmlException {
@@ -1276,13 +1295,15 @@ public class FsmXml implements FsmXmlInterface {
 			if (name != null) {
 				xmlStreamWriter.writeAttribute(ATR_NAME, name);
 			}
-			Point2D point2d = state.getGeometricData().location;
-			if (point2d != null) {
-				xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
-				xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(point2d.getX()));
-				xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
-				xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
-			}
+			if (writeGeometricAndDrawingData) {
+				Point2D point2d = state.getGeometricData().location;
+				if (point2d != null) {
+					xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
+					xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(point2d.getX()));
+					xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
+					xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
+				}
+			} // End if (writeGeometricAndDrawingData)
 			xmlStreamWriter.writeEndElement();  // End TAG_STATE
 		}  // End while (allStatesIterator.hasNext())
 
@@ -1290,7 +1311,7 @@ public class FsmXml implements FsmXmlInterface {
 
 	}  // End private void writeStateTags(XMLStreamWriter xmlStreamWriter, Automata automata)
 
-	private void writeTransitionsTag(XMLStreamWriter xmlStreamWriter, Automata automata)
+	private void writeTransitionsTag(XMLStreamWriter xmlStreamWriter, Automata automata, boolean writeGeometricAndDrawingData)
 			throws
 			XMLStreamException,
 			FsmXmlException {
@@ -1313,22 +1334,24 @@ public class FsmXml implements FsmXmlInterface {
 				writeWeightedRegularExpression(xmlStreamWriter, label);
 				xmlStreamWriter.writeEndElement();  // End TAG_LABEL
 			}
-			TransitionInterface.GeometricData geometricData = transition.getGeometricData();
-			if (geometricData != null) {
-				List<Point2D> controlPoints = geometricData.controlPoints;
-				if ((controlPoints != null) && !(controlPoints.isEmpty())) {
-					xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
-					Iterator<Point2D> iteratePoints = controlPoints.iterator();
-					while (iteratePoints.hasNext()) {
-						Point2D point2d = iteratePoints.next();
-						xmlStreamWriter.writeStartElement(TAG_CONTROL_POINT);
-						xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(point2d.getX()));
-						xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
-						xmlStreamWriter.writeEndElement();  // End TAG_CONTROL_POINT
-					}  // End while (iteratePoints.hasNext())
-					xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
-				}  // End if ((controlPoints != null) && !(controlPoints.isEmpty()))
-			} // End if (geometricData != null)
+			if (writeGeometricAndDrawingData) {
+				TransitionInterface.GeometricData geometricData = transition.getGeometricData();
+				if (geometricData != null) {
+					List<Point2D> controlPoints = geometricData.controlPoints;
+					if ((controlPoints != null) && !(controlPoints.isEmpty())) {
+						xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
+						Iterator<Point2D> iteratePoints = controlPoints.iterator();
+						while (iteratePoints.hasNext()) {
+							Point2D point2d = iteratePoints.next();
+							xmlStreamWriter.writeStartElement(TAG_CONTROL_POINT);
+							xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(point2d.getX()));
+							xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
+							xmlStreamWriter.writeEndElement();  // End TAG_CONTROL_POINT
+						}  // End while (iteratePoints.hasNext())
+						xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
+					}  // End if ((controlPoints != null) && !(controlPoints.isEmpty()))
+				} // End if (geometricData != null)
+			} // End if (writeGeometricAndDrawingData)
 			xmlStreamWriter.writeEndElement();  // End TAG_TRANSITION
 		}  // End while (allTransitionsIterator.hasNext())
 

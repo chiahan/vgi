@@ -2,6 +2,7 @@ package vgi;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -276,6 +277,7 @@ public class TAFKit implements TAFKitInterface {
 		commandTokens.add("-v");
 		commandTokens.add(algorithm.name);
 		List<Automata> automataList = new ArrayList<Automata>();
+		List<File> tempFileList = new ArrayList<File>();
 
 		for (int index = 0; index < inputs.size(); index++) {
 
@@ -283,19 +285,19 @@ public class TAFKit implements TAFKitInterface {
 			switch (algorithm.inputsInfo.get(index).type) {
 
 				case AUTOMATON:
+					File file;
 					if (object instanceof Automata) {
 						automataList.add((Automata) object);
-						commandTokens.add("-");
+						file = saveAutomataToTempFile(automataList);
 					} else if (object instanceof File) {
-						File file = (File) object;
-						String string = file.getAbsolutePath();
-						commandTokens.add(string);
+						file = saveAutomataToTempFile((File) object);
 					} else if (object instanceof String) {
-						String string = (String) object;
-						commandTokens.add(string);
+						file = saveAutomataToTempFile((String) object);
 					} else {
 						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be an automaton, but it is not!");
 					}
+					tempFileList.add(file);
+					commandTokens.add(file.getAbsolutePath());
 					break;
 
 				case BOOLEAN:
@@ -355,12 +357,12 @@ public class TAFKit implements TAFKitInterface {
 			String[] cmdArray = new String[commandTokens.size()];
 			commandTokens.toArray(cmdArray);
 			process = Runtime.getRuntime().exec(cmdArray, null, pmTafKitPath);
-			if (!(automataList.isEmpty())) {
-				BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(process.getOutputStream());
-				FsmXml fsmXml = new FsmXml();
-				fsmXml.write(automataList, bufferedOutputStream);
-				bufferedOutputStream.close();
-			}
+//			if (!(automataList.isEmpty())) {
+//				BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(process.getOutputStream());
+//				FsmXml fsmXml = new FsmXml();
+//				fsmXml.write(automataList, bufferedOutputStream);
+//				bufferedOutputStream.close();
+//			}  // End if (!(automataList.isEmpty()))
 			inputStream = process.getInputStream();
 			string = convertInputStreamToString(inputStream);
 			inputStream.close();
@@ -369,8 +371,13 @@ public class TAFKit implements TAFKitInterface {
 			throw new Error(ioException);
 		} catch (InterruptedException interruptedException) {
 			throw new Error(interruptedException);
-		} catch (FsmXmlException fsmXmlException) {
-			throw new Error(fsmXmlException);
+//		} catch (FsmXmlException fsmXmlException) {
+//			throw new Error(fsmXmlException);
+		}
+
+		Iterator<File> iterateFile = tempFileList.iterator();
+		while (iterateFile.hasNext()) {
+			iterateFile.next().delete();
 		}
 
 		switch (exitValue) {
@@ -476,6 +483,57 @@ public class TAFKit implements TAFKitInterface {
 		return stringBuilder.toString();
 
 	}  // End public static String convertInputStreamToString(InputStream inputSream)
+
+	protected static File saveAutomataToTempFile(String filePath)
+			throws
+			TAFKitException {
+		File file = new File(filePath);
+		return saveAutomataToTempFile(file);
+	}  // End protected File saveAutomataToTempFile(String filePath)
+
+	protected static File saveAutomataToTempFile(File file)
+			throws
+			TAFKitException {
+
+		FsmXml fsmXml = new FsmXml();
+		try {
+			List<Automata> automataList = fsmXml.read(file);
+			return saveAutomataToTempFile(automataList);
+		} catch (IOException ioException) {
+			throw new TAFKitException(ioException);
+		} catch (FsmXmlException fsmXmlException) {
+			throw new TAFKitException(fsmXmlException);
+		}
+
+	}  // End protected File saveAutomataToTempFile(File file)
+
+	protected static File saveAutomataToTempFile(List<Automata> automataList)
+			throws
+			TAFKitException {
+
+		File file = null;
+		try {
+			file = File.createTempFile("vgi_aut", "." + FsmXmlInterface.fileNameExtensionFilter.getExtensions()[0]);
+		} catch (IOException ioException) {
+			throw new TAFKitException(ioException);
+		}
+		if (file == null) {
+			throw new TAFKitException("Failed to create temporary files.");
+		}
+		FsmXml fsmXml = new FsmXml();
+		try {
+			fsmXml.write(automataList, file, false);
+		} catch (IOException ioException) {
+			file.delete();
+			throw new TAFKitException(ioException);
+		} catch (FsmXmlException fsmXmlException) {
+			file.delete();
+			throw new TAFKitException(fsmXmlException);
+		}
+		file.deleteOnExit();
+
+		return file;
+	}  // End protected File saveAutomataToTempFile(Automata automata)
 
 	/**
 	 * @param args the command line arguments
