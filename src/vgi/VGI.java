@@ -317,12 +317,13 @@ public class VGI extends javax.swing.JFrame {
         toolBarSeparator3 = new javax.swing.JToolBar.Separator();
         undoButton = new javax.swing.JButton();
         redoButton = new javax.swing.JButton();
-        mainPanel = new javax.swing.JPanel();
-        statusLabel = new javax.swing.JLabel();
-        mainDesktopPane = new javax.swing.JDesktopPane();
+        mainSplitPane = new javax.swing.JSplitPane();
         infoSplitPane = new javax.swing.JSplitPane();
         infoPanel = new javax.swing.JPanel();
         outlinePanel = new javax.swing.JPanel();
+        mainPanel = new javax.swing.JPanel();
+        statusLabel = new javax.swing.JLabel();
+        mainDesktopPane = new javax.swing.JDesktopPane();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         newMenuItem = new javax.swing.JMenuItem();
@@ -474,17 +475,12 @@ public class VGI extends javax.swing.JFrame {
 
         getContentPane().add(toolBar, java.awt.BorderLayout.NORTH);
 
-        mainPanel.setLayout(new java.awt.BorderLayout());
-
-        statusLabel.setText("status:");
-        mainPanel.add(statusLabel, java.awt.BorderLayout.SOUTH);
-        mainPanel.add(mainDesktopPane, java.awt.BorderLayout.CENTER);
-
-        getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
+        mainSplitPane.setOneTouchExpandable(true);
 
         infoSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
         infoSplitPane.setResizeWeight(1.0);
         infoSplitPane.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        infoSplitPane.setMaximumSize(new java.awt.Dimension(300, 600));
         infoSplitPane.setMinimumSize(new java.awt.Dimension(300, 600));
         infoSplitPane.setOpaque(false);
         infoSplitPane.setPreferredSize(new java.awt.Dimension(300, 600));
@@ -497,7 +493,17 @@ public class VGI extends javax.swing.JFrame {
         outlinePanel.setPreferredSize(new java.awt.Dimension(298, 284));
         infoSplitPane.setBottomComponent(outlinePanel);
 
-        getContentPane().add(infoSplitPane, java.awt.BorderLayout.WEST);
+        mainSplitPane.setLeftComponent(infoSplitPane);
+
+        mainPanel.setLayout(new java.awt.BorderLayout());
+
+        statusLabel.setText("status:");
+        mainPanel.add(statusLabel, java.awt.BorderLayout.SOUTH);
+        mainPanel.add(mainDesktopPane, java.awt.BorderLayout.CENTER);
+
+        mainSplitPane.setRightComponent(mainPanel);
+
+        getContentPane().add(mainSplitPane, java.awt.BorderLayout.CENTER);
 
         fileMenu.setMnemonic('F');
         fileMenu.setText("File");
@@ -1170,6 +1176,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenu layoutMenu;
     private javax.swing.JDesktopPane mainDesktopPane;
     private javax.swing.JPanel mainPanel;
+    private javax.swing.JSplitPane mainSplitPane;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem newMenuItem;
     private javax.swing.JMenuItem openMenuItem;
