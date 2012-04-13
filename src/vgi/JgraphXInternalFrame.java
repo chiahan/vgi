@@ -527,20 +527,34 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 null, transition.getLabel(), source, target,
                 "shape=curve"));
         cellTable.put(edge, transition);
-		if ((transition.getGeometricData() == null)
-				|| (transition.getGeometricData().controlPoints == null)
-				|| (transition.getGeometricData().controlPoints.isEmpty())) {
-			edge.getGeometry().setPoints(new ArrayList<mxPoint>());
+		mxGeometry geometry = edge.getGeometry();
+		if (geometry == null) {
+			geometry = new mxGeometry();
+			edge.setGeometry(geometry);
+		}
+		TransitionInterface.GeometricData geometricData = transition.getGeometricData();
+		if (geometricData == null) {
+			geometricData = new TransitionInterface.GeometricData();
+		}
+		if (geometricData.labelPosition == null) {
+			geometry.setX(0);
+			geometry.setY(DEFAULT_LABEL_DISTANCE);
+		} else {
+			geometry.setX(geometricData.labelPosition.getX());
+			geometry.setY(geometricData.labelPosition.getY());
+		}
+		if ((geometricData.controlPoints == null)
+				|| (geometricData.controlPoints.isEmpty())) {
+			geometry.setPoints(new ArrayList<mxPoint>());
 		} else {
 			List<mxPoint> points = new ArrayList<mxPoint>();
-			Iterator<Point2D> iterateControlPoints = transition.getGeometricData().controlPoints.iterator();
+			Iterator<Point2D> iterateControlPoints = geometricData.controlPoints.iterator();
 			while (iterateControlPoints.hasNext()) {
 				Point2D controlPoint = iterateControlPoints.next();
 				points.add(new mxPoint(controlPoint));
 			}  // End while (iterateControlPoints.hasNext())
-			edge.getGeometry().setPoints(points);
+			geometry.setPoints(points);
 		}
-        edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
     }  // End public void addTransition(Transition transition)
 
     public void addControlPoint() {
@@ -665,15 +679,22 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			if (object instanceof WeightedRegularExpression) {
 				transition.setLabel((WeightedRegularExpression) object);
 			}
-			List<mxPoint> points = edge.getGeometry().getPoints();
-			if ((points != null) && (!points.isEmpty())) {
-				List<Point2D> controlPoints = transition.getGeometricData().controlPoints;
-				Iterator<mxPoint> iteratePoints = points.iterator();
-				while (iteratePoints.hasNext()) {
-					mxPoint point = iteratePoints.next();
-					controlPoints.add(new Point2D.Double(point.getX(), point.getY()));
-				}  // End while (iteratePoints.hasNext())
-			}  // End if ((points != null) && (!points.isEmpty()))
+			mxGeometry geometry = edge.getGeometry();
+			if (geometry != null) {
+				TransitionInterface.GeometricData geometricData = new TransitionInterface.GeometricData();
+				if ((geometry.getX() != 0) || (geometry.getY() != DEFAULT_LABEL_DISTANCE)) {
+					geometricData.labelPosition = new Point2D.Double(geometry.getX(), geometry.getY());
+				}
+				List<mxPoint> points = geometry.getPoints();
+				if ((points != null) && (!points.isEmpty())) {
+					Iterator<mxPoint> iteratePoints = points.iterator();
+					while (iteratePoints.hasNext()) {
+						mxPoint point = iteratePoints.next();
+						geometricData.controlPoints.add(new Point2D.Double(point.getX(), point.getY()));
+					}  // End while (iteratePoints.hasNext())
+				}  // End if ((points != null) && (!points.isEmpty()))
+				transition.setGeometricData(geometricData);
+			}  // End if (geometry != null)
 			automata.addTransition(transition);
 
 		}  // End for (int index = 0; index < edges.length; index++)

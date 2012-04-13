@@ -926,20 +926,34 @@ public class FsmXml implements FsmXmlInterface {
 			throws XMLStreamException,
 			FsmXmlException {
 
+		TransitionInterface.GeometricData geometricData = new TransitionInterface.GeometricData();
+		String xStr = xmlStreamReader.getAttributeValue(null, ATR_X);
+		String yStr = xmlStreamReader.getAttributeValue(null, ATR_Y);
+		if ((xStr != null) && (yStr != null)) {
+			double x = Double.valueOf(xStr);
+			double y = Double.valueOf(yStr);
+			geometricData.labelPosition = new Point2D.Double(x, y);
+		}  // End if ((xStr != null) && (yStr != null))
+
 		Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
 		while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END)))) {
 
 			if (tag.equals(TAG_CONTROL_POINT, Tag.Type.START)) {
-				Double x = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_X));
-				Double y = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_Y));
-				List<Transition> allTransitions = automata.getAllTransitions();
-				Transition transition = allTransitions.get(allTransitions.size() - 1);
-				transition.getGeometricData().controlPoints.add(new Point2D.Double(x, y));
+				xStr = xmlStreamReader.getAttributeValue(null, ATR_X);
+				yStr = xmlStreamReader.getAttributeValue(null, ATR_Y);
+				if ((xStr != null) && (yStr != null)) {
+					double x = Double.valueOf(xStr);
+					double y = Double.valueOf(yStr);
+					geometricData.controlPoints.add(new Point2D.Double(x, y));
+				}  // End if ((xStr != null) && (yStr != null))
 			}  // End if (tag.equals(TAG_CONTROL_POINT, Tag.Type.START))
 
 			tag = Tag.nextStartOrEnd(xmlStreamReader);
 		}  // End while ((tag != null) && (!(tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.END))))
 
+		List<Transition> allTransitions = automata.getAllTransitions();
+		Transition transition = allTransitions.get(allTransitions.size() - 1);
+		transition.setGeometricData(geometricData);
 	}  // End private void parseTransitionGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
 
 	public static Object getSemiringIdentityValue(TAFKitInterface.AutomataType.Semiring semiring) {
@@ -1337,10 +1351,18 @@ public class FsmXml implements FsmXmlInterface {
 			if (writeGeometricAndDrawingData) {
 				TransitionInterface.GeometricData geometricData = transition.getGeometricData();
 				if (geometricData != null) {
-					List<Point2D> controlPoints = geometricData.controlPoints;
-					if ((controlPoints != null) && !(controlPoints.isEmpty())) {
+					boolean isStartGeometricDataTagWritten = false;
+					if (geometricData.labelPosition != null) {
 						xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
-						Iterator<Point2D> iteratePoints = controlPoints.iterator();
+						isStartGeometricDataTagWritten = true;
+						xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(geometricData.labelPosition.getX()));
+						xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(geometricData.labelPosition.getY()));
+					}  // End if (geometricData.labelPosition != null)
+					if ((geometricData.controlPoints != null) && !(geometricData.controlPoints.isEmpty())) {
+						if (!isStartGeometricDataTagWritten) {
+							xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
+						}
+						Iterator<Point2D> iteratePoints = geometricData.controlPoints.iterator();
 						while (iteratePoints.hasNext()) {
 							Point2D point2d = iteratePoints.next();
 							xmlStreamWriter.writeStartElement(TAG_CONTROL_POINT);
@@ -1348,9 +1370,11 @@ public class FsmXml implements FsmXmlInterface {
 							xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
 							xmlStreamWriter.writeEndElement();  // End TAG_CONTROL_POINT
 						}  // End while (iteratePoints.hasNext())
+					}  // End if ((geometricData.controlPoints != null) && !(geometricData.controlPoints.isEmpty()))
+					if (isStartGeometricDataTagWritten) {
 						xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
-					}  // End if ((controlPoints != null) && !(controlPoints.isEmpty()))
-				} // End if (geometricData != null)
+					}
+				}  // End if (geometricData != null)
 			} // End if (writeGeometricAndDrawingData)
 			xmlStreamWriter.writeEndElement();  // End TAG_TRANSITION
 		}  // End while (allTransitionsIterator.hasNext())

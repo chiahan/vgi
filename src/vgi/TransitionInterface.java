@@ -1,6 +1,5 @@
 package vgi;
 
-
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +12,11 @@ public interface TransitionInterface {
 
 	public class GeometricData {
 
+		Point2D labelPosition;
 		List<Point2D> controlPoints;
 
 		public GeometricData() {
+			this.labelPosition = null;
 			this.controlPoints = new ArrayList<Point2D>();
 		}
 	}  // End public class GeometricData
