@@ -1,10 +1,9 @@
 package vgi;
 
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * To change this template, choose Tools | Templates and open the template in
+ * the editor.
  */
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +33,7 @@ public class State implements StateInterface {
 	 * @return the initial weight
 	 */
 	@Override
-	public Object getInitialWeight() {
+	public InitialFinalWeight getInitialWeight() {
 		return this.pmInitialWeight;
 	}
 
@@ -42,7 +41,7 @@ public class State implements StateInterface {
 	 * @param initialFlag the initial weight to set
 	 */
 	@Override
-	public void setInitialWeight(Object initialWeight) {
+	public void setInitialWeight(InitialFinalWeight initialWeight) {
 		this.pmInitialWeight = initialWeight;
 	}
 
@@ -50,7 +49,7 @@ public class State implements StateInterface {
 	 * @return the final weight
 	 */
 	@Override
-	public Object getFinalWeight() {
+	public InitialFinalWeight getFinalWeight() {
 		return this.pmFinalWeight;
 	}
 
@@ -58,7 +57,7 @@ public class State implements StateInterface {
 	 * @param finalFlag the finalFlag to set
 	 */
 	@Override
-	public void setFinalWeight(Object finalWeight) {
+	public void setFinalWeight(InitialFinalWeight finalWeight) {
 		this.pmFinalWeight = finalWeight;
 	}
 
@@ -141,15 +140,14 @@ public class State implements StateInterface {
 	public void setHistory(List<State> states) {
 		this.pmHistoryStates = states;
 	}
-    
-    @Override
-    public String toString() {
-        return pmName;
-    }
-    
+
+	@Override
+	public String toString() {
+		return pmName;
+	}
 	private String pmName;
-	private Object pmInitialWeight;
-	private Object pmFinalWeight;
+	private InitialFinalWeight pmInitialWeight;
+	private InitialFinalWeight pmFinalWeight;
 	private List<Transition> pmIncomingTransitions;
 	private List<Transition> pmLoopTransitions;
 	private List<Transition> pmOutgoingTransitions;

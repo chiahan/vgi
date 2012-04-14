@@ -98,30 +98,35 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
             finalWeightTextField.setText(state.getFinalWeight().toString());
         }
     }
-    
-    public Object getDefaultExpression() {
+
+	public InitialFinalWeight getDefaultWeightValue() {
+		InitialFinalWeight initialFinalWeight = new InitialFinalWeight();
 		switch (automata.getWeight().semiring) {
 			case Z_INTEGER:
 			case ZMIN_MIN_TROPICAL:
 			case ZMAX_MAX_TROPICAL:
-				return new Integer(1);
+				initialFinalWeight.setValue(new Integer(1));
+				break;
 			case Q_RATIONAL:
 			case R_REAL:
-				return new Double(1);
+				initialFinalWeight.setValue(new Double(1));
+				break;
 			case B_BOOLEAN:
 			case F2_TWO_ELEMENT_FIELD:
-				return new Boolean(true);
+				initialFinalWeight.setValue(true);
+				break;
 			default:
 				return null;
 		}  // End switch (automata.getWeight().semiring)
-	}  // End public Object getDefaultExpression()
+		return initialFinalWeight;
+	}  // End public InitialFinalWeight getDefaultWeightValue()
 
     private void setFinalState(boolean isSet) {
         if (isSet) {
             if (this.finalEdge == null) {
-                Object expression = getDefaultExpression();
-                state.setFinalWeight(expression);
-                setInitialFinal(false, expression);
+                InitialFinalWeight initialFinalWeight = getDefaultWeightValue();
+                state.setFinalWeight(initialFinalWeight);
+                setInitialFinal(false, initialFinalWeight);
                 this.finalEdge = (mxCell) this.display.getFinalEdge(this.cell);
             }
         }else {
@@ -145,9 +150,9 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         if (isSet) {
             Object edge = display.getInitialEdge(cell);
             if (this.initialEdge == null) {
-                Object expression = getDefaultExpression();
-                state.setInitialWeight(expression);
-                setInitialFinal(true, expression);
+                InitialFinalWeight initialFinalWeight = getDefaultWeightValue();
+                state.setInitialWeight(initialFinalWeight);
+                setInitialFinal(true, initialFinalWeight);
                 this.initialEdge = (mxCell) this.display.getInitialEdge(this.cell);
             }
         }else {
@@ -380,52 +385,52 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 		if (this.initialEdge == null) {
 			return;
 		}
-		Object weight = null;
+		InitialFinalWeight initialFinalWeight = new InitialFinalWeight();
 		switch (automata.getWeight().semiring) {
 			case Z_INTEGER:
 			case ZMIN_MIN_TROPICAL:
 			case ZMAX_MAX_TROPICAL:
-				weight = Integer.valueOf(this.initialWeightTextField.getText());
+				initialFinalWeight.setValue(Integer.valueOf(this.initialWeightTextField.getText()));
 				break;
 			case Q_RATIONAL:
 			case R_REAL:
-				weight = Double.valueOf(this.initialWeightTextField.getText());
+				initialFinalWeight.setValue(Double.valueOf(this.initialWeightTextField.getText()));
 				break;
 			case B_BOOLEAN:
 			case F2_TWO_ELEMENT_FIELD:
-				weight = new Boolean(true);
+				initialFinalWeight.setValue(true);
 				break;
 			default:
 				return;
 		}  // End switch (automata.getWeight().semiring)
-		this.initialEdge.setValue(weight);
-		this.state.setInitialWeight(weight);
+		this.initialEdge.setValue(initialFinalWeight);
+		this.state.setInitialWeight(initialFinalWeight);
 	}//GEN-LAST:event_initialWeightTextFieldActionPerformed
 
 	private void finalWeightTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_finalWeightTextFieldActionPerformed
 		if (this.finalEdge == null) {
 			return;
 		}
-		Object weight = null;
+		InitialFinalWeight initialFinalWeight = new InitialFinalWeight();
 		switch (automata.getWeight().semiring) {
 			case Z_INTEGER:
 			case ZMIN_MIN_TROPICAL:
 			case ZMAX_MAX_TROPICAL:
-				weight = Integer.valueOf(this.finalWeightTextField.getText());
+				initialFinalWeight.setValue(Integer.valueOf(this.finalWeightTextField.getText()));
 				break;
 			case Q_RATIONAL:
 			case R_REAL:
-				weight = Double.valueOf(this.finalWeightTextField.getText());
+				initialFinalWeight.setValue(Double.valueOf(this.finalWeightTextField.getText()));
 				break;
 			case B_BOOLEAN:
 			case F2_TWO_ELEMENT_FIELD:
-				weight = new Boolean(true);
+				initialFinalWeight.setValue(new Boolean(true));
 				break;
 			default:
 				return;
 		}  // End switch (automata.getWeight().semiring)
-		this.finalEdge.setValue(weight);
-		this.state.setFinalWeight(weight);
+		this.finalEdge.setValue(initialFinalWeight);
+		this.state.setFinalWeight(initialFinalWeight);
 	}//GEN-LAST:event_finalWeightTextFieldActionPerformed
 
 	private void initialWeightTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_initialWeightTextFieldKeyPressed

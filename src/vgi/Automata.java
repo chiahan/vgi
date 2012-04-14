@@ -509,16 +509,18 @@ public class Automata implements AutomataInterface {
 				State state2 = secondInput.getAllStates().get(index2);
 				stateToInt2.put(state2, index2);
 				State newState = new State();
-				Object initialWeight1 = state1.getInitialWeight();
-				Object initialWeight2 = state2.getInitialWeight();
-				Object finalWeight1 = state1.getFinalWeight();
-				Object finalWeight2 = state2.getFinalWeight();
+				InitialFinalWeight initialWeight1 = state1.getInitialWeight();
+				InitialFinalWeight initialWeight2 = state2.getInitialWeight();
+				InitialFinalWeight finalWeight1 = state1.getFinalWeight();
+				InitialFinalWeight finalWeight2 = state2.getFinalWeight();
 				if ((initialWeight1 != null) && (initialWeight2 != null)) {
-					Object newWeightValue = multiplyWeights(outputAutomaton.getWeight().semiring, initialWeight1, initialWeight2);
+					InitialFinalWeight newWeightValue = new InitialFinalWeight();
+					newWeightValue.setValue(multiplyWeights(outputAutomaton.getWeight().semiring, initialWeight1.getValue(), initialWeight2.getValue()));
 					newState.setInitialWeight(newWeightValue);
 				}
 				if ((finalWeight1 != null) && (finalWeight2 != null)) {
-					Object newWeightValue = multiplyWeights(outputAutomaton.getWeight().semiring, finalWeight1, finalWeight2);
+					InitialFinalWeight newWeightValue = new InitialFinalWeight();
+					newWeightValue.setValue(multiplyWeights(outputAutomaton.getWeight().semiring, finalWeight1.getValue(), finalWeight2.getValue()));
 					newState.setFinalWeight(newWeightValue);
 				}
 				newState.setGeometricData(null);

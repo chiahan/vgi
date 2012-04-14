@@ -26,13 +26,13 @@ public interface StateInterface {
 
 	public void setName(String name);
 
-	public Object getInitialWeight();
+	public InitialFinalWeight getInitialWeight();
 
-	public void setInitialWeight(Object initialWeight);
+	public void setInitialWeight(InitialFinalWeight initialWeight);
 
-	public Object getFinalWeight();
+	public InitialFinalWeight getFinalWeight();
 
-	public void setFinalWeight(Object finalWeight);
+	public void setFinalWeight(InitialFinalWeight finalWeight);
 
 	public GeometricData getGeometricData();
 

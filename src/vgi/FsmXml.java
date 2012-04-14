@@ -692,46 +692,12 @@ public class FsmXml implements FsmXmlInterface {
 			} // End if (tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.START))
 			else if (tag.equals(TAG_INITIAL, Tag.Type.START)) {
 
-				String id = xmlStreamReader.getAttributeValue(null, ATR_STATE);
-				if (id == null) {
-					throw new FsmXmlException("Missing required \"" + ATR_STATE + "\" attribute of a \"" + tag.localName + "\" tag.");
-				}
-				State state = statesMap.get(id);
-				if (state == null) {
-					throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + tag.localName + "\" tag.");
-				}
-				tag = Tag.nextStartOrEnd(xmlStreamReader);
-				if (tag.equals(TAG_INITIAL, Tag.Type.END)) {
-					state.setInitialWeight(getSemiringIdentityValue(automata.getWeight().semiring));
-				} else if (tag.equals(TAG_WEIGHT, Tag.Type.START)
-						|| (Tag.findNextSpecified(xmlStreamReader, TAG_WEIGHT, Tag.Type.START))) {
-					Object weight = parseWeightTag(xmlStreamReader, automata);
-					state.setInitialWeight(weight);
-				} else {
-					Tag.assertTag(TAG_WEIGHT, Tag.Type.START);
-				}
+				parseInitialFinalTag(xmlStreamReader, automata, statesMap, true);
 
 			} // End if (tag.equals(TAG_INITIAL, Tag.Type.START))
 			else if (tag.equals(TAG_FINAL, Tag.Type.START)) {
 
-				String id = xmlStreamReader.getAttributeValue(null, ATR_STATE);
-				if (id == null) {
-					throw new FsmXmlException("Missing required \"" + ATR_STATE + "\" attribute of a \"" + tag.localName + "\" tag.");
-				}
-				State state = statesMap.get(id);
-				if (state == null) {
-					throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + tag.localName + "\" tag.");
-				}
-				tag = Tag.nextStartOrEnd(xmlStreamReader);
-				if (tag.equals(TAG_FINAL, Tag.Type.END)) {
-					state.setFinalWeight(getSemiringIdentityValue(automata.getWeight().semiring));
-				} else if (tag.equals(TAG_WEIGHT, Tag.Type.START)
-						|| (Tag.findNextSpecified(xmlStreamReader, TAG_WEIGHT, Tag.Type.START))) {
-					Object weight = parseWeightTag(xmlStreamReader, automata);
-					state.setFinalWeight(weight);
-				} else {
-					Tag.assertTag(TAG_WEIGHT, Tag.Type.START);
-				}
+				parseInitialFinalTag(xmlStreamReader, automata, statesMap, false);
 
 			}  // End if (tag.equals(TAG_FINAL, Tag.Type.START))
 
@@ -956,6 +922,61 @@ public class FsmXml implements FsmXmlInterface {
 		transition.setGeometricData(geometricData);
 	}  // End private void parseTransitionGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
 
+	protected void parseInitialFinalTag(
+			XMLStreamReader xmlStreamReader,
+			Automata automata,
+			Map<String, State> statesMap,
+			boolean isInitial)
+			throws XMLStreamException,
+			FsmXmlException {
+
+		Tag tag;
+		if (isInitial) {
+			tag = new Tag(TAG_INITIAL, Tag.Type.START);
+		} else {
+			tag = new Tag(TAG_FINAL, Tag.Type.START);
+		}
+
+		String id = xmlStreamReader.getAttributeValue(null, ATR_STATE);
+		if (id == null) {
+			throw new FsmXmlException("Missing required \"" + ATR_STATE + "\" attribute of a \"" + tag.localName + "\" tag.");
+		}
+		State state = statesMap.get(id);
+		if (state == null) {
+			throw new FsmXmlException("Missing state with id \"" + id + "\", which is referenced by a \"" + tag.localName + "\" tag.");
+		}
+
+		InitialFinalWeight initialFinalWeight = new InitialFinalWeight();
+		initialFinalWeight.setValue(getSemiringIdentityValue(automata.getWeight().semiring));
+
+		tag = Tag.nextStartOrEnd(xmlStreamReader);
+		while (!((isInitial && (tag.equals(TAG_INITIAL, Tag.Type.END))) || (!isInitial && (tag.equals(TAG_FINAL, Tag.Type.END))))) {
+
+			if (tag.equals(TAG_WEIGHT, Tag.Type.START)) {
+				initialFinalWeight.setValue(parseWeightTag(xmlStreamReader, automata));
+			} else if (tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.START)) {
+				String xStr = xmlStreamReader.getAttributeValue(null, ATR_X);
+				String yStr = xmlStreamReader.getAttributeValue(null, ATR_Y);
+				if ((xStr != null) && (yStr != null)) {
+					double x = Double.valueOf(xStr);
+					double y = Double.valueOf(yStr);
+					InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
+					geometricData.offset = new Point2D.Double(x, y);
+					initialFinalWeight.setGeometricData(geometricData);
+				}  // End if ((xStr != null) && (yStr != null))
+			}
+
+			tag = Tag.nextStartOrEnd(xmlStreamReader);
+		}  // End while (!((isInitial && (tag.equals(TAG_INITIAL, Tag.Type.END))) || (!isInitial && (tag.equals(TAG_FINAL, Tag.Type.END)))))
+
+		if (isInitial) {
+			state.setInitialWeight(initialFinalWeight);
+		} else {
+			state.setFinalWeight(initialFinalWeight);
+		}
+
+	}  // End protected void parseInitialFinalTag()
+
 	public static Object getSemiringIdentityValue(TAFKitInterface.AutomataType.Semiring semiring) {
 		switch (semiring) {
 			case Z_INTEGER:
@@ -967,7 +988,7 @@ public class FsmXml implements FsmXmlInterface {
 				return new Double(1);
 			case B_BOOLEAN:
 			case F2_TWO_ELEMENT_FIELD:
-				return new Boolean(true);
+				return true;
 			default:
 				throw new IllegalArgumentException("Unrecognizable semiring set.");
 		}  // End switch (automata.getWeight().semiring)
@@ -1382,41 +1403,57 @@ public class FsmXml implements FsmXmlInterface {
 		Iterator<State> allStatesIterator = allStates.iterator();
 		while (allStatesIterator.hasNext()) {
 			State state = allStatesIterator.next();
-			Object weight = state.getInitialWeight();
-			if (weight != null) {
+			InitialFinalWeight initialFinalWeight = state.getInitialWeight();
+			if (initialFinalWeight != null) {
 				xmlStreamWriter.writeStartElement(TAG_INITIAL);
 				xmlStreamWriter.writeAttribute(ATR_STATE, "s" + allStates.indexOf(state));
-				if (!(weight instanceof Boolean)) {
+				Object object = initialFinalWeight.getValue();
+				if (!(object instanceof Boolean)) {
 					xmlStreamWriter.writeStartElement(TAG_LABEL);
 					xmlStreamWriter.writeStartElement(TAG_LEFT_EXT_MUL);
-					writeWeightTag(xmlStreamWriter, weight);
+					writeWeightTag(xmlStreamWriter, object);
 					xmlStreamWriter.writeStartElement(TAG_ONE);
 					xmlStreamWriter.writeEndElement();  // End TAG_ONE
 					xmlStreamWriter.writeEndElement();  // End TAG_LEFT_EXT_MUL
 					xmlStreamWriter.writeEndElement();  // End TAG_LABEL
-				}  // End if (!(weight instanceof Boolean))
+				}  // End if (!(object instanceof Boolean))
+				InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
+				if ((geometricData != null) && (geometricData.offset != null)) {
+					xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
+					xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(geometricData.offset.getX()));
+					xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(geometricData.offset.getY()));
+					xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
+				}  // End if ((geometricData != null) && (geometricData.offset != null))
 				xmlStreamWriter.writeEndElement();  // End TAG_INITIAL
-			}
+			}  // End if (initialFinalWeight != null)
 		}  // End while (allStatesIterator.hasNext())
 
 		allStatesIterator = allStates.iterator();
 		while (allStatesIterator.hasNext()) {
 			State state = allStatesIterator.next();
-			Object weight = state.getFinalWeight();
-			if (weight != null) {
+			InitialFinalWeight initialFinalWeight = state.getFinalWeight();
+			if (initialFinalWeight != null) {
 				xmlStreamWriter.writeStartElement(TAG_FINAL);
 				xmlStreamWriter.writeAttribute(ATR_STATE, "s" + allStates.indexOf(state));
-				if (!(weight instanceof Boolean)) {
+				Object object = initialFinalWeight.getValue();
+				if (!(object instanceof Boolean)) {
 					xmlStreamWriter.writeStartElement(TAG_LABEL);
 					xmlStreamWriter.writeStartElement(TAG_LEFT_EXT_MUL);
-					writeWeightTag(xmlStreamWriter, weight);
+					writeWeightTag(xmlStreamWriter, object);
 					xmlStreamWriter.writeStartElement(TAG_ONE);
 					xmlStreamWriter.writeEndElement();  // End TAG_ONE
 					xmlStreamWriter.writeEndElement();  // End TAG_LEFT_EXT_MUL
 					xmlStreamWriter.writeEndElement();  // End TAG_LABEL
-				}  // End if (!(weight instanceof Boolean))
+				}  // End if (!(object instanceof Boolean))
+				InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
+				if ((geometricData != null) && (geometricData.offset != null)) {
+					xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
+					xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(geometricData.offset.getX()));
+					xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(geometricData.offset.getY()));
+					xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
+				}  // End if ((geometricData != null) && (geometricData.offset != null))
 				xmlStreamWriter.writeEndElement();  // End TAG_FINAL
-			}
+			}  // End if (initialFinalWeight != null)
 		}  // End while (allStatesIterator.hasNext())
 
 		xmlStreamWriter.writeEndElement();  // End TAG_TRANSITIONS

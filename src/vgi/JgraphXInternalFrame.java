@@ -12,7 +12,6 @@ import com.mxgraph.util.*;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
-import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -385,18 +384,47 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         Object parent = this.graph.getDefaultParent();
         Iterator<mxCell> cellIterator = this.initialFinalCells.iterator();
         while (cellIterator.hasNext()) {
-            mxCell vertex = cellIterator.next();
-            State state = this.cellToState(vertex);
+			mxCell vertex = cellIterator.next();
+			mxGeometry geometry = vertex.getGeometry();
+			if (geometry == null) {
+				continue;
+			}
 
-            Object initialWeight = state.getInitialWeight();
-            if (initialWeight != null) {
-                display.showInitialFinal(parent, initialWeight, vertex, false);
-            }
+			State state = this.cellToState(vertex);
 
-            Object finalWeight = state.getFinalWeight();
-            if (finalWeight != null) {
-                display.showInitialFinal(parent, finalWeight, vertex, true);
-            }
+			InitialFinalWeight initialFinalWeight = state.getInitialWeight();
+			if (initialFinalWeight != null) {
+				InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
+				if ((geometricData != null) && (geometricData.offset != null)) {
+					double x = geometry.getCenterX() + geometricData.offset.getX();
+					double y = geometry.getCenterY() + geometricData.offset.getY();
+					mxPoint point = new mxPoint(x, y);
+					mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, null, vertex);
+					edge.getGeometry().setSourcePoint(point);
+					edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
+					Object[] cells = {edge};
+					this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+				} else {
+					display.showInitialFinal(parent, initialFinalWeight, vertex, false);
+				}
+			}  // End if (initialFinalWeight != null)
+
+			initialFinalWeight = state.getFinalWeight();
+			if (initialFinalWeight != null) {
+				InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
+				if ((geometricData != null) && (geometricData.offset != null)) {
+					double x = geometry.getCenterX() + geometricData.offset.getX();
+					double y = geometry.getCenterY() + geometricData.offset.getY();
+					mxPoint point = new mxPoint(x, y);
+					mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, vertex, null);
+					edge.getGeometry().setTargetPoint(point);
+					edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
+					Object[] cells = {edge};
+					this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+				} else {
+					display.showInitialFinal(parent, initialFinalWeight, vertex, true);
+				}
+			}  // End if (initialFinalWeight != null)
         }  // End while (cellIterator.hasNext())
     }
 
@@ -659,7 +687,25 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 					* This edge is an arrow pointing to an initial state.
 					*/
 					State state = cellToStateMap.get(targetVertex);
-					state.setInitialWeight(edge.getValue());
+					object = edge.getValue();
+					if (object instanceof InitialFinalWeight) {
+						InitialFinalWeight initialFinalWeight = (InitialFinalWeight) object;
+						if ((edge.getGeometry() != null)
+								&& (edge.getGeometry().getSourcePoint() != null)
+								&& (targetVertex.getGeometry() != null)) {
+							mxPoint point = edge.getGeometry().getSourcePoint();
+							mxGeometry geometry = targetVertex.getGeometry();
+							InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
+							geometricData.offset = new Point2D.Double(point.getX() - geometry.getCenterX(), point.getY() - geometry.getCenterY());
+							initialFinalWeight.setGeometricData(geometricData);
+							geometricData = null;  // InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
+						} // End f ((edge.getGeometry() != null)
+							//	&& (edge.getGeometry().getSourcePoint() != null)
+							//	&& (targetVertex.getGeometry() != null))
+						state.setInitialWeight(initialFinalWeight);
+					} else {
+						state.setInitialWeight(new InitialFinalWeight(true));
+					}
 					continue;
 				}
 			} else {
@@ -668,7 +714,25 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 					 * This edge is an arrow pointing from a final state.
 					 */
 					State state = cellToStateMap.get(sourceVertex);
-					state.setFinalWeight(edge.getValue());
+					object = edge.getValue();
+					if (object instanceof InitialFinalWeight) {
+						InitialFinalWeight initialFinalWeight = (InitialFinalWeight) object;
+						if ((edge.getGeometry() != null)
+								&& (edge.getGeometry().getTargetPoint() != null)
+								&& (sourceVertex.getGeometry() != null)) {
+							mxPoint point = edge.getGeometry().getTargetPoint();
+							mxGeometry geometry = sourceVertex.getGeometry();
+							InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
+							geometricData.offset = new Point2D.Double(point.getX() - geometry.getCenterX(), point.getY() - geometry.getCenterY());
+							initialFinalWeight.setGeometricData(geometricData);
+							geometricData = null;  // InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
+						} // End if ((edge.getGeometry() != null)
+							//	&& (edge.getGeometry().getTargetPoint() != null)
+							//	&& (sourceVertex.getGeometry() != null))
+						state.setFinalWeight(initialFinalWeight);
+					} else {
+						state.setFinalWeight(new InitialFinalWeight(true));
+					}
 					continue;
 				}
 			}
