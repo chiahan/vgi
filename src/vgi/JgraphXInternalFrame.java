@@ -478,6 +478,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         Object vertex = graph.insertVertex(parent, Integer.toString(id), name,
                 x - 25, y - 25, 50, 50, "shape=ellipse;perimeter=ellipsePerimeter;");
         graph.setSelectionCell(vertex);
+		((mxCell) vertex).setConnectable(false);
 
         return (mxCell) vertex;
     }
