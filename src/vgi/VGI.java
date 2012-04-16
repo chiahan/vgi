@@ -838,9 +838,9 @@ public class VGI extends javax.swing.JFrame {
 			graphComponent.zoomActual();
 			mxRectangle graphBounds = graphComponent.getGraph().getGraphBounds();
 			Rectangle viewRect = graphComponent.getViewport().getVisibleRect();
-			double xScale = viewRect.getWidth() * 0.99 / graphBounds.getWidth();
-			double yScale = viewRect.getHeight() * 0.99 / graphBounds.getHeight();
-			if (xScale < yScale) {
+			double xScale = viewRect.getWidth() * 0.95 / graphBounds.getWidth();
+			double yScale = viewRect.getHeight() * 0.95 / graphBounds.getHeight();
+                        if (xScale < yScale) {
 				graphComponent.zoomTo(xScale, true);
 			} else {
 				graphComponent.zoomTo(yScale, true);
