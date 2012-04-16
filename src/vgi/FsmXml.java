@@ -1417,13 +1417,15 @@ public class FsmXml implements FsmXmlInterface {
 					xmlStreamWriter.writeEndElement();  // End TAG_LEFT_EXT_MUL
 					xmlStreamWriter.writeEndElement();  // End TAG_LABEL
 				}  // End if (!(object instanceof Boolean))
-				InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
-				if ((geometricData != null) && (geometricData.offset != null)) {
-					xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
-					xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(geometricData.offset.getX()));
-					xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(geometricData.offset.getY()));
-					xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
-				}  // End if ((geometricData != null) && (geometricData.offset != null))
+				if (writeGeometricAndDrawingData) {
+					InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
+					if ((geometricData != null) && (geometricData.offset != null)) {
+						xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
+						xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(geometricData.offset.getX()));
+						xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(geometricData.offset.getY()));
+						xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
+					}  // End if ((geometricData != null) && (geometricData.offset != null))
+				} // End if (writeGeometricAndDrawingData)
 				xmlStreamWriter.writeEndElement();  // End TAG_INITIAL
 			}  // End if (initialFinalWeight != null)
 		}  // End while (allStatesIterator.hasNext())
@@ -1445,13 +1447,15 @@ public class FsmXml implements FsmXmlInterface {
 					xmlStreamWriter.writeEndElement();  // End TAG_LEFT_EXT_MUL
 					xmlStreamWriter.writeEndElement();  // End TAG_LABEL
 				}  // End if (!(object instanceof Boolean))
-				InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
-				if ((geometricData != null) && (geometricData.offset != null)) {
-					xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
-					xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(geometricData.offset.getX()));
-					xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(geometricData.offset.getY()));
-					xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
-				}  // End if ((geometricData != null) && (geometricData.offset != null))
+				if (writeGeometricAndDrawingData) {
+					InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
+					if ((geometricData != null) && (geometricData.offset != null)) {
+						xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
+						xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(geometricData.offset.getX()));
+						xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(geometricData.offset.getY()));
+						xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
+					}  // End if ((geometricData != null) && (geometricData.offset != null))
+				} // End if (writeGeometricAndDrawingData)
 				xmlStreamWriter.writeEndElement();  // End TAG_FINAL
 			}  // End if (initialFinalWeight != null)
 		}  // End while (allStatesIterator.hasNext())
