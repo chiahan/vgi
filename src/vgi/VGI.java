@@ -291,7 +291,15 @@ public class VGI extends javax.swing.JFrame {
 			this.currentSettingMenuItem.setText("Current setting:  " + this.pmTAFKit.getTafKitPath().getAbsolutePath());
 			this.updateAlgorithmMenuItems();
 		}
+                
+                
+                
+                
+                
 	}  // End public VGI()
+        
+        
+        
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
@@ -1024,7 +1032,8 @@ public class VGI extends javax.swing.JFrame {
 		}
 	}//GEN-LAST:event_productMenuItemActionPerformed
 
-	private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
+	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
+        public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
 		if (fileChooser.getDialogType() != JFileChooser.SAVE_DIALOG) {
 			throw new RuntimeException("Input of getFileTobeSavedWithExtensionAppended() should be a JFileChooser used to show a \"Save File\" dialog.");

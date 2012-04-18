@@ -21,9 +21,7 @@ import java.awt.geom.Point2D;
 import java.io.File;
 import java.util.*;
 import java.util.Stack;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
+import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import vgi.TransitionInterface.GeometricData;
@@ -1232,6 +1230,24 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         setFinalMenuItem.setText("Set Final State");
         graphPopupMenu.add(setFinalMenuItem);
 
+        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosing(evt);
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosed(evt);
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
         addMouseWheelListener(new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 formMouseWheelMoved(evt);
@@ -1300,6 +1316,76 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
         transitionFrom = null;
     }//GEN-LAST:event_cancelMenuItemActionPerformed
+
+    private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
+        
+        /*if(modified){
+            
+            int check=JOptionPane.showConfirmDialog(this, "Save before leaving?", "", JOptionPane.YES_NO_OPTION);
+            if(check== JOptionPane.YES_OPTION){
+                
+                
+            }else{
+                
+                
+                
+            }
+        }*/
+        
+        
+        
+    }//GEN-LAST:event_formInternalFrameClosed
+
+    private void formInternalFrameClosing(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosing
+        // TODO add your handling code here:
+        if(modified){
+            
+            int check=JOptionPane.showConfirmDialog(this, "Save before leaving?", "", JOptionPane.YES_NO_OPTION);
+            if(check== JOptionPane.YES_OPTION){
+                
+                if(currentFile==null){
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setFileFilter(FsmXmlInterface.fileNameExtensionFilter);
+                    int returnValue = fileChooser.showSaveDialog(this);
+                    if(returnValue != JFileChooser.APPROVE_OPTION){
+			return;
+                    }
+                    
+                    //this.pmLastFolderForSaveFile = fileChooser.getCurrentDirectory();
+                    File file = VGI.getFileTobeSavedWithExtensionAppended(fileChooser);
+
+                    FsmXml fsmXml = new FsmXml();
+                    try{
+			ArrayList<Automata> currentAutomata = new ArrayList<Automata>();
+			currentAutomata.add(this.automata);
+			fsmXml.write(currentAutomata, file);
+                    }catch(Exception e){
+			e.printStackTrace();
+                    }
+                    
+                    
+                    
+                 }else{
+                        
+                        FsmXml fsmXml = new FsmXml();
+			try{
+				ArrayList<Automata> currentAutomata = new ArrayList<Automata>();
+				currentAutomata.add(this.automata);
+				fsmXml.write(currentAutomata, this.currentFile);
+				//.setModified(false);
+                        }catch(Exception e){
+				e.printStackTrace();
+			}
+                        
+                        
+                 }
+                 
+           }
+        }
+        
+        
+    }//GEN-LAST:event_formInternalFrameClosing
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addControlPointMenuItem;
     private javax.swing.JMenuItem addStateMenuItem;
