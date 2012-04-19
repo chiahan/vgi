@@ -12,11 +12,13 @@ public interface TransitionInterface {
 
 	public class GeometricData {
 
-		Point2D labelPosition;
-		List<Point2D> controlPoints;
+		public Point2D.Double labelPosAndDist;
+		public Point2D.Double labelOffset;
+		public List<Point2D> controlPoints;
 
 		public GeometricData() {
-			this.labelPosition = null;
+			this.labelPosAndDist = null;
+			this.labelOffset = null;
 			this.controlPoints = new ArrayList<Point2D>();
 		}
 	}  // End public class GeometricData

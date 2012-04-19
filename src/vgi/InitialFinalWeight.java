@@ -16,9 +16,13 @@ public class InitialFinalWeight {
 	public static class GeometricData {
 
 		public Point2D.Double offset;
+		public Point2D.Double labelPosAndDist;
+		public Point2D.Double labelOffset;
 
 		public GeometricData() {
 			this.offset = null;
+			this.labelPosAndDist = null;
+			this.labelOffset = null;
 		}
 	}  // End public static class GeometricData
 	protected Object value;

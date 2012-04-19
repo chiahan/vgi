@@ -393,35 +393,69 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			InitialFinalWeight initialFinalWeight = state.getInitialWeight();
 			if (initialFinalWeight != null) {
 				InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
-				if ((geometricData != null) && (geometricData.offset != null)) {
-					double x = geometry.getCenterX() + geometricData.offset.getX();
-					double y = geometry.getCenterY() + geometricData.offset.getY();
-					mxPoint point = new mxPoint(x, y);
-					mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, null, vertex);
-					edge.getGeometry().setSourcePoint(point);
-					edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
-					Object[] cells = {edge};
-					this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
-				} else {
+				if (geometricData == null) {
 					display.showInitialFinal(parent, initialFinalWeight, vertex, false);
-				}
+				} else {  // End if (geometricData == null)
+					if (geometricData.offset == null) {
+						display.showInitialFinal(parent, initialFinalWeight, vertex, false);
+					} else {  // End if (geometricData.offset == null)
+						double x = geometry.getCenterX() + geometricData.offset.getX();
+						double y = geometry.getCenterY() + geometricData.offset.getY();
+						mxPoint point = new mxPoint(x, y);
+						mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, null, vertex);
+						Object[] cells = {edge};
+						this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+						mxGeometry edgeGeometry = edge.getGeometry();
+						if (edgeGeometry != null) {
+							edgeGeometry.setSourcePoint(point);
+							if (geometricData.labelPosAndDist == null) {
+								edgeGeometry.setY(DEFAULT_LABEL_DISTANCE);
+							} else {
+								edgeGeometry.setX(geometricData.labelPosAndDist.getX());
+								edgeGeometry.setY(geometricData.labelPosAndDist.getY());
+							}
+							if (geometricData.labelOffset == null) {
+								edgeGeometry.setOffset(null);
+							} else {
+								edgeGeometry.setOffset(new mxPoint(geometricData.labelOffset));
+							}
+						}  // End if (edgeGeometry != null)
+					}  // End else part of if (geometricData.offset == null)
+				}  // End else part of if (geometricData == null)
 			}  // End if (initialFinalWeight != null)
 
 			initialFinalWeight = state.getFinalWeight();
 			if (initialFinalWeight != null) {
 				InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
-				if ((geometricData != null) && (geometricData.offset != null)) {
-					double x = geometry.getCenterX() + geometricData.offset.getX();
-					double y = geometry.getCenterY() + geometricData.offset.getY();
-					mxPoint point = new mxPoint(x, y);
-					mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, vertex, null);
-					edge.getGeometry().setTargetPoint(point);
-					edge.getGeometry().setY(DEFAULT_LABEL_DISTANCE);
-					Object[] cells = {edge};
-					this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
-				} else {
+				if (geometricData == null) {
 					display.showInitialFinal(parent, initialFinalWeight, vertex, true);
-				}
+				} else {  // End if (geometricData == null)
+					if (geometricData.offset == null) {
+						display.showInitialFinal(parent, initialFinalWeight, vertex, true);
+					} else {  // End if (geometricData.offset == null)
+						double x = geometry.getCenterX() + geometricData.offset.getX();
+						double y = geometry.getCenterY() + geometricData.offset.getY();
+						mxPoint point = new mxPoint(x, y);
+						mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, vertex, null);
+						Object[] cells = {edge};
+						this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+						mxGeometry edgeGeometry = edge.getGeometry();
+						if (edgeGeometry != null) {
+							edgeGeometry.setTargetPoint(point);
+							if (geometricData.labelPosAndDist == null) {
+								edgeGeometry.setY(DEFAULT_LABEL_DISTANCE);
+							} else {
+								edgeGeometry.setX(geometricData.labelPosAndDist.getX());
+								edgeGeometry.setY(geometricData.labelPosAndDist.getY());
+							}
+							if (geometricData.labelOffset == null) {
+								edgeGeometry.setOffset(null);
+							} else {
+								edgeGeometry.setOffset(new mxPoint(geometricData.labelOffset));
+							}
+						}  // End if (edgeGeometry != null)
+					}  // End else part of if (geometricData.offset == null)
+				}  // End else part of if (geometricData == null)
 			}  // End if (initialFinalWeight != null)
         }  // End while (cellIterator.hasNext())
     }
@@ -563,12 +597,17 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 		if (geometricData == null) {
 			geometricData = new TransitionInterface.GeometricData();
 		}
-		if (geometricData.labelPosition == null) {
+		if (geometricData.labelPosAndDist == null) {
 			geometry.setX(0);
 			geometry.setY(DEFAULT_LABEL_DISTANCE);
 		} else {
-			geometry.setX(geometricData.labelPosition.getX());
-			geometry.setY(geometricData.labelPosition.getY());
+			geometry.setX(geometricData.labelPosAndDist.getX());
+			geometry.setY(geometricData.labelPosAndDist.getY());
+		}
+		if (geometricData.labelOffset == null) {
+			geometry.setOffset(null);
+		} else {
+			geometry.setOffset(new mxPoint(geometricData.labelOffset));
 		}
 		if ((geometricData.controlPoints == null)
 				|| (geometricData.controlPoints.isEmpty())) {
@@ -688,18 +727,28 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 					object = edge.getValue();
 					if (object instanceof InitialFinalWeight) {
 						InitialFinalWeight initialFinalWeight = (InitialFinalWeight) object;
-						if ((edge.getGeometry() != null)
-								&& (edge.getGeometry().getSourcePoint() != null)
-								&& (targetVertex.getGeometry() != null)) {
-							mxPoint point = edge.getGeometry().getSourcePoint();
-							mxGeometry geometry = targetVertex.getGeometry();
+						mxGeometry edgeGeometry = edge.getGeometry();
+						if (edgeGeometry != null) {
 							InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
-							geometricData.offset = new Point2D.Double(point.getX() - geometry.getCenterX(), point.getY() - geometry.getCenterY());
-							initialFinalWeight.setGeometricData(geometricData);
+							mxPoint point = edgeGeometry.getSourcePoint();
+							mxGeometry vertexGeometry = targetVertex.getGeometry();
+							if ((point != null) && (vertexGeometry != null)) {
+								geometricData.offset = new Point2D.Double(point.getX() - vertexGeometry.getCenterX(), point.getY() - vertexGeometry.getCenterY());
+							}
+							if ((edgeGeometry.getX() != 0) || (edgeGeometry.getY() != DEFAULT_LABEL_DISTANCE)) {
+								geometricData.labelPosAndDist = new Point2D.Double(edgeGeometry.getX(), edgeGeometry.getY());
+							}
+							mxPoint labelOffset = edgeGeometry.getOffset();
+							if (labelOffset != null) {
+								geometricData.labelOffset = new Point2D.Double(labelOffset.getX(), labelOffset.getY());
+							}
+							if ((geometricData.offset != null)
+									|| (geometricData.labelPosAndDist != null)
+									|| (geometricData.labelOffset != null)) {
+								initialFinalWeight.setGeometricData(geometricData);
+							}
 							geometricData = null;  // InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
-						} // End f ((edge.getGeometry() != null)
-							//	&& (edge.getGeometry().getSourcePoint() != null)
-							//	&& (targetVertex.getGeometry() != null))
+						}  // End if (edgeGeometry != null)
 						state.setInitialWeight(initialFinalWeight);
 					} else {
 						state.setInitialWeight(new InitialFinalWeight(true));
@@ -715,18 +764,28 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 					object = edge.getValue();
 					if (object instanceof InitialFinalWeight) {
 						InitialFinalWeight initialFinalWeight = (InitialFinalWeight) object;
-						if ((edge.getGeometry() != null)
-								&& (edge.getGeometry().getTargetPoint() != null)
-								&& (sourceVertex.getGeometry() != null)) {
-							mxPoint point = edge.getGeometry().getTargetPoint();
-							mxGeometry geometry = sourceVertex.getGeometry();
+						mxGeometry edgeGeometry = edge.getGeometry();
+						if (edgeGeometry != null) {
 							InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
-							geometricData.offset = new Point2D.Double(point.getX() - geometry.getCenterX(), point.getY() - geometry.getCenterY());
-							initialFinalWeight.setGeometricData(geometricData);
+							mxPoint point = edgeGeometry.getTargetPoint();
+							mxGeometry vertexGeometry = sourceVertex.getGeometry();
+							if ((point != null) && (vertexGeometry != null)) {
+								geometricData.offset = new Point2D.Double(point.getX() - vertexGeometry.getCenterX(), point.getY() - vertexGeometry.getCenterY());
+							}
+							if ((edgeGeometry.getX() != 0) || (edgeGeometry.getY() != DEFAULT_LABEL_DISTANCE)) {
+								geometricData.labelPosAndDist = new Point2D.Double(edgeGeometry.getX(), edgeGeometry.getY());
+							}
+							mxPoint labelOffset = edgeGeometry.getOffset();
+							if (labelOffset != null) {
+								geometricData.labelOffset = new Point2D.Double(labelOffset.getX(), labelOffset.getY());
+							}
+							if ((geometricData.offset != null)
+									|| (geometricData.labelPosAndDist != null)
+									|| (geometricData.labelOffset != null)) {
+								initialFinalWeight.setGeometricData(geometricData);
+							}
 							geometricData = null;  // InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
-						} // End if ((edge.getGeometry() != null)
-							//	&& (edge.getGeometry().getTargetPoint() != null)
-							//	&& (sourceVertex.getGeometry() != null))
+						}  // End if (edgeGeometry != null)
 						state.setFinalWeight(initialFinalWeight);
 					} else {
 						state.setFinalWeight(new InitialFinalWeight(true));
@@ -746,7 +805,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			if (geometry != null) {
 				TransitionInterface.GeometricData geometricData = new TransitionInterface.GeometricData();
 				if ((geometry.getX() != 0) || (geometry.getY() != DEFAULT_LABEL_DISTANCE)) {
-					geometricData.labelPosition = new Point2D.Double(geometry.getX(), geometry.getY());
+					geometricData.labelPosAndDist = new Point2D.Double(geometry.getX(), geometry.getY());
+				}
+				mxPoint offset = geometry.getOffset();
+				if (offset != null) {
+					geometricData.labelOffset = new Point2D.Double(offset.getX(), offset.getY());
 				}
 				List<mxPoint> points = geometry.getPoints();
 				if ((points != null) && (!points.isEmpty())) {
