@@ -280,28 +280,29 @@ public class mxEdgeStyle
 			mxPoint controlPoint;
 			if ((points != null) && (!(points.isEmpty()))) {
 				controlPoint = view.transformControlPoint(state, points.get(0));
+				if (source.contains(controlPoint.getX(), controlPoint.getY())) {
+					controlPoint = new mxPoint(centerX + width, centerY);
+				}
 			} else {
 				controlPoint = new mxPoint(centerX + width, centerY);
 			}
 
+			mxPoint perimeterPoint = view.getPerimeterPoint(source, controlPoint, false);
+			if (perimeterPoint == null) {
+				perimeterPoint = new mxPoint(centerX, centerY);
+			}
+			centerX = perimeterPoint.getX();
+			centerY = perimeterPoint.getY();
 			double offsetX = controlPoint.getX() - centerX;
 			double offsetY = controlPoint.getY() - centerY;
 			/*
 			 * Rotate the offset vector from vertex center to control point by
 			 * 90 degrees counterclockwise and reduce the length to 1/10.
 			 */
-			double dx = offsetY / 10;
-			double dy = -offsetX / 10;
+			double dx = offsetY / 5;
+			double dy = -offsetX / 5;
 
-			if ((source.contains(centerX + offsetX * 0.7 + dx * 9, centerY + offsetY * 0.7 + dy * 0.9))
-					|| (source.contains(centerX + offsetX * 0.7 - dx * 9, centerY + offsetY * 0.7 - dy * 0.9))) {
-				controlPoint = new mxPoint(centerX + width, centerY);
-				offsetX = controlPoint.getX() - centerX;
-				offsetY = controlPoint.getY() - centerY;
-				dx = offsetY / 10;
-				dy = -offsetX / 10;
-			}
-
+			result.add(perimeterPoint);
 			result.add(new mxPoint(centerX + offsetX * 0.7 + dx * 0.9, centerY + offsetY * 0.7 + dy * 0.9));
 			result.add(new mxPoint(centerX + offsetX * 0.8 + dx, centerY + offsetY * 0.8 + dy));
 			result.add(new mxPoint(centerX + offsetX * 0.9 + dx * 0.9, centerY + offsetY * 0.9 + dy * 0.9));
@@ -310,6 +311,7 @@ public class mxEdgeStyle
 			result.add(new mxPoint(centerX + offsetX * 0.9 - dx * 0.9, centerY + offsetY * 0.9 - dy * 0.9));
 			result.add(new mxPoint(centerX + offsetX * 0.8 - dx, centerY + offsetY * 0.8 - dy));
 			result.add(new mxPoint(centerX + offsetX * 0.7 - dx * 0.9, centerY + offsetY * 0.7 - dy * 0.9));
+			result.add(perimeterPoint);
 		}
 	};
 

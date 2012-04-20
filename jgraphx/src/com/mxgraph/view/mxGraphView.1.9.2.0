@@ -1120,15 +1120,6 @@ public class mxGraphView extends mxEventSource
 		mxPoint p0 = state.getAbsolutePoint(0);
 		mxPoint pe = state.getAbsolutePoint(state.getAbsolutePointCount() - 1);
 
-		//
-		// For loop edges, let the edge style code handle all control points for routing.
-		//
-		if ((p0 == null) && (pe == null) && (source != null) && (source == target)) {
-			state.getAbsolutePoints().remove(p0);
-			state.getAbsolutePoints().remove(pe);
-			return;
-		}
-
 		if (pe == null && target != null)
 		{
 			updateFloatingTerminalPoint(state, target, source, false);
