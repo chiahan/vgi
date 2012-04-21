@@ -956,7 +956,9 @@ public class VGI extends javax.swing.JFrame {
 		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
 		if (JgraphXInternalFrame.class.isInstance(frame)) {
 			Automata inputAutomaton = ((JgraphXInternalFrame) frame).getAutomata();
-			Automata outputAutomaton = Automata.accessible(inputAutomaton);
+			AutomataHistory history = new AutomataHistory();
+			Automata outputAutomaton = Automata.accessible(inputAutomaton, history);
+			outputAutomaton = Layout.keepTheSame(outputAutomaton, history);
 			this.createInternalFrame(outputAutomaton, "Accessible of " + frame.getTitle());
 		}
 	}//GEN-LAST:event_accessibleMenuItemActionPerformed
