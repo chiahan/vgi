@@ -270,7 +270,7 @@ public class Automata implements AutomataInterface {
 		return outputAutomaton;  // Automata outputAutomaton = new Automata();
 	}  // End public static Automata accessible(Automata automata, AutomataHistory optionalHistory)
 
-	public static Automata coaccessible(Automata automata) {
+	public static Automata coaccessible(Automata automata, AutomataHistory optionalHistory) {
 
 		//
 		// Add final states to the list of coaccessible states because all final states are coaccessible by definition.
@@ -301,7 +301,12 @@ public class Automata implements AutomataInterface {
 		outputAutomaton.setWeight(automata.getWeight());
 		outputAutomaton.setAlphabet(automata.getAlphabet());
 		outputAutomaton.setOutputAlphabet(automata.getOutputAlphabet());
-		HashMap<State, State> mapOldToNewStates = new HashMap<State, State>();
+		HashMap<State, List<State>> mapOldToNewStates = new HashMap<State, List<State>>();
+		if (optionalHistory != null) {
+			optionalHistory.newToOldStatesMap = new HashMap<State, List<State>>();
+			optionalHistory.oldToNewStatesMap = mapOldToNewStates;
+			optionalHistory.transitionsMap = new HashMap<Transition, Transition>();
+		}
 
 		Iterator<State> iterateStates = automata.getAllStates().iterator();
 		while (iterateStates.hasNext()) {
@@ -314,12 +319,17 @@ public class Automata implements AutomataInterface {
 			newState.setInitialWeight(state.getInitialWeight());
 			newState.setFinalWeight(state.getFinalWeight());
 			newState.setGeometricData(null);
-			ArrayList<State> arrayList = new ArrayList<State>();
-			arrayList.add(state);
-			newState.setHistory(arrayList);
-			arrayList = null;  // ArrayList<State> arrayList = new ArrayList<State>();
 			outputAutomaton.addState(newState);
-			mapOldToNewStates.put(state, newState);
+			ArrayList<State> arrayList = new ArrayList<State>();
+			arrayList.add(newState);
+			mapOldToNewStates.put(state, arrayList);
+			arrayList = null;  // ArrayList<State> arrayList = new ArrayList<State>();
+			if (optionalHistory != null) {
+				arrayList = new ArrayList<State>();
+				arrayList.add(state);
+				optionalHistory.newToOldStatesMap.put(newState, arrayList);
+				arrayList = null;  // arrayList = new ArrayList<State>();
+			}  // End if (optionalHistory != null)
 			newState = null;  // State newState = new State();
 		}  // End while (iterateStates.hasNext())
 
@@ -331,20 +341,24 @@ public class Automata implements AutomataInterface {
 				continue;
 			}
 			Transition newTransition = new Transition();
-			newTransition.setSourceState(mapOldToNewStates.get(transition.getSourceState()));
-			newTransition.setTargetState(mapOldToNewStates.get(transition.getTargetState()));
+			newTransition.setSourceState(mapOldToNewStates.get(transition.getSourceState()).get(0));
+			newTransition.setTargetState(mapOldToNewStates.get(transition.getTargetState()).get(0));
 			newTransition.setLabel(transition.getLabel());
 			newTransition.setGeometricData(null);
 			outputAutomaton.addTransition(newTransition);
+			if (optionalHistory != null) {
+				optionalHistory.transitionsMap.put(transition, newTransition);
+				optionalHistory.transitionsMap.put(newTransition, transition);
+			}
 			newTransition = null;  // Transition newTransition = new Transition();
 		}  // End while (iterateTransitions.hasNext())
 
-		mapOldToNewStates = null;  // HashMap<State, State> mapOldToNewStates = new HashMap<State, State>();
+		mapOldToNewStates = null;  // HashMap<State, List<State>> mapOldToNewStates = new HashMap<State, List<State>>();
 
 		return outputAutomaton;  // Automata outputAutomaton = new Automata();
-	}  // End public static Automata coaccessible(Automata automata)
+	}  // End public static Automata coaccessible(Automata automata, AutomataHistory optionalHistory)
 
-	public static Automata removeEpsilonTransitions(Automata automata) {
+	public static Automata removeEpsilonTransitions(Automata automata, AutomataHistory optionalHistory) {
 
 		Automata outputAutomaton = new Automata();
 		outputAutomaton.setName("Removed epsilon transitions of " + automata.getName());
@@ -352,7 +366,13 @@ public class Automata implements AutomataInterface {
 		outputAutomaton.setWeight(automata.getWeight());
 		outputAutomaton.setAlphabet(automata.getAlphabet());
 		outputAutomaton.setOutputAlphabet(automata.getOutputAlphabet());
-		HashMap<State, State> mapOldToNewStates = new HashMap<State, State>();
+		HashMap<State, List<State>> mapNewToOldStates = new HashMap<State, List<State>>();
+		HashMap<State, List<State>> mapOldToNewStates = new HashMap<State, List<State>>();
+		if (optionalHistory != null) {
+			optionalHistory.newToOldStatesMap = mapNewToOldStates;
+			optionalHistory.oldToNewStatesMap = mapOldToNewStates;
+			optionalHistory.transitionsMap = new HashMap<Transition, Transition>();
+		}
 
 		//
 		// Copy all the states from the original automaton to the new automaton.
@@ -366,12 +386,15 @@ public class Automata implements AutomataInterface {
 			newState.setInitialWeight(state.getInitialWeight());
 			newState.setFinalWeight(state.getFinalWeight());
 			newState.setGeometricData(null);
+			outputAutomaton.addState(newState);
 			ArrayList<State> arrayList = new ArrayList<State>();
 			arrayList.add(state);
-			newState.setHistory(arrayList);
+			mapNewToOldStates.put(newState, arrayList);
 			arrayList = null;  // ArrayList<State> arrayList = new ArrayList<State>();
-			outputAutomaton.addState(newState);
-			mapOldToNewStates.put(state, newState);
+			arrayList = new ArrayList<State>();
+			arrayList.add(newState);
+			mapOldToNewStates.put(state, arrayList);
+			arrayList = null;  // arrayList = new ArrayList<State>();
 			newState = null;  // State newState = new State();
 		}  // End while (iterateStates.hasNext())
 
@@ -381,7 +404,7 @@ public class Automata implements AutomataInterface {
 		iterateStates = outputAutomaton.getAllStates().iterator();
 		while (iterateStates.hasNext()) {
 			State newState = iterateStates.next();
-			State state = newState.getHistory().get(0);
+			State state = mapNewToOldStates.get(newState).get(0);
 
 			//
 			// Add all the non-epsilon loop transitions to the new automaton.
@@ -398,6 +421,10 @@ public class Automata implements AutomataInterface {
 				newTransition.setLabel(transition.getLabel());
 				newTransition.setGeometricData(null);
 				outputAutomaton.addTransition(newTransition);
+				if (optionalHistory != null) {
+					optionalHistory.transitionsMap.put(transition, newTransition);
+					optionalHistory.transitionsMap.put(newTransition, transition);
+				}
 				newTransition = null;  // Transition newTransition = new Transition();
 			}  // End while (iterateTransitions.hasNext())
 
@@ -420,10 +447,14 @@ public class Automata implements AutomataInterface {
 				}
 				Transition newTransition = new Transition();
 				newTransition.setSourceState(newState);
-				newTransition.setTargetState(mapOldToNewStates.get(targetState));
+				newTransition.setTargetState(mapOldToNewStates.get(targetState).get(0));
 				newTransition.setLabel(transition.getLabel());
 				newTransition.setGeometricData(null);
 				outputAutomaton.addTransition(newTransition);
+				if (optionalHistory != null) {
+					optionalHistory.transitionsMap.put(transition, newTransition);
+					optionalHistory.transitionsMap.put(newTransition, transition);
+				}
 				newTransition = null;  // Transition newTransition = new Transition();
 			}  // End while (iterateTransitions.hasNext())
 
@@ -449,7 +480,7 @@ public class Automata implements AutomataInterface {
 					}
 					Transition newTransition = new Transition();
 					newTransition.setSourceState(newState);
-					newTransition.setTargetState(mapOldToNewStates.get(closureState));
+					newTransition.setTargetState(mapOldToNewStates.get(closureState).get(0));
 					newTransition.setLabel(transition.getLabel());
 					newTransition.setGeometricData(null);
 					outputAutomaton.addTransition(newTransition);
@@ -473,7 +504,7 @@ public class Automata implements AutomataInterface {
 					}
 					Transition newTransition = new Transition();
 					newTransition.setSourceState(newState);
-					newTransition.setTargetState(mapOldToNewStates.get(targetState));
+					newTransition.setTargetState(mapOldToNewStates.get(targetState).get(0));
 					newTransition.setLabel(transition.getLabel());
 					newTransition.setGeometricData(null);
 					outputAutomaton.addTransition(newTransition);
@@ -486,10 +517,11 @@ public class Automata implements AutomataInterface {
 
 		}  // End while (iterateStates.hasNext())
 
-		mapOldToNewStates = null;  // HashMap<State, State> mapOldToNewStates = new HashMap<State, State>();
+		mapNewToOldStates = null;  // HashMap<State, List<State>> mapNewToOldStates = new HashMap<State, List<State>>();
+		mapOldToNewStates = null;  // HashMap<State, List<State>> mapOldToNewStates = new HashMap<State, List<State>>();
 
 		return outputAutomaton;  // Automata outputAutomaton = new Automata();
-	}  // End public static Automata removeEpsilonTransitions(Automata automata)
+	}  // End public static Automata removeEpsilonTransitions(Automata automata, AutomataHistory optionalHistory)
 
 	public static Automata product(Automata firstInput, Automata secondInput) {
 

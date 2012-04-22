@@ -967,7 +967,9 @@ public class VGI extends javax.swing.JFrame {
 		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
 		if (JgraphXInternalFrame.class.isInstance(frame)) {
 			Automata inputAutomaton = ((JgraphXInternalFrame) frame).getAutomata();
-			Automata outputAutomaton = Automata.coaccessible(inputAutomaton);
+			AutomataHistory history = new AutomataHistory();
+			Automata outputAutomaton = Automata.coaccessible(inputAutomaton, history);
+			outputAutomaton = Layout.keepTheSame(outputAutomaton, history);
 			this.createInternalFrame(outputAutomaton, "Coccessible of " + frame.getTitle());
 		}
 	}//GEN-LAST:event_coaccessibleMenuItemActionPerformed
@@ -976,7 +978,9 @@ public class VGI extends javax.swing.JFrame {
 		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
 		if (JgraphXInternalFrame.class.isInstance(frame)) {
 			Automata inputAutomaton = ((JgraphXInternalFrame) frame).getAutomata();
-			Automata outputAutomaton = Automata.removeEpsilonTransitions(inputAutomaton);
+			AutomataHistory history = new AutomataHistory();
+			Automata outputAutomaton = Automata.removeEpsilonTransitions(inputAutomaton, history);
+			outputAutomaton = Layout.keepTheSame(outputAutomaton, history);
 			this.createInternalFrame(outputAutomaton, "Removed epsilon transitions of " + frame.getTitle());
 		}
 	}//GEN-LAST:event_removeEpsilonTransitionsMenuItemActionPerformed
