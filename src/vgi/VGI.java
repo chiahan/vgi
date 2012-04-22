@@ -1031,7 +1031,9 @@ public class VGI extends javax.swing.JFrame {
 			return;
 		}
 		try {
-			Automata outputAutomaton = Automata.product(firstInput, automataList.get(0));
+			AutomataHistory history = new AutomataHistory();
+			Automata outputAutomaton = Automata.product(firstInput, automataList.get(0), history);
+			outputAutomaton = Layout.productGrid(outputAutomaton, history);
 			this.createInternalFrame(outputAutomaton, "Product automaton of " + frame.getTitle() + " and " + file.getName());
 		} catch (IllegalArgumentException illegalArgumentException) {
 			JOptionPane.showMessageDialog(this, illegalArgumentException.getMessage(), "Error!", JOptionPane.WARNING_MESSAGE);
