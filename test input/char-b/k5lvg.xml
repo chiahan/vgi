@@ -1,0 +1,161 @@
+<fsmxml xmlns="http://vaucanson.lrde.epita.fr" version="1.0">
+  <automaton>
+    <valueType>
+      <writingData closePar=")" openPar="(" plusSym="+" spacesSym=" " starSym="*" timesSym="." weightClosing="}" weightOpening="{" zeroSym="0"/>
+      <semiring operations="classical" set="B" type="numerical"/>
+      <monoid genDescrip="enum" genKind="simple" genSort="letters" type="free">
+        <writingData identitySym="1"/>
+        <monGen value="a"/>
+        <monGen value="b"/>
+      </monoid>
+    </valueType>
+    <automatonStruct>
+      <states>
+        <state id="s0" name="s0">
+          <geometricData x="125.0" y="75.0"/>
+        </state>
+        <state id="s1" name="s1">
+          <geometricData x="125.0" y="165.0"/>
+        </state>
+        <state id="s2" name="s2">
+          <geometricData x="125.0" y="255.0"/>
+        </state>
+        <state id="s3" name="s3">
+          <geometricData x="125.0" y="345.0"/>
+        </state>
+        <state id="s4" name="s4">
+          <geometricData x="125.0" y="435.0"/>
+        </state>
+      </states>
+      <transitions>
+        <transition source="s0" target="s1">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s1" target="s2">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s2" target="s3">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s3" target="s4">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s0" target="s2">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+          <geometricData labelPos="0.0" labelDist="2.0" labelOffsetX="7.0" labelOffsetY="-24.0">
+            <controlPoint x="90.0" y="160.0"/>
+          </geometricData>
+        </transition>
+        <transition source="s0" target="s3">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+          <geometricData>
+            <controlPoint x="60.0" y="220.0"/>
+          </geometricData>
+        </transition>
+        <transition source="s0" target="s4">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+          <geometricData>
+            <controlPoint x="20.0" y="250.0"/>
+          </geometricData>
+        </transition>
+        <transition source="s1" target="s3">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+          <geometricData>
+            <controlPoint x="160.0" y="260.0"/>
+          </geometricData>
+        </transition>
+        <transition source="s1" target="s4">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+          <geometricData>
+            <controlPoint x="200.0" y="300.0"/>
+          </geometricData>
+        </transition>
+        <transition source="s2" target="s4">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+          <geometricData labelPos="0.0" labelDist="-9.0" labelOffsetX="-3.0" labelOffsetY="7.0">
+            <controlPoint x="90.0" y="350.0"/>
+          </geometricData>
+        </transition>
+        <transition source="s0" target="s0">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s1" target="s1">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s2" target="s2">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+          <geometricData labelPos="0.0" labelDist="8.0" labelOffsetX="18.0" labelOffsetY="-9.0">
+            <controlPoint x="80.0" y="250.0"/>
+          </geometricData>
+        </transition>
+        <transition source="s3" target="s3">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+          <geometricData labelPos="0.0" labelDist="10.0" labelOffsetX="-15.0" labelOffsetY="-15.0"/>
+        </transition>
+        <transition source="s4" target="s4">
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+      </transitions>
+    </automatonStruct>
+  </automaton>
+</fsmxml>
