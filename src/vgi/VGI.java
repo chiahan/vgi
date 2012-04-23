@@ -357,6 +357,7 @@ public class VGI extends javax.swing.JFrame {
         layoutMenu = new javax.swing.JMenu();
         circleMenuItem = new javax.swing.JMenuItem();
         hierarchicalMenuItem = new javax.swing.JMenuItem();
+        featureMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -490,7 +491,6 @@ public class VGI extends javax.swing.JFrame {
         infoSplitPane.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         infoSplitPane.setMaximumSize(new java.awt.Dimension(300, 600));
         infoSplitPane.setMinimumSize(new java.awt.Dimension(300, 600));
-        infoSplitPane.setOpaque(false);
         infoSplitPane.setPreferredSize(new java.awt.Dimension(300, 600));
 
         infoPanel.setMinimumSize(new java.awt.Dimension(300, 400));
@@ -649,6 +649,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         layoutMenu.add(hierarchicalMenuItem);
+
+        featureMenuItem.setText("feature");
+        featureMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                featureMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(featureMenuItem);
 
         menuBar.add(layoutMenu);
 
@@ -1040,6 +1048,14 @@ public class VGI extends javax.swing.JFrame {
 		}
 	}//GEN-LAST:event_productMenuItemActionPerformed
 
+    private void featureMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_featureMenuItemActionPerformed
+        // TODO add your handling code here:
+        JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (JgraphXInternalFrame.class.isInstance(frame)) {
+			((JgraphXInternalFrame) frame).doFeatureLayout();
+		}
+    }//GEN-LAST:event_featureMenuItemActionPerformed
+
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
@@ -1182,6 +1198,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenu editMenu;
     private javax.swing.JPopupMenu.Separator editMenuSeparator1;
     private javax.swing.JMenuItem exitMenuItem;
+    private javax.swing.JMenuItem featureMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JPopupMenu.Separator fileMenuSeparator1;
     private javax.swing.JButton fitWindowButton;

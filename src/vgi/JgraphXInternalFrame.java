@@ -2,6 +2,7 @@ package vgi;
 
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.layout.mxCircleLayout;
+import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.swing.handler.mxKeyboardHandler;
@@ -660,6 +661,63 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         mxHierarchicalLayout layout = new mxHierarchicalLayout(this.graph);
         layout.execute(this.graph.getDefaultParent());
     }  // End public void doHierarchicalLayout()
+    
+    public void doFeatureLayout() {
+        
+        graph.getModel().beginUpdate();
+	try {
+         Map<mxCell, List<mxCell>> CycleFeatureNode = new HashMap<mxCell, List<mxCell>>();
+                        
+                        
+                        PreProcess cycleFilter = new PreProcess(graph);
+                        CycleFeatureNode = cycleFilter.getFeatureNodeList();
+                        
+                        List<mxCell> childs = new ArrayList<mxCell>();
+                        Collection collection = CycleFeatureNode.keySet();
+                        Iterator iterator = collection.iterator();
+                        while(iterator.hasNext()) {
+                            mxCell FeatureNode = (mxCell)iterator.next();
+                            childs = CycleFeatureNode.get(FeatureNode);
+                            for(mxCell child : childs)
+                            (FeatureNode).insert(child);
+                        }
+                        
+                        TreeLayout layout = new TreeLayout(graph); 
+                        layout.execute(this.graph.getDefaultParent());  
+                        
+                        iterator = collection.iterator();
+                          while(iterator.hasNext()) {
+                            
+                            CircleLayout circleLayout = new CircleLayout(graph);
+
+                            mxCell FeatureNode = (mxCell)iterator.next();
+                            
+                            circleLayout.setMoveCircle(true);
+                            circleLayout.setX0(FeatureNode.getGeometry().getY());
+                            circleLayout.setY0(FeatureNode.getGeometry().getX());
+                            circleLayout.setRadius(40);
+                            circleLayout.execute(FeatureNode);
+                            
+                        }
+                        
+                        iterator = collection.iterator();
+                        
+                        
+                        while(iterator.hasNext()) {
+                            mxCell FeatureNode = (mxCell)iterator.next();
+                            graph.ungroupCells(new Object[]{FeatureNode});
+                        }
+                        
+                       
+                        mxParallelEdgeLayout layout2 = new mxParallelEdgeLayout(graph);
+                        layout2.execute(graph.getDefaultParent());
+                        
+                        EdgeRoutingLayout layout3 = new EdgeRoutingLayout(graph);
+                        layout3.execute(graph.getDefaultParent());
+                        } finally {
+			graph.getModel().endUpdate();
+		}
+    }  
 
 	public Automata getAutomata() {
 
