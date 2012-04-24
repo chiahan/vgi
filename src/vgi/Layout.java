@@ -5,6 +5,7 @@
 package vgi;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -138,11 +139,64 @@ public class Layout {
 		while (iterateTransitions.hasNext()) {
 			Transition transition = iterateTransitions.next();
 			Transition outTransition = new Transition();
-			outTransition.setSourceState(inToOutStatesMap.get(transition.getSourceState()));
-			outTransition.setTargetState(inToOutStatesMap.get(transition.getTargetState()));
+			State sourceState = transition.getSourceState();
+			State targetState = transition.getTargetState();
+			outTransition.setSourceState(inToOutStatesMap.get(sourceState));
+			outTransition.setTargetState(inToOutStatesMap.get(targetState));
 			outTransition.setLabel(transition.getLabel());
 			outTransition.setGeometricData(null);
 			outputAutomaton.addTransition(outTransition);
+
+			if (history.newToOldTransitionsMap == null) {
+				outTransition = null;  // Transition outTransition = new Transition();
+				continue;
+			}
+			List<Transition> oldTransitionsList = history.newToOldTransitionsMap.get(transition);
+			if ((oldTransitionsList == null) || (oldTransitionsList.size() < 2)) {
+				outTransition = null;  // Transition outTransition = new Transition();
+				continue;
+			}
+
+			List<State> oldSourceStates = history.newToOldStatesMap.get(sourceState);
+			List<State> oldTargetStates = history.newToOldStatesMap.get(targetState);
+			Transition oldTransition;
+			double oldToNewOffsetX;
+			double oldToNewOffsetY;
+			if (oldSourceStates.get(1) == oldTargetStates.get(1)) {
+				//
+				// Vertical or loop transitions
+				//
+				oldTransition = oldTransitionsList.get(0);
+				oldToNewOffsetX = outTransition.getSourceState().getGeometricData().location.getX() - oldSourceStates.get(0).getGeometricData().location.getX();
+				oldToNewOffsetY = outTransition.getSourceState().getGeometricData().location.getY() - oldSourceStates.get(0).getGeometricData().location.getY();
+			} else if (oldSourceStates.get(0) == oldTargetStates.get(0)) {
+				//
+				// Horizontal transitions
+				//
+				oldTransition = oldTransitionsList.get(1);
+				oldToNewOffsetX = outTransition.getSourceState().getGeometricData().location.getX() - oldSourceStates.get(1).getGeometricData().location.getX();
+				oldToNewOffsetY = outTransition.getSourceState().getGeometricData().location.getY() - oldSourceStates.get(1).getGeometricData().location.getY();
+			} else {
+				//
+				// Diagonal transitions
+				//
+				outTransition = null;  // Transition outTransition = new Transition();
+				continue;
+			}
+
+			TransitionInterface.GeometricData oldGeometricData = oldTransition.getGeometricData();
+			TransitionInterface.GeometricData geometricData = new TransitionInterface.GeometricData();
+			geometricData.labelPosAndDist = oldGeometricData.labelPosAndDist;
+			geometricData.labelOffset = oldGeometricData.labelOffset;
+			geometricData.controlPoints = new ArrayList<Point2D>();
+			Iterator<Point2D> iteratePoints = oldGeometricData.controlPoints.iterator();
+			while (iteratePoints.hasNext()) {
+				Point2D oldPoint = iteratePoints.next();
+				geometricData.controlPoints.add(new Point2D.Double(oldPoint.getX() + oldToNewOffsetX, oldPoint.getY() + oldToNewOffsetY));
+			}  // End while (iteratePoints.hasNext())
+			outTransition.setGeometricData(geometricData);
+			geometricData = null;  // TransitionInterface.GeometricData geometricData = new TransitionInterface.GeometricData();
+
 			outTransition = null;  // Transition outTransition = new Transition();
 		}  // End while (iterateTransitions.hasNext())
 
