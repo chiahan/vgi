@@ -182,6 +182,121 @@ public class Automata implements AutomataInterface {
 		Automata automataWithWeight = new Automata(weight);
 	}
 
+	public static Automata mergeSimilarTransitions(Automata automata, AutomataHistory optionalHistory) {
+
+		Automata outputAutomaton = new Automata();
+		outputAutomaton.setName(automata.getName());
+		outputAutomaton.setWritingData(automata.getWritingData());
+		outputAutomaton.setWeight(automata.getWeight());
+		outputAutomaton.setAlphabet(automata.getAlphabet());
+		outputAutomaton.setOutputAlphabet(automata.getOutputAlphabet());
+		HashMap<State, List<State>> mapOldToNewStates = new HashMap<State, List<State>>();
+		if (optionalHistory != null) {
+			optionalHistory.newToOldStatesMap = new HashMap<State, List<State>>();
+			optionalHistory.oldToNewStatesMap = mapOldToNewStates;
+			optionalHistory.newToOldTransitionsMap = new HashMap<Transition, List<Transition>>();
+			optionalHistory.oldToNewTransitionsMap = new HashMap<Transition, List<Transition>>();
+		}  // End if (optionalHistory != null)
+
+		Iterator<State> iterateStates = automata.getAllStates().iterator();
+		while (iterateStates.hasNext()) {
+			State state = iterateStates.next();
+			State newState = new State();
+			newState.setName(state.getName());
+			newState.setInitialWeight(state.getInitialWeight());
+			newState.setFinalWeight(state.getFinalWeight());
+			newState.setGeometricData(state.getGeometricData());
+			outputAutomaton.addState(newState);
+			ArrayList<State> arrayList = new ArrayList<State>();
+			arrayList.add(newState);
+			mapOldToNewStates.put(state, arrayList);
+			arrayList = null;  // ArrayList<State> arrayList = new ArrayList<State>();
+			if (optionalHistory != null) {
+				arrayList = new ArrayList<State>();
+				arrayList.add(state);
+				optionalHistory.newToOldStatesMap.put(newState, arrayList);
+				arrayList = null;  // arrayList = new ArrayList<State>();
+			}  // End if (optionalHistory != null)
+			newState = null;  // State newState = new State();
+		}  // End while (iterateStates.hasNext())
+
+		iterateStates = automata.getAllStates().iterator();
+		while (iterateStates.hasNext()) {
+
+			State state = iterateStates.next();
+			List<Transition> loopAndOutgoingTransitions = new ArrayList<Transition>();
+			loopAndOutgoingTransitions.addAll(state.getLoopTransitions());
+			loopAndOutgoingTransitions.addAll(state.getOutgoingTransitions());
+			int transitionsCount = loopAndOutgoingTransitions.size();
+			List<State> addedTargetStates = new ArrayList<State>();
+
+			for (int index = 0; index < transitionsCount; index++) {
+
+				Transition transition = loopAndOutgoingTransitions.get(index);
+				State targetState = transition.getTargetState();
+				if (addedTargetStates.contains(targetState)) {
+					continue;
+				}
+
+				addedTargetStates.add(targetState);
+				WeightedRegularExpression newLabel = transition.getLabel();
+				List<Transition> oldTransitionsList = new ArrayList<Transition>();
+				if (optionalHistory != null) {
+					oldTransitionsList.add(transition);
+				}
+
+				for (int index2 = index + 1; index2 < transitionsCount; index2++) {
+					Transition transition2 = loopAndOutgoingTransitions.get(index2);
+					State targetState2 = transition2.getTargetState();
+					if (!targetState.equals(targetState2)) {
+						continue;
+					}
+
+					WeightedRegularExpression.Sum sum = new WeightedRegularExpression.Sum();
+					sum.setAlphabet(newLabel.getAlphabet());
+					sum.setWeight(newLabel.getWeight());
+					sum.setWritingData(newLabel.getWritingData());
+					sum.setLeftExpression(newLabel);
+					sum.setRightExpression(transition2.getLabel());
+					newLabel = sum;
+					if (optionalHistory != null) {
+						oldTransitionsList.add(transition2);
+					}
+				}  // End for (int index2 = index + 1; index2 < transitionsCount; index2++)
+
+				Transition newTransition = new Transition();
+				newTransition.setSourceState(mapOldToNewStates.get(transition.getSourceState()).get(0));
+				newTransition.setTargetState(mapOldToNewStates.get(transition.getTargetState()).get(0));
+				newTransition.setLabel(newLabel);
+				newTransition.setGeometricData(null);
+				outputAutomaton.addTransition(newTransition);
+				if (optionalHistory != null) {
+					optionalHistory.newToOldTransitionsMap.put(newTransition, oldTransitionsList);
+					Iterator<Transition> iterateOldTransitions = oldTransitionsList.iterator();
+					while (iterateOldTransitions.hasNext()) {
+						Transition oldTransition = iterateOldTransitions.next();
+						List<Transition> list = new ArrayList();
+						list.add(newTransition);
+						optionalHistory.oldToNewTransitionsMap.put(oldTransition, list);
+						list = null;  // List<Transition> list = new ArrayList();
+					}  // End while (iterateTransitions.hasNext())
+				}  // End if (optionalHistory != null)
+				newTransition = null;  // Transition newTransition = new Transition();
+
+				oldTransitionsList = null;  // List<Transition> oldTransitionsList = new ArrayList<Transition>();
+
+			}  // End for (int index = 0; index < count; index++)
+
+			addedTargetStates = null;  // List<State> addedTargetStates = new ArrayList<State>();
+			loopAndOutgoingTransitions = null;  // List<Transition> loopAndOutgoingTransitions = new ArrayList<Transition>();
+
+		}  // End while (iterateStates.hasNext())
+
+		mapOldToNewStates = null;  // HashMap<State, List<State>> mapOldToNewStates = new HashMap<State, List<State>>();
+
+		return outputAutomaton;
+	}  // End public static Automata mergeSimilarTransitions(Automata automata, AutomataHistory optionalHistory)
+
 	public static Automata accessible(Automata automata, AutomataHistory optionalHistory) {
 
 		//

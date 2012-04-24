@@ -362,6 +362,7 @@ public class VGI extends javax.swing.JFrame {
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
         algorithmsMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
+        mergeSimilarTransitionsMenuItem = new javax.swing.JMenuItem();
         accessibleMenuItem = new javax.swing.JMenuItem();
         coaccessibleMenuItem = new javax.swing.JMenuItem();
         removeEpsilonTransitionsMenuItem = new javax.swing.JMenuItem();
@@ -675,6 +676,14 @@ public class VGI extends javax.swing.JFrame {
         currentSettingMenuItem.setEnabled(false);
         algorithmsMenu.add(currentSettingMenuItem);
         algorithmsMenu.add(algorithmsMenuSeparator1);
+
+        mergeSimilarTransitionsMenuItem.setText("Merge Similar Transitions");
+        mergeSimilarTransitionsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mergeSimilarTransitionsMenuItemActionPerformed(evt);
+            }
+        });
+        algorithmsMenu.add(mergeSimilarTransitionsMenuItem);
 
         accessibleMenuItem.setText("Accessible");
         accessibleMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -1056,6 +1065,17 @@ public class VGI extends javax.swing.JFrame {
 		}
     }//GEN-LAST:event_featureMenuItemActionPerformed
 
+	private void mergeSimilarTransitionsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mergeSimilarTransitionsMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JInternalFrame) {
+			Automata inputAutomaton = ((JgraphXInternalFrame) frame).getAutomata();
+			AutomataHistory history = new AutomataHistory();
+			Automata outputAutomaton = Automata.mergeSimilarTransitions(inputAutomaton, history);
+			outputAutomaton = Layout.keepTheSame(outputAutomaton, history);
+			this.createInternalFrame(outputAutomaton, frame.getTitle());
+		}  // End if (frame instanceof JInternalFrame)
+	}//GEN-LAST:event_mergeSimilarTransitionsMenuItemActionPerformed
+
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
@@ -1091,6 +1111,7 @@ public class VGI extends javax.swing.JFrame {
 			this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
 			this.algorithmsMenu.add(this.currentSettingMenuItem);
 			this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
+			this.algorithmsMenu.add(this.mergeSimilarTransitionsMenuItem);
 			this.algorithmsMenu.add(this.accessibleMenuItem);
 			this.algorithmsMenu.add(this.coaccessibleMenuItem);
 			this.algorithmsMenu.add(this.removeEpsilonTransitionsMenuItem);
@@ -1115,6 +1136,7 @@ public class VGI extends javax.swing.JFrame {
 		this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
 		this.algorithmsMenu.add(this.currentSettingMenuItem);
 		this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
+		this.algorithmsMenu.add(this.mergeSimilarTransitionsMenuItem);
 		this.algorithmsMenu.add(this.accessibleMenuItem);
 		this.algorithmsMenu.add(this.coaccessibleMenuItem);
 		this.algorithmsMenu.add(this.removeEpsilonTransitionsMenuItem);
@@ -1212,6 +1234,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JPanel mainPanel;
     private javax.swing.JSplitPane mainSplitPane;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem mergeSimilarTransitionsMenuItem;
     private javax.swing.JMenuItem newMenuItem;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JPanel outlinePanel;

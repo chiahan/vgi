@@ -238,6 +238,14 @@
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="algorithmsMenuSeparator1">
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mergeSimilarTransitionsMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Merge Similar Transitions"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mergeSimilarTransitionsMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="accessibleMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Accessible"/>
