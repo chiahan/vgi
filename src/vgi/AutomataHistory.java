@@ -15,5 +15,6 @@ public class AutomataHistory {
 
 	public HashMap<State, List<State>> newToOldStatesMap;
 	public HashMap<State, List<State>> oldToNewStatesMap;
-	public HashMap<Transition, Transition> transitionsMap;
+	public HashMap<Transition, List<Transition>> newToOldTransitionsMap;
+	public HashMap<Transition, List<Transition>> oldToNewTransitionsMap;
 }  // End public class AutomataHistory

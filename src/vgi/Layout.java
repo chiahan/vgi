@@ -61,16 +61,16 @@ public class Layout {
 			outTransition.setSourceState(inToOutStatesMap.get(transition.getSourceState()));
 			outTransition.setTargetState(inToOutStatesMap.get(transition.getTargetState()));
 			outTransition.setLabel(transition.getLabel());
-			if ((history.transitionsMap != null) && !(history.transitionsMap.isEmpty())) {
-				Transition oldTransition = history.transitionsMap.get(transition);
-				if (oldTransition != null) {
-					outTransition.setGeometricData(oldTransition.getGeometricData());
-				} else {
-					outTransition.setGeometricData(null);
-				}
-			} else {   // End if ((history.transitionsMap != null) && !(history.transitionsMap.isEmpty()))
-				outTransition.setGeometricData(null);
-			}
+			outTransition.setGeometricData(null);
+			if ((history.newToOldTransitionsMap != null) && !(history.newToOldTransitionsMap.isEmpty())) {
+				List<Transition> oldTransitionsList = history.newToOldTransitionsMap.get(transition);
+				if ((oldTransitionsList != null) && !(oldTransitionsList.isEmpty())) {
+					Transition oldTransition = oldTransitionsList.get(0);
+					if (oldTransition != null) {
+						outTransition.setGeometricData(oldTransition.getGeometricData());
+					}
+				}  // End if ((oldTransitionsList != null) && !(oldTransitionsList.isEmpty()))
+			}  // End if ((history.newToOldTransitionsMap != null) && !(history.newToOldTransitionsMap.isEmpty()))
 			outputAutomaton.addTransition(outTransition);
 			outTransition = null;  // Transition outTransition = new Transition();
 		}  // End while (iterateTransitions.hasNext())

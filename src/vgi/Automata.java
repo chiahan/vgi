@@ -217,8 +217,9 @@ public class Automata implements AutomataInterface {
 		if (optionalHistory != null) {
 			optionalHistory.newToOldStatesMap = new HashMap<State, List<State>>();
 			optionalHistory.oldToNewStatesMap = mapOldToNewStates;
-			optionalHistory.transitionsMap = new HashMap<Transition, Transition>();
-		}
+			optionalHistory.newToOldTransitionsMap = new HashMap<Transition, List<Transition>>();
+			optionalHistory.oldToNewTransitionsMap = new HashMap<Transition, List<Transition>>();
+		}  // End if (optionalHistory != null)
 
 		Iterator<State> iterateStates = automata.getAllStates().iterator();
 		while (iterateStates.hasNext()) {
@@ -259,9 +260,15 @@ public class Automata implements AutomataInterface {
 			newTransition.setGeometricData(null);
 			outputAutomaton.addTransition(newTransition);
 			if (optionalHistory != null) {
-				optionalHistory.transitionsMap.put(transition, newTransition);
-				optionalHistory.transitionsMap.put(newTransition, transition);
-			}
+				List<Transition> list = new ArrayList();
+				list.add(transition);
+				optionalHistory.newToOldTransitionsMap.put(newTransition, list);
+				list = null;  // List<Transition> list = new ArrayList();
+				list = new ArrayList();
+				list.add(newTransition);
+				optionalHistory.oldToNewTransitionsMap.put(transition, list);
+				list = null;  // list = new ArrayList();
+			}  // End if (optionalHistory != null)
 			newTransition = null;  // Transition newTransition = new Transition();
 		}  // End while (iterateTransitions.hasNext())
 
@@ -305,8 +312,9 @@ public class Automata implements AutomataInterface {
 		if (optionalHistory != null) {
 			optionalHistory.newToOldStatesMap = new HashMap<State, List<State>>();
 			optionalHistory.oldToNewStatesMap = mapOldToNewStates;
-			optionalHistory.transitionsMap = new HashMap<Transition, Transition>();
-		}
+			optionalHistory.newToOldTransitionsMap = new HashMap<Transition, List<Transition>>();
+			optionalHistory.oldToNewTransitionsMap = new HashMap<Transition, List<Transition>>();
+		}  // End if (optionalHistory != null)
 
 		Iterator<State> iterateStates = automata.getAllStates().iterator();
 		while (iterateStates.hasNext()) {
@@ -347,9 +355,15 @@ public class Automata implements AutomataInterface {
 			newTransition.setGeometricData(null);
 			outputAutomaton.addTransition(newTransition);
 			if (optionalHistory != null) {
-				optionalHistory.transitionsMap.put(transition, newTransition);
-				optionalHistory.transitionsMap.put(newTransition, transition);
-			}
+				List<Transition> list = new ArrayList();
+				list.add(transition);
+				optionalHistory.newToOldTransitionsMap.put(newTransition, list);
+				list = null;  // List<Transition> list = new ArrayList();
+				list = new ArrayList();
+				list.add(newTransition);
+				optionalHistory.oldToNewTransitionsMap.put(transition, list);
+				list = null;  // list = new ArrayList();
+			}  // End if (optionalHistory != null)
 			newTransition = null;  // Transition newTransition = new Transition();
 		}  // End while (iterateTransitions.hasNext())
 
@@ -371,8 +385,9 @@ public class Automata implements AutomataInterface {
 		if (optionalHistory != null) {
 			optionalHistory.newToOldStatesMap = mapNewToOldStates;
 			optionalHistory.oldToNewStatesMap = mapOldToNewStates;
-			optionalHistory.transitionsMap = new HashMap<Transition, Transition>();
-		}
+			optionalHistory.newToOldTransitionsMap = new HashMap<Transition, List<Transition>>();
+			optionalHistory.oldToNewTransitionsMap = new HashMap<Transition, List<Transition>>();
+		}  // End if (optionalHistory != null)
 
 		//
 		// Copy all the states from the original automaton to the new automaton.
@@ -422,9 +437,15 @@ public class Automata implements AutomataInterface {
 				newTransition.setGeometricData(null);
 				outputAutomaton.addTransition(newTransition);
 				if (optionalHistory != null) {
-					optionalHistory.transitionsMap.put(transition, newTransition);
-					optionalHistory.transitionsMap.put(newTransition, transition);
-				}
+					List<Transition> list = new ArrayList();
+					list.add(transition);
+					optionalHistory.newToOldTransitionsMap.put(newTransition, list);
+					list = null;  // List<Transition> list = new ArrayList();
+					list = new ArrayList();
+					list.add(newTransition);
+					optionalHistory.oldToNewTransitionsMap.put(transition, list);
+					list = null;  // list = new ArrayList();
+				}  // End if (optionalHistory != null)
 				newTransition = null;  // Transition newTransition = new Transition();
 			}  // End while (iterateTransitions.hasNext())
 
@@ -452,9 +473,15 @@ public class Automata implements AutomataInterface {
 				newTransition.setGeometricData(null);
 				outputAutomaton.addTransition(newTransition);
 				if (optionalHistory != null) {
-					optionalHistory.transitionsMap.put(transition, newTransition);
-					optionalHistory.transitionsMap.put(newTransition, transition);
-				}
+					List<Transition> list = new ArrayList();
+					list.add(transition);
+					optionalHistory.newToOldTransitionsMap.put(newTransition, list);
+					list = null;  // List<Transition> list = new ArrayList();
+					list = new ArrayList();
+					list.add(newTransition);
+					optionalHistory.oldToNewTransitionsMap.put(transition, list);
+					list = null;  // list = new ArrayList();
+				}  // End if (optionalHistory != null)
 				newTransition = null;  // Transition newTransition = new Transition();
 			}  // End while (iterateTransitions.hasNext())
 
@@ -547,8 +574,9 @@ public class Automata implements AutomataInterface {
 		if (optionalHistory != null) {
 			optionalHistory.newToOldStatesMap = mapNewToOldStates;
 			optionalHistory.oldToNewStatesMap = new HashMap<State, List<State>>();
-			optionalHistory.transitionsMap = null;
-		}
+			optionalHistory.newToOldTransitionsMap = new HashMap<Transition, List<Transition>>();
+			optionalHistory.oldToNewTransitionsMap = new HashMap<Transition, List<Transition>>();
+		}  // End if (optionalHistory != null)v
 
 		int count1 = firstInput.getAllStates().size();
 		int count2 = secondInput.getAllStates().size();
@@ -670,6 +698,25 @@ public class Automata implements AutomataInterface {
 					newTransition.setLabel(newLabel);
 					newTransition.setGeometricData(null);
 					outputAutomaton.addTransition(newTransition);
+					if (optionalHistory != null) {
+						List<Transition> list = new ArrayList<Transition>();
+						list.add(transition1);
+						list.add(transition2);
+						optionalHistory.newToOldTransitionsMap.put(newTransition, list);
+						list = null;  // List<Transition> list = new ArrayList<Transition>();
+						list = optionalHistory.oldToNewTransitionsMap.get(transition1);
+						if (list == null) {
+							list = new ArrayList<Transition>();
+							optionalHistory.oldToNewTransitionsMap.put(transition1, list);
+						}
+						list.add(newTransition);
+						list = optionalHistory.oldToNewTransitionsMap.get(transition2);
+						if (list == null) {
+							list = new ArrayList<Transition>();
+							optionalHistory.oldToNewTransitionsMap.put(transition2, list);
+						}
+						list.add(newTransition);
+					}  // End if (optionalHistory != null)
 					newTransition = null;  // Transition newTransition = new Transition();
 					newLabel = null;  // newLabel = new WeightedRegularExpression
 
