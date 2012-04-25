@@ -257,14 +257,14 @@ public class VGI extends javax.swing.JFrame {
 	private void createInternalFrame(Automata automata) {
 		JgraphXInternalFrame frame =
 				new JgraphXInternalFrame(infoSplitPane, new mxGraph(),
-				automata, "untitled");
+				automata, "untitled",this);
 		createInternalFrame(frame);
 	}
 
 	private void createInternalFrame(Automata automata, String filename) {
 		JgraphXInternalFrame frame =
 				new JgraphXInternalFrame(infoSplitPane, new mxGraph(),
-				automata, filename);
+				automata, filename,this);
 		createInternalFrame(frame);
 	}
 
@@ -916,12 +916,32 @@ public class VGI extends javax.swing.JFrame {
 
 	private void saveMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveMenuItemActionPerformed
 
-		JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
+		//JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
+
+		//if (selected.currentFile == null/* newlyCreatedFile*/) {
+		/*	this.saveAsMenuItemActionPerformed(evt);
+		} else {
+			FsmXml fsmXml = new FsmXml();
+			try {
+				ArrayList<Automata> currentAutomata = new ArrayList<Automata>();
+				currentAutomata.add(selected.getAutomata());
+				fsmXml.write(currentAutomata, selected.currentFile);
+				selected.setModified(false);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}*/
+                save();
+
+	}//GEN-LAST:event_saveMenuItemActionPerformed
+
+        public void save(){
+            JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
 
 		if (selected.currentFile == null/*
 				 * newlyCreatedFile
 				 */) {
-			this.saveAsMenuItemActionPerformed(evt);
+			saveAs();
 		} else {
 			FsmXml fsmXml = new FsmXml();
 			try {
@@ -934,11 +954,11 @@ public class VGI extends javax.swing.JFrame {
 			}
 		}
 
-	}//GEN-LAST:event_saveMenuItemActionPerformed
-
-	private void saveAsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveAsMenuItemActionPerformed
-
-		JFileChooser fileChooser = new JFileChooser(this.pmLastFolderForSaveFile);
+        }
+        
+        public void saveAs(){
+            
+            JFileChooser fileChooser = new JFileChooser(this.pmLastFolderForSaveFile);
 		fileChooser.setFileFilter(FsmXmlInterface.fileNameExtensionFilter);
 		int returnValue = fileChooser.showSaveDialog(this);
 		if (returnValue != JFileChooser.APPROVE_OPTION) {
@@ -961,6 +981,37 @@ public class VGI extends javax.swing.JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+            
+            
+        }
+        
+        
+	private void saveAsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveAsMenuItemActionPerformed
+
+                saveAs();
+		/*JFileChooser fileChooser = new JFileChooser(this.pmLastFolderForSaveFile);
+		fileChooser.setFileFilter(FsmXmlInterface.fileNameExtensionFilter);
+		int returnValue = fileChooser.showSaveDialog(this);
+		if (returnValue != JFileChooser.APPROVE_OPTION) {
+			return;
+		}
+		this.pmLastFolderForSaveFile = fileChooser.getCurrentDirectory();
+		File file = this.getFileTobeSavedWithExtensionAppended(fileChooser);
+
+		FsmXml fsmXml = new FsmXml();
+		try {
+
+			JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
+			ArrayList<Automata> currentAutomata = new ArrayList<Automata>();
+			currentAutomata.add(selected.getAutomata());
+			fsmXml.write(currentAutomata, file);
+
+			selected.currentFile = file;
+			selected.setTitle(fileChooser.getSelectedFile().getName());
+			selected.setModified(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}*/
 
 	}//GEN-LAST:event_saveAsMenuItemActionPerformed
 

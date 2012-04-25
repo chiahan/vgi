@@ -71,7 +71,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
      * Creates new form JgraphXInternalFrame
      */
     public JgraphXInternalFrame(JSplitPane infoSplitPane, final mxGraph graph,
-            Automata automata, String title) {
+            Automata automata, String title,VGI vgi_) {
         super(automata.getName(),
                 true, //resizable
                 true, //closable
@@ -95,6 +95,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         }
 
         setupUndoRedo();
+        vgi=vgi_;
+        
     }
 
     private void initGraph() {
@@ -1284,6 +1286,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     static final int STATUS_CHANGE = 3;
 
     ////
+
+    VGI vgi;
+    
+    ////
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -1471,39 +1478,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             if(check== JOptionPane.YES_OPTION){
                 
                 if(currentFile==null){
-                    JFileChooser fileChooser = new JFileChooser();
-                    fileChooser.setFileFilter(FsmXmlInterface.fileNameExtensionFilter);
-                    int returnValue = fileChooser.showSaveDialog(this);
-                    if(returnValue != JFileChooser.APPROVE_OPTION){
-			return;
-                    }
-                    
-                    //this.pmLastFolderForSaveFile = fileChooser.getCurrentDirectory();
-                    File file = VGI.getFileTobeSavedWithExtensionAppended(fileChooser);
-
-                    FsmXml fsmXml = new FsmXml();
-                    try{
-			ArrayList<Automata> currentAutomata = new ArrayList<Automata>();
-			currentAutomata.add(this.automata);
-			fsmXml.write(currentAutomata, file);
-                    }catch(Exception e){
-			e.printStackTrace();
-                    }
-                    
-                    
+                   vgi.saveAs();
                     
                  }else{
-                        
-                        FsmXml fsmXml = new FsmXml();
-			try{
-				ArrayList<Automata> currentAutomata = new ArrayList<Automata>();
-				currentAutomata.add(this.automata);
-				fsmXml.write(currentAutomata, this.currentFile);
-				//.setModified(false);
-                        }catch(Exception e){
-				e.printStackTrace();
-			}
-                        
+                    vgi.save();
                         
                  }
                  
