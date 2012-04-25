@@ -108,9 +108,64 @@ public class EdgeRoutingLayout extends mxGraphLayout
 		}
 	}
 
+	public void route(mxCell edge) {
+		if (!(edge.isEdge())) {
+			return;
+		}
+		if (!(this.graph.isCellMovable(edge))) {
+			return;
+		}
+		mxIGraphModel model = this.graph.getModel();
+		if (model == null) {
+			return;
+		}
+		mxICell source = edge.getSource();
+		if ((source == null) || !(source instanceof mxCell)) {
+			return;
+		}
+		mxGeometry sourceGeometry = source.getGeometry();
+		if (sourceGeometry == null) {
+			return;
+		}
+		mxICell target = edge.getTarget();
+		if ((target == null) || !(target instanceof mxCell)) {
+			return;
+		}
+		mxGeometry targetGeometry = target.getGeometry();
+		if (targetGeometry == null) {
+			return;
+		}
+		Object[] objectArray = this.graph.getChildVertices(this.graph.getDefaultParent());
+		if (objectArray == null) {
+			return;
+		}
+		List<mxCell> ignore = new ArrayList<mxCell>();
+		for (int index = 0; index < objectArray.length; index++) {
+			if (objectArray[index] instanceof mxCell) {
+				ignore.add((mxCell) objectArray[index]);
+			}
+		}  // End for (int index = 0; index < objectArray.length; index++)
+		ignore.remove((mxCell) source);
+		ignore.remove((mxCell) target);
+		List<mxPoint> points = new ArrayList<mxPoint>();
 
+		Reroute(edge,
+				sourceGeometry.getCenterX(),
+				sourceGeometry.getCenterY(),
+				targetGeometry.getCenterX(),
+				targetGeometry.getCenterY(),
+				5,
+				ignore,
+				points);
 
-        
+		model.beginUpdate();
+		try {
+			setEdgePoints(edge, points);
+		} finally {
+			model.endUpdate();
+		}
+	}  // End public void route(mxCell edge)
+
         public void Reroute(mxCell edge, double src_x, double src_y, double trg_x, double trg_y, int max_depth_to_go, List<mxCell> ignore, List<mxPoint> points){
         
        
