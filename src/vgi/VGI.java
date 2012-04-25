@@ -358,6 +358,7 @@ public class VGI extends javax.swing.JFrame {
         circleMenuItem = new javax.swing.JMenuItem();
         hierarchicalMenuItem = new javax.swing.JMenuItem();
         featureMenuItem = new javax.swing.JMenuItem();
+        autoRouteEdgesMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -658,6 +659,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         layoutMenu.add(featureMenuItem);
+
+        autoRouteEdgesMenuItem.setText("Auto Route Edges");
+        autoRouteEdgesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                autoRouteEdgesMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(autoRouteEdgesMenuItem);
 
         menuBar.add(layoutMenu);
 
@@ -1076,6 +1085,13 @@ public class VGI extends javax.swing.JFrame {
 		}  // End if (frame instanceof JInternalFrame)
 	}//GEN-LAST:event_mergeSimilarTransitionsMenuItemActionPerformed
 
+	private void autoRouteEdgesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_autoRouteEdgesMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			((JgraphXInternalFrame) frame).autoRouteEdges();
+		}
+	}//GEN-LAST:event_autoRouteEdgesMenuItemActionPerformed
+
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
@@ -1211,6 +1227,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenu algorithmsMenu;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator1;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator2;
+    private javax.swing.JMenuItem autoRouteEdgesMenuItem;
     private javax.swing.JMenuItem circleMenuItem;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem coaccessibleMenuItem;

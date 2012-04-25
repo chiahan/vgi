@@ -719,6 +719,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 		}
     }  
 
+	public void autoRouteEdges() {
+		EdgeRoutingLayout layout = new EdgeRoutingLayout(this.graph);
+		layout.execute(this.graph.getDefaultParent());
+	}  // End public void autoRouteEdges()
+
 	public Automata getAutomata() {
 
 		Automata automata = new Automata();
