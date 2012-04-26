@@ -455,13 +455,7 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
             }
         });
     }
-    private Semiring semiring;
-    private Semiring.SemiringType semiringType;
-    private Semiring.SemiringSet semiringSet;
-    private Semiring.SemiringOperation semiringOperation;
     private TAFKitInterface.AutomataType.Semiring tafKitSemiring;
-    private Monoid monoid;
-    private Monoid.MonoidType monoidType;
     private String semiringZeroSymbol;
     private String semiringIdentitySymbol;
     private String monoidZeroSymbol;
