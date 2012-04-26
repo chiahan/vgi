@@ -5,6 +5,8 @@ import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
+import com.mxgraph.swing.handler.mxCellHandler;
+import com.mxgraph.swing.handler.mxEdgeHandler;
 import com.mxgraph.swing.handler.mxKeyboardHandler;
 import com.mxgraph.swing.handler.mxRubberband;
 import com.mxgraph.swing.mxGraphComponent;
@@ -221,7 +223,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
                 boolean edgeSelected = false;
                 boolean vertexSelected = false;
-
+                boolean controlPointSelected=false;
                 if (selected) {
                     DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
                     
@@ -231,6 +233,15 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                                 new EdgePropertiesPanel(selectedCell, 
                                                    display.cellToTransition(selectedCell), 
                                                    display));
+                        
+                        mxEdgeHandler hand=(mxEdgeHandler)graphComponent.getSelectionCellsHandler().getHandler(selectedCell);
+                        selectedHandlerIndex=hand.getIndex();
+                        //System.out.println("handler index:"+selectedHandlerIndex);
+                        if(selectedHandlerIndex>0) controlPointSelected=true;
+                        
+                        
+                        addTransitionFromMenuItem.setVisible(false);
+                        addTransitionToMenuItem.setVisible(false);
                     }
 
                     vertexSelected = selectedCell.isVertex();
@@ -257,9 +268,16 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 addStateMenuItem.setVisible(!selected);
                 deleteMenuItem.setVisible(selected);
                 addControlPointMenuItem.setVisible(edgeSelected);
+                deleteControlPointMenuItem.setVisible(controlPointSelected);
+                resetControlPointMenuItem.setVisible(edgeSelected);
+                
+                
                 cancelMenuItem.setVisible((transitionFrom == null) ? false : true);
                 setInitialMenuItem.setVisible(vertexSelected);
                 setFinalMenuItem.setVisible(vertexSelected);
+                
+                
+                
 
                 JgraphXInternalFrame.this.validate();
 
@@ -653,6 +671,38 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         setModified(true);
         undoStack.push(STATUS_CHANGE);
     }
+    public void deleteControlPoint(){
+        deleteControlPoint((mxCell) getGraphComponent().getCellAt(popMouseX, popMouseY),
+                selectedHandlerIndex);
+    }
+    
+    public void deleteControlPoint(mxCell cell, int index) {
+        System.out.println("delete Ctrl pt at" + index);
+        ArrayList<mxPoint> points = (ArrayList) cell.getGeometry().getPoints();
+        points.remove(index-1);
+        
+        cell.getGeometry().setPoints(points);
+        getGraphComponent().refresh();
+
+        setModified(true);
+        undoStack.push(STATUS_CHANGE);
+    }
+    public void resetControlPoint(){
+        
+        resetControlPoint((mxCell) getGraphComponent().getCellAt(popMouseX, popMouseY));
+    }
+    public void resetControlPoint(mxCell cell){
+        System.out.println("reset contrl pt");
+        ArrayList<mxPoint> points = (ArrayList) cell.getGeometry().getPoints();
+        points.clear();
+        
+        cell.getGeometry().setPoints(points);
+        getGraphComponent().refresh();
+
+        setModified(true);
+        undoStack.push(STATUS_CHANGE);
+    }
+    
 
     public void doCircleLayout() {
         mxCircleLayout layout = new mxCircleLayout(this.graph);
@@ -1290,6 +1340,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     VGI vgi;
     
     ////
+    int selectedHandlerIndex=0;
+    ////
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -1309,6 +1361,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         cancelMenuItem = new javax.swing.JMenuItem();
         setInitialMenuItem = new javax.swing.JMenuItem();
         setFinalMenuItem = new javax.swing.JMenuItem();
+        deleteControlPointMenuItem = new javax.swing.JMenuItem();
+        resetControlPointMenuItem = new javax.swing.JMenuItem();
 
         addStateMenuItem.setText("Add State");
         addStateMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -1363,6 +1417,22 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         setFinalMenuItem.setText("Set Final State");
         graphPopupMenu.add(setFinalMenuItem);
+
+        deleteControlPointMenuItem.setText("Delete Control Point");
+        deleteControlPointMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteControlPointMenuItemActionPerformed(evt);
+            }
+        });
+        graphPopupMenu.add(deleteControlPointMenuItem);
+
+        resetControlPointMenuItem.setText("Reset Control Points");
+        resetControlPointMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetControlPointMenuItemActionPerformed(evt);
+            }
+        });
+        graphPopupMenu.add(resetControlPointMenuItem);
 
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
             public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
@@ -1453,21 +1523,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
         
-        /*if(modified){
-            
-            int check=JOptionPane.showConfirmDialog(this, "Save before leaving?", "", JOptionPane.YES_NO_OPTION);
-            if(check== JOptionPane.YES_OPTION){
-                
-                
-            }else{
-                
-                
-                
-            }
-        }*/
-        
-        
-        
     }//GEN-LAST:event_formInternalFrameClosed
 
     private void formInternalFrameClosing(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosing
@@ -1483,13 +1538,20 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                  }else{
                     vgi.save();
                         
-                 }
-                 
+                 }                 
            }
         }
         
         
     }//GEN-LAST:event_formInternalFrameClosing
+
+    private void deleteControlPointMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteControlPointMenuItemActionPerformed
+        deleteControlPoint();
+    }//GEN-LAST:event_deleteControlPointMenuItemActionPerformed
+
+    private void resetControlPointMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetControlPointMenuItemActionPerformed
+        resetControlPoint();
+    }//GEN-LAST:event_resetControlPointMenuItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addControlPointMenuItem;
@@ -1497,8 +1559,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     private javax.swing.JMenuItem addTransitionFromMenuItem;
     private javax.swing.JMenuItem addTransitionToMenuItem;
     private javax.swing.JMenuItem cancelMenuItem;
+    private javax.swing.JMenuItem deleteControlPointMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JPopupMenu graphPopupMenu;
+    private javax.swing.JMenuItem resetControlPointMenuItem;
     private javax.swing.JMenuItem setFinalMenuItem;
     private javax.swing.JMenuItem setInitialMenuItem;
     // End of variables declaration//GEN-END:variables

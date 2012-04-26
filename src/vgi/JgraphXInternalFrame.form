@@ -66,6 +66,22 @@
             <Property name="text" type="java.lang.String" value="Set Final State"/>
           </Properties>
         </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="deleteControlPointMenuItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Delete Control Point"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="deleteControlPointMenuItemActionPerformed"/>
+          </Events>
+        </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="resetControlPointMenuItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Reset Control Points"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="resetControlPointMenuItemActionPerformed"/>
+          </Events>
+        </MenuItem>
       </SubComponents>
     </Container>
   </NonVisualComponents>
