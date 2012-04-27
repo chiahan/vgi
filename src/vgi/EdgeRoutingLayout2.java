@@ -72,6 +72,7 @@ public class EdgeRoutingLayout2 extends mxGraphLayout {
 			return 0;
 		}
 
+		System.out.println("Routing edge from " + source.getValue().toString() + " to " + target.getValue().toString() + ".");
 		List<mxPoint> controlPoints = new ArrayList<mxPoint>();
 		double cost = this.route(
 				sourceGeometry.getCenterX(),
@@ -97,6 +98,7 @@ public class EdgeRoutingLayout2 extends mxGraphLayout {
 			throw new IllegalArgumentException("Input 'controlPoints' must be an empty ArrayList<mxPoint>.");
 		}
 
+		System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f\n", sourceX, sourceY, targetX, targetY);
 		List<mxCell> obstacles = new ArrayList<mxCell>();
 		Object[] cells = this.graph.getChildCells(this.graph.getDefaultParent());
 
@@ -127,7 +129,9 @@ public class EdgeRoutingLayout2 extends mxGraphLayout {
 		double offsetY = targetY - sourceY;
 
 		if (obstacles.isEmpty()) {
-			return Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+			double cost = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+			System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f, cost: %.1f\n", sourceX, sourceY, targetX, targetY, cost);
+			return cost;
 		}
 
 		double controlPointX = sourceX + offsetX / 2;
@@ -141,6 +145,7 @@ public class EdgeRoutingLayout2 extends mxGraphLayout {
 		mxCell obstacle = obstacles.get(0);
 
 		while (obstacle != null) {
+
 			mxGeometry geometry = obstacle.getGeometry();
 			if (geometry == null) {
 				throw new NullPointerException("An obstacle cell in edge routing has null geometry.  This should not be possible.  Something has gone terribly wrong.");
@@ -157,7 +162,30 @@ public class EdgeRoutingLayout2 extends mxGraphLayout {
 			controlPointX = geometry.getCenterX() + detourX;
 			controlPointY = geometry.getCenterY() + detourY;
 
-			obstacle = (mxCell) (new mxGraphComponent(this.graph).getCellAt((int) controlPointX, (int) controlPointY));
+			obstacle = null;
+			for (int index = 0; index < cells.length; index++) {
+				if (!(cells[index] instanceof mxCell)) {
+					continue;
+				}
+				mxCell cell = (mxCell) cells[index];
+				if (cell.isEdge()) {
+					//
+					// Edge crossing detection to be implemented later.
+					//
+					continue;
+				}
+				geometry = cell.getGeometry();
+				if ((geometry == null)
+						|| ((geometry.getCenterX() == sourceX) && (geometry.getCenterY() == sourceY))
+						|| ((geometry.getCenterX() == controlPointX) && (geometry.getCenterY() == targetY))) {
+					continue;
+				}
+				if (geometry.contains(controlPointX, controlPointY)) {
+					obstacle = cell;
+					break;
+				}
+			}  // End for (int index = 0; index < cells.length; index++)
+
 		}  // End while (obstacle != null)
 
 		double dx1 = controlPointX - sourceX;
@@ -166,6 +194,7 @@ public class EdgeRoutingLayout2 extends mxGraphLayout {
 		double dy2 = targetY - controlPointY;
 		double cost = Math.sqrt(dx1 * dx1 + dy1 * dy1) + Math.sqrt(dx2 * dx2 + dy2 * dy2);
 		if (cost > remainingCost) {
+			System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f, cost: %.1f, remaining cost: %.1f\n", sourceX, sourceY, targetX, targetY, cost, remainingCost);
 			offsetX = targetX - sourceX;
 			offsetY = targetY - sourceY;
 			return Math.sqrt(offsetX * offsetX + offsetY * offsetY);
@@ -198,6 +227,7 @@ public class EdgeRoutingLayout2 extends mxGraphLayout {
 			cost = cost + cost2;
 		}
 
+		System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f, cost: %.1f\n", sourceX, sourceY, targetX, targetY, cost);
 		return cost;
 	}  // End public double route(...)
 
