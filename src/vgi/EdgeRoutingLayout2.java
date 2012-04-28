@@ -134,8 +134,8 @@ public class EdgeRoutingLayout2 extends mxGraphLayout {
 			return cost;
 		}
 
-		double controlPointX = sourceX + offsetX / 2;
-		double controlPointY = sourceY + offsetY / 2;
+		double controlPointX = targetX;
+		double controlPointY = targetY;
 		if (remainingCost <= 0) {
 			remainingCost = Math.sqrt(offsetX * offsetX + offsetY * offsetY) + obstacles.size() * 10000;
 		}
@@ -150,8 +150,8 @@ public class EdgeRoutingLayout2 extends mxGraphLayout {
 			if (geometry == null) {
 				throw new NullPointerException("An obstacle cell in edge routing has null geometry.  This should not be possible.  Something has gone terribly wrong.");
 			}
-			offsetX = geometry.getCenterX() - sourceX;
-			offsetY = geometry.getCenterY() - sourceY;
+			offsetX = controlPointX - sourceX;
+			offsetY = controlPointY - sourceY;
 			double detourLength = (geometry.getHeight() > geometry.getWidth()) ? geometry.getHeight() : geometry.getWidth();
 			//
 			// Rotate the offset vector 90 degrees couterclockwise and adjust its length to detourLength
