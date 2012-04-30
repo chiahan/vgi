@@ -30,7 +30,7 @@ import javax.swing.*;
 public class StatePropertiesPanel extends javax.swing.JPanel {
 
     /** Creates new form state_properties */
-    public StatePropertiesPanel(mxCell cell, State state, DisplayUtil display) {
+    public StatePropertiesPanel(mxCell cell, State state, DisplayUtil display,JgraphXInternalFrame jif) {
         initComponents();
         
         this.cell = cell;
@@ -70,7 +70,10 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
             strokeWidthBox.setSelectedIndex(ind - 1);
         }
 
+        jInternalFrame=jif;
+    
     }
+    
     
     private void showName() {
         this.nameTextField.setText(cell.getValue().toString());
@@ -405,6 +408,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 		}  // End switch (automata.getWeight().semiring)
 		this.initialEdge.setValue(initialFinalWeight);
 		this.state.setInitialWeight(initialFinalWeight);
+                
+               
 	}//GEN-LAST:event_initialWeightTextFieldActionPerformed
 
 	private void finalWeightTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_finalWeightTextFieldActionPerformed
@@ -431,6 +436,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 		}  // End switch (automata.getWeight().semiring)
 		this.finalEdge.setValue(initialFinalWeight);
 		this.state.setFinalWeight(initialFinalWeight);
+                
+               
 	}//GEN-LAST:event_finalWeightTextFieldActionPerformed
 
 	private void initialWeightTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_initialWeightTextFieldKeyPressed
@@ -438,6 +445,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 				&& (this.initialEdge != null)){
 			this.initialWeightTextField.setText(this.initialEdge.getValue().toString());
 		}
+                
+                jInternalFrame.setModified(true);
 	}//GEN-LAST:event_initialWeightTextFieldKeyPressed
 
 	private void finalWeightTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_finalWeightTextFieldKeyPressed
@@ -445,6 +454,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 				&& (this.finalEdge != null)){
 			this.finalWeightTextField.setText(this.finalEdge.getValue().toString());
 		}
+                
+                
 	}//GEN-LAST:event_finalWeightTextFieldKeyPressed
 
     private void styleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_styleComboBoxActionPerformed
@@ -453,6 +464,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         Object[] objects = {cell};
 //        System.out.print(style);
         graph.setCellStyles("shape", ((String) cb.getSelectedItem()).toLowerCase(), objects);
+        
+        
     }//GEN-LAST:event_styleComboBoxActionPerformed
 
     private void initialCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_initialCheckBoxItemStateChanged
@@ -461,6 +474,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         } else if (evt.getStateChange() == ItemEvent.DESELECTED) {
             setInitialState(false);
         }
+        //jInternalFrame.setModified(true);
     }//GEN-LAST:event_initialCheckBoxItemStateChanged
 
     private void finalCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_finalCheckBoxItemStateChanged
@@ -471,6 +485,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
             setFinalState(false);
             ((JCheckBox)evt.getSource()).setSelected(false);
         }
+        //jInternalFrame.setModified(true);
     }//GEN-LAST:event_finalCheckBoxItemStateChanged
 
     private void colorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorButtonActionPerformed
@@ -480,6 +495,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         setFillColor(graph,fillColor);
         colorButton.setBackground(fillColor);
         
+        
     }//GEN-LAST:event_colorButtonActionPerformed
 
     private void strokeColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeColorButtonActionPerformed
@@ -487,6 +503,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
                      "Fill color", strokeColor );
         setStrokeColor(graph,strokeColor);
         strokeColorButton.setBackground(strokeColor);
+        
     }//GEN-LAST:event_strokeColorButtonActionPerformed
 
     private void strokeWidthBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeWidthBoxActionPerformed
@@ -527,24 +544,28 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     private Color strokeColor = Color.white;
     private String strokeWidth = null;
     
+    
+    JgraphXInternalFrame jInternalFrame;
+    
+    
     public void setFillColor(mxGraph graph,Color color){
         Object[] objects = new Object[1];
         objects[0]=cell;
         graph.setCellStyles("fillColor", mxUtils.hexString(color),objects);
-        
+        jInternalFrame.setModified(true);
     }
     public void setStrokeColor(mxGraph graph,Color color){
         Object[] objects = new Object[1];
         objects[0]=cell;
         graph.setCellStyles("strokeColor", mxUtils.hexString(color),objects);
-        
+        jInternalFrame.setModified(true);
     }
     public void setStrokeWidth(mxGraph graph,float width){
         Object[] objects = new Object[1];
         objects[0]=cell;
         String wid=String.valueOf(width);
         graph.setCellStyles("strokeWidth",wid,objects);
-        
+        if(jInternalFrame!=null) jInternalFrame.setModified(true);
     }
     
     //fill cell with gradient color

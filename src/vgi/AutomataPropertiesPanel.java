@@ -24,7 +24,7 @@ import javax.swing.JSplitPane;
 public class AutomataPropertiesPanel extends javax.swing.JPanel {
 
     /** Creates new form Automata_properties */
-   public AutomataPropertiesPanel(DisplayUtil display) {
+   public AutomataPropertiesPanel(DisplayUtil display,JgraphXInternalFrame jif) {
         initComponents();
         this.display = display;
         this.automata = display.getAutomata();
@@ -36,6 +36,8 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
             showFinals();
             showInitials();
         }
+        
+        jInternalFrame=jif;
     }
     
     private void showStates() {
@@ -106,6 +108,8 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
     private Object selectedItem;
     private mxCell selectedCell;
 
+    JgraphXInternalFrame jInternalFrame;
+    
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -297,12 +301,12 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
             parent.setTopComponent(
                     new StatePropertiesPanel(selectedCell, 
                                              display.cellToState(selectedCell), 
-                                             display));
+                                             display,jInternalFrame));
         } else if (selectedCell.isEdge()) {
             parent.setTopComponent(
                     new EdgePropertiesPanel(selectedCell, 
                                        display.cellToTransition(selectedCell),
-                                       display));
+                                       display,jInternalFrame));
         }
     }//GEN-LAST:event_goButtonActionPerformed
 

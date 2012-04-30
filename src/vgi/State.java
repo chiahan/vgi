@@ -153,7 +153,8 @@ public class State implements StateInterface {
 	private List<Transition> pmOutgoingTransitions;
 	private GeometricData pmGeometricData;
 	private List<State> pmHistoryStates;
-
+        private DrawingData pmDrawingData;
+        
 	public State() {
 		this.pmName = null;
 		this.pmInitialWeight = null;
@@ -163,4 +164,14 @@ public class State implements StateInterface {
 		this.pmOutgoingTransitions = new ArrayList<Transition>();
 		this.pmGeometricData = new GeometricData();
 	}
+
+    @Override
+    public DrawingData getDrawingData() {
+        return pmDrawingData;
+    }
+
+    @Override
+    public void setDrawingData(DrawingData drawingData) {
+        pmDrawingData=drawingData;
+    }
 }  // End public class State implements StateInterface

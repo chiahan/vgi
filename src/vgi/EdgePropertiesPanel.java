@@ -23,7 +23,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     /**
      * Creates new form edge_properties
      */
-    public EdgePropertiesPanel(mxCell cell, Transition transition, DisplayUtil display) {
+    public EdgePropertiesPanel(mxCell cell, Transition transition, DisplayUtil display,JgraphXInternalFrame jif) {
         
         initComponents();
         this.cell = cell;
@@ -43,6 +43,8 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             int ind=(int)width;
             strokeWidthBox.setSelectedIndex(ind-1);
         }
+        
+        jInternalFrame=jif;
     }
     
     private void showLabel() {
@@ -55,17 +57,20 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         Object[] edge = {cell};
         
         graph.setCellStyles(arrowDir, arrowType, edge);
+        jInternalFrame.setModified(true);
     }
     
     public void setStrokeColor(mxGraph graph, Color color) {
         Object[] edge = {cell};
         graph.setCellStyles("strokeColor", mxUtils.hexString(color), edge);
+        jInternalFrame.setModified(true);
     }
 
     public void setStrokeWidth(mxGraph graph, float width) {
         Object[] edge = {cell};
         String wid = String.valueOf(width);
         graph.setCellStyles("strokeWidth", wid, edge);
+        if(jInternalFrame!=null) jInternalFrame.setModified(true);
     }
 
     /**
@@ -232,4 +237,6 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     private DisplayUtil display;
     private Color strokeColor = Color.white;
     private String strokeWidth = null;
+    
+    JgraphXInternalFrame jInternalFrame;
 }

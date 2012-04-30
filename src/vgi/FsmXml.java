@@ -239,6 +239,15 @@ public class FsmXml implements FsmXmlInterface {
 	private static final String TAG_INITIAL = "initial";
 	private static final String TAG_FINAL = "final";
 	private static final String ATR_STATE = "state";
+        
+        
+        private static final String TAG_DRAWING_DATA="drawingData";
+        private static final String ATR_FILL_COLOR="fillColor";
+        private static final String ATR_STROKE_COLOR="strokeColor";
+        private static final String ATR_STROKE_WIDTH="strokeWidth";
+        private static final String ATR_START_ARROW="startArrow";
+        private static final String ATR_END_ARROW="endArrow";
+        
 
 	@Override
 	public List<Automata> read(File fsmXmlFile)
@@ -623,8 +632,10 @@ public class FsmXml implements FsmXmlInterface {
 			} // End if (tag.equals(TAG_STATE, Tag.Type.START))
 			else if (tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.START)) {
 				parseStateGeometricData(xmlStreamReader, automata);
-			}  // End if (tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.START))
-
+                        }  // End if (tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.START))
+                        else if(tag.equals(TAG_DRAWING_DATA, Tag.Type.START)){
+                            parseStateDrawingData(xmlStreamReader,automata);
+                        }
 			tag = Tag.nextStartOrEnd(xmlStreamReader);
 
 		}  // End while ((tag != null) && (!(tag.equals(TAG_STATES, Tag.Type.END))))
@@ -653,6 +664,34 @@ public class FsmXml implements FsmXmlInterface {
 
 	}  // End private void parseStateGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
 
+        private void parseStateDrawingData(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+                
+                String fillcolor=xmlStreamReader.getAttributeValue(null, ATR_FILL_COLOR);
+            
+                String strokecolor=xmlStreamReader.getAttributeValue(null, ATR_STROKE_COLOR);
+                float strokewidth=Float.valueOf(xmlStreamReader.getAttributeValue(null, ATR_STROKE_WIDTH));
+            
+                
+                List<State> allStates = automata.getAllStates();
+		State state = allStates.get(allStates.size() - 1);
+		
+                StateInterface.DrawingData drawingdata=new StateInterface.DrawingData();
+                
+                drawingdata.fillColor=fillcolor;
+                drawingdata.strokeColor=strokecolor;
+                drawingdata.strokeWidth=strokewidth;
+                
+                state.setDrawingData(drawingdata);
+                
+                if (!(Tag.findNextSpecified(xmlStreamReader, TAG_DRAWING_DATA, Tag.Type.END))) {
+			Tag.assertTag(TAG_DRAWING_DATA, Tag.Type.END);
+		}
+
+	}  // End private void parseStateGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
+
+        
 	private void parseTransitionsTag(XMLStreamReader xmlStreamReader, Automata automata, Map<String, State> statesMap)
 			throws XMLStreamException,
 			FsmXmlException {
@@ -704,7 +743,9 @@ public class FsmXml implements FsmXmlInterface {
 				parseInitialFinalTag(xmlStreamReader, automata, statesMap, false);
 
 			}  // End if (tag.equals(TAG_FINAL, Tag.Type.START))
-
+                        else if(tag.equals(TAG_DRAWING_DATA, Tag.Type.START)){
+                                parseTransitionDrawingData(xmlStreamReader, automata);
+                        }
 			tag = Tag.nextStartOrEnd(xmlStreamReader);
 
 		}  // End while ((tag != null) && (!(tag.equals(TAG_TRANSITIONS, Tag.Type.END))))
@@ -933,6 +974,30 @@ public class FsmXml implements FsmXmlInterface {
 		transition.setGeometricData(geometricData);
 	}  // End private void parseTransitionGeometricData(XMLStreamReader xmlStreamReader, Automata automata)
 
+        private void parseTransitionDrawingData(XMLStreamReader xmlStreamReader, Automata automata)
+			throws XMLStreamException,
+			FsmXmlException {
+            TransitionInterface.DrawingData drawingdata=new TransitionInterface.DrawingData();
+            
+            String strokecolor=xmlStreamReader.getAttributeValue(null, ATR_STROKE_COLOR);
+            float strokewidth=Float.valueOf(xmlStreamReader.getAttributeValue(null, ATR_STROKE_WIDTH));
+            String startArrow=xmlStreamReader.getAttributeValue(null, ATR_START_ARROW);
+            String endArrow=xmlStreamReader.getAttributeValue(null, ATR_END_ARROW);
+            
+            drawingdata.strokeColor=strokecolor;
+            drawingdata.strokeWidth=strokewidth;
+             
+            List<Transition> allTransitions = automata.getAllTransitions();
+            Transition transition = allTransitions.get(allTransitions.size() - 1);
+            transition.setDrawingData(drawingdata);
+                   
+            
+            
+            
+        }
+        
+        
+        
 	protected void parseInitialFinalTag(
 			XMLStreamReader xmlStreamReader,
 			Automata automata,
@@ -1369,7 +1434,19 @@ public class FsmXml implements FsmXmlInterface {
 					xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
 				}
 			} // End if (writeGeometricAndDrawingData)
-			xmlStreamWriter.writeEndElement();  // End TAG_STATE
+                        
+                        
+                        // write drawing data
+                        
+                        xmlStreamWriter.writeStartElement(TAG_DRAWING_DATA);
+                        xmlStreamWriter.writeAttribute(ATR_FILL_COLOR, state.getDrawingData().fillColor);
+                        xmlStreamWriter.writeAttribute(ATR_STROKE_COLOR, state.getDrawingData().strokeColor);
+                        xmlStreamWriter.writeAttribute(ATR_STROKE_WIDTH, String.valueOf(state.getDrawingData().strokeWidth));
+                        xmlStreamWriter.writeEndElement();   
+                        
+                        
+                        
+                        xmlStreamWriter.writeEndElement();  // End TAG_STATE
 		}  // End while (allStatesIterator.hasNext())
 
 		xmlStreamWriter.writeEndElement();  // End TAG_STATES
@@ -1436,6 +1513,23 @@ public class FsmXml implements FsmXmlInterface {
 					}
 				}  // End if (geometricData != null)
 			} // End if (writeGeometricAndDrawingData)
+                        
+                        
+                        // write drawing data
+                        
+                        xmlStreamWriter.writeStartElement(TAG_DRAWING_DATA);
+                        xmlStreamWriter.writeAttribute(ATR_STROKE_COLOR, transition.getDrawingData().strokeColor);
+                        xmlStreamWriter.writeAttribute(ATR_STROKE_WIDTH, String.valueOf(transition.getDrawingData().strokeWidth));
+                        
+                        String startarrow=transition.getDrawingData().startArrow;
+                        if(startarrow!=null)
+                            xmlStreamWriter.writeAttribute(ATR_START_ARROW, startarrow);
+                        xmlStreamWriter.writeAttribute(ATR_END_ARROW, transition.getDrawingData().endArrow);
+                        xmlStreamWriter.writeEndElement();   
+                        
+                        
+                       
+                        
 			xmlStreamWriter.writeEndElement();  // End TAG_TRANSITION
 		}  // End while (allTransitionsIterator.hasNext())
 

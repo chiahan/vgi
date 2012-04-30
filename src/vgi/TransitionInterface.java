@@ -23,6 +23,22 @@ public interface TransitionInterface {
 		}
 	}  // End public class GeometricData
 
+        public class DrawingData{
+            
+            public String strokeColor;
+            public float strokeWidth;
+            public String startArrow;
+            public String endArrow;
+                    
+            public DrawingData(){
+                this.strokeColor=null;
+                this.strokeWidth=1;
+                this.startArrow=null;
+                this.endArrow=null;
+            }
+            
+        }
+        
 	public State getSourceState();
 
 	public void setSourceState(State sourceState);
@@ -38,4 +54,8 @@ public interface TransitionInterface {
 	public GeometricData getGeometricData();
 
 	public void setGeometricData(GeometricData geometricData);
+        
+        public DrawingData getDrawingData();
+        
+        public void setDrawingData(DrawingData drawingData);
 }  // End public interface TransitionInterface

@@ -232,7 +232,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new EdgePropertiesPanel(selectedCell, 
                                                    display.cellToTransition(selectedCell), 
-                                                   display));
+                                                   display,JgraphXInternalFrame.this));
                         
                         mxEdgeHandler hand=(mxEdgeHandler)graphComponent.getSelectionCellsHandler().getHandler(selectedCell);
                         selectedHandlerIndex=hand.getIndex();
@@ -249,7 +249,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new StatePropertiesPanel(selectedCell, 
                                 JgraphXInternalFrame.this.cellToState(selectedCell), 
-                                display)
+                                display,JgraphXInternalFrame.this)
                                 );
 
                         addTransitionFromMenuItem.setVisible(
@@ -260,7 +260,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                             new AutomataPropertiesPanel(
-                                new DisplayUtil(graph, automata, cellTable)));
+                                new DisplayUtil(graph, automata, cellTable),JgraphXInternalFrame.this));
                     addTransitionFromMenuItem.setVisible(false);
                     addTransitionToMenuItem.setVisible(false);
                     graph.setSelectionCell(null);
@@ -353,17 +353,17 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new EdgePropertiesPanel(selectedCell,
                                                    display.cellToTransition(selectedCell), 
-                                                   display));
+                                                   display,JgraphXInternalFrame.this));
                     } else if (selectedCell.isVertex()) {
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new StatePropertiesPanel(selectedCell,
                                 JgraphXInternalFrame.this.cellToState(selectedCell), 
-                                display));
+                                display,JgraphXInternalFrame.this));
                     }
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                             new AutomataPropertiesPanel(
-                                new DisplayUtil(graph, automata, cellTable)));
+                                new DisplayUtil(graph, automata, cellTable),JgraphXInternalFrame.this));
                 }
 
                 JgraphXInternalFrame.this.infoSplitPane.setBottomComponent(
@@ -517,7 +517,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
         infoSplitPane.setTopComponent(
-                new StatePropertiesPanel((mxCell) vertex, newState, display));
+                new StatePropertiesPanel((mxCell) vertex, newState, display,JgraphXInternalFrame.this));
 
         System.out.println("add state at" + x + "," + y);
         System.out.println("total states:" + automata.getAllStates().size());
@@ -542,6 +542,16 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         mxCell vertex = createVertex(x, y, state.getName());
         cellTable.put(vertex, state);
 
+        
+        StateInterface.DrawingData drawingdata=state.getDrawingData();
+        if(drawingdata!=null){
+            graph.setCellStyles("fillColor",drawingdata.fillColor);
+            graph.setCellStyles("strokeColor",drawingdata.strokeColor);
+            graph.setCellStyles("strokeWidth",String.valueOf(drawingdata.strokeWidth));
+            
+        }
+        
+        
         if ((state.getInitialWeight() != null) || (state.getFinalWeight() != null)) {
             this.initialFinalCells.add(vertex);
         }
@@ -643,6 +653,19 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			}  // End while (iterateControlPoints.hasNext())
 			geometry.setPoints(points);
 		}
+        
+        graph.setSelectionCell(edge);
+        TransitionInterface.DrawingData drawingdata=transition.getDrawingData();
+        if(drawingdata!=null){
+            graph.setCellStyles("strokeColor",drawingdata.strokeColor);
+            graph.setCellStyles("strokeWidth",String.valueOf(drawingdata.strokeWidth));
+            graph.setCellStyles("startArrow",drawingdata.startArrow);
+            graph.setCellStyles("endArrow",drawingdata.endArrow);
+            
+        }
+                
+                
+                
     }  // End public void addTransition(Transition transition)
 
     public void addControlPoint() {
@@ -803,12 +826,26 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			StateInterface.GeometricData geometricData = new StateInterface.GeometricData();
 			geometricData.location = point2d;
 			state.setGeometricData(geometricData);
-			automata.addState(state);
+			
+                        StateInterface.DrawingData drawingData=new StateInterface.DrawingData();
+                        Map<String,Object> styleList=graph.getCellStyle(vertex);
+                        drawingData.fillColor=(String) styleList.get("fillColor");
+                        drawingData.strokeColor=(String) styleList.get("strokeColor");
+                        String width=(String)styleList.get("strokeWidth");
+                        if(width!=null)
+                            drawingData.strokeWidth=Float.valueOf(width);
+                            
+                        //System.out.println("style:"+drawingData.fillColor+" "+drawingData.strokeColor+" "+drawingData.strokeWidth);
+                        
+                        state.setDrawingData(drawingData);
+                        
+                        automata.addState(state);
 			cellToStateMap.put(vertex, state);
 			Object object = vertex.getValue();
 			if (object instanceof String) {
 				state.setName((String) object);
 			}
+                        
 
 		}  // End for (int index = 0; index < vertices.length; index++)
 
@@ -937,6 +974,21 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 				}  // End if ((points != null) && (!points.isEmpty()))
 				transition.setGeometricData(geometricData);
 			}  // End if (geometry != null)
+                        
+                        TransitionInterface.DrawingData drawingData=new TransitionInterface.DrawingData();
+                        Map<String,Object> styleList=graph.getCellStyle(edge);
+                        drawingData.strokeColor=(String)styleList.get("strokeColor");
+                        String width=(String)styleList.get("strokeWidth");
+                        if(width!=null)
+                            drawingData.strokeWidth=Float.valueOf(width);
+                        
+                        drawingData.startArrow=(String)styleList.get("startArrow");
+                        drawingData.endArrow=(String)styleList.get("endArrow");
+                        System.out.println("style:"+drawingData.strokeColor+" "+drawingData.strokeWidth+" "+drawingData.startArrow+" "+drawingData.endArrow);
+                        
+                        transition.setDrawingData(drawingData);
+                        
+                        
 			automata.addTransition(transition);
 
 		}  // End for (int index = 0; index < edges.length; index++)

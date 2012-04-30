@@ -83,6 +83,7 @@ public class Transition implements TransitionInterface {
 	private State pmTargetState;
 	private WeightedRegularExpression pmLabel;
 	private GeometricData pmGeometricData;
+        private DrawingData pmDrawingData;
 
 	public Transition() {
 		this.pmSourceState = null;
@@ -90,4 +91,14 @@ public class Transition implements TransitionInterface {
 		this.pmLabel = null;
 		this.pmGeometricData = new GeometricData();
 	}
+
+    @Override
+    public DrawingData getDrawingData() {
+        return pmDrawingData;
+    }
+
+    @Override
+    public void setDrawingData(DrawingData drawingData) {
+        pmDrawingData=drawingData;
+    }
 }  // End public class Transition implements TransitionInterface

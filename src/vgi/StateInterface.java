@@ -22,6 +22,21 @@ public interface StateInterface {
 		}
 	}  // End public class GeometricData
 
+        
+        public class DrawingData{
+            
+               String fillColor;
+               String strokeColor;
+               float strokeWidth;
+               
+               public DrawingData(){
+                   this.fillColor=null;
+                   this.strokeColor=null;
+                   this.strokeWidth=1;
+               }
+        }
+        
+        
 	public String getName();
 
 	public void setName(String name);
@@ -57,4 +72,10 @@ public interface StateInterface {
 	public List<State> getHistory();
 
 	public void setHistory(List<State> states);
+        
+        public DrawingData getDrawingData();
+        
+        public void setDrawingData(DrawingData drawingData);
+        
+        
 }  // End public interface StateInterface
