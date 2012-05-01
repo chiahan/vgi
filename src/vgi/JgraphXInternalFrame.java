@@ -271,7 +271,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 deleteControlPointMenuItem.setVisible(controlPointSelected);
                 resetControlPointMenuItem.setVisible(edgeSelected);
                 routeEdgeMenuItem.setVisible(edgeSelected);
-                
+                routeEdgeOneStepMenuItem.setVisible(edgeSelected);
+
                 cancelMenuItem.setVisible((transitionFrom == null) ? false : true);
                 setInitialMenuItem.setVisible(vertexSelected);
                 setFinalMenuItem.setVisible(vertexSelected);
@@ -796,7 +797,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }  
 
 	public void autoRouteEdges() {
-		EdgeRoutingLayout layout = new EdgeRoutingLayout(this.graph);
+		EdgeRoutingLayout2 layout = new EdgeRoutingLayout2(this.graph);
 		layout.execute(this.graph.getDefaultParent());
 	}  // End public void autoRouteEdges()
 
@@ -1416,6 +1417,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         deleteControlPointMenuItem = new javax.swing.JMenuItem();
         resetControlPointMenuItem = new javax.swing.JMenuItem();
         routeEdgeMenuItem = new javax.swing.JMenuItem();
+        routeEdgeOneStepMenuItem = new javax.swing.JMenuItem();
 
         addStateMenuItem.setText("Add State");
         addStateMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -1495,22 +1497,30 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(routeEdgeMenuItem);
 
-        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
-            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+        routeEdgeOneStepMenuItem.setText("Route Edge (One Step)");
+        routeEdgeOneStepMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                routeEdgeOneStepMenuItemActionPerformed(evt);
             }
-            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
-                formInternalFrameClosed(evt);
+        });
+        graphPopupMenu.add(routeEdgeOneStepMenuItem);
+
+        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameClosing(evt);
             }
-            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosed(evt);
             }
             public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
             }
-            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
         });
         addMouseWheelListener(new java.awt.event.MouseWheelListener() {
@@ -1623,6 +1633,15 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 		edgeRoutingLayout.route(cell);
 	}//GEN-LAST:event_routeEdgeMenuItemActionPerformed
 
+	private void routeEdgeOneStepMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_routeEdgeOneStepMenuItemActionPerformed
+		mxCell cell = (mxCell) getGraphComponent().getCellAt(this.popMouseX, this.popMouseY);
+		if ((cell == null)) {
+			return;
+		}
+		EdgeRoutingLayout2 edgeRoutingLayout = new EdgeRoutingLayout2(this.graph);
+		edgeRoutingLayout.route(cell, true);
+	}//GEN-LAST:event_routeEdgeOneStepMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addControlPointMenuItem;
     private javax.swing.JMenuItem addStateMenuItem;
@@ -1634,6 +1653,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     private javax.swing.JPopupMenu graphPopupMenu;
     private javax.swing.JMenuItem resetControlPointMenuItem;
     private javax.swing.JMenuItem routeEdgeMenuItem;
+    private javax.swing.JMenuItem routeEdgeOneStepMenuItem;
     private javax.swing.JMenuItem setFinalMenuItem;
     private javax.swing.JMenuItem setInitialMenuItem;
     // End of variables declaration//GEN-END:variables
