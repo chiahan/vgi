@@ -100,24 +100,13 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 				this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.BLACK), cells);
 			} else {  // End if (controlPoints.isEmpty())
 				this.graph.removeCells(cells);
-				Object parent = this.graph.getDefaultParent();
-				mxPoint point = controlPoints.get(0);
-				mxCell vertex = (mxCell) this.graph.insertVertex(parent, null, null, point.getX(), point.getY(), 0, 0);
-				this.graph.insertEdge(parent, null, "", source, vertex, "strokeColor=0xFF0000");
-				this.graph.insertEdge(parent, null, "", vertex, target, "strokeColor=0xFF0000");
-				if (controlPoints.size() > 1) {
-					point = controlPoints.get(1);
-					vertex = (mxCell) this.graph.insertVertex(parent, null, null, point.getX(), point.getY(), 0, 0);
-					this.graph.insertEdge(parent, null, "", source, vertex);
-					this.graph.insertEdge(parent, null, "", vertex, target);
-				}
 			}  // End else part of if (controlPoints.isEmpty())
 		} else {
 			super.setEdgePoints(edge, controlPoints);
 		}
 	}  // End public void route(mxCell edge, boolean oneStepOnly)
 
-	public double route(
+	protected double route(
 			double sourceX,
 			double sourceY,
 			double targetX,
@@ -131,6 +120,8 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 		}
 
 		System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f\n", sourceX, sourceY, targetX, targetY);
+		mxCell source = null;
+		mxCell target = null;
 		List<mxCell> obstacles = new ArrayList<mxCell>();
 		Object[] cells = this.graph.getChildCells(this.graph.getDefaultParent());
 
@@ -146,10 +137,18 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 				continue;
 			}
 			mxGeometry geometry = cell.getGeometry();
-			if ((geometry == null)
-					|| ((geometry.getCenterX() == sourceX) && (geometry.getCenterY() == sourceY))
-					|| ((geometry.getCenterX() == targetX) && (geometry.getCenterY() == targetY))
-					|| ((geometry.getWidth() == 0) && (geometry.getHeight() == 0))) {
+			if (geometry == null) {
+				continue;
+			}
+			if ((geometry.getCenterX() == sourceX) && (geometry.getCenterY() == sourceY)) {
+				source = cell;
+				continue;
+			}
+			if ((geometry.getCenterX() == targetX) && (geometry.getCenterY() == targetY)) {
+				target = cell;
+				continue;
+			}
+			if ((geometry.getWidth() == 0) && (geometry.getHeight() == 0)) {
 				continue;
 			}
 			mxPoint intersectPoint = geometry.intersectLine(sourceX, sourceY, targetX, targetY);
@@ -170,8 +169,8 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 		if (remainingCost <= 0) {
 			remainingCost = straightCost;
 		}
-		double controlPointX = targetX;
-		double controlPointY = targetY;
+		double leftControlPointX = targetX;
+		double leftControlPointY = targetY;
 		if (obstacles.size() > 1) {
 			Collections.sort(obstacles, new ObstacleVerticesComparator(sourceX, sourceY));
 		}
@@ -183,8 +182,8 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			if (geometry == null) {
 				throw new NullPointerException("An obstacle cell in edge routing has null geometry.  This should not be possible.  Something has gone terribly wrong.");
 			}
-			offsetX = controlPointX - sourceX;
-			offsetY = controlPointY - sourceY;
+			offsetX = leftControlPointX - sourceX;
+			offsetY = leftControlPointY - sourceY;
 			double offsetLength = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
 			double detourLength = (geometry.getHeight() > geometry.getWidth()) ? geometry.getHeight() : geometry.getWidth();
 			//
@@ -192,8 +191,8 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			//
 			double detourX = offsetY * detourLength / offsetLength;
 			double detourY = -offsetX * detourLength / offsetLength;
-			controlPointX = geometry.getCenterX() + detourX;
-			controlPointY = geometry.getCenterY() + detourY;
+			leftControlPointX = geometry.getCenterX() + detourX;
+			leftControlPointY = geometry.getCenterY() + detourY;
 
 			obstacle = null;
 			for (int index = 0; index < cells.length; index++) {
@@ -214,7 +213,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 						|| ((geometry.getWidth() == 0) && (geometry.getHeight() == 0))) {
 					continue;
 				}
-				mxPoint intersectPoint = geometry.intersectLine(sourceX, sourceY, controlPointX, controlPointY);
+				mxPoint intersectPoint = geometry.intersectLine(sourceX, sourceY, leftControlPointX, leftControlPointY);
 				if (intersectPoint != null) {
 					obstacle = cell;
 					break;
@@ -227,10 +226,10 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 
 		}  // End while (obstacle != null)
 
-		double dx1 = controlPointX - sourceX;
-		double dy1 = controlPointY - sourceY;
-		double dx2 = targetX - controlPointX;
-		double dy2 = targetY - controlPointY;
+		double dx1 = leftControlPointX - sourceX;
+		double dy1 = leftControlPointY - sourceY;
+		double dx2 = targetX - leftControlPointX;
+		double dy2 = targetY - leftControlPointY;
 		double leftCost = Math.sqrt(dx1 * dx1 + dy1 * dy1) + Math.sqrt(dx2 * dx2 + dy2 * dy2);
 
 		double rightControlPointX = targetX;
@@ -274,12 +273,12 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 						|| ((geometry.getWidth() == 0) && (geometry.getHeight() == 0))) {
 					continue;
 				}
-				mxPoint intersectPoint = geometry.intersectLine(sourceX, sourceY, controlPointX, controlPointY);
+				mxPoint intersectPoint = geometry.intersectLine(sourceX, sourceY, rightControlPointX, rightControlPointY);
 				if (intersectPoint != null) {
 					obstacle = cell;
 					break;
 				}
-//				if (geometry.contains(controlPointX, controlPointY)) {
+//				if (geometry.contains(rightControlPointX, rightControlPointY)) {
 //					obstacle = cell;
 //					break;
 //				}
@@ -298,262 +297,112 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 		List<mxPoint> firstHalfControlPoints;
 		List<mxPoint> secondHalfControlPoints;
 
-		if (!oneStepOnly) {
+		if (oneStepOnly) {
+
+			Object parent = this.graph.getDefaultParent();
+			if (source == null) {
+				source = (mxCell) this.graph.insertVertex(parent, null, null, sourceX, sourceY, 0, 0);
+			}
+			if (target == null) {
+				target = (mxCell) this.graph.insertVertex(parent, null, null, targetX, targetY, 0, 0);
+			}
+			mxCell vertex;
+			if (leftCost < rightCost) {
+				vertex = (mxCell) this.graph.insertVertex(parent, null, null, leftControlPointX, leftControlPointY, 0, 0);
+				this.graph.insertEdge(parent, null, "", source, vertex, "strokeColor=0xFF0000");
+				this.graph.insertEdge(parent, null, "", vertex, target, "strokeColor=0xFF0000");
+				vertex = (mxCell) this.graph.insertVertex(parent, null, null, rightControlPointX, rightControlPointY, 0, 0);
+			} else {
+				vertex = (mxCell) this.graph.insertVertex(parent, null, null, rightControlPointX, rightControlPointY, 0, 0);
+				this.graph.insertEdge(parent, null, "", source, vertex, "strokeColor=0xFF0000");
+				this.graph.insertEdge(parent, null, "", vertex, target, "strokeColor=0xFF0000");
+				vertex = (mxCell) this.graph.insertVertex(parent, null, null, leftControlPointX, leftControlPointY, 0, 0);
+			}
+			this.graph.insertEdge(parent, null, "", source, vertex);
+			this.graph.insertEdge(parent, null, "", vertex, target);
+
+		} else {  // End if (oneStepOnly)
+
 			if (leftCost < remainingCost) {
 				if (rightCost < remainingCost) {
 					if (leftCost < rightCost) {
-						leftCost = 0;
-						firstHalfControlPoints = new ArrayList<mxPoint>();
-						double leftCost1 = this.route(
+						leftCost = this.routeWithOneControlPoint(
 								sourceX,
 								sourceY,
-								controlPointX,
-								controlPointY,
-								firstHalfControlPoints,
-								remainingCost,
-								oneStepOnly);
-						if (leftCost1 < remainingCost) {
-							leftControlPoints.addAll(firstHalfControlPoints);
-							leftCost = leftCost1;
-						}
-						leftControlPoints.add(new mxPoint(controlPointX, controlPointY));
-						secondHalfControlPoints = new ArrayList<mxPoint>();
-						double leftCost2 = this.route(
-								controlPointX,
-								controlPointY,
 								targetX,
 								targetY,
-								secondHalfControlPoints,
-								remainingCost - leftCost1,
-								oneStepOnly);
-						if (leftCost2 < remainingCost - leftCost1) {
-							leftControlPoints.addAll(secondHalfControlPoints);
-							leftCost = leftCost + leftCost2;
-						}
+								leftControlPoints,
+								remainingCost,
+								leftControlPointX,
+								leftControlPointY);
 						if (rightCost < leftCost) {
-							rightCost = 0;
-							firstHalfControlPoints = new ArrayList<mxPoint>();
-							double rightCost1 = this.route(
+							rightCost = this.routeWithOneControlPoint(
 									sourceX,
 									sourceY,
-									rightControlPointX,
-									rightControlPointY,
-									firstHalfControlPoints,
-									remainingCost,
-									oneStepOnly);
-							if (rightCost1 < remainingCost) {
-								rightControlPoints.addAll(firstHalfControlPoints);
-								rightCost = rightCost1;
-							}
-							rightControlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
-							secondHalfControlPoints = new ArrayList<mxPoint>();
-							double rightCost2 = this.route(
-									rightControlPointX,
-									rightControlPointY,
 									targetX,
 									targetY,
-									secondHalfControlPoints,
-									remainingCost - rightCost1,
-									oneStepOnly);
-							if (rightCost2 < remainingCost - rightCost1) {
-								rightControlPoints.addAll(secondHalfControlPoints);
-								rightCost = rightCost + rightCost2;
-							}
+									rightControlPoints,
+									remainingCost,
+									rightControlPointX,
+									rightControlPointY);
 						}  // End if (rightCost < leftCost)
 					} else {  // End if (leftCost < rightCost)
-						rightCost = 0;
-						firstHalfControlPoints = new ArrayList<mxPoint>();
-						double rightCost1 = this.route(
+						rightCost = this.routeWithOneControlPoint(
 								sourceX,
 								sourceY,
-								rightControlPointX,
-								rightControlPointY,
-								firstHalfControlPoints,
-								remainingCost,
-								oneStepOnly);
-						if (rightCost1 < remainingCost) {
-							rightControlPoints.addAll(firstHalfControlPoints);
-							rightCost = rightCost1;
-						}
-						rightControlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
-						secondHalfControlPoints = new ArrayList<mxPoint>();
-						double rightCost2 = this.route(
-								rightControlPointX,
-								rightControlPointY,
 								targetX,
 								targetY,
-								secondHalfControlPoints,
-								remainingCost - rightCost1,
-								oneStepOnly);
-						if (rightCost2 < remainingCost - rightCost1) {
-							rightControlPoints.addAll(secondHalfControlPoints);
-							rightCost = rightCost + rightCost2;
-						}
+								rightControlPoints,
+								remainingCost,
+								rightControlPointX,
+								rightControlPointY);
 						if (leftCost < rightCost) {
-							leftCost = 0;
-							firstHalfControlPoints = new ArrayList<mxPoint>();
-							double leftCost1 = this.route(
+							leftCost = this.routeWithOneControlPoint(
 									sourceX,
 									sourceY,
-									controlPointX,
-									controlPointY,
-									firstHalfControlPoints,
-									remainingCost,
-									oneStepOnly);
-							if (leftCost1 < remainingCost) {
-								leftControlPoints.addAll(firstHalfControlPoints);
-								leftCost = leftCost1;
-							}
-							leftControlPoints.add(new mxPoint(controlPointX, controlPointY));
-							secondHalfControlPoints = new ArrayList<mxPoint>();
-							double leftCost2 = this.route(
-									controlPointX,
-									controlPointY,
 									targetX,
 									targetY,
-									secondHalfControlPoints,
-									remainingCost - leftCost1,
-									oneStepOnly);
-							if (leftCost2 < remainingCost - leftCost1) {
-								leftControlPoints.addAll(secondHalfControlPoints);
-								leftCost = leftCost + leftCost2;
-							}
+									leftControlPoints,
+									remainingCost,
+									leftControlPointX,
+									leftControlPointY);
 						}  // End if (leftCost < rightCost)
 					}  // End else part of if (leftCost < rightCost)
 				} else {  // End if (rightCost < remainingCost)
 					// rightCost > remainingCost so no need to consider right path
-					leftCost = 0;
-					firstHalfControlPoints = new ArrayList<mxPoint>();
-					double leftCost1 = this.route(
+					leftCost = this.routeWithOneControlPoint(
 							sourceX,
 							sourceY,
-							controlPointX,
-							controlPointY,
-							firstHalfControlPoints,
-							remainingCost,
-							oneStepOnly);
-					if (leftCost1 < remainingCost) {
-						leftControlPoints.addAll(firstHalfControlPoints);
-						leftCost = leftCost1;
-					}
-					leftControlPoints.add(new mxPoint(controlPointX, controlPointY));
-					secondHalfControlPoints = new ArrayList<mxPoint>();
-					double leftCost2 = this.route(
-							controlPointX,
-							controlPointY,
 							targetX,
 							targetY,
-							secondHalfControlPoints,
-							remainingCost - leftCost1,
-							oneStepOnly);
-					if (leftCost2 < remainingCost - leftCost1) {
-						leftControlPoints.addAll(secondHalfControlPoints);
-						leftCost = leftCost + leftCost2;
-					}
+							leftControlPoints,
+							remainingCost,
+							leftControlPointX,
+							leftControlPointY);
 				}  // End else part of if (rightCost < remainingCost)
 			} else {  // End if (leftCost < remainingCost)
 				// leftCost > remainingCost so no need to consider left path
 				if (rightCost < remainingCost) {
-					rightCost = 0;
-					firstHalfControlPoints = new ArrayList<mxPoint>();
-					double rightCost1 = this.route(
+					rightCost = this.routeWithOneControlPoint(
 							sourceX,
 							sourceY,
-							rightControlPointX,
-							rightControlPointY,
-							firstHalfControlPoints,
-							remainingCost,
-							oneStepOnly);
-					if (rightCost1 < remainingCost) {
-						rightControlPoints.addAll(firstHalfControlPoints);
-						rightCost = rightCost1;
-					}
-					rightControlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
-					secondHalfControlPoints = new ArrayList<mxPoint>();
-					double rightCost2 = this.route(
-							rightControlPointX,
-							rightControlPointY,
 							targetX,
 							targetY,
-							secondHalfControlPoints,
-							remainingCost - rightCost1,
-							oneStepOnly);
-					if (rightCost2 < remainingCost - rightCost1) {
-						rightControlPoints.addAll(secondHalfControlPoints);
-						rightCost = rightCost + rightCost2;
-					}
+							rightControlPoints,
+							remainingCost,
+							rightControlPointX,
+							rightControlPointY);
 				}  // End if (rightCost < remainingCost)
-			}
-		}  // End if (!oneStepOnly)
+			}  // End else part of if (leftCost < remainingCost)
 
-//		if ((!oneStepOnly) && (leftCost < remainingCost) && (leftCost < rightCost)) {
-//			leftCost = 0;
-//			List<mxPoint> firstHalfControlPoints = new ArrayList<mxPoint>();
-//			double leftCost1 = this.route(
-//					sourceX,
-//					sourceY,
-//					controlPointX,
-//					controlPointY,
-//					firstHalfControlPoints,
-//					remainingCost,
-//					oneStepOnly);
-//			if (leftCost1 < remainingCost) {
-//				leftControlPoints.addAll(firstHalfControlPoints);
-//				leftCost = leftCost1;
-//			}
-//			leftControlPoints.add(new mxPoint(controlPointX, controlPointY));
-//			List<mxPoint> secondHalfControlPoints = new ArrayList<mxPoint>();
-//			double leftCost2 = this.route(
-//					controlPointX,
-//					controlPointY,
-//					targetX,
-//					targetY,
-//					secondHalfControlPoints,
-//					remainingCost - leftCost1,
-//					oneStepOnly);
-//			if (leftCost2 < remainingCost - leftCost1) {
-//				leftControlPoints.addAll(secondHalfControlPoints);
-//				leftCost = leftCost + leftCost2;
-//			}
-//		}  // End if ((!oneStepOnly) && (leftCost < remainingCost) && (leftCost < rightCost))
+		}  // End else part of if (oneStepOnly)
 
-//		if ((!oneStepOnly) && (rightCost < leftCost)) {
-//			rightCost = 0;
-//			List<mxPoint> firstHalfControlPoints = new ArrayList<mxPoint>();
-//			double rightCost1 = this.route(
-//					sourceX,
-//					sourceY,
-//					rightControlPointX,
-//					rightControlPointY,
-//					firstHalfControlPoints,
-//					remainingCost,
-//					oneStepOnly);
-//			if (rightCost1 < remainingCost) {
-//				rightControlPoints.addAll(firstHalfControlPoints);
-//				rightCost = rightCost1;
-//			}
-//			rightControlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
-//			List<mxPoint> secondHalfControlPoints = new ArrayList<mxPoint>();
-//			double rightCost2 = this.route(
-//					rightControlPointX,
-//					rightControlPointY,
-//					targetX,
-//					targetY,
-//					secondHalfControlPoints,
-//					remainingCost - rightCost1,
-//					oneStepOnly);
-//			if (rightCost2 < remainingCost - rightCost1) {
-//				rightControlPoints.addAll(secondHalfControlPoints);
-//				rightCost = rightCost + rightCost2;
-//			}
-//		}  // End if ((!oneStepOnly) && (rightCost < leftCost))
-
-		double cost = remainingCost;
+		double cost = straightCost;
 		if (leftCost < remainingCost) {
 			if (rightCost < remainingCost) {
 				if (leftCost < rightCost) {
 					if (oneStepOnly) {
-						controlPoints.add(new mxPoint(controlPointX, controlPointY));
+						controlPoints.add(new mxPoint(leftControlPointX, leftControlPointY));
 						controlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
 					} else {
 						controlPoints.addAll(leftControlPoints);
@@ -562,7 +411,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 				} else {  // End if (leftCost < rightCost)
 					if (oneStepOnly) {
 						controlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
-						controlPoints.add(new mxPoint(controlPointX, controlPointY));
+						controlPoints.add(new mxPoint(leftControlPointX, leftControlPointY));
 					} else {
 						controlPoints.addAll(rightControlPoints);
 					}
@@ -570,7 +419,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 				}  // End else part of if (leftCost < rightCost)
 			} else {  // End if (rightCost < remainingCost)
 				if (oneStepOnly) {
-					controlPoints.add(new mxPoint(controlPointX, controlPointY));
+					controlPoints.add(new mxPoint(leftControlPointX, leftControlPointY));
 					controlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
 				} else {
 					controlPoints.addAll(leftControlPoints);
@@ -580,7 +429,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			if (rightCost < remainingCost) {
 				if (oneStepOnly) {
 					controlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
-					controlPoints.add(new mxPoint(controlPointX, controlPointY));
+					controlPoints.add(new mxPoint(leftControlPointX, leftControlPointY));
 				} else {
 					controlPoints.addAll(rightControlPoints);
 				}
@@ -591,7 +440,48 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 		rightControlPoints = null;  // List<mxPoint> rightControlPoints = new ArrayList<mxPoint>();
 		System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f, cost: %.1f\n", sourceX, sourceY, targetX, targetY, cost);
 		return cost;
-	}  // End public double route(...)
+	}  // End protected double route(...)
+
+	protected double routeWithOneControlPoint(
+			double sourceX,
+			double sourceY,
+			double targetX,
+			double targetY,
+			List<mxPoint> controlPoints,
+			double remainingCost,
+			double controlPointX,
+			double controlPointY) {
+
+		double cost = 0;
+		List<mxPoint> tempControlPoints = new ArrayList<mxPoint>();
+		double cost1 = this.route(
+				sourceX,
+				sourceY,
+				controlPointX,
+				controlPointY,
+				tempControlPoints,
+				remainingCost,
+				false);
+		if (cost1 < remainingCost) {
+			controlPoints.addAll(tempControlPoints);
+			cost = cost + cost1;
+		}
+		controlPoints.add(new mxPoint(controlPointX, controlPointY));
+		tempControlPoints.clear();
+		double cost2 = this.route(
+				controlPointX,
+				controlPointY,
+				targetX,
+				targetY,
+				tempControlPoints,
+				remainingCost - cost1,
+				false);
+		if (cost2 < remainingCost - cost1) {
+			controlPoints.addAll(tempControlPoints);
+			cost = cost + cost2;
+		}
+		return cost;
+	}  // End protected double routeWithOneControlPoint(...)
 
 	protected static class ObstacleVerticesComparator implements Comparator<mxCell> {
 
