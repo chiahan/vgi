@@ -214,12 +214,20 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="featureMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="autoRouteEdgesMenuItem">
+            <MenuItem class="javax.swing.JMenuItem" name="routeAllEdges2008MenuItem">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Auto Route Edges"/>
+                <Property name="text" type="java.lang.String" value="Route All Edges (2008)"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="autoRouteEdgesMenuItemActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="routeAllEdges2008MenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="routeAllEdgesBranchingMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Route All Edges (Branching)"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="routeAllEdgesBranchingMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>

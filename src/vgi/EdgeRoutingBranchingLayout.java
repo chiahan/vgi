@@ -21,9 +21,9 @@ import java.util.List;
  *
  * @author JLiu
  */
-public class EdgeRoutingLayout2 extends mxGraphLayout {
+public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 
-	public EdgeRoutingLayout2(mxGraph graph) {
+	public EdgeRoutingBranchingLayout(mxGraph graph) {
 		super(graph);
 	}
 
@@ -623,4 +623,4 @@ public class EdgeRoutingLayout2 extends mxGraphLayout {
 			return (int) (offsetX1 * offsetX1 + offsetY1 * offsetY1 - offsetX2 * offsetX2 - offsetY2 * offsetY2);
 		}  // End public int compare(mxCell o1, mxCell o2)
 	}  // End protected static class ObstacleVerticesComparator implements Comparator<mxCell>
-}  // End public class EdgeRoutingLayout2 extends mxGraphLayout
+}  // End public class EdgeRoutingBranchingLayout extends mxGraphLayout

@@ -358,7 +358,8 @@ public class VGI extends javax.swing.JFrame {
         circleMenuItem = new javax.swing.JMenuItem();
         hierarchicalMenuItem = new javax.swing.JMenuItem();
         featureMenuItem = new javax.swing.JMenuItem();
-        autoRouteEdgesMenuItem = new javax.swing.JMenuItem();
+        routeAllEdges2008MenuItem = new javax.swing.JMenuItem();
+        routeAllEdgesBranchingMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -660,13 +661,21 @@ public class VGI extends javax.swing.JFrame {
         });
         layoutMenu.add(featureMenuItem);
 
-        autoRouteEdgesMenuItem.setText("Auto Route Edges");
-        autoRouteEdgesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        routeAllEdges2008MenuItem.setText("Route All Edges (2008)");
+        routeAllEdges2008MenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                autoRouteEdgesMenuItemActionPerformed(evt);
+                routeAllEdges2008MenuItemActionPerformed(evt);
             }
         });
-        layoutMenu.add(autoRouteEdgesMenuItem);
+        layoutMenu.add(routeAllEdges2008MenuItem);
+
+        routeAllEdgesBranchingMenuItem.setText("Route All Edges (Branching)");
+        routeAllEdgesBranchingMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                routeAllEdgesBranchingMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(routeAllEdgesBranchingMenuItem);
 
         menuBar.add(layoutMenu);
 
@@ -1136,12 +1145,19 @@ public class VGI extends javax.swing.JFrame {
 		}  // End if (frame instanceof JInternalFrame)
 	}//GEN-LAST:event_mergeSimilarTransitionsMenuItemActionPerformed
 
-	private void autoRouteEdgesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_autoRouteEdgesMenuItemActionPerformed
+	private void routeAllEdges2008MenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_routeAllEdges2008MenuItemActionPerformed
 		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
 		if (frame instanceof JgraphXInternalFrame) {
-			((JgraphXInternalFrame) frame).autoRouteEdges();
+			((JgraphXInternalFrame) frame).routeAllEdges2008();
 		}
-	}//GEN-LAST:event_autoRouteEdgesMenuItemActionPerformed
+	}//GEN-LAST:event_routeAllEdges2008MenuItemActionPerformed
+
+	private void routeAllEdgesBranchingMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_routeAllEdgesBranchingMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			((JgraphXInternalFrame) frame).routeAllEdgesBranching();
+		}
+	}//GEN-LAST:event_routeAllEdgesBranchingMenuItemActionPerformed
 
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
@@ -1278,7 +1294,6 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenu algorithmsMenu;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator1;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator2;
-    private javax.swing.JMenuItem autoRouteEdgesMenuItem;
     private javax.swing.JMenuItem circleMenuItem;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem coaccessibleMenuItem;
@@ -1310,6 +1325,8 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem rationalExpressionSymbolsMenuItem;
     private javax.swing.JButton redoButton;
     private javax.swing.JMenuItem removeEpsilonTransitionsMenuItem;
+    private javax.swing.JMenuItem routeAllEdges2008MenuItem;
+    private javax.swing.JMenuItem routeAllEdgesBranchingMenuItem;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
     private javax.swing.JButton setAsFinalStateButton;

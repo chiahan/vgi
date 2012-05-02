@@ -593,8 +593,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         automata.addTransition(newTrans);
 
         System.out.println("total trans:" + automata.getAllTransitions().size());
-		EdgeRoutingLayout2 edgeRoutingLayout = new EdgeRoutingLayout2(this.graph);
-		edgeRoutingLayout.route((mxCell) e);
+		EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
+		layout.route((mxCell) e);
         setModified(true);
         undoStack.push(STATUS_ADD);
     }
@@ -796,10 +796,15 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 		}
     }  
 
-	public void autoRouteEdges() {
-		EdgeRoutingLayout2 layout = new EdgeRoutingLayout2(this.graph);
+	public void routeAllEdges2008() {
+		EdgeRoutingLayout layout = new EdgeRoutingLayout(this.graph);
 		layout.execute(this.graph.getDefaultParent());
-	}  // End public void autoRouteEdges()
+	}  // End public void routeAllEdges2008()
+
+	public void routeAllEdgesBranching() {
+		EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
+		layout.execute(this.graph.getDefaultParent());
+	}  // End public void routeAllEdgesBranching()
 
 	public Automata getAutomata() {
 
@@ -1629,8 +1634,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 		if ((cell == null)) {
 			return;
 		}
-		EdgeRoutingLayout2 edgeRoutingLayout = new EdgeRoutingLayout2(this.graph);
-		edgeRoutingLayout.route(cell);
+		EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
+		layout.route(cell);
 	}//GEN-LAST:event_routeEdgeMenuItemActionPerformed
 
 	private void routeEdgeOneStepMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_routeEdgeOneStepMenuItemActionPerformed
@@ -1638,8 +1643,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 		if ((cell == null)) {
 			return;
 		}
-		EdgeRoutingLayout2 edgeRoutingLayout = new EdgeRoutingLayout2(this.graph);
-		edgeRoutingLayout.route(cell, true);
+		EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
+		layout.route(cell, true);
 	}//GEN-LAST:event_routeEdgeOneStepMenuItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
