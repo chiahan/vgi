@@ -294,11 +294,11 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 
 		List<mxPoint> leftControlPoints = new ArrayList<mxPoint>();
 		List<mxPoint> rightControlPoints = new ArrayList<mxPoint>();
-		List<mxPoint> firstHalfControlPoints;
-		List<mxPoint> secondHalfControlPoints;
 
 		if (oneStepOnly) {
 
+			leftControlPoints.add(new mxPoint(leftControlPointX, leftControlPointY));
+			rightControlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
 			Object parent = this.graph.getDefaultParent();
 			if (source == null) {
 				source = (mxCell) this.graph.insertVertex(parent, null, null, sourceX, sourceY, 0, 0);
@@ -401,38 +401,18 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 		if (leftCost < remainingCost) {
 			if (rightCost < remainingCost) {
 				if (leftCost < rightCost) {
-					if (oneStepOnly) {
-						controlPoints.add(new mxPoint(leftControlPointX, leftControlPointY));
-						controlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
-					} else {
-						controlPoints.addAll(leftControlPoints);
-					}
+					controlPoints.addAll(leftControlPoints);
 					cost = leftCost;
 				} else {  // End if (leftCost < rightCost)
-					if (oneStepOnly) {
-						controlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
-						controlPoints.add(new mxPoint(leftControlPointX, leftControlPointY));
-					} else {
-						controlPoints.addAll(rightControlPoints);
-					}
+					controlPoints.addAll(rightControlPoints);
 					cost = rightCost;
 				}  // End else part of if (leftCost < rightCost)
 			} else {  // End if (rightCost < remainingCost)
-				if (oneStepOnly) {
-					controlPoints.add(new mxPoint(leftControlPointX, leftControlPointY));
-					controlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
-				} else {
-					controlPoints.addAll(leftControlPoints);
-				}
+				controlPoints.addAll(leftControlPoints);
 			}  // End else part of if (rightCost < remainingCost)
 		} else {  // End if (leftCost < remainingCost)
 			if (rightCost < remainingCost) {
-				if (oneStepOnly) {
-					controlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
-					controlPoints.add(new mxPoint(leftControlPointX, leftControlPointY));
-				} else {
-					controlPoints.addAll(rightControlPoints);
-				}
+				controlPoints.addAll(rightControlPoints);
 				cost = rightCost;
 			}  // End if (rightCost < remainingCost)
 		}  // End else part of if (leftCost < remainingCost)
