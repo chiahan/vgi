@@ -169,6 +169,13 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 		if (remainingCost <= 0) {
 			remainingCost = straightCost;
 		}
+		//
+		// Rotate the offset vector 90 degrees couterclockwise to get a test vecotr.
+		// Any vector projected onto the test vector (by dot product) points to the left of the
+		// offset vector if and only if the projection (dot product) is positive.
+		//
+		double testVectorX = offsetY;
+		double testVectorY = -offsetX;
 		double leftControlPointX = targetX;
 		double leftControlPointY = targetY;
 		if (obstacles.size() > 1) {
@@ -193,6 +200,21 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			double detourY = -offsetX * detourLength / offsetLength;
 			leftControlPointX = geometry.getCenterX() + detourX;
 			leftControlPointY = geometry.getCenterY() + detourY;
+
+			System.out.println("leftControlPointX: " + leftControlPointX + ", leftControlPointY: " + leftControlPointY);
+			offsetX = leftControlPointX - sourceX;
+			offsetY = leftControlPointY - sourceY;
+			double projection = offsetX * testVectorX + offsetY * testVectorY;
+			//
+			// If the left control point has been adjusted so much that it is no longer
+			// left of the vector from source to target, stop looking for a left control
+			// point.
+			//
+			if (projection < 0) {
+				leftControlPointX = sourceX + testVectorX;
+				leftControlPointY = sourceY + testVectorY;
+				break;
+			}
 
 			obstacle = null;
 			for (int index = 0; index < cells.length; index++) {
@@ -253,6 +275,21 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			double detourY = offsetX * detourLength / offsetLength;
 			rightControlPointX = geometry.getCenterX() + detourX;
 			rightControlPointY = geometry.getCenterY() + detourY;
+
+			System.out.println("rightControlPointX: " + rightControlPointX + ", rightControlPointY: " + rightControlPointY);
+			offsetX = rightControlPointX - sourceX;
+			offsetY = rightControlPointY - sourceY;
+			double projection = offsetX * testVectorX + offsetY * testVectorY;
+			//
+			// If the right control point has been adjusted so much that it is no longer
+			// right of the vector from source to target, stop looking for a right control
+			// point.
+			//
+			if (projection > 0) {
+				rightControlPointX = sourceX + testVectorX;
+				rightControlPointY = sourceY + testVectorY;
+				break;
+			}
 
 			obstacle = null;
 			for (int index = 0; index < cells.length; index++) {
