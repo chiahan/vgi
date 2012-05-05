@@ -12,10 +12,7 @@ import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -124,7 +121,10 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 		mxCell target = null;
 		List<mxCell> obstacles = new ArrayList<mxCell>();
 		Object[] cells = this.graph.getChildCells(this.graph.getDefaultParent());
-
+		//
+		// Find all the obstacles between the source and the target.
+		// Since we are enumerating all the mxCells, find and remember the source and the target.as well.
+		//
 		for (int index = 0; index < cells.length; index++) {
 			if (!(cells[index] instanceof mxCell)) {
 				continue;
@@ -170,17 +170,22 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			remainingCost = straightCost;
 		}
 		//
+		// The list of obstacles should be in the order of hitting the obstacle when going out from the source.
+		//
+		EdgeRoutingBranchingLayout.sort(obstacles, new ObstacleVerticesComparator(sourceX, sourceY));
+		//
 		// Rotate the offset vector 90 degrees couterclockwise to get a test vecotr.
 		// Any vector projected onto the test vector (by dot product) points to the left of the
 		// offset vector if and only if the projection (dot product) is positive.
 		//
 		double testVectorX = offsetY;
 		double testVectorY = -offsetX;
-		double leftControlPointX = targetX;
-		double leftControlPointY = targetY;
-		if (obstacles.size() > 1) {
-			Collections.sort(obstacles, new ObstacleVerticesComparator(sourceX, sourceY));
-		}
+		//
+		// Find a control point.to the left of the vector from source to target.
+		//
+		Route route = new Route();
+		route.controlPointX = targetX;
+		route.controlPointY = targetY;
 		mxCell obstacle = obstacles.get(0);
 
 		while (obstacle != null) {
@@ -189,8 +194,8 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			if (geometry == null) {
 				throw new NullPointerException("An obstacle cell in edge routing has null geometry.  This should not be possible.  Something has gone terribly wrong.");
 			}
-			offsetX = leftControlPointX - sourceX;
-			offsetY = leftControlPointY - sourceY;
+			offsetX = route.controlPointX - sourceX;
+			offsetY = route.controlPointY - sourceY;
 			double offsetLength = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
 			double detourLength = (geometry.getHeight() > geometry.getWidth()) ? geometry.getHeight() : geometry.getWidth();
 			//
@@ -198,12 +203,11 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			//
 			double detourX = offsetY * detourLength / offsetLength;
 			double detourY = -offsetX * detourLength / offsetLength;
-			leftControlPointX = geometry.getCenterX() + detourX;
-			leftControlPointY = geometry.getCenterY() + detourY;
+			route.controlPointX = geometry.getCenterX() + detourX;
+			route.controlPointY = geometry.getCenterY() + detourY;
 
-//			System.out.println("leftControlPointX: " + leftControlPointX + ", leftControlPointY: " + leftControlPointY);
-			offsetX = leftControlPointX - sourceX;
-			offsetY = leftControlPointY - sourceY;
+			offsetX = route.controlPointX - sourceX;
+			offsetY = route.controlPointY - sourceY;
 			double projection = offsetX * testVectorX + offsetY * testVectorY;
 			//
 			// If the left control point has been adjusted so much that it is no longer
@@ -211,8 +215,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			// point.
 			//
 			if (projection < 0) {
-				leftControlPointX = sourceX + 10000;
-				leftControlPointY = sourceY + 10000;
+				route = null;
 				break;
 			}
 
@@ -235,12 +238,12 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 						|| ((geometry.getWidth() == 0) && (geometry.getHeight() == 0))) {
 					continue;
 				}
-				mxPoint intersectPoint = geometry.intersectLine(sourceX, sourceY, leftControlPointX, leftControlPointY);
+				mxPoint intersectPoint = geometry.intersectLine(sourceX, sourceY, route.controlPointX, route.controlPointY);
 				if (intersectPoint != null) {
 					obstacle = cell;
 					break;
 				}
-//				if (geometry.contains(controlPointX, controlPointY)) {
+//				if (geometry.contains(route.controlPointX, route.controlPointY)) {
 //					obstacle = cell;
 //					break;
 //				}
@@ -248,14 +251,24 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 
 		}  // End while (obstacle != null)
 
-		double dx1 = leftControlPointX - sourceX;
-		double dy1 = leftControlPointY - sourceY;
-		double dx2 = targetX - leftControlPointX;
-		double dy2 = targetY - leftControlPointY;
-		double leftCost = Math.sqrt(dx1 * dx1 + dy1 * dy1) + Math.sqrt(dx2 * dx2 + dy2 * dy2);
+		ArrayList<Route> routeList = new ArrayList<Route>();
+		if (route != null) {
+			double dx1 = route.controlPointX - sourceX;
+			double dy1 = route.controlPointY - sourceY;
+			double dx2 = targetX - route.controlPointX;
+			double dy2 = targetY - route.controlPointY;
+			route.cost = Math.sqrt(dx1 * dx1 + dy1 * dy1) + Math.sqrt(dx2 * dx2 + dy2 * dy2);
+			if (route.cost < remainingCost) {
+				routeList.add(route);
+			}
+		}  // End if (route != null)
 
-		double rightControlPointX = targetX;
-		double rightControlPointY = targetY;
+		//
+		// Find a control point.to the right of the vector from source to target.
+		//
+		route = new Route();
+		route.controlPointX = targetX;
+		route.controlPointY = targetY;
 		obstacle = obstacles.get(0);
 
 		while (obstacle != null) {
@@ -264,8 +277,8 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			if (geometry == null) {
 				throw new NullPointerException("An obstacle cell in edge routing has null geometry.  This should not be possible.  Something has gone terribly wrong.");
 			}
-			offsetX = rightControlPointX - sourceX;
-			offsetY = rightControlPointY - sourceY;
+			offsetX = route.controlPointX - sourceX;
+			offsetY = route.controlPointY - sourceY;
 			double offsetLength = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
 			double detourLength = (geometry.getHeight() > geometry.getWidth()) ? geometry.getHeight() : geometry.getWidth();
 			//
@@ -273,12 +286,11 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			//
 			double detourX = -offsetY * detourLength / offsetLength;
 			double detourY = offsetX * detourLength / offsetLength;
-			rightControlPointX = geometry.getCenterX() + detourX;
-			rightControlPointY = geometry.getCenterY() + detourY;
+			route.controlPointX = geometry.getCenterX() + detourX;
+			route.controlPointY = geometry.getCenterY() + detourY;
 
-//			System.out.println("rightControlPointX: " + rightControlPointX + ", rightControlPointY: " + rightControlPointY);
-			offsetX = rightControlPointX - sourceX;
-			offsetY = rightControlPointY - sourceY;
+			offsetX = route.controlPointX - sourceX;
+			offsetY = route.controlPointY - sourceY;
 			double projection = offsetX * testVectorX + offsetY * testVectorY;
 			//
 			// If the right control point has been adjusted so much that it is no longer
@@ -286,8 +298,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			// point.
 			//
 			if (projection > 0) {
-				rightControlPointX = sourceX + 10000;
-				rightControlPointY = sourceY + 10000;
+				route = null;
 				break;
 			}
 
@@ -310,12 +321,12 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 						|| ((geometry.getWidth() == 0) && (geometry.getHeight() == 0))) {
 					continue;
 				}
-				mxPoint intersectPoint = geometry.intersectLine(sourceX, sourceY, rightControlPointX, rightControlPointY);
+				mxPoint intersectPoint = geometry.intersectLine(sourceX, sourceY, route.controlPointX, route.controlPointY);
 				if (intersectPoint != null) {
 					obstacle = cell;
 					break;
 				}
-//				if (geometry.contains(rightControlPointX, rightControlPointY)) {
+//				if (geometry.contains(route.controlPointX, route.controlPointY)) {
 //					obstacle = cell;
 //					break;
 //				}
@@ -323,203 +334,132 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 
 		}  // End while (obstacle != null)
 
-		dx1 = rightControlPointX - sourceX;
-		dy1 = rightControlPointY - sourceY;
-		dx2 = targetX - rightControlPointX;
-		dy2 = targetY - rightControlPointY;
-		double rightCost = Math.sqrt(dx1 * dx1 + dy1 * dy1) + Math.sqrt(dx2 * dx2 + dy2 * dy2);
+		if (route != null) {
+			double dx1 = route.controlPointX - sourceX;
+			double dy1 = route.controlPointY - sourceY;
+			double dx2 = targetX - route.controlPointX;
+			double dy2 = targetY - route.controlPointY;
+			route.cost = Math.sqrt(dx1 * dx1 + dy1 * dy1) + Math.sqrt(dx2 * dx2 + dy2 * dy2);
+			if (route.cost < remainingCost) {
+				routeList.add(route);
+			}
+		}  // End if (route != null)
 
-		List<mxPoint> leftControlPoints = new ArrayList<mxPoint>();
-		List<mxPoint> rightControlPoints = new ArrayList<mxPoint>();
+		//
+		// The list of routes should be in the order of increasing costs.
+		//
+		EdgeRoutingBranchingLayout.sort(routeList, new RouteComparator());
 
 		if (oneStepOnly) {
 
-			leftControlPoints.add(new mxPoint(leftControlPointX, leftControlPointY));
-			rightControlPoints.add(new mxPoint(rightControlPointX, rightControlPointY));
 			Object parent = this.graph.getDefaultParent();
-			if (source == null) {
-				source = (mxCell) this.graph.insertVertex(parent, null, null, sourceX, sourceY, 0, 0);
-			}
-			if (target == null) {
-				target = (mxCell) this.graph.insertVertex(parent, null, null, targetX, targetY, 0, 0);
-			}
 			mxCell vertex;
-			if (leftCost < rightCost) {
-				vertex = (mxCell) this.graph.insertVertex(parent, null, null, leftControlPointX, leftControlPointY, 0, 0);
+			Iterator<Route> iterateRoutes = routeList.iterator();
+			if (iterateRoutes.hasNext()) {
+				route = iterateRoutes.next();
+				route.controlPoints.add(new mxPoint(route.controlPointX, route.controlPointY));
+				if (source == null) {
+					source = (mxCell) this.graph.insertVertex(parent, null, null, sourceX, sourceY, 0, 0);
+				}
+				if (target == null) {
+					target = (mxCell) this.graph.insertVertex(parent, null, null, targetX, targetY, 0, 0);
+				}
+				vertex = (mxCell) this.graph.insertVertex(parent, null, null, route.controlPointX, route.controlPointY, 0, 0);
 				this.graph.insertEdge(parent, null, "", source, vertex, "strokeColor=0xFF0000");
 				this.graph.insertEdge(parent, null, "", vertex, target, "strokeColor=0xFF0000");
-				vertex = (mxCell) this.graph.insertVertex(parent, null, null, rightControlPointX, rightControlPointY, 0, 0);
-			} else {
-				vertex = (mxCell) this.graph.insertVertex(parent, null, null, rightControlPointX, rightControlPointY, 0, 0);
-				this.graph.insertEdge(parent, null, "", source, vertex, "strokeColor=0xFF0000");
-				this.graph.insertEdge(parent, null, "", vertex, target, "strokeColor=0xFF0000");
-				vertex = (mxCell) this.graph.insertVertex(parent, null, null, leftControlPointX, leftControlPointY, 0, 0);
-			}
-			this.graph.insertEdge(parent, null, "", source, vertex);
-			this.graph.insertEdge(parent, null, "", vertex, target);
+
+				while (iterateRoutes.hasNext()) {
+					route = iterateRoutes.next();
+					vertex = (mxCell) this.graph.insertVertex(parent, null, null, route.controlPointX, route.controlPointY, 0, 0);
+					this.graph.insertEdge(parent, null, "", source, vertex);
+					this.graph.insertEdge(parent, null, "", vertex, target);
+				}  // End while (iterateRoutes.hasNext())
+			}  // End if (iterateRoutes.hasNext())
 
 		} else {  // End if (oneStepOnly)
 
-			if (leftCost < remainingCost) {
-				if (rightCost < remainingCost) {
-					if (leftCost < rightCost) {
-						leftCost = this.routeWithOneControlPoint(
-								sourceX,
-								sourceY,
+			if (!(routeList.isEmpty())) {
+				//
+				// Recursively route the route with the lowest possible cost if
+				// its cost is not updated (which means it has not been fully
+				// routed).
+				//
+				double currentRemainingCost = remainingCost;
+
+				while (!(routeList.get(0).isCostUpdated)) {
+
+					route = routeList.get(0);
+					ArrayList<mxPoint> tempControlPoints = new ArrayList<mxPoint>();
+//					double cost1 = this.route(
+//							sourceX,
+//							sourceY,
+//							route.controlPointX,
+//							route.controlPointY,
+//							tempControlPoints,
+//							currentRemainingCost,
+//							false);
+//					route.controlPoints.addAll(tempControlPoints);
+//					tempControlPoints.clear();
+					offsetX = route.controlPointX - sourceX;
+					offsetY = route.controlPointY - sourceY;
+					double cost1 = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+					route.controlPoints.add(new mxPoint(route.controlPointX, route.controlPointY));
+					double cost2 = 0;
+					if (cost1 < currentRemainingCost) {
+						cost2 = this.route(
+								route.controlPointX,
+								route.controlPointY,
 								targetX,
 								targetY,
-								leftControlPoints,
-								remainingCost,
-								leftControlPointX,
-								leftControlPointY);
-						if (rightCost < leftCost) {
-							if (leftCost < remainingCost) {
-								rightCost = this.routeWithOneControlPoint(
-										sourceX,
-										sourceY,
-										targetX,
-										targetY,
-										rightControlPoints,
-										leftCost,
-										rightControlPointX,
-										rightControlPointY);
-							} else {  // End if (leftCost < remainingCost)
-								rightCost = this.routeWithOneControlPoint(
-										sourceX,
-										sourceY,
-										targetX,
-										targetY,
-										rightControlPoints,
-										remainingCost,
-										rightControlPointX,
-										rightControlPointY);
-							}  // End else part of if (leftCost < remainingCost)
-						}  // End if (rightCost < leftCost)
-					} else {  // End if (leftCost < rightCost)
-						rightCost = this.routeWithOneControlPoint(
-								sourceX,
-								sourceY,
-								targetX,
-								targetY,
-								rightControlPoints,
-								remainingCost,
-								rightControlPointX,
-								rightControlPointY);
-						if (leftCost < rightCost) {
-							if (rightCost < remainingCost) {
-								leftCost = this.routeWithOneControlPoint(
-										sourceX,
-										sourceY,
-										targetX,
-										targetY,
-										leftControlPoints,
-										rightCost,
-										leftControlPointX,
-										leftControlPointY);
-							} else {  // End if (rightCost < remainingCost)
-								leftCost = this.routeWithOneControlPoint(
-										sourceX,
-										sourceY,
-										targetX,
-										targetY,
-										leftControlPoints,
-										remainingCost,
-										leftControlPointX,
-										leftControlPointY);
-							}  // End else part of if (rightCost < remainingCost)
-						}  // End if (leftCost < rightCost)
-					}  // End else part of if (leftCost < rightCost)
-				} else {  // End if (rightCost < remainingCost)
-					// rightCost > remainingCost so no need to consider right path
-					leftCost = this.routeWithOneControlPoint(
-							sourceX,
-							sourceY,
-							targetX,
-							targetY,
-							leftControlPoints,
-							remainingCost,
-							leftControlPointX,
-							leftControlPointY);
-				}  // End else part of if (rightCost < remainingCost)
-			} else {  // End if (leftCost < remainingCost)
-				// leftCost > remainingCost so no need to consider left path
-				if (rightCost < remainingCost) {
-					rightCost = this.routeWithOneControlPoint(
-							sourceX,
-							sourceY,
-							targetX,
-							targetY,
-							rightControlPoints,
-							remainingCost,
-							rightControlPointX,
-							rightControlPointY);
-				}  // End if (rightCost < remainingCost)
-			}  // End else part of if (leftCost < remainingCost)
+								tempControlPoints,
+								currentRemainingCost - cost1,
+								false);
+						route.controlPoints.addAll(tempControlPoints);
+					}  // End if (cost1 < remainingCost)
+					tempControlPoints = null;  // ArrayList<mxPoint> tempControlPoints = new ArrayList<mxPoint>();
+					route.cost = cost1 + cost2;
+					route.isCostUpdated = true;
+					//
+					// Updaing current remaining cost to the lowest update cost
+					// helps to prune the branching search tree.
+					//
+					if (route.cost < currentRemainingCost) {
+						currentRemainingCost = route.cost;
+					}
+					EdgeRoutingBranchingLayout.sort(routeList, new RouteComparator());
+
+				}  // End while (!(routeList.get(0).isCostUpdated))
+
+			}  // End if (!(routeList.isEmpty()))
 
 		}  // End else part of if (oneStepOnly)
 
 		double cost = straightCost;
-		if (leftCost < remainingCost) {
-			if (rightCost < remainingCost) {
-				if (leftCost < rightCost) {
-					controlPoints.addAll(leftControlPoints);
-					cost = leftCost;
-				} else {  // End if (leftCost < rightCost)
-					controlPoints.addAll(rightControlPoints);
-					cost = rightCost;
-				}  // End else part of if (leftCost < rightCost)
-			} else {  // End if (rightCost < remainingCost)
-				controlPoints.addAll(leftControlPoints);
-				cost = leftCost;
-			}  // End else part of if (rightCost < remainingCost)
-		} else {  // End if (leftCost < remainingCost)
-			if (rightCost < remainingCost) {
-				controlPoints.addAll(rightControlPoints);
-				cost = rightCost;
-			}  // End if (rightCost < remainingCost)
-		}  // End else part of if (leftCost < remainingCost)
-		leftControlPoints = null;  // List<mxPoint> leftControlPoints = new ArrayList<mxPoint>();
-		rightControlPoints = null;  // List<mxPoint> rightControlPoints = new ArrayList<mxPoint>();
+		if (!(routeList.isEmpty())) {
+			route = routeList.get(0);
+			if (route.cost < remainingCost) {
+				controlPoints.addAll(route.controlPoints);
+				cost = route.cost;
+			}
+		}  // End if (!(routeList.isEmpty()))
 		System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f, cost: %.1f\n", sourceX, sourceY, targetX, targetY, cost);
 		return cost;
 	}  // End protected double route(...)
 
-	protected double routeWithOneControlPoint(
-			double sourceX,
-			double sourceY,
-			double targetX,
-			double targetY,
-			List<mxPoint> controlPoints,
-			double remainingCost,
-			double controlPointX,
-			double controlPointY) {
-
-		List<mxPoint> tempControlPoints = new ArrayList<mxPoint>();
-		double cost1 = this.route(
-				sourceX,
-				sourceY,
-				controlPointX,
-				controlPointY,
-				tempControlPoints,
-				remainingCost,
-				false);
-		controlPoints.addAll(tempControlPoints);
-		controlPoints.add(new mxPoint(controlPointX, controlPointY));
-		if (cost1 > remainingCost) {
-			return cost1;
+	protected static <T> void sort(List<T> list, Comparator<? super T> c) {
+		if (list == null) {
+			return;
 		}
-		tempControlPoints.clear();
-		double cost2 = this.route(
-				controlPointX,
-				controlPointY,
-				targetX,
-				targetY,
-				tempControlPoints,
-				remainingCost - cost1,
-				false);
-		controlPoints.addAll(tempControlPoints);
-		return cost1 + cost2;
-	}  // End protected double routeWithOneControlPoint(...)
+		if (list.size() == 2) {
+			T first = list.get(0);
+			if (c.compare(first, list.get(1)) > 0) {
+				list.remove(first);
+				list.add(first);
+			}
+		} else if (list.size() > 2) {
+			Collections.sort(list, c);
+		}
+	}  // End protected static <T> void sort(List<T> list, Comparator<? super T> c)
 
 	protected static class ObstacleVerticesComparator implements Comparator<mxCell> {
 
@@ -551,4 +491,28 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			return (int) (offsetX1 * offsetX1 + offsetY1 * offsetY1 - offsetX2 * offsetX2 - offsetY2 * offsetY2);
 		}  // End public int compare(mxCell o1, mxCell o2)
 	}  // End protected static class ObstacleVerticesComparator implements Comparator<mxCell>
+
+	protected static class Route {
+
+		public double controlPointX;
+		public double controlPointY;
+		public List<mxPoint> controlPoints;
+		public double cost;
+		public boolean isCostUpdated;
+
+		public Route() {
+			this.controlPointX = 0;
+			this.controlPointY = 0;
+			this.controlPoints = new ArrayList<mxPoint>();
+			this.isCostUpdated = false;
+		}
+	}  // End protected static class Route
+
+	protected static class RouteComparator implements Comparator<Route> {
+
+		@Override
+		public int compare(Route o1, Route o2) {
+			return (int) (o1.cost - o2.cost);
+		}  // End public int compare(mxCell o1, mxCell o2)
+	}  // End protected static class RouteComparator implements Comparator<Route>
 }  // End public class EdgeRoutingBranchingLayout extends mxGraphLayout
