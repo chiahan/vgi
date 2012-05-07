@@ -1433,16 +1433,19 @@ public class FsmXml implements FsmXmlInterface {
 					xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
 					xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
 				}
-			} // End if (writeGeometricAndDrawingData)
+			
+                            // write drawing data
+                        
+                            xmlStreamWriter.writeStartElement(TAG_DRAWING_DATA);
+                            xmlStreamWriter.writeAttribute(ATR_FILL_COLOR, state.getDrawingData().fillColor);
+                            xmlStreamWriter.writeAttribute(ATR_STROKE_COLOR, state.getDrawingData().strokeColor);
+                            xmlStreamWriter.writeAttribute(ATR_STROKE_WIDTH, String.valueOf(state.getDrawingData().strokeWidth));
+                            xmlStreamWriter.writeEndElement();   
                         
                         
-                        // write drawing data
+                        } // End if (writeGeometricAndDrawingData)
                         
-                        xmlStreamWriter.writeStartElement(TAG_DRAWING_DATA);
-                        xmlStreamWriter.writeAttribute(ATR_FILL_COLOR, state.getDrawingData().fillColor);
-                        xmlStreamWriter.writeAttribute(ATR_STROKE_COLOR, state.getDrawingData().strokeColor);
-                        xmlStreamWriter.writeAttribute(ATR_STROKE_WIDTH, String.valueOf(state.getDrawingData().strokeWidth));
-                        xmlStreamWriter.writeEndElement();   
+                        
                         
                         
                         
@@ -1512,20 +1515,22 @@ public class FsmXml implements FsmXmlInterface {
 						xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
 					}
 				}  // End if (geometricData != null)
+                                
+                                // write drawing data
+                        
+                            xmlStreamWriter.writeStartElement(TAG_DRAWING_DATA);
+                            xmlStreamWriter.writeAttribute(ATR_STROKE_COLOR, transition.getDrawingData().strokeColor);
+                            xmlStreamWriter.writeAttribute(ATR_STROKE_WIDTH, String.valueOf(transition.getDrawingData().strokeWidth));
+                        
+                            String startarrow=transition.getDrawingData().startArrow;
+                            if(startarrow!=null)
+                                xmlStreamWriter.writeAttribute(ATR_START_ARROW, startarrow);
+                            xmlStreamWriter.writeAttribute(ATR_END_ARROW, transition.getDrawingData().endArrow);
+                            xmlStreamWriter.writeEndElement();   
 			} // End if (writeGeometricAndDrawingData)
                         
                         
-                        // write drawing data
                         
-                        xmlStreamWriter.writeStartElement(TAG_DRAWING_DATA);
-                        xmlStreamWriter.writeAttribute(ATR_STROKE_COLOR, transition.getDrawingData().strokeColor);
-                        xmlStreamWriter.writeAttribute(ATR_STROKE_WIDTH, String.valueOf(transition.getDrawingData().strokeWidth));
-                        
-                        String startarrow=transition.getDrawingData().startArrow;
-                        if(startarrow!=null)
-                            xmlStreamWriter.writeAttribute(ATR_START_ARROW, startarrow);
-                        xmlStreamWriter.writeAttribute(ATR_END_ARROW, transition.getDrawingData().endArrow);
-                        xmlStreamWriter.writeEndElement();   
                         
                         
                        
