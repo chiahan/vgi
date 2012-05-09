@@ -181,7 +181,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 		double testVectorX = offsetY;
 		double testVectorY = -offsetX;
 		//
-		// Find a control point.to the left of the vector from source to target.
+		// Find a control point to the left of the vector from source to target.
 		//
 		Route route = new Route();
 		route.controlPointX = targetX;
@@ -264,7 +264,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 		}  // End if (route != null)
 
 		//
-		// Find a control point.to the right of the vector from source to target.
+		// Find a control point to the right of the vector from source to target.
 		//
 		route = new Route();
 		route.controlPointX = targetX;
@@ -504,6 +504,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			this.controlPointX = 0;
 			this.controlPointY = 0;
 			this.controlPoints = new ArrayList<mxPoint>();
+			this.cost = 0;
 			this.isCostUpdated = false;
 		}
 	}  // End protected static class Route
