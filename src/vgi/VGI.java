@@ -360,6 +360,7 @@ public class VGI extends javax.swing.JFrame {
         featureMenuItem = new javax.swing.JMenuItem();
         routeAllEdges2008MenuItem = new javax.swing.JMenuItem();
         routeAllEdgesBranchingMenuItem = new javax.swing.JMenuItem();
+        planarizeMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -676,6 +677,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         layoutMenu.add(routeAllEdgesBranchingMenuItem);
+
+        planarizeMenuItem.setText("Planarize");
+        planarizeMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                planarizeMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(planarizeMenuItem);
 
         menuBar.add(layoutMenu);
 
@@ -1159,6 +1168,20 @@ public class VGI extends javax.swing.JFrame {
 		}
 	}//GEN-LAST:event_routeAllEdgesBranchingMenuItemActionPerformed
 
+	private void planarizeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_planarizeMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			mxGraph graph = EdgeRoutingMinCross.planarize(((JgraphXInternalFrame) frame).graph);
+			JgraphXInternalFrame newFrame = new JgraphXInternalFrame(
+					this.infoSplitPane,
+					graph,
+					new Automata(),
+					"Test Output",
+					this);
+			this.createInternalFrame(newFrame);
+		}  // End if (frame instanceof JgraphXInternalFrame)
+	}//GEN-LAST:event_planarizeMenuItemActionPerformed
+
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
@@ -1321,6 +1344,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem newMenuItem;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JPanel outlinePanel;
+    private javax.swing.JMenuItem planarizeMenuItem;
     private javax.swing.JMenuItem productMenuItem;
     private javax.swing.JMenuItem rationalExpressionSymbolsMenuItem;
     private javax.swing.JButton redoButton;
