@@ -361,6 +361,7 @@ public class VGI extends javax.swing.JFrame {
         routeAllEdges2008MenuItem = new javax.swing.JMenuItem();
         routeAllEdgesBranchingMenuItem = new javax.swing.JMenuItem();
         planarizeMenuItem = new javax.swing.JMenuItem();
+        buildDualGraphMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -636,6 +637,7 @@ public class VGI extends javax.swing.JFrame {
 
         menuBar.add(viewMenu);
 
+        layoutMenu.setMnemonic('L');
         layoutMenu.setText("Layout");
 
         circleMenuItem.setText("Circle");
@@ -685,6 +687,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         layoutMenu.add(planarizeMenuItem);
+
+        buildDualGraphMenuItem.setText("Build Dual Graph");
+        buildDualGraphMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buildDualGraphMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(buildDualGraphMenuItem);
 
         menuBar.add(layoutMenu);
 
@@ -1176,11 +1186,25 @@ public class VGI extends javax.swing.JFrame {
 					this.infoSplitPane,
 					graph,
 					new Automata(),
-					"Test Output",
+					"Planarized " + frame.getTitle(),
 					this);
 			this.createInternalFrame(newFrame);
 		}  // End if (frame instanceof JgraphXInternalFrame)
 	}//GEN-LAST:event_planarizeMenuItemActionPerformed
+
+	private void buildDualGraphMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buildDualGraphMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			mxGraph graph = EdgeRoutingMinCross.buildDualGraph(((JgraphXInternalFrame) frame).graph);
+			JgraphXInternalFrame newFrame = new JgraphXInternalFrame(
+					this.infoSplitPane,
+					graph,
+					new Automata(),
+					"Dual Graph of " + frame.getTitle(),
+					this);
+			this.createInternalFrame(newFrame);
+		}  // End if (frame instanceof JgraphXInternalFrame)
+	}//GEN-LAST:event_buildDualGraphMenuItemActionPerformed
 
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
@@ -1317,6 +1341,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenu algorithmsMenu;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator1;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator2;
+    private javax.swing.JMenuItem buildDualGraphMenuItem;
     private javax.swing.JMenuItem circleMenuItem;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem coaccessibleMenuItem;

@@ -187,6 +187,7 @@
         </Menu>
         <Menu class="javax.swing.JMenu" name="layoutMenu">
           <Properties>
+            <Property name="mnemonic" type="int" value="76"/>
             <Property name="text" type="java.lang.String" value="Layout"/>
           </Properties>
           <SubComponents>
@@ -236,6 +237,14 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="planarizeMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="buildDualGraphMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Build Dual Graph"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buildDualGraphMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
