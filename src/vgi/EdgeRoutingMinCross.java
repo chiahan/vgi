@@ -321,52 +321,71 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		mxGraph outGraph = new mxGraph();
 //		HashMap<mxICell, mxICell> oldToNewVerticesMap = new HashMap<mxICell, mxICell>();
-		Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
-
-		mxCell vertex;
-		if (!(objects[0] instanceof mxCell)) {
+//		Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
+//
+//		mxCell vertex;
+//		if (!(objects[0] instanceof mxCell)) {
+//			return null;
+//		}
+//		vertex = (mxCell) objects[0];
+//		if (!(vertex.isVertex())) {
+//			return null;
+//		}
+//		objects = inGraph.getConnections(vertex);
+//		mxCell edge;
+//		if (!(objects[0] instanceof mxCell)) {
+//			return null;
+//		}
+//		edge = (mxCell) objects[0];
+//		if (!(edge.isEdge())) {
+//			return null;
+//		}
+//		mxICell neighbour = edge.getSource();
+//		if (neighbour.equals(vertex)) {
+//			neighbour = edge.getTarget();
+//		}
+		Object objects[] = inGraph.getChildEdges(inGraph.getDefaultParent());
+		if (!(objects[0] instanceof mxICell)) {
 			return null;
 		}
-		vertex = (mxCell) objects[0];
-		if (!(vertex.isVertex())) {
-			return null;
-		}
-		objects = inGraph.getConnections(vertex);
-		mxCell edge;
-		if (!(objects[0] instanceof mxCell)) {
-			return null;
-		}
-		edge = (mxCell) objects[0];
-		if (!(edge.isEdge())) {
-			return null;
-		}
-		mxICell neighbour = edge.getSource();
-		if (neighbour.equals(vertex)) {
-			neighbour = edge.getTarget();
-		}
+		mxICell edge = (mxICell) objects[0];
 		List<mxICell> regionVertices = new ArrayList<mxICell>();
-		regionVertices.add(vertex);
-		regionVertices.add(neighbour);
-		mxICell previousVertex = vertex;
-		mxICell currentVertex = neighbour;
-		mxICell nextVertex = null;
+//		regionVertices.add(vertex);
+//		regionVertices.add(neighbour);
+//		mxICell previousVertex = vertex;
+//		mxICell currentVertex = neighbour;
+//		mxICell nextVertex = null;
+//		while (true) {
+//			nextVertex = getNextVertex(previousVertex, currentVertex);
+//			if ((nextVertex == null) || (nextVertex == vertex)) {
+//				break;
+//			}
+//			regionVertices.add(nextVertex);
+//			previousVertex = currentVertex;
+//			currentVertex = nextVertex;
+//		}  // End while (true)
+//
+//		if (nextVertex == null) {
+//			return null;
+//		}
+
+		EdgeDirection edgeDirection = new EdgeDirection(edge, true);
 		while (true) {
-			nextVertex = getNextVertex(previousVertex, currentVertex);
-			if ((nextVertex == null) || (nextVertex == vertex)) {
+			regionVertices.add(edgeDirection.edge.getTerminal(!(edgeDirection.isSourceToTarget)));
+			edgeDirection = getNextEdgeDirection(edgeDirection);
+			if ((edgeDirection == null)
+					|| (edgeDirection.edge == null)) {
+				throw new IllegalStateException("getNextEdgeDirection() returned invalid output.");
+			}
+			if ((edgeDirection.edge == edge)
+					&& (edgeDirection.isSourceToTarget)) {
 				break;
 			}
-			regionVertices.add(nextVertex);
-			previousVertex = currentVertex;
-			currentVertex = nextVertex;
 		}  // End while (true)
-
-		if (nextVertex == null) {
-			return null;
-		}
 
 		Iterator<mxICell> iterateVertices = regionVertices.iterator();
 		while (iterateVertices.hasNext()) {
-			currentVertex = iterateVertices.next();
+			mxICell currentVertex = iterateVertices.next();
 			mxGeometry geometry = currentVertex.getGeometry();
 			if (geometry == null) {
 				throw new IllegalArgumentException("currentVertex has null geometry.");
@@ -484,5 +503,122 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}  // End for (int index = 0; index < edgeCount; index++)
 
 		return outVertex;
-	}  // End protected mxIcell getNextVertex(mxICell, mxCell edge)
+	}  // End protected static mxICell getNextVertex(mxICell previousVertex, mxICell currentVertex)
+
+	protected static class EdgeDirection {
+
+		public mxICell edge;
+		public boolean isSourceToTarget;
+
+		public EdgeDirection() {
+			this.edge = null;
+			this.isSourceToTarget = false;
+		}
+
+		public EdgeDirection(mxICell edge, boolean isSourceToTarget) {
+			this.edge = edge;
+			this.isSourceToTarget = isSourceToTarget;
+		}
+	}  // End protected class EdgeDirection
+
+	protected static EdgeDirection getNextEdgeDirection(EdgeDirection inEdgeDirection) {
+
+		if ((inEdgeDirection == null)
+				|| (inEdgeDirection.edge == null)) {
+			throw new IllegalArgumentException("Invalid inputs to getNextEdgeDirection().");
+		}
+
+		mxICell currentVertex;
+		mxICell previousVertex;
+		if (inEdgeDirection.isSourceToTarget) {
+			currentVertex = inEdgeDirection.edge.getTerminal(false);
+			previousVertex = inEdgeDirection.edge.getTerminal(true);
+		} else {
+			currentVertex = inEdgeDirection.edge.getTerminal(true);
+			previousVertex = inEdgeDirection.edge.getTerminal(false);
+		}
+		if ((currentVertex == null)
+				|| (previousVertex == null)) {
+			throw new IllegalArgumentException("inEdgeDirection.edge has a null vertex.");
+		}
+		int edgeCount = currentVertex.getEdgeCount();
+		if (edgeCount == 0) {
+			throw new IllegalArgumentException("currentVertex has 0 edges.");
+		}
+		EdgeDirection outEdgeDirection = new EdgeDirection();
+		if (edgeCount == 1) {
+			outEdgeDirection.edge = inEdgeDirection.edge;
+			outEdgeDirection.isSourceToTarget = !(inEdgeDirection.isSourceToTarget);
+			return outEdgeDirection;
+		}
+
+		mxGeometry previousGeometry = previousVertex.getGeometry();
+		if (previousGeometry == null) {
+			throw new IllegalArgumentException("previousVertex has null geometry.");
+		}
+		mxGeometry currentGeometry = currentVertex.getGeometry();
+		if (currentGeometry == null) {
+			throw new IllegalArgumentException("currentVertex has null geometry.");
+		}
+		double inOffsetX = currentGeometry.getCenterX() - previousGeometry.getCenterX();
+		double inOffsetY = currentGeometry.getCenterY() - previousGeometry.getCenterY();
+		//
+		// Turn the incoming vector to the right (clockwise) 90 degrees.
+		//
+		double rightVectorX = -inOffsetY;
+		double rightVectorY = inOffsetX;
+		double currentAngle = -Math.PI - 1;
+
+		for (int index = 0; index < edgeCount; index++) {
+
+			mxICell edge = currentVertex.getEdgeAt(index);
+			if ((edge == null) || !(edge.isEdge())) {
+				throw new IllegalArgumentException("edge is null or is not an edge");
+			}
+			if (edge == inEdgeDirection.edge) {
+				continue;
+			}
+			mxICell source = edge.getTerminal(true);
+			mxICell target = edge.getTerminal(false);
+			mxICell neighbour = (currentVertex == source) ? target : source;
+
+			if (edgeCount == 2) {
+				outEdgeDirection.edge = edge;
+				outEdgeDirection.isSourceToTarget = (currentVertex == source);
+				return outEdgeDirection;
+			}
+
+			mxGeometry neighbourGeometry = neighbour.getGeometry();
+			if (neighbourGeometry == null) {
+				throw new IllegalArgumentException("neighbour has null geometry.");
+			}
+			double offsetX = neighbourGeometry.getCenterX() - currentGeometry.getCenterX();
+			double offsetY = neighbourGeometry.getCenterY() - currentGeometry.getCenterY();
+			//
+			// Calculate the angle between the edge from previousVertex to
+			// currentVertex and the edge from currentVertex to neighbour by dot
+			// product.
+			//
+			double angle = Math.acos(
+					(offsetX * inOffsetX + offsetY * inOffsetY)
+					/ Math.sqrt(offsetX * offsetX + offsetY * offsetY)
+					/ Math.sqrt(inOffsetX * inOffsetX + inOffsetY * inOffsetY));
+			//
+			// Make the angle negative if the edge from currentVertex to
+			// neighbour is to the left of the edge (vector) from previousVertex
+			// to currentVertex.
+			//
+			if ((offsetX * rightVectorX + offsetY * rightVectorY) < 0) {
+				angle = -angle;
+			}
+			if (angle > currentAngle) {
+				currentAngle = angle;
+				outEdgeDirection.edge = edge;
+				outEdgeDirection.isSourceToTarget = (currentVertex == source);
+			}
+
+		}  // End for (int index = 0; index < edgeCount; index++)
+
+		return outEdgeDirection;
+	}  // End protected EdgeDirection getNextEdgeDirection(EdgeDirection inEdgeDirection)
 }  // End public class EdgeRoutingMinCross extends mxGraphLayout
