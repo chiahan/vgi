@@ -11,10 +11,7 @@ import com.mxgraph.model.mxICell;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -57,15 +54,15 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		for (int index = 0; index < objects.length; index++) {
 			if (!(objects[index] instanceof mxICell)) {
-				throw new IllegalArgumentException("vertex is not mxICell.");
+				throw new IllegalStateException("vertex is not mxICell.");
 			}
 			mxICell vertex = (mxICell) objects[index];
 			if (!(vertex.isVertex())) {
-				throw new IllegalArgumentException("vertex is not vertex.");
+				throw new IllegalStateException("vertex is not vertex.");
 			}
 			mxGeometry geometry = vertex.getGeometry();
 			if (geometry == null) {
-				throw new IllegalArgumentException("vertex has null geometry.");
+				throw new IllegalStateException("vertex has null geometry.");
 			}
 			mxICell newVertex = (mxICell) outGraph.insertVertex(
 					outGraph.getDefaultParent(),
@@ -84,20 +81,20 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		for (int index = 0; index < objects.length; index++) {
 			if (!(objects[index] instanceof mxCell)) {
-				throw new IllegalArgumentException("edge is not mxCell.");
+				throw new IllegalStateException("edge is not mxCell.");
 			}
 			mxCell edge = (mxCell) objects[index];
 			if (!(edge.isEdge())) {
-				throw new IllegalArgumentException("edge is not edge.");
+				throw new IllegalStateException("edge is not edge.");
 			}
 			mxGeometry geometry = edge.getGeometry();
 			if (geometry == null) {
-				throw new IllegalArgumentException("edge has null geometry.");
+				throw new IllegalStateException("edge has null geometry.");
 			}
 			mxICell source = edge.getSource();
 			mxICell target = edge.getTarget();
 			if ((source == null) && (target == null)) {
-				throw new IllegalArgumentException("The source and target of an edge can not both be null.");
+				throw new IllegalStateException("The source and target of an edge can not both be null.");
 			}
 
 			Object parent = outGraph.getDefaultParent();
@@ -141,7 +138,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				if ((controlPoints == null) || (controlPoints.isEmpty())) {
 					mxGeometry sourceGeometry = source.getGeometry();
 					if (sourceGeometry == null) {
-						throw new IllegalArgumentException("Source vertex has null geometry.");
+						throw new IllegalStateException("Source vertex has null geometry.");
 					}
 					point = new mxPoint(
 							sourceGeometry.getCenterX() + sourceGeometry.getWidth(),
@@ -319,18 +316,10 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 	protected static class EdgeVisit {
 
-		mxICell edge;
 		public boolean isSourceVisited;
 		public boolean isTargetVisited;
 
 		public EdgeVisit() {
-			this.edge = null;
-			this.isSourceVisited = false;
-			this.isTargetVisited = false;
-		}
-
-		public EdgeVisit(mxICell edge) {
-			this.edge = edge;
 			this.isSourceVisited = false;
 			this.isTargetVisited = false;
 		}
@@ -352,13 +341,62 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}
 	}  // End protected class EdgeDirection
 
+	protected static class Region<E> extends ArrayList<E> {
+
+		public Region() {
+		}
+
+		public Region(Collection<? extends E> c) {
+			super(c);
+		}
+
+		public Region(int initialCapacity) {
+			super(initialCapacity);
+		}
+
+		@Override
+		public String toString() {
+
+			String string = "";
+			Iterator<E> iterator = this.iterator();
+			while (true) {
+				Object object = iterator.next();
+				if (object instanceof mxICell) {
+					mxICell cell = (mxICell) object;
+					object = cell.getValue();
+					if (object == null) {
+						string = string + cell.getId();
+					} else {
+						string = string + object.toString();
+					}
+				} else {
+					string = string + object.toString();
+				}
+				if (iterator.hasNext()) {
+					string = string + ", ";
+				} else {
+					break;
+				}
+			}  // End while (true)
+
+			return string;
+		}  // End public String toString()
+	}  // End protected static class Region<E> extends ArrayList<E>
+
 	public static mxGraph buildDualGraph(mxGraph inGraph) {
 
+		if (inGraph == null) {
+			throw new IllegalArgumentException("Input inGraph is null.");
+		}
 		mxGraph outGraph = new mxGraph();
 		Object objects[] = inGraph.getChildEdges(inGraph.getDefaultParent());
 		int edgeCount = objects.length;
 		HashMap<mxICell, EdgeVisit> edgeVisitMap = new HashMap<mxICell, EdgeVisit>(edgeCount);
+		List<mxICell> edgeList = new LinkedList<mxICell>();
 
+		//
+		// Initialize all data structures required.
+		//
 		for (int index = 0; index < edgeCount; index++) {
 			if (!(objects[index] instanceof mxICell)) {
 				throw new IllegalStateException("An edge is not of the type mxICell.");
@@ -367,29 +405,38 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			if (!(edge.isEdge())) {
 				throw new IllegalStateException("The edge variable is not actually an edge.");
 			}
-			edgeVisitMap.put(edge, new EdgeVisit(edge));
+			edgeVisitMap.put(edge, new EdgeVisit());
+			edgeList.add(edge);
 		}  // End for (int index = 0; index < edgeCount; index++)
 
-		List<List<mxICell>> regionList = new ArrayList<List<mxICell>>();
-
+		//
+		// Find all regions of the planar graph.
+		//
+		List<Region<mxICell>> regionList = new ArrayList<Region<mxICell>>();
 		while (!(edgeVisitMap.isEmpty())) {
 
-			EdgeVisit edgeVisit = edgeVisitMap.get(edgeVisitMap.keySet().iterator().next());
-			if ((edgeVisit == null)
-					|| (edgeVisit.edge == null)) {
-				throw new IllegalStateException("Invalid edgeVisit.");
+			mxICell edge = edgeVisitMap.keySet().iterator().next();
+			if (edge == null) {
+				throw new IllegalStateException("The edge variable is null.");
+			}
+			EdgeVisit edgeVisit = edgeVisitMap.get(edge);
+			if (edgeVisit == null) {
+				throw new IllegalStateException("The edgeVisit variable is null.");
 			}
 			EdgeDirection startEdgeDirection;
 			if (!(edgeVisit.isTargetVisited)) {
-				startEdgeDirection = new EdgeDirection(edgeVisit.edge, true);
+				startEdgeDirection = new EdgeDirection(edge, true);
 			} else if (!(edgeVisit.isSourceVisited)) {
-				startEdgeDirection = new EdgeDirection(edgeVisit.edge, false);
+				startEdgeDirection = new EdgeDirection(edge, false);
 			} else {
-				edgeVisitMap.remove(edgeVisit.edge);
+				edgeVisitMap.remove(edge);
 				continue;
 			}
 
-			List<mxICell> regionVertices = new ArrayList<mxICell>();
+			//
+			// Find one region by traversing edges.
+			//
+			Region<mxICell> regionVertices = new Region<mxICell>();
 			EdgeDirection edgeDirection = startEdgeDirection;
 			do {
 				if (edgeDirection.isSourceToTarget) {
@@ -406,56 +453,19 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				edgeVisit = edgeVisitMap.get(edgeDirection.edge);
 			} while ((edgeDirection.edge != startEdgeDirection.edge)
 					|| (edgeDirection.isSourceToTarget != startEdgeDirection.isSourceToTarget));
+
 			regionList.add(regionVertices);
 			regionVertices = null;  // List<mxICell> regionVertices = new ArrayList<mxICell>();
 
 		} // End while (!(edgeVisitMap.isEmpty()))
 
-		Iterator< List< mxICell>> iterateRegions = regionList.iterator();
+		//
+		// For each region found, add a vertex in the output dual graph.
+		//
+		Iterator<Region<mxICell>> iterateRegions = regionList.iterator();
 		while (iterateRegions.hasNext()) {
-			List<mxICell> regionVertices = iterateRegions.next();
+			Region<mxICell> regionVertices = iterateRegions.next();
 			Iterator<mxICell> iterateVertices = regionVertices.iterator();
-//			Object previousNewVertex = null;
-//			Object firstNewVertex = null;
-//
-//			while (iterateVertices.hasNext()) {
-//				mxICell currentVertex = iterateVertices.next();
-//				mxGeometry geometry = currentVertex.getGeometry();
-//				if (geometry == null) {
-//					throw new IllegalArgumentException("currentVertex has null geometry.");
-//				}
-//				mxICell newVertex = (mxICell) outGraph.insertVertex(
-//						outGraph.getDefaultParent(),
-//						currentVertex.getId(),
-//						currentVertex.getValue(),
-//						geometry.getX(),
-//						geometry.getY(),
-//						geometry.getWidth(),
-//						geometry.getHeight(),
-//						currentVertex.getStyle(),
-//						geometry.isRelative());
-//				if (previousNewVertex == null) {
-//					firstNewVertex = newVertex;
-//				} else {
-//					outGraph.insertEdge(
-//							outGraph.getDefaultParent(),
-//							null,
-//							null,
-//							previousNewVertex,
-//							newVertex);
-//				}  // End if (previousNewVertex != null)
-//				previousNewVertex = newVertex;
-//			}  // End while (iterateVertices.hasNext())
-//
-//			if (previousNewVertex != null) {
-//				outGraph.insertEdge(
-//						outGraph.getDefaultParent(),
-//						null,
-//						null,
-//						previousNewVertex,
-//						firstNewVertex);
-//			}  // End if (previousNewVertex != null)
-
 			double sumX = 0;
 			double sumY = 0;
 
@@ -463,7 +473,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				mxICell currentVertex = iterateVertices.next();
 				mxGeometry geometry = currentVertex.getGeometry();
 				if (geometry == null) {
-					throw new IllegalArgumentException("currentVertex has null geometry.");
+					throw new IllegalStateException("currentVertex has null geometry.");
 				}
 				sumX = sumX + geometry.getCenterX();
 				sumY = sumY + geometry.getCenterY();
@@ -475,9 +485,117 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					regionVertices,
 					sumX / regionVertices.size(),
 					sumY / regionVertices.size(),
-					50,
-					50);
+					30,
+					30);
 		}  // End while (iterateRegions.hasNext())
+
+		//
+		// For every pair of neighbouring regions, add an edge in the output dual graph.
+		//
+		while (!(edgeList.isEmpty())) {
+
+			mxICell edge = edgeList.remove(0);
+			mxICell source = edge.getTerminal(true);
+			mxICell target = edge.getTerminal(false);
+			mxICell firstRegion = null;
+			mxICell secondRegion = null;
+			objects = outGraph.getChildVertices(outGraph.getDefaultParent());
+			int verticesCount = objects.length;
+
+			//
+			// Find (at most two) regions that share an edge (i.e. contain the
+			// same two vertices in consecutive order).
+			//
+			for (int index = 0; index < verticesCount; index++) {
+				if (!(objects[index] instanceof mxICell)) {
+					throw new IllegalStateException("A vertex is not of the type mxICell.");
+				}
+				mxICell outVertex = (mxICell) objects[index];
+				if (!(outVertex.isVertex())) {
+					throw new IllegalStateException("The outVertex variable is not actually a vertex.");
+				}
+				Object object = outVertex.getValue();
+				if (!(object instanceof Region)) {
+					throw new IllegalStateException("The value of outVertex is not the type List.");
+				}
+				Region regionVertices = (Region) object;
+				int position = regionVertices.indexOf(source);
+				if (position < 0) {
+					continue;
+				}
+				int previousPosition = (position - 1 < 0) ? (regionVertices.size() - 1) : (position - 1);
+				int nextPosition = (position + 1 >= regionVertices.size()) ? (0) : (position + 1);
+				if ((regionVertices.get(previousPosition) == target)
+						|| (regionVertices.get(nextPosition) == target)) {
+					if (firstRegion == null) {
+						firstRegion = outVertex;
+					} else if (secondRegion == null) {
+						secondRegion = outVertex;
+						break;
+					}
+				}  // End if ((regionVertices.get(previousPosition) == target)
+				//	|| (regionVertices.get(nextPosition) == target))
+			}  // End for (int index = 0; index < verticesCount; index++)
+
+			if ((firstRegion != null) && (secondRegion != null)) {
+				boolean alreadyHasEdge = false;
+				for (int index1 = 0; index1 < firstRegion.getEdgeCount(); index1++) {
+					for (int index2 = 0; index2 < secondRegion.getEdgeCount(); index2++) {
+						if (firstRegion.getEdgeAt(index1) == secondRegion.getEdgeAt(index2)) {
+							alreadyHasEdge = true;
+							break;
+						}
+					}  // End for (int index2 = 0; index2 < secondRegion.getEdgeCount(); index2++)
+				}  // End for (int index1 = 0; index1 < firstRegion.getEdgeCount(); index1++)
+				if (!alreadyHasEdge) {
+					outGraph.insertEdge(
+							outGraph.getDefaultParent(),
+							null,
+							null,
+							firstRegion,
+							secondRegion);
+				}  // End if (!alreadyHasEdge)
+			}  // End if ((firstRegion != null) && (secondRegion != null))
+
+			//
+			// Remove all edges on the boundary between the two known regions
+			// from the edge list.
+			//
+			mxICell boundaryEdge = edge;
+			mxICell boundaryVertex = source;
+			while (boundaryVertex.getEdgeCount() == 2) {
+				int index = boundaryVertex.getEdgeIndex(boundaryEdge);
+				if (index == 0) {
+					boundaryEdge = boundaryVertex.getEdgeAt(1);
+				} else {
+					boundaryEdge = boundaryVertex.getEdgeAt(0);
+				}
+				if (boundaryEdge.getTerminal(true) == boundaryVertex) {
+					boundaryVertex = boundaryEdge.getTerminal(false);
+				} else {
+					boundaryVertex = boundaryEdge.getTerminal(true);
+				}
+				edgeList.remove(boundaryEdge);
+			}  // End while (boundaryVertex.getEdgeCount() == 2)
+
+			boundaryEdge = edge;
+			boundaryVertex = target;
+			while (boundaryVertex.getEdgeCount() == 2) {
+				int index = boundaryVertex.getEdgeIndex(boundaryEdge);
+				if (index == 0) {
+					boundaryEdge = boundaryVertex.getEdgeAt(1);
+				} else {
+					boundaryEdge = boundaryVertex.getEdgeAt(0);
+				}
+				if (boundaryEdge.getTerminal(true) == boundaryVertex) {
+					boundaryVertex = boundaryEdge.getTerminal(false);
+				} else {
+					boundaryVertex = boundaryEdge.getTerminal(true);
+				}
+				edgeList.remove(boundaryEdge);
+			}  // End while (boundaryVertex.getEdgeCount() == 2)
+
+		}  // End while (!(edgeList.isEmpty()))
 
 		return outGraph;
 	}  // End public static mxGraph buildDualGraph(mxGraph inGraph)
@@ -500,11 +618,11 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}
 		if ((currentVertex == null)
 				|| (previousVertex == null)) {
-			throw new IllegalArgumentException("inEdgeDirection.edge has a null vertex.");
+			throw new IllegalStateException("inEdgeDirection.edge has a null vertex.");
 		}
 		int edgeCount = currentVertex.getEdgeCount();
 		if (edgeCount == 0) {
-			throw new IllegalArgumentException("currentVertex has 0 edges.");
+			throw new IllegalStateException("currentVertex has 0 edges.");
 		}
 		EdgeDirection outEdgeDirection = new EdgeDirection();
 		if (edgeCount == 1) {
@@ -515,11 +633,11 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		mxGeometry previousGeometry = previousVertex.getGeometry();
 		if (previousGeometry == null) {
-			throw new IllegalArgumentException("previousVertex has null geometry.");
+			throw new IllegalStateException("previousVertex has null geometry.");
 		}
 		mxGeometry currentGeometry = currentVertex.getGeometry();
 		if (currentGeometry == null) {
-			throw new IllegalArgumentException("currentVertex has null geometry.");
+			throw new IllegalStateException("currentVertex has null geometry.");
 		}
 		double inOffsetX = currentGeometry.getCenterX() - previousGeometry.getCenterX();
 		double inOffsetY = currentGeometry.getCenterY() - previousGeometry.getCenterY();
@@ -534,7 +652,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 			mxICell edge = currentVertex.getEdgeAt(index);
 			if ((edge == null) || !(edge.isEdge())) {
-				throw new IllegalArgumentException("edge is null or is not an edge");
+				throw new IllegalStateException("edge is null or is not an edge");
 			}
 			if (edge == inEdgeDirection.edge) {
 				continue;
@@ -551,7 +669,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 			mxGeometry neighbourGeometry = neighbour.getGeometry();
 			if (neighbourGeometry == null) {
-				throw new IllegalArgumentException("neighbour has null geometry.");
+				throw new IllegalStateException("neighbour has null geometry.");
 			}
 			double offsetX = neighbourGeometry.getCenterX() - currentGeometry.getCenterX();
 			double offsetY = neighbourGeometry.getCenterY() - currentGeometry.getCenterY();
