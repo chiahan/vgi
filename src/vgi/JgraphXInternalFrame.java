@@ -1660,7 +1660,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             if ((cell == null)) {
                 return;
             }
-            EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
+            EdgeRoutingMinCross layout = new EdgeRoutingMinCross(this.graph);
             layout.route(cell);
 	}//GEN-LAST:event_routeEdgeMenuItemActionPerformed
 
