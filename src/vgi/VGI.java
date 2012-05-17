@@ -20,6 +20,7 @@ import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -278,6 +279,7 @@ public class VGI extends javax.swing.JFrame {
 		this.pmLastFolderForSaveFile = new File(defaultFolderPath);
 		this.pmAutomataType = null;
 		initComponents();
+		this.editMenu.setVisible(false);
 		this.viewMenu.setVisible(false);
 
 		Preferences preferences = Preferences.systemRoot().node(this.getClass().getName());
@@ -544,6 +546,11 @@ public class VGI extends javax.swing.JFrame {
         closeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_W, java.awt.event.InputEvent.CTRL_MASK));
         closeMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/stop.png"))); // NOI18N
         closeMenuItem.setText("Close");
+        closeMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                closeMenuItemActionPerformed(evt);
+            }
+        });
         fileMenu.add(closeMenuItem);
 
         saveMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
@@ -567,6 +574,11 @@ public class VGI extends javax.swing.JFrame {
 
         exitMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/door.png"))); // NOI18N
         exitMenuItem.setText("Exit");
+        exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitMenuItemActionPerformed(evt);
+            }
+        });
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
@@ -1205,6 +1217,19 @@ public class VGI extends javax.swing.JFrame {
 			this.createInternalFrame(newFrame);
 		}  // End if (frame instanceof JgraphXInternalFrame)
 	}//GEN-LAST:event_buildDualGraphMenuItemActionPerformed
+
+	private void closeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame == null) {
+			return;
+		}
+		frame.doDefaultCloseAction();
+	}//GEN-LAST:event_closeMenuItemActionPerformed
+
+	private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
+		WindowEvent windowClosing = new WindowEvent(this, WindowEvent.WINDOW_CLOSING);
+		this.dispatchEvent(windowClosing);
+	}//GEN-LAST:event_exitMenuItemActionPerformed
 
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
