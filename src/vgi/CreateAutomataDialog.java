@@ -2,7 +2,7 @@ package vgi;
 
 
 import java.util.ArrayList;
-import javax.swing.ComboBoxModel;
+import javax.swing.JOptionPane;
 
 /*
  * To change this template, choose Tools | Templates
@@ -284,29 +284,47 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
-        // TODO add your handling code here:
-//        if (!((semiringZeroSymbolTextField.getText().equals("")) ||
-//             (semiringIdentitySymbolTextField.getText().equals("")) ||
-//             (semiringType == null) || (semiringSet == null) ||
-//             (semiringOperation == null))) {
-//            Semiring semiring = new Semiring(semiringZeroSymbolTextField.getText(),
-//                                           semiringIdentitySymbolTextField.getText(),
-//                                           semiringType, semiringSet,
-//                                           semiringOperation, "", null, null);
-//            Monoid monoid = new Monoid(monoidZeroSymbolTextField.getText(), 
-//                                      monoidAlphabetComboBox.getModel().getSize(), 
-//                                      monoidAlphabetComboBox.getModel(), 
-//                                      0, null);
-//            this.setVisible(false);
-//            createFlag = true;
-//        }
-        if (!(tafKitSemiring == null)) {
-            this.setVisible(false);
-            createFlag = true;
-        }
-        else {
-            System.out.println("some options are empty");
-        }
+		AutomataInterface.Alphabet alphabet = this.getAlphabet();
+		if ((alphabet == null)
+				|| (alphabet.allSymbols == null)
+				|| (alphabet.allSymbols.isEmpty())) {
+			JOptionPane.showMessageDialog(
+					this,
+					"Please enter at least one symbol for the alphabet.",
+					null,
+					JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+		AutomataInterface.Weight weight = this.getWeight();
+		if ((weight == null)
+				|| (weight.semiring == null)) {
+			JOptionPane.showMessageDialog(
+					this,
+					"Please select a semiring for the weight.",
+					null,
+					JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+		AutomataInterface.WritingData writingData = this.getWritingData();
+		if ((writingData == null)
+				|| (writingData.closePar == null)
+				|| (writingData.openPar == null)
+				|| (writingData.plusSym == null)
+				|| (writingData.spacesSym == null)
+				|| (writingData.starSym == null)
+				|| (writingData.timesSym == null)
+				|| (writingData.weightClosing == null)
+				|| (writingData.weightOpening == null)
+				|| (writingData.zeroSym == null)) {
+			JOptionPane.showMessageDialog(
+					this,
+					"Please specify the writing data for this combination of alphabet and semiring.",
+					null,
+					JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+		createFlag = true;
+		this.setVisible(false);
     }//GEN-LAST:event_okButtonActionPerformed
 
     private void defaultButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_defaultButtonActionPerformed
