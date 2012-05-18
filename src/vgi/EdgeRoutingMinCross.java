@@ -67,8 +67,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		if ((sourceValue != null) && (targetValue != null)) {
 			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
 		}
-		mxGraph planarGraph = planarize(this.getGraph());
-		mxGraph dualGraph = buildDualGraph(planarGraph);
+		mxGraph planarGraph = EdgeRoutingMinCross.planarize(this.getGraph(), edge);
+		mxGraph dualGraph = EdgeRoutingMinCross.buildDualGraph(planarGraph);
 
 		mxICell planarSource = null;
 		mxICell planarTarget = null;
@@ -99,33 +99,43 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			throw new IllegalStateException("Cannot find the corresponding source and target vertices in the planar graph.");
 		}
 
-		List<mxICell> path = findShortestPath(dualGraph, planarSource, planarTarget);
-		if (!(path.isEmpty())) {
-			System.out.print("Shortest path goes through");
+		List<List<mxICell>> paths = findShortestPaths(dualGraph, planarSource, planarTarget);
 
-			Iterator<mxICell> iterateVertices = path.iterator();
-			while (iterateVertices.hasNext()) {
-				mxICell vertex = iterateVertices.next();
-				System.out.print(" {" + vertex.getValue().toString() + "}");
-			}  // End while (iterateVertices.hasNext())
+		Iterator<List<mxICell>> iteratePaths = paths.iterator();
+		while (iteratePaths.hasNext()) {
 
-			System.out.println();
-		}  // End if (!(path.isEmpty()))
+			List<mxICell> path = iteratePaths.next();
+			if (!(path.isEmpty())) {
+				System.out.print("Shortest path goes through");
+
+				Iterator<mxICell> iterateVertices = path.iterator();
+				while (iterateVertices.hasNext()) {
+					mxICell vertex = iterateVertices.next();
+					System.out.print(" {" + vertex.getValue().toString() + "}");
+				}  // End while (iterateVertices.hasNext())
+
+				System.out.println();
+			}  // End if (!(path.isEmpty()))
+
+		}  // End while (iteratePaths.hasNext())
 //		List<mxPoint> controlPoints = new ArrayList<mxPoint>();
 //		super.setEdgePoints(edge, controlPoints);
 	}  // End public void route(mxCell edge)
 
-	protected static List<mxICell> findShortestPath(mxGraph inGraph, mxICell inSource, mxICell inTarget) {
+	protected static List<List<mxICell>> findShortestPaths(
+			mxGraph inGraph,
+			mxICell inSourceElement,
+			mxICell inTargetElement) {
 
 		if ((inGraph == null)
-				|| (inSource == null)
-				|| (inTarget == null)) {
+				|| (inSourceElement == null)
+				|| (inTargetElement == null)) {
 			throw new IllegalArgumentException("Invalid input to findShortestPath().");
 		}
 
-		List<mxICell> verticesToBeVisited = new LinkedList<mxICell>();
+		HashMap<mxICell, List<mxICell>> sourceToVisitedVerticesMap = new HashMap<mxICell, List<mxICell>>();
 		List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
-		List<List<mxICell>> completePaths = new LinkedList<List<mxICell>>();
+		List<List<mxICell>> outPaths = new LinkedList<List<mxICell>>();
 		Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
 		int count = objects.length;
 
@@ -142,25 +152,32 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				throw new IllegalStateException("The value of vertex is not of the type Region.");
 			}
 			Region region = (Region) object;
-			if (region.contains(inSource)) {
+			if (region.contains(inSourceElement)) {
 				List<mxICell> path = new ArrayList<mxICell>();
 				path.add(vertex);
-				paths.add(path);
-				if (region.contains(inTarget)) {
-					completePaths.add(path);
+				if (region.contains(inTargetElement)) {
+					outPaths.add(path);
+					path = null;  // List<mxICell> path = new ArrayList<mxICell>();
+					continue;
 				}
-			} else {  // End if (region.contains(inSource))
-				verticesToBeVisited.add(vertex);
-			}
+				paths.add(path);
+				path = null;  // List<mxICell> path = new ArrayList<mxICell>();
+				List<mxICell> visitedVertices = new LinkedList<mxICell>();
+				visitedVertices.add(vertex);
+				sourceToVisitedVerticesMap.put(vertex, visitedVertices);
+				visitedVertices = null;  // List<mxICell> visitedVertices = new LinkedList<mxICell>();
+			}  // End if (region.contains(inSourceElement))
 		}  // End for (int index = 0; index < count; index++)
 
-		Iterator<List<mxICell>> iteratePaths = completePaths.iterator();
-		while (iteratePaths.hasNext()) {
-			List<mxICell> path = iteratePaths.next();
-			return path;
-		}  // End while (iteratePaths.hasNext())
+		objects = null;  // Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
 
-		while (!(verticesToBeVisited.isEmpty())) {
+		if (!(outPaths.isEmpty())) {
+			sourceToVisitedVerticesMap = null;  // HashMap<mxICell, List<mxICell>> sourceToVisitedVerticesMap = new HashMap<mxICell, List<mxICell>>();
+			paths = null;  // List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
+			return outPaths;
+		}
+
+		while (!(paths.isEmpty())) {
 
 			List<mxICell> path = paths.remove(0);
 			mxICell vertex = path.get(path.size() - 1);
@@ -177,38 +194,46 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					}
 				}  // End if (nextVertex == vertex)
 
-				if (!(verticesToBeVisited.contains(nextVertex))) {
+				List<mxICell> visitedVertices = sourceToVisitedVerticesMap.get(path.get(0));
+				if (visitedVertices.contains(nextVertex)) {
 					continue;
 				}
 
+				visitedVertices.add(nextVertex);
 				List<mxICell> newPath = new ArrayList<mxICell>(path);
 				newPath.add(nextVertex);
-				paths.add(newPath);
 
 				Object object = nextVertex.getValue();
 				if (!(object instanceof Region)) {
 					throw new IllegalStateException("The value of vertex is not of the type Region.");
 				}
 				Region region = (Region) object;
-				if (region.contains(inTarget)) {
-					completePaths.add(newPath);
+				if (region.contains(inTargetElement)) {
+					outPaths.add(newPath);
+				} else {
+					paths.add(newPath);
 				}
-				verticesToBeVisited.remove(nextVertex);
+				newPath = null;  // List<mxICell> newPath = new ArrayList<mxICell>(path);
 
 			}  // End for (int index = 0; index < count; index++)
 
 			paths.remove(path);
 
-			iteratePaths = completePaths.iterator();
-			while (iteratePaths.hasNext()) {
-				path = iteratePaths.next();
-				return path;
-			}  // End while (iteratePaths.hasNext())
+			if (!(outPaths.isEmpty())) {
+				break;
+			}
 
-		}  // End while (!(verticesToBeVisited.isEmpty()))
+		}  // End while (!(paths.isEmpty()))
 
-		return null;
-	}  // End protected static List<mxICell> findShortestPath(mxGraph inGraph, mxICell inSource, mxICell inTarget)
+		if (outPaths.isEmpty()) {
+			outPaths = null;
+		}
+
+		sourceToVisitedVerticesMap = null;  // HashMap<mxICell, List<mxICell>> sourceToVisitedVerticesMap = new HashMap<mxICell, List<mxICell>>();
+		paths = null;  // List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
+
+		return outPaths;
+	}  // End protected static List<List<mxICell>> findShortestPaths(...)
 
 	protected static class Crossing {
 
@@ -226,6 +251,10 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 	}  // End protected static class Crossing
 
 	public static mxGraph planarize(mxGraph inGraph) {
+		return EdgeRoutingMinCross.planarize(inGraph, null);
+	}  // End public static mxGraph planarize(mxGraph inGraph)
+
+	public static mxGraph planarize(mxGraph inGraph, mxICell edgeToIgnore) {
 
 		if (inGraph == null) {
 			throw new IllegalArgumentException("Input inGraph is null.");
@@ -268,6 +297,9 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			mxCell edge = (mxCell) objects[index];
 			if (!(edge.isEdge())) {
 				throw new IllegalStateException("edge is not edge.");
+			}
+			if (edge == edgeToIgnore) {
+				continue;
 			}
 			mxGeometry geometry = edge.getGeometry();
 			if (geometry == null) {
@@ -494,7 +526,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		crossingList = null;  // List<Crossing> crossingList = new ArrayList<Crossing>();
 
 		return outGraph;
-	}  // End public static mxGraph planarize(mxGraph inGraph)
+	}  // End public static mxGraph planarize(mxGraph inGraph, mxICell edgeToIgnore)
 
 	protected static class EdgeVisit {
 
@@ -752,6 +784,10 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				} else {
 					boundaryEdge = boundaryVertex.getEdgeAt(0);
 				}
+				if ((boundaryEdge == edge)
+						|| (!(edgeList.contains(boundaryEdge)))) {
+					break;
+				}
 				if (boundaryEdge.getTerminal(true) == boundaryVertex) {
 					boundaryVertex = boundaryEdge.getTerminal(false);
 				} else {
@@ -768,6 +804,10 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					boundaryEdge = boundaryVertex.getEdgeAt(1);
 				} else {
 					boundaryEdge = boundaryVertex.getEdgeAt(0);
+				}
+				if ((boundaryEdge == edge)
+						|| (!(edgeList.contains(boundaryEdge)))) {
+					break;
 				}
 				if (boundaryEdge.getTerminal(true) == boundaryVertex) {
 					boundaryVertex = boundaryEdge.getTerminal(false);
