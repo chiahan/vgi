@@ -179,49 +179,56 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		while (!(paths.isEmpty())) {
 
-			List<mxICell> path = paths.remove(0);
-			mxICell vertex = path.get(path.size() - 1);
-			count = vertex.getEdgeCount();
+			List<List<mxICell>> nextPathsToTry = new LinkedList<List<mxICell>>();
 
-			for (int index = 0; index < count; index++) {
+			while (!(paths.isEmpty())) {
 
-				mxICell edge = vertex.getEdgeAt(index);
-				mxICell nextVertex = edge.getTerminal(true);
-				if (nextVertex == vertex) {
-					nextVertex = edge.getTerminal(false);
+				List<mxICell> path = paths.remove(0);
+				mxICell vertex = path.get(path.size() - 1);
+				count = vertex.getEdgeCount();
+
+				for (int index = 0; index < count; index++) {
+
+					mxICell edge = vertex.getEdgeAt(index);
+					mxICell nextVertex = edge.getTerminal(true);
 					if (nextVertex == vertex) {
+						nextVertex = edge.getTerminal(false);
+						if (nextVertex == vertex) {
+							continue;
+						}
+					}  // End if (nextVertex == vertex)
+
+					List<mxICell> visitedVertices = sourceToVisitedVerticesMap.get(path.get(0));
+					if (visitedVertices.contains(nextVertex)) {
 						continue;
 					}
-				}  // End if (nextVertex == vertex)
 
-				List<mxICell> visitedVertices = sourceToVisitedVerticesMap.get(path.get(0));
-				if (visitedVertices.contains(nextVertex)) {
-					continue;
-				}
+					visitedVertices.add(nextVertex);
+					List<mxICell> newPath = new ArrayList<mxICell>(path);
+					newPath.add(nextVertex);
 
-				visitedVertices.add(nextVertex);
-				List<mxICell> newPath = new ArrayList<mxICell>(path);
-				newPath.add(nextVertex);
+					Object object = nextVertex.getValue();
+					if (!(object instanceof Region)) {
+						throw new IllegalStateException("The value of vertex is not of the type Region.");
+					}
+					Region region = (Region) object;
+					if (region.contains(inTargetElement)) {
+						outPaths.add(newPath);
+					} else {
+						nextPathsToTry.add(newPath);
+					}
+					newPath = null;  // List<mxICell> newPath = new ArrayList<mxICell>(path);
 
-				Object object = nextVertex.getValue();
-				if (!(object instanceof Region)) {
-					throw new IllegalStateException("The value of vertex is not of the type Region.");
-				}
-				Region region = (Region) object;
-				if (region.contains(inTargetElement)) {
-					outPaths.add(newPath);
-				} else {
-					paths.add(newPath);
-				}
-				newPath = null;  // List<mxICell> newPath = new ArrayList<mxICell>(path);
+				}  // End for (int index = 0; index < count; index++)
 
-			}  // End for (int index = 0; index < count; index++)
-
-			paths.remove(path);
+			}  // End while (!(paths.isEmpty()))
 
 			if (!(outPaths.isEmpty())) {
 				break;
 			}
+
+			paths = nextPathsToTry;
+			nextPathsToTry = null;  // List<List<mxICell>> nextPathsToTry = new LinkedList<List<mxICell>>();
 
 		}  // End while (!(paths.isEmpty()))
 
