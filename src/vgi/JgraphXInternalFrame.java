@@ -610,8 +610,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         automata.addTransition(newTrans);
 
         System.out.println("total trans:" + automata.getAllTransitions().size());
-        EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
-        layout.route((mxCell) e);
+//        EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
+//        layout.route((mxCell) e);
         setModified(true);
         undoStack.push(STATUS_ADD);
     }
