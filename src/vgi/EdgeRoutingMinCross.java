@@ -1383,12 +1383,6 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		List<mxPoint> path = new LinkedList<mxPoint>();
 		path.add(new mxPoint(inSourcePoint));
 		pathsToTry.add(path);
-		if (!(inRegion.intersectsLine(inSourcePoint, inTargetPoint))) {
-			path.add(new mxPoint(inTargetPoint));
-			outPaths.add(path);
-			path = null;  // List<mxPoint> path = new LinkedList<mxPoint>();
-			return outPaths;
-		}  // End if (!(inRegion.intersectsLine(inSourcePoint, inTargetPoint)))
 		path = null;  // List<mxPoint> path = new LinkedList<mxPoint>();
 
 		while (!(pathsToTry.isEmpty())) {
@@ -1399,8 +1393,16 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 				path = pathsToTry.remove(0);
 				mxPoint point = path.get(path.size() - 1);
-				Iterator iterateVertices = inRegion.iterator();
+				if (!(inRegion.intersectsLine(
+						point.getX(),
+						point.getY(),
+						inTargetPoint.getX(),
+						inTargetPoint.getY()))) {
+					path.add(new mxPoint(inTargetPoint));
+					outPaths.add(path);
+				}  // End if (!(inRegion.intersectsLine(...)))
 
+				Iterator iterateVertices = inRegion.iterator();
 				while (iterateVertices.hasNext()) {
 
 					Object object = iterateVertices.next();
