@@ -1473,12 +1473,6 @@ public class FsmXml implements FsmXmlInterface {
 			xmlStreamWriter.writeAttribute(ATR_SOURCE, "s" + allStates.indexOf(state));
 			state = transition.getTargetState();
 			xmlStreamWriter.writeAttribute(ATR_TARGET, "s" + allStates.indexOf(state));
-			WeightedRegularExpression label = transition.getLabel();
-			if (label != null) {
-				xmlStreamWriter.writeStartElement(TAG_LABEL);
-				writeWeightedRegularExpression(xmlStreamWriter, label);
-				xmlStreamWriter.writeEndElement();  // End TAG_LABEL
-			}
 			if (writeGeometricAndDrawingData) {
 				TransitionInterface.GeometricData geometricData = transition.getGeometricData();
 				if (geometricData != null) {
@@ -1528,13 +1522,12 @@ public class FsmXml implements FsmXmlInterface {
                             xmlStreamWriter.writeAttribute(ATR_END_ARROW, transition.getDrawingData().endArrow);
                             xmlStreamWriter.writeEndElement();   
 			} // End if (writeGeometricAndDrawingData)
-                        
-                        
-                        
-                        
-                        
-                       
-                        
+			WeightedRegularExpression label = transition.getLabel();
+			if (label != null) {
+				xmlStreamWriter.writeStartElement(TAG_LABEL);
+				writeWeightedRegularExpression(xmlStreamWriter, label);
+				xmlStreamWriter.writeEndElement();  // End TAG_LABEL
+			}
 			xmlStreamWriter.writeEndElement();  // End TAG_TRANSITION
 		}  // End while (allTransitionsIterator.hasNext())
 
@@ -1545,16 +1538,6 @@ public class FsmXml implements FsmXmlInterface {
 			if (initialFinalWeight != null) {
 				xmlStreamWriter.writeStartElement(TAG_INITIAL);
 				xmlStreamWriter.writeAttribute(ATR_STATE, "s" + allStates.indexOf(state));
-				Object object = initialFinalWeight.getValue();
-				if (!(object instanceof Boolean)) {
-					xmlStreamWriter.writeStartElement(TAG_LABEL);
-					xmlStreamWriter.writeStartElement(TAG_LEFT_EXT_MUL);
-					writeWeightTag(xmlStreamWriter, object);
-					xmlStreamWriter.writeStartElement(TAG_ONE);
-					xmlStreamWriter.writeEndElement();  // End TAG_ONE
-					xmlStreamWriter.writeEndElement();  // End TAG_LEFT_EXT_MUL
-					xmlStreamWriter.writeEndElement();  // End TAG_LABEL
-				}  // End if (!(object instanceof Boolean))
 				if (writeGeometricAndDrawingData) {
 					InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
 					if (geometricData != null) {
@@ -1586,6 +1569,16 @@ public class FsmXml implements FsmXmlInterface {
 						}
 					}  // End if (geometricData != null)
 				} // End if (writeGeometricAndDrawingData)
+				Object object = initialFinalWeight.getValue();
+				if (!(object instanceof Boolean)) {
+					xmlStreamWriter.writeStartElement(TAG_LABEL);
+					xmlStreamWriter.writeStartElement(TAG_LEFT_EXT_MUL);
+					writeWeightTag(xmlStreamWriter, object);
+					xmlStreamWriter.writeStartElement(TAG_ONE);
+					xmlStreamWriter.writeEndElement();  // End TAG_ONE
+					xmlStreamWriter.writeEndElement();  // End TAG_LEFT_EXT_MUL
+					xmlStreamWriter.writeEndElement();  // End TAG_LABEL
+				}  // End if (!(object instanceof Boolean))
 				xmlStreamWriter.writeEndElement();  // End TAG_INITIAL
 			}  // End if (initialFinalWeight != null)
 		}  // End while (allStatesIterator.hasNext())
@@ -1597,16 +1590,6 @@ public class FsmXml implements FsmXmlInterface {
 			if (initialFinalWeight != null) {
 				xmlStreamWriter.writeStartElement(TAG_FINAL);
 				xmlStreamWriter.writeAttribute(ATR_STATE, "s" + allStates.indexOf(state));
-				Object object = initialFinalWeight.getValue();
-				if (!(object instanceof Boolean)) {
-					xmlStreamWriter.writeStartElement(TAG_LABEL);
-					xmlStreamWriter.writeStartElement(TAG_LEFT_EXT_MUL);
-					writeWeightTag(xmlStreamWriter, object);
-					xmlStreamWriter.writeStartElement(TAG_ONE);
-					xmlStreamWriter.writeEndElement();  // End TAG_ONE
-					xmlStreamWriter.writeEndElement();  // End TAG_LEFT_EXT_MUL
-					xmlStreamWriter.writeEndElement();  // End TAG_LABEL
-				}  // End if (!(object instanceof Boolean))
 				if (writeGeometricAndDrawingData) {
 					InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
 					if (geometricData != null) {
@@ -1638,6 +1621,16 @@ public class FsmXml implements FsmXmlInterface {
 						}
 					}  // End if (geometricData != null)
 				} // End if (writeGeometricAndDrawingData)
+				Object object = initialFinalWeight.getValue();
+				if (!(object instanceof Boolean)) {
+					xmlStreamWriter.writeStartElement(TAG_LABEL);
+					xmlStreamWriter.writeStartElement(TAG_LEFT_EXT_MUL);
+					writeWeightTag(xmlStreamWriter, object);
+					xmlStreamWriter.writeStartElement(TAG_ONE);
+					xmlStreamWriter.writeEndElement();  // End TAG_ONE
+					xmlStreamWriter.writeEndElement();  // End TAG_LEFT_EXT_MUL
+					xmlStreamWriter.writeEndElement();  // End TAG_LABEL
+				}  // End if (!(object instanceof Boolean))
 				xmlStreamWriter.writeEndElement();  // End TAG_FINAL
 			}  // End if (initialFinalWeight != null)
 		}  // End while (allStatesIterator.hasNext())

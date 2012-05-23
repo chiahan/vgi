@@ -26,64 +26,64 @@
       </states>
       <transitions>
         <transition source="s0" target="s0">
-          <label>
-            <monElmt>
-              <monGen value="a"/>
-            </monElmt>
-          </label>
           <geometricData>
             <controlPoint x="70.0" y="40.0"/>
           </geometricData>
           <drawingData strokeColor="#6482B9" strokeWidth="3.0" endArrow="classic"/>
-        </transition>
-        <transition source="s0" target="s0">
           <label>
             <monElmt>
-              <monGen value="b"/>
+              <monGen value="a"/>
             </monElmt>
           </label>
+        </transition>
+        <transition source="s0" target="s0">
           <geometricData>
             <controlPoint x="80.0" y="150.0"/>
           </geometricData>
           <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
-        </transition>
-        <transition source="s0" target="s1">
-          <label>
-            <monElmt>
-              <monGen value="a"/>
-            </monElmt>
-          </label>
-          <drawingData strokeColor="#FFFF00" strokeWidth="1.0" endArrow="classic"/>
-        </transition>
-        <transition source="s1" target="s2">
           <label>
             <monElmt>
               <monGen value="b"/>
             </monElmt>
           </label>
-          <drawingData strokeColor="#FF9900" strokeWidth="1.0" endArrow="classic"/>
         </transition>
-        <transition source="s2" target="s2">
+        <transition source="s0" target="s1">
+          <drawingData strokeColor="#FFFF00" strokeWidth="1.0" endArrow="classic"/>
           <label>
             <monElmt>
               <monGen value="a"/>
             </monElmt>
           </label>
+        </transition>
+        <transition source="s1" target="s2">
+          <drawingData strokeColor="#FF9900" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="b"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s2" target="s2">
           <geometricData>
             <controlPoint x="310.0" y="40.0"/>
           </geometricData>
           <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
         </transition>
         <transition source="s2" target="s2">
+          <geometricData>
+            <controlPoint x="320.0" y="150.0"/>
+          </geometricData>
+          <drawingData strokeColor="#6482B9" strokeWidth="3.0" endArrow="classic"/>
           <label>
             <monElmt>
               <monGen value="b"/>
             </monElmt>
           </label>
-          <geometricData>
-            <controlPoint x="320.0" y="150.0"/>
-          </geometricData>
-          <drawingData strokeColor="#6482B9" strokeWidth="3.0" endArrow="classic"/>
         </transition>
         <initial state="s0">
           <geometricData x="-50.0" y="0.0"/>
