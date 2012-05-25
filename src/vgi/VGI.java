@@ -282,7 +282,7 @@ public class VGI extends javax.swing.JFrame {
 		this.editMenu.setVisible(false);
 		this.viewMenu.setVisible(false);
 
-		Preferences preferences = Preferences.systemRoot().node(this.getClass().getName());
+		Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
 		String string = preferences.get("TAF-Kit Path", defaultFolderPath);
 		try {
 			this.pmTAFKit = new TAFKit(new File(string));
@@ -836,7 +836,7 @@ public class VGI extends javax.swing.JFrame {
 			this.currentSettingMenuItem.setText("Current setting:  " + tafKit.getTafKitPath().getAbsolutePath());
 			this.pmTAFKit = tafKit;
 			this.updateAlgorithmMenuItems();
-			Preferences preferences = Preferences.systemRoot().node(this.getClass().getName());
+			Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
 			preferences.put("TAF-Kit Path", tafKit.getTafKitPath().getAbsolutePath());
 		}  // End if (pmTAFKit != null)
 
