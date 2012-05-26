@@ -103,7 +103,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			throw new IllegalStateException("Cannot find the corresponding source and target vertices in the planar graph.");
 		}
 
-		List<List<mxICell>> paths = findShortestPaths(dualGraph, planarSource, planarTarget);
+		List<List<mxICell>> paths = findShortestPathsInDualGraph(dualGraph, planarSource, planarTarget);
 		if ((paths == null) || (paths.isEmpty())) {
 			return;
 		}
@@ -162,126 +162,6 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Object cells[] = {edge};
 		this.getGraph().removeCells(cells);
 	}  // End public void route(mxCell edge)
-
-	protected static List<List<mxICell>> findShortestPaths(
-			mxGraph inGraph,
-			mxICell inSourceElement,
-			mxICell inTargetElement) {
-
-		if ((inGraph == null)
-				|| (inSourceElement == null)
-				|| (inTargetElement == null)) {
-			throw new IllegalArgumentException("Invalid input to findShortestPath().");
-		}
-
-		HashMap<mxICell, List<mxICell>> sourceToVisitedVerticesMap = new HashMap<mxICell, List<mxICell>>();
-		List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
-		List<List<mxICell>> outPaths = new LinkedList<List<mxICell>>();
-		Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
-		int count = objects.length;
-
-		for (int index = 0; index < count; index++) {
-			if (!(objects[index] instanceof mxICell)) {
-				throw new IllegalStateException("vertex is not of the type mxICell.");
-			}
-			mxICell vertex = (mxICell) objects[index];
-			if (!(vertex.isVertex())) {
-				throw new IllegalStateException("vertex is not vertex.");
-			}
-			Object object = vertex.getValue();
-			if (!(object instanceof Region)) {
-				throw new IllegalStateException("The value of vertex is not of the type Region.");
-			}
-			Region region = (Region) object;
-			if (region.contains(inSourceElement)) {
-				List<mxICell> path = new ArrayList<mxICell>();
-				path.add(vertex);
-				if (region.contains(inTargetElement)) {
-					outPaths.add(path);
-					path = null;  // List<mxICell> path = new ArrayList<mxICell>();
-					continue;
-				}
-				paths.add(path);
-				path = null;  // List<mxICell> path = new ArrayList<mxICell>();
-				List<mxICell> visitedVertices = new LinkedList<mxICell>();
-				visitedVertices.add(vertex);
-				sourceToVisitedVerticesMap.put(vertex, visitedVertices);
-				visitedVertices = null;  // List<mxICell> visitedVertices = new LinkedList<mxICell>();
-			}  // End if (region.contains(inSourceElement))
-		}  // End for (int index = 0; index < count; index++)
-
-		objects = null;  // Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
-
-		if (!(outPaths.isEmpty())) {
-			sourceToVisitedVerticesMap = null;  // HashMap<mxICell, List<mxICell>> sourceToVisitedVerticesMap = new HashMap<mxICell, List<mxICell>>();
-			paths = null;  // List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
-			return outPaths;
-		}
-
-		while (!(paths.isEmpty())) {
-
-			List<List<mxICell>> nextPathsToTry = new LinkedList<List<mxICell>>();
-
-			while (!(paths.isEmpty())) {
-
-				List<mxICell> path = paths.remove(0);
-				mxICell vertex = path.get(path.size() - 1);
-				count = vertex.getEdgeCount();
-
-				for (int index = 0; index < count; index++) {
-
-					mxICell edge = vertex.getEdgeAt(index);
-					mxICell nextVertex = edge.getTerminal(true);
-					if (nextVertex == vertex) {
-						nextVertex = edge.getTerminal(false);
-						if (nextVertex == vertex) {
-							continue;
-						}
-					}  // End if (nextVertex == vertex)
-
-					List<mxICell> visitedVertices = sourceToVisitedVerticesMap.get(path.get(0));
-					if (visitedVertices.contains(nextVertex)) {
-						continue;
-					}
-
-					visitedVertices.add(nextVertex);
-					List<mxICell> newPath = new ArrayList<mxICell>(path);
-					newPath.add(nextVertex);
-
-					Object object = nextVertex.getValue();
-					if (!(object instanceof Region)) {
-						throw new IllegalStateException("The value of vertex is not of the type Region.");
-					}
-					Region region = (Region) object;
-					if (region.contains(inTargetElement)) {
-						outPaths.add(newPath);
-					} else {
-						nextPathsToTry.add(newPath);
-					}
-					newPath = null;  // List<mxICell> newPath = new ArrayList<mxICell>(path);
-
-				}  // End for (int index = 0; index < count; index++)
-
-			}  // End while (!(paths.isEmpty()))
-
-			if (!(outPaths.isEmpty())) {
-				break;
-			}
-
-			paths = nextPathsToTry;
-			nextPathsToTry = null;  // List<List<mxICell>> nextPathsToTry = new LinkedList<List<mxICell>>();
-
-		}  // End while (!(paths.isEmpty()))
-
-		if (outPaths.isEmpty()) {
-			outPaths = null;
-		}
-
-		sourceToVisitedVerticesMap = null;  // HashMap<mxICell, List<mxICell>> sourceToVisitedVerticesMap = new HashMap<mxICell, List<mxICell>>();
-		paths = null;  // List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
-
-		return outPaths;
-	}  // End protected static List<List<mxICell>> findShortestPaths(...)
 
 	protected static class Crossing {
 
@@ -632,9 +512,23 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 			for (int index = 0; index < count; index++) {
 				Object object = inRegion1.get(index);
-				if (inRegion2.contains(object)) {
-					outList.add(object);
+				int index2 = inRegion2.lastIndexOf(object);
+				if (index2 < 0) {
+					continue;
 				}
+				int nextIndex = (index + 1 >= count) ? 0 : (index + 1);
+				int previousIndex2 = (index2 - 1 < 0) ? (inRegion2.size() - 1) : (index2 - 1);
+				Object nextObject = inRegion1.get(nextIndex);
+				if (nextObject.equals(inRegion2.get(previousIndex2))) {
+					outList.add(object);
+					do {
+						outList.add(nextObject);
+						nextIndex = (nextIndex + 1 >= count) ? 0 : (nextIndex + 1);
+						previousIndex2 = (previousIndex2 - 1 < 0) ? (inRegion2.size() - 1) : (previousIndex2 - 1);
+						nextObject = inRegion1.get(nextIndex);
+					} while (nextObject.equals(inRegion2.get(previousIndex2)));
+					break;
+				}  // End if (nextObject.equals(inRegion2.get(previousIndex2)))
 			}  // End for (int index = 0; index < count; index++)
 
 			return outList;
@@ -1236,6 +1130,126 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		return outEdgeDirection;
 	}  // End protected EdgeDirection findNextEdgeDirection(EdgeDirection inEdgeDirection)
+
+	protected static List<List<mxICell>> findShortestPathsInDualGraph(
+			mxGraph inGraph,
+			mxICell inSourceElement,
+			mxICell inTargetElement) {
+
+		if ((inGraph == null)
+				|| (inSourceElement == null)
+				|| (inTargetElement == null)) {
+			throw new IllegalArgumentException("Invalid input to findShortestPath().");
+		}
+
+		HashMap<mxICell, List<mxICell>> sourceToVisitedVerticesMap = new HashMap<mxICell, List<mxICell>>();
+		List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
+		List<List<mxICell>> outPaths = new LinkedList<List<mxICell>>();
+		Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
+		int count = objects.length;
+
+		for (int index = 0; index < count; index++) {
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException("vertex is not of the type mxICell.");
+			}
+			mxICell vertex = (mxICell) objects[index];
+			if (!(vertex.isVertex())) {
+				throw new IllegalStateException("vertex is not vertex.");
+			}
+			Object object = vertex.getValue();
+			if (!(object instanceof Region)) {
+				throw new IllegalStateException("The value of vertex is not of the type Region.");
+			}
+			Region region = (Region) object;
+			if (region.contains(inSourceElement)) {
+				List<mxICell> path = new ArrayList<mxICell>();
+				path.add(vertex);
+				if (region.contains(inTargetElement)) {
+					outPaths.add(path);
+					path = null;  // List<mxICell> path = new ArrayList<mxICell>();
+					continue;
+				}
+				paths.add(path);
+				path = null;  // List<mxICell> path = new ArrayList<mxICell>();
+				List<mxICell> visitedVertices = new LinkedList<mxICell>();
+				visitedVertices.add(vertex);
+				sourceToVisitedVerticesMap.put(vertex, visitedVertices);
+				visitedVertices = null;  // List<mxICell> visitedVertices = new LinkedList<mxICell>();
+			}  // End if (region.contains(inSourceElement))
+		}  // End for (int index = 0; index < count; index++)
+
+		objects = null;  // Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
+
+		if (!(outPaths.isEmpty())) {
+			sourceToVisitedVerticesMap = null;  // HashMap<mxICell, List<mxICell>> sourceToVisitedVerticesMap = new HashMap<mxICell, List<mxICell>>();
+			paths = null;  // List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
+			return outPaths;
+		}
+
+		while (!(paths.isEmpty())) {
+
+			List<List<mxICell>> nextPathsToTry = new LinkedList<List<mxICell>>();
+
+			while (!(paths.isEmpty())) {
+
+				List<mxICell> path = paths.remove(0);
+				mxICell vertex = path.get(path.size() - 1);
+				count = vertex.getEdgeCount();
+
+				for (int index = 0; index < count; index++) {
+
+					mxICell edge = vertex.getEdgeAt(index);
+					mxICell nextVertex = edge.getTerminal(true);
+					if (nextVertex == vertex) {
+						nextVertex = edge.getTerminal(false);
+						if (nextVertex == vertex) {
+							continue;
+						}
+					}  // End if (nextVertex == vertex)
+
+					List<mxICell> visitedVertices = sourceToVisitedVerticesMap.get(path.get(0));
+					if (visitedVertices.contains(nextVertex)) {
+						continue;
+					}
+
+					visitedVertices.add(nextVertex);
+					List<mxICell> newPath = new ArrayList<mxICell>(path);
+					newPath.add(nextVertex);
+
+					Object object = nextVertex.getValue();
+					if (!(object instanceof Region)) {
+						throw new IllegalStateException("The value of vertex is not of the type Region.");
+					}
+					Region region = (Region) object;
+					if (region.contains(inTargetElement)) {
+						outPaths.add(newPath);
+					} else {
+						nextPathsToTry.add(newPath);
+					}
+					newPath = null;  // List<mxICell> newPath = new ArrayList<mxICell>(path);
+
+				}  // End for (int index = 0; index < count; index++)
+
+			}  // End while (!(paths.isEmpty()))
+
+			if (!(outPaths.isEmpty())) {
+				break;
+			}
+
+			paths = nextPathsToTry;
+			nextPathsToTry = null;  // List<List<mxICell>> nextPathsToTry = new LinkedList<List<mxICell>>();
+
+		}  // End while (!(paths.isEmpty()))
+
+		if (outPaths.isEmpty()) {
+			outPaths = null;
+		}
+
+		sourceToVisitedVerticesMap = null;  // HashMap<mxICell, List<mxICell>> sourceToVisitedVerticesMap = new HashMap<mxICell, List<mxICell>>();
+		paths = null;  // List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
+
+		return outPaths;
+	}  // End protected static List<List<mxICell>> findShortestPathsInDualGraph(...)
 
 	protected static List<List<mxPoint>> findPathsThroughRegions(
 			mxICell inSourceElement,
