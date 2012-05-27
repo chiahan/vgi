@@ -364,6 +364,7 @@ public class VGI extends javax.swing.JFrame {
         routeAllEdgesBranchingMenuItem = new javax.swing.JMenuItem();
         planarizeMenuItem = new javax.swing.JMenuItem();
         buildDualGraphMenuItem = new javax.swing.JMenuItem();
+        buildWeightedVisibilityGraphMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -707,6 +708,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         layoutMenu.add(buildDualGraphMenuItem);
+
+        buildWeightedVisibilityGraphMenuItem.setText("Build Weighted Visibility Graph");
+        buildWeightedVisibilityGraphMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buildWeightedVisibilityGraphMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(buildWeightedVisibilityGraphMenuItem);
 
         menuBar.add(layoutMenu);
 
@@ -1231,6 +1240,20 @@ public class VGI extends javax.swing.JFrame {
 		this.dispatchEvent(windowClosing);
 	}//GEN-LAST:event_exitMenuItemActionPerformed
 
+	private void buildWeightedVisibilityGraphMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buildWeightedVisibilityGraphMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			mxGraph graph = EdgeRoutingMinCross.buildWeightedVisibilityGraph(((JgraphXInternalFrame) frame).graph);
+			JgraphXInternalFrame newFrame = new JgraphXInternalFrame(
+					this.infoSplitPane,
+					graph,
+					new Automata(),
+					"Weighted Visibility Graph of " + frame.getTitle(),
+					this);
+			this.createInternalFrame(newFrame);
+		}  // End if (frame instanceof JgraphXInternalFrame)
+	}//GEN-LAST:event_buildWeightedVisibilityGraphMenuItemActionPerformed
+
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
@@ -1367,6 +1390,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator1;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator2;
     private javax.swing.JMenuItem buildDualGraphMenuItem;
+    private javax.swing.JMenuItem buildWeightedVisibilityGraphMenuItem;
     private javax.swing.JMenuItem circleMenuItem;
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem coaccessibleMenuItem;

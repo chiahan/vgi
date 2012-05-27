@@ -8,7 +8,9 @@ import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
+import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxPoint;
+import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
@@ -31,6 +33,411 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 	public void execute(Object parent) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
+	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
+	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
+	protected static final double MINIMUM_SPACING = 9;
+
+	protected static mxGraph buildWeightedVisibilityGraph(mxGraph inGraph) {
+
+		mxGraph outGraph = inGraph;//new mxGraph();
+		Object parent = outGraph.getDefaultParent();
+		Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
+		List<mxRectangle> roadblocksList = new ArrayList<mxRectangle>(objects.length);
+
+		for (int index = 0; index < objects.length; index++) {
+
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException("A vertex is not of the type mxICell.");
+			}
+			mxICell vertex = (mxICell) objects[index];
+			roadblocksList.add(vertex.getGeometry());
+
+			List<mxPoint> pointsAroundRoadblock = EdgeRoutingMinCross.findPointsAroundRoadblock(inGraph, vertex);
+			Iterator<mxPoint> iteratePointsAroundRoadblock = pointsAroundRoadblock.iterator();
+			while (iteratePointsAroundRoadblock.hasNext()) {
+				mxPoint point = iteratePointsAroundRoadblock.next();
+				outGraph.insertVertex(
+						parent,
+						null,
+						null,
+						point.getX() - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+						point.getY() - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+						VISIBILITY_GRAPH_VERTEX_WDITH,
+						VISIBILITY_GRAPH_VERTEX_HEIGHT);
+			}  // End while (iteratePointsAroundRoadblock.hasNext())
+
+		}  // End for (int index = 0; index < objects.length; index++)
+
+		List<Hindrance> hindrancesList = new ArrayList<Hindrance>();
+		objects = inGraph.getChildEdges(inGraph.getDefaultParent());
+
+		for (int index = 0; index < objects.length; index++) {
+
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException("An edge is not of the type mxICell.");
+			}
+			mxICell edge = (mxICell) objects[index];
+			if (!(edge.isEdge())) {
+				throw new IllegalStateException("edge is not an edge.");
+			}
+			mxICell source = edge.getTerminal(true);
+			mxICell target = edge.getTerminal(false);
+			mxGeometry edgeGeometry = edge.getGeometry();
+			mxPoint point = null;
+			mxGeometry vertexGeometry = null;
+			if (source == null) {
+				if (target == null) {
+					throw new IllegalStateException("edge has neither source nor target vertices.");
+				}
+				point = edgeGeometry.getSourcePoint();
+				vertexGeometry = target.getGeometry();
+			} else if (target == null) {
+				point = edgeGeometry.getTargetPoint();
+				vertexGeometry = source.getGeometry();
+			}
+			if ((point != null) && (vertexGeometry != null)) {
+				hindrancesList.add(new Hindrance(vertexGeometry.getCenterX(), vertexGeometry.getCenterY(), point.getX(), point.getY()));
+				double offsetX = point.getX() - vertexGeometry.getCenterX();
+				double offsetY = point.getY() - vertexGeometry.getCenterY();
+				double length = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+				offsetX = offsetX / length;
+				offsetY = offsetY / length;
+				double rightX = -offsetY;
+				double rightY = offsetX;
+				outGraph.insertVertex(
+						parent,
+						null,
+						null,
+						point.getX() + (offsetX + rightX) * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+						point.getY() + (offsetY + rightY) * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+						VISIBILITY_GRAPH_VERTEX_WDITH,
+						VISIBILITY_GRAPH_VERTEX_HEIGHT);
+				outGraph.insertVertex(
+						parent,
+						null,
+						null,
+						point.getX() + (offsetX - rightX) * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+						point.getY() + (offsetY - rightY) * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+						VISIBILITY_GRAPH_VERTEX_WDITH,
+						VISIBILITY_GRAPH_VERTEX_HEIGHT);
+				continue;
+			}  // End if ((point != null) && (vertexGeometry != null))
+
+			List<mxPoint> controlPoints = edge.getGeometry().getPoints();
+			if ((controlPoints == null) || (controlPoints.isEmpty())) {
+				continue;
+			}
+			mxGeometry geometry = source.getGeometry();
+			mxPoint previousPoint = new mxPoint(geometry.getCenterX(), geometry.getCenterY());
+
+			for (int pointIndex = 0; pointIndex < controlPoints.size(); pointIndex++) {
+
+				mxPoint currentPoint = controlPoints.get(pointIndex);
+				hindrancesList.add(new Hindrance(previousPoint.getX(), previousPoint.getY(), currentPoint.getX(), currentPoint.getY()));
+				mxPoint nextPoint;
+				if (pointIndex < controlPoints.size() - 1) {
+					nextPoint = controlPoints.get(pointIndex + 1);
+				} else {
+					geometry = target.getGeometry();
+					nextPoint = new mxPoint(geometry.getCenterX(), geometry.getCenterY());
+					hindrancesList.add(new Hindrance(currentPoint.getX(), currentPoint.getY(), nextPoint.getX(), nextPoint.getY()));
+				}
+				double previousVectorX = previousPoint.getX() - currentPoint.getX();
+				double previousVectorY = previousPoint.getY() - currentPoint.getY();
+				double previousVectorLength = Math.sqrt(previousVectorX * previousVectorX + previousVectorY * previousVectorY);
+				previousVectorX = previousVectorX / previousVectorLength;
+				previousVectorY = previousVectorY / previousVectorLength;
+				double nextVectorX = nextPoint.getX() - currentPoint.getX();
+				double nextVectorY = nextPoint.getY() - currentPoint.getY();
+				double nextVectorLength = Math.sqrt(nextVectorX * nextVectorX + nextVectorY * nextVectorY);
+				nextVectorX = nextVectorX / nextVectorLength;
+				nextVectorY = nextVectorY / nextVectorLength;
+				previousPoint = currentPoint;
+				if (Vector2D.areSameDirection(previousVectorX, previousVectorY, nextVectorX, nextVectorY)) {
+					double offsetX = -previousVectorX;
+					double offsetY = -previousVectorY;
+					double rightX = -offsetY;
+					double rightY = offsetX;
+					outGraph.insertVertex(
+							parent,
+							null,
+							null,
+							currentPoint.getX() + (offsetX + rightX) * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+							currentPoint.getY() + (offsetY + rightY) * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+							VISIBILITY_GRAPH_VERTEX_WDITH,
+							VISIBILITY_GRAPH_VERTEX_HEIGHT);
+					outGraph.insertVertex(
+							parent,
+							null,
+							null,
+							currentPoint.getX() + (offsetX - rightX) * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+							currentPoint.getY() + (offsetY - rightY) * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+							VISIBILITY_GRAPH_VERTEX_WDITH,
+							VISIBILITY_GRAPH_VERTEX_HEIGHT);
+					continue;
+				}  // End if (Vector2D.areSameDirection(previousVectorX, previousVectorY, nextVectorX, nextVectorY))
+
+				double bisectorX;
+				double bisectorY;
+				if (Vector2D.areOpposite(previousVectorX, previousVectorY, nextVectorX, nextVectorY)) {
+					bisectorX = -nextVectorY;
+					bisectorY = nextVectorX;
+				} else {
+					bisectorX = previousVectorX + nextVectorX;
+					bisectorY = previousVectorY + nextVectorY;
+					double bisectorLength = Math.sqrt(bisectorX * bisectorX + bisectorY * bisectorY);
+					bisectorX = bisectorX / bisectorLength;
+					bisectorY = bisectorY / bisectorLength;
+				}
+				outGraph.insertVertex(
+						parent,
+						null,
+						null,
+						currentPoint.getX() + bisectorX * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+						currentPoint.getY() + bisectorY * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+						VISIBILITY_GRAPH_VERTEX_WDITH,
+						VISIBILITY_GRAPH_VERTEX_HEIGHT);
+				outGraph.insertVertex(
+						parent,
+						null,
+						null,
+						currentPoint.getX() - bisectorX * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+						currentPoint.getY() - bisectorY * MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+						VISIBILITY_GRAPH_VERTEX_WDITH,
+						VISIBILITY_GRAPH_VERTEX_HEIGHT);
+
+			}  // End for (int pointIndex = 0; pointIndex < controlPoints.size(); pointIndex++)
+
+		}  // End for (int index = 0; index < objects.length; index++)
+
+		roadblocksList = null;  // List<mxICell> roadblocksList = new LinkedList<mxICell>();
+
+		return outGraph;
+	}  // End protected static mxGraph buildWeightedVisibilityGraph(mxGraph inGraph)
+
+	protected static List<mxPoint> findPointsAroundRoadblock(mxGraph inGraph, mxICell inVertex) {
+
+		if (inVertex == null) {
+			throw new IllegalArgumentException("inVertex is null.");
+		}
+		if (!(inVertex.isVertex())) {
+			throw new IllegalArgumentException("inVertex is not a vertex.");
+		}
+		mxGeometry geometry = inVertex.getGeometry();
+		if (geometry == null) {
+			throw new IllegalStateException("inVertex has null geometry.");
+		}
+
+		List<mxPoint> outPoints = new LinkedList<mxPoint>();
+		mxGraphComponent graphComponent = new mxGraphComponent(inGraph);
+		//
+		// Add points for the 4 corners of the rectangle bounding inVertex.
+		//
+		double x = geometry.getX() + geometry.getWidth() + MINIMUM_SPACING;
+		double y = geometry.getY() + geometry.getHeight() + MINIMUM_SPACING;
+		if (graphComponent.getCellAt((int) x, (int) y) == null) {
+			outPoints.add(new mxPoint(x, y));
+		} else {  // End if (graphComponent.getCellAt((int) x, (int) y) == null)
+			if (graphComponent.getCellAt((int) (x + MINIMUM_SPACING), (int) y) == null) {
+				outPoints.add(new mxPoint(x + MINIMUM_SPACING, y));
+			}
+			if (graphComponent.getCellAt((int) x, (int) (y + MINIMUM_SPACING)) == null) {
+				outPoints.add(new mxPoint(x, y + MINIMUM_SPACING));
+			}
+		}  // End else part of if (graphComponent.getCellAt((int) x, (int) y) == null)
+		x = geometry.getX() - MINIMUM_SPACING;
+		y = geometry.getY() + geometry.getHeight() + MINIMUM_SPACING;
+		if (graphComponent.getCellAt((int) x, (int) y) == null) {
+			outPoints.add(new mxPoint(x, y));
+		} else {  // End if (graphComponent.getCellAt((int) x, (int) y) == null)
+			if (graphComponent.getCellAt((int) (x - MINIMUM_SPACING), (int) y) == null) {
+				outPoints.add(new mxPoint(x - MINIMUM_SPACING, y));
+			}
+			if (graphComponent.getCellAt((int) x, (int) (y + MINIMUM_SPACING)) == null) {
+				outPoints.add(new mxPoint(x, y + MINIMUM_SPACING));
+			}
+		}  // End else part of if (graphComponent.getCellAt((int) x, (int) y) == null)
+		x = geometry.getX() - MINIMUM_SPACING;
+		y = geometry.getY() - MINIMUM_SPACING;
+		if (graphComponent.getCellAt((int) x, (int) y) == null) {
+			outPoints.add(new mxPoint(x, y));
+		} else {  // End if (graphComponent.getCellAt((int) x, (int) y) == null)
+			if (graphComponent.getCellAt((int) (x - MINIMUM_SPACING), (int) y) == null) {
+				outPoints.add(new mxPoint(x - MINIMUM_SPACING, y));
+			}
+			if (graphComponent.getCellAt((int) x, (int) (y - MINIMUM_SPACING)) == null) {
+				outPoints.add(new mxPoint(x, y - MINIMUM_SPACING));
+			}
+		}  // End else part of if (graphComponent.getCellAt((int) x, (int) y) == null)
+		x = geometry.getX() + geometry.getWidth() + MINIMUM_SPACING;
+		y = geometry.getY() - MINIMUM_SPACING;
+		if (graphComponent.getCellAt((int) x, (int) y) == null) {
+			outPoints.add(new mxPoint(x, y));
+		} else {  // End if (graphComponent.getCellAt((int) x, (int) y) == null)
+			if (graphComponent.getCellAt((int) (x + MINIMUM_SPACING), (int) y) == null) {
+				outPoints.add(new mxPoint(x + MINIMUM_SPACING, y));
+			}
+			if (graphComponent.getCellAt((int) x, (int) (y - MINIMUM_SPACING)) == null) {
+				outPoints.add(new mxPoint(x, y - MINIMUM_SPACING));
+			}
+		}  // End else part of if (graphComponent.getCellAt((int) x, (int) y) == null)
+		graphComponent = null;  // mxGraphComponent graphComponent = new mxGraphComponent(inGraph);
+
+		int edgeCount = inVertex.getEdgeCount();
+		if (edgeCount < 2) {
+			return outPoints;
+		}
+
+		List<mxPoint> edgeUnitVectorsList = new ArrayList<mxPoint>(edgeCount);
+
+		for (int index = 0; index < edgeCount; index++) {
+			mxICell edge = inVertex.getEdgeAt(index);
+			if ((edge == null) || (!(edge.isEdge())) || (edge.getGeometry() == null)) {
+				throw new IllegalStateException("Invalid edge.");
+			}
+			mxGeometry edgeGeometry = edge.getGeometry();
+			List<mxPoint> points = edgeGeometry.getPoints();
+			mxICell source = edge.getTerminal(true);
+			mxICell target = edge.getTerminal(false);
+			mxPoint point;
+			if (inVertex == source) {
+				if ((points == null) || (points.isEmpty())) {
+					if (target == null) {
+						point = edgeGeometry.getTargetPoint();
+					} else {
+						mxGeometry targetGeometry = target.getGeometry();
+						point = new mxPoint(targetGeometry.getCenterX(), targetGeometry.getCenterY());
+					}
+				} else {
+					point = points.get(0);
+				}
+			} else if (inVertex == target) {
+				if ((points == null) || (points.isEmpty())) {
+					if (source == null) {
+						point = edgeGeometry.getSourcePoint();
+					} else {
+						mxGeometry sourceGeometry = source.getGeometry();
+						point = new mxPoint(sourceGeometry.getCenterX(), sourceGeometry.getCenterY());
+					}
+				} else {
+					point = points.get(points.size() - 1);
+				}
+			} else {
+				throw new IllegalStateException("Edge does not connect to inVertex.");
+			}
+			double offsetX = point.getX() - geometry.getCenterX();
+			double offsetY = point.getY() - geometry.getCenterY();
+			double offsetLength = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+			edgeUnitVectorsList.add(new mxPoint(offsetX / offsetLength, offsetY / offsetLength));
+		}  // End for (int index = 0; index < edgeCount; index++)
+
+		x = geometry.getWidth() / 2 + MINIMUM_SPACING;
+		y = geometry.getHeight() / 2 + MINIMUM_SPACING;
+		double radius = Math.sqrt(x * x + y * y);
+
+		Collections.sort(edgeUnitVectorsList, new UnitVectorComparator());
+
+		for (int index = 0; index < edgeCount; index++) {
+
+			int nextIndex = (index + 1 >= edgeCount) ? (0) : (index + 1);
+			mxPoint currentVector = edgeUnitVectorsList.get(index);
+			mxPoint nextVector = edgeUnitVectorsList.get(nextIndex);
+			if (Vector2D.areSameDirection(currentVector.getX(), currentVector.getY(), nextVector.getX(), nextVector.getY())) {
+				continue;
+			}
+			double rightUnitVectorX = -currentVector.getY();
+			double rightUnitVectorY = currentVector.getX();
+			if (Vector2D.areOpposite(currentVector.getX(), currentVector.getY(), nextVector.getX(), nextVector.getY())) {
+				outPoints.add(new mxPoint(
+						geometry.getCenterX() + radius * rightUnitVectorX,
+						geometry.getCenterY() + radius * rightUnitVectorY));
+				continue;
+			}
+			double bisectorX = currentVector.getX() + nextVector.getX();
+			double bisectorY = currentVector.getY() + nextVector.getY();
+			//
+			// if the next vecotr points to the left of the current vector
+			//
+			if (Vector2D.dotProduct(nextVector.getX(), nextVector.getY(), rightUnitVectorX, rightUnitVectorY) < 0) {
+				bisectorX = -bisectorX;
+				bisectorY = -bisectorY;
+			}
+			double bisectorLength = Math.sqrt(bisectorX * bisectorX + bisectorY * bisectorY);
+			outPoints.add(new mxPoint(
+					geometry.getCenterX() + radius * bisectorX / bisectorLength,
+					geometry.getCenterY() + radius * bisectorY / bisectorLength));
+
+		}  // End for (int index = 0; index < edgeCount; index++)
+
+		edgeUnitVectorsList = null;  // List<mxPoint> edgeUnitVectorsList = new ArrayList<mxPoint>();
+
+		return outPoints;
+	}  // End protected static List<mxPoint> findPointsAroundRoadblock(mxGraph inGraph, mxICell inVertex)
+
+	protected static class UnitVectorComparator implements Comparator<mxPoint> {
+
+		@Override
+		public int compare(mxPoint unitVector1, mxPoint unitVector2) {
+			double angle1 = Math.acos(unitVector1.getX());
+			if (unitVector1.getY() < 0) {
+				angle1 = angle1 + 2 * Math.PI;
+			}
+			double angle2 = Math.acos(unitVector2.getX());
+			if (unitVector2.getY() < 0) {
+				angle2 = angle2 + 2 * Math.PI;
+			}
+			double difference = angle1 - angle2;
+			if (difference < 0) {
+				return -1;
+			} else {
+				return 1;
+			}
+		}  // End public int compare(mxPoint unitVector1, mxPoint unitVector2)
+	}  // End protected static class UnitVectorComparator implements Comparator<mxPoint>
+
+	protected static class Vector2D {
+
+		protected static final double SMALL_VALUE = 0.01;
+
+		public static double dotProduct(double x1, double y1, double x2, double y2) {
+			return (x1 * x2 + y1 * y2);
+		}  // End public static double dotProduct(double x1, double y1, double x2, double y2)
+
+		public static boolean areOpposite(double x1, double y1, double x2, double y2) {
+			double lengthSquared1 = x1 * x1 + y1 * y1;
+			double lengthSquared2 = x2 * x2 + y2 * y2;
+			double dotProduct = Vector2D.dotProduct(x1, y1, x2, y2);
+			return ((Math.abs(lengthSquared1 * lengthSquared2 - dotProduct * dotProduct) < SMALL_VALUE)
+					&& (dotProduct < 0));
+		}  // End public static boolean areOpposite(double x1, double y1, double x2, double y2)
+
+		public static boolean arePerpendicular(double x1, double y1, double x2, double y2) {
+			return (Math.abs(Vector2D.dotProduct(x1, y1, x2, y2)) < SMALL_VALUE);
+		}  // End public static boolean arePerpendicular(double x1, double y1, double x2, double y2)
+
+		public static boolean areSameDirection(double x1, double y1, double x2, double y2) {
+			double lengthSquared1 = x1 * x1 + y1 * y1;
+			double lengthSquared2 = x2 * x2 + y2 * y2;
+			double dotProduct = Vector2D.dotProduct(x1, y1, x2, y2);
+			return ((Math.abs(lengthSquared1 * lengthSquared2 - dotProduct * dotProduct) < SMALL_VALUE)
+					&& (dotProduct > 0));
+		}  // End public static boolean areSameDirection(double x1, double y1, double x2, double y2)
+	}  // End protected static class Vector2D
+
+	protected static class Hindrance {
+
+		double x1;
+		double y1;
+		double x2;
+		double y2;
+
+		public Hindrance(double x1, double y1, double x2, double y2) {
+			this.x1 = x1;
+			this.y1 = y1;
+			this.x2 = x2;
+			this.y2 = y2;
+		}
+	}  // End protected static class Hindrance
 
 	public void route(mxCell edge) {
 
