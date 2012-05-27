@@ -3783,8 +3783,7 @@ public class mxGraph extends mxEventSource
 
 				if (isResetEdgesOnMove())
 				{
-					//resetEdges(cells);
-                                        resetEdges(cells,dx,dy);
+					resetEdges(cells);
 				}
 
 				fireEvent(new mxEventObject(mxEvent.CELLS_MOVED, "cells",
@@ -4016,91 +4015,12 @@ public class mxGraph extends mxEventSource
 			{
 				geo = (mxGeometry) geo.clone();
 				geo.setPoints(null);
-				
-                                model.setGeometry(edge, geo);
+				model.setGeometry(edge, geo);
 			}
 		}
 
 		return edge;
 	}
-        
-        // move control points!
-        
-        public void resetEdges(Object[] cells,double dx,double dy)
-	{
-		if (cells != null)
-		{
-			// Prepares a hashtable for faster cell lookups
-			HashSet<Object> set = new HashSet<Object>(Arrays.asList(cells));
-
-			model.beginUpdate();
-			try
-			{
-				for (int i = 0; i < cells.length; i++)
-				{
-					Object[] edges = mxGraphModel.getEdges(model, cells[i]);
-
-					if (edges != null)
-					{
-						for (int j = 0; j < edges.length; j++)
-						{
-							mxCellState state = view.getState(edges[j]);
-							Object source = (state != null) ? state
-									.getVisibleTerminal(true) : view.getVisibleTerminal(
-									edges[j], true);
-							Object target = (state != null) ? state
-									.getVisibleTerminal(false) : view.getVisibleTerminal(
-									edges[j], false);
-
-							// Checks if one of the terminals is not in the given array
-							if (!set.contains(source) || !set.contains(target))
-							{
-								resetEdge(edges[j],dx,dy);
-							}
-						}
-					}
-
-					resetEdges(mxGraphModel.getChildren(model, cells[i]),dx,dy);
-				}
-			}
-			finally
-			{
-				model.endUpdate();
-			}
-		}
-	}
-
-	public Object resetEdge(Object edge,double dx,double dy)
-	{
-		mxGeometry geo = model.getGeometry(edge);
-
-		if (geo != null)
-		{
-			// Resets the control points
-			List<mxPoint> points = geo.getPoints();
-
-			if (points != null && !points.isEmpty())
-			{
-				geo = (mxGeometry) geo.clone();
-				//geo.setPoints(null);
-				
-                                List<mxPoint> ptlist=geo.getPoints();
-                                for(mxPoint pt:ptlist){
-                                    
-                                    pt.setX(pt.getX()+dx);
-                                    pt.setY(pt.getY()+dy);
-                                    
-                                    System.out.println("update control pt!");
-                                }
-                                
-                                model.setGeometry(edge, geo);
-			}
-		}
-
-		return edge;
-	}
-        
-        
 
 	//
 	// Cell connecting and connection constraints

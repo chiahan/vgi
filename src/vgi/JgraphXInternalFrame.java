@@ -105,7 +105,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         graph.setSplitEnabled(false);
         graph.setCellsDisconnectable(false);
         graph.setGridEnabled(false);
-
+        graph.setResetEdgesOnMove(true);
+        
         graphComponent = getGraphComponent();
         graphComponent.setConnectable(false);
         graphComponent.getViewport().setBackground(Color.WHITE);
@@ -694,6 +695,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     public void addControlPoint(mxCell cell, double x, double y) {
         System.out.println("add Ctrl pt at" + x + "," + y);
         ArrayList<mxPoint> points = (ArrayList) cell.getGeometry().getPoints();
+        if(points==null) points=new ArrayList<mxPoint>();
         points.add(new mxPoint(x, y));
 
         //to sort
