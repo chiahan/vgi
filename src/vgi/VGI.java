@@ -408,7 +408,7 @@ public class VGI extends javax.swing.JFrame {
         toolBar.add(deleteButton);
         toolBar.add(toolBarSeparator1);
 
-        fitWindowButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/zoom.png"))); // NOI18N
+        fitWindowButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/fit-32.png"))); // NOI18N
         fitWindowButton.setFocusable(false);
         fitWindowButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         fitWindowButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -419,7 +419,7 @@ public class VGI extends javax.swing.JFrame {
         });
         toolBar.add(fitWindowButton);
 
-        zoomInButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/zoomin.png"))); // NOI18N
+        zoomInButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/zoomin-32.png"))); // NOI18N
         zoomInButton.setFocusable(false);
         zoomInButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         zoomInButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -430,7 +430,7 @@ public class VGI extends javax.swing.JFrame {
         });
         toolBar.add(zoomInButton);
 
-        zoomOutButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/zoomout.png"))); // NOI18N
+        zoomOutButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/zoomout-32.png"))); // NOI18N
         zoomOutButton.setFocusable(false);
         zoomOutButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         zoomOutButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -441,7 +441,7 @@ public class VGI extends javax.swing.JFrame {
         });
         toolBar.add(zoomOutButton);
 
-        actualSizeButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/refresh.png"))); // NOI18N
+        actualSizeButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/actual-32.png"))); // NOI18N
         actualSizeButton.setFocusable(false);
         actualSizeButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         actualSizeButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -468,7 +468,7 @@ public class VGI extends javax.swing.JFrame {
         toolBar.add(setAsFinalStateButton);
         toolBar.add(toolBarSeparator3);
 
-        undoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/object_05.png"))); // NOI18N
+        undoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/undo-32.png"))); // NOI18N
         undoButton.setFocusable(false);
         undoButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         undoButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -479,7 +479,7 @@ public class VGI extends javax.swing.JFrame {
         });
         toolBar.add(undoButton);
 
-        redoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/object_04.png"))); // NOI18N
+        redoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/redo-32.png"))); // NOI18N
         redoButton.setFocusable(false);
         redoButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         redoButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -525,7 +525,7 @@ public class VGI extends javax.swing.JFrame {
         fileMenu.setText("File");
 
         newMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
-        newMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/Forward.png"))); // NOI18N
+        newMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/Document.png"))); // NOI18N
         newMenuItem.setText("New");
         newMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -535,7 +535,7 @@ public class VGI extends javax.swing.JFrame {
         fileMenu.add(newMenuItem);
 
         openMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
-        openMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/open.png"))); // NOI18N
+        openMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/Folder.png"))); // NOI18N
         openMenuItem.setText("Open...");
         openMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -545,7 +545,7 @@ public class VGI extends javax.swing.JFrame {
         fileMenu.add(openMenuItem);
 
         closeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_W, java.awt.event.InputEvent.CTRL_MASK));
-        closeMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/stop.png"))); // NOI18N
+        closeMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/Close.png"))); // NOI18N
         closeMenuItem.setText("Close");
         closeMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -573,7 +573,7 @@ public class VGI extends javax.swing.JFrame {
         fileMenu.add(saveAsMenuItem);
         fileMenu.add(fileMenuSeparator1);
 
-        exitMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/door.png"))); // NOI18N
+        exitMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/Standby.png"))); // NOI18N
         exitMenuItem.setText("Exit");
         exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
