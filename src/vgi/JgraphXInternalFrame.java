@@ -550,26 +550,30 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             
             for (int j = 0; j < count; j++) {
                 edge = (mxCell) edges[j];
-                 
-                mxGeometry geo=edge.getGeometry();
-		if (geo != null){
-			// Resets the control points
-			List<mxPoint> points = geo.getPoints();
-                        
-			if (points != null && !points.isEmpty()){
-				
-                                List<mxPoint> ptlist=geo.getPoints();
-                                for(mxPoint pt:ptlist){
-                                    
-                                    pt.setX(pt.getX()+dx);
-                                    pt.setY(pt.getY()+dy);
-                                    
-                                    System.out.println("update control pt!");
-                                }
-                                
-                                edge.getGeometry().setPoints(ptlist);
-			}
-		}
+                
+                mxCell source=(mxCell)edge.getSource();
+                mxCell target=(mxCell)edge.getTarget();
+                if(source==target){ // only loop
+                    mxGeometry geo=edge.getGeometry();
+                    if (geo != null){
+                            // Resets the control points
+                            List<mxPoint> points = geo.getPoints();
+
+                            if (points != null && !points.isEmpty()){
+
+                                    List<mxPoint> ptlist=geo.getPoints();
+                                    for(mxPoint pt:ptlist){
+
+                                        pt.setX(pt.getX()+dx);
+                                        pt.setY(pt.getY()+dy);
+
+                                        //System.out.println("update control pt!");
+                                    }
+
+                                    edge.getGeometry().setPoints(ptlist);
+                            }
+                    }
+                }
             }
         }
 
