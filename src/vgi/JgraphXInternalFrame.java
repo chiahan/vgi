@@ -105,7 +105,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         graph.setSplitEnabled(false);
         graph.setCellsDisconnectable(false);
         graph.setGridEnabled(false);
-        graph.setResetEdgesOnMove(true);
+        //graph.setResetEdgesOnMove(true);
         
         graphComponent = getGraphComponent();
         graphComponent.setConnectable(false);
@@ -185,6 +185,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
 //                System.out.println("Cells moved: " + cells.length + " " + dx + " " + dy);
                 updateInitialFinal(cells, new Point2D.Double(dx, dy));
+                updateControlPoint(cells,new Point2D.Double(dx,dy));
+                
+                
             }
         });
 
@@ -513,6 +516,16 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     display.showInitialFinal(graph.getDefaultParent(), edge.getValue(), graph.getSelectionCell(), false);
                     Object removeEdge[] = {edge};
                     graph.removeCells(removeEdge);
+                    
+                    /*List<mxPoint> ptlist=edge.getGeometry().getPoints();
+                    double dx=offset.getX();
+                    double dy=offset.getY();
+                    for(mxPoint pt:ptlist){
+                           pt.setX(pt.getX()+dx);
+                           pt.setY(pt.getY()+dy);
+                    }
+                    edge.getGeometry().setPoints(ptlist);
+                    */
                 } else if (edge.getTerminal(false) == null) {
                     display.showInitialFinal(graph.getDefaultParent(), edge.getValue(), graph.getSelectionCell(), true);
                     Object removeEdge[] = {edge};
@@ -521,6 +534,46 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             }
         }
     }
+    
+ 
+    private void updateControlPoint(Object[] cells, Point2D offset) {
+        int length = cells.length;
+        mxCell vertex, edge;
+        double dx=offset.getX();
+        double dy=offset.getY();
+                    
+        for (int i = 0; i < length; i++) {
+        
+            vertex = (mxCell) cells[i];
+            Object edges[] = graph.getEdges(vertex);
+            int count = edges.length;
+            
+            for (int j = 0; j < count; j++) {
+                edge = (mxCell) edges[j];
+                 
+                mxGeometry geo=edge.getGeometry();
+		if (geo != null){
+			// Resets the control points
+			List<mxPoint> points = geo.getPoints();
+                        
+			if (points != null && !points.isEmpty()){
+				
+                                List<mxPoint> ptlist=geo.getPoints();
+                                for(mxPoint pt:ptlist){
+                                    
+                                    pt.setX(pt.getX()+dx);
+                                    pt.setY(pt.getY()+dy);
+                                    
+                                    System.out.println("update control pt!");
+                                }
+                                
+                                edge.getGeometry().setPoints(ptlist);
+			}
+		}
+            }
+        }
+
+    }   
 
     public void addState(double x, double y) {
         State newState = new State();
