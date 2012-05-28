@@ -380,11 +380,11 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		public int compare(mxPoint unitVector1, mxPoint unitVector2) {
 			double angle1 = Math.acos(unitVector1.getX());
 			if (unitVector1.getY() < 0) {
-				angle1 = angle1 + 2 * Math.PI;
+				angle1 = 2 * Math.PI - angle1;
 			}
 			double angle2 = Math.acos(unitVector2.getX());
 			if (unitVector2.getY() < 0) {
-				angle2 = angle2 + 2 * Math.PI;
+				angle2 = 2 * Math.PI - angle2;
 			}
 			double difference = angle1 - angle2;
 			if (difference < 0) {
