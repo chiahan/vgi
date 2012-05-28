@@ -781,7 +781,7 @@ public class VGI extends javax.swing.JFrame {
         helpMenu.setMnemonic('H');
         helpMenu.setText("Help");
 
-        rationalExpressionSymbolsMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/question.png"))); // NOI18N
+        rationalExpressionSymbolsMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/question.png"))); // NOI18N
         rationalExpressionSymbolsMenuItem.setText("Rational Expression Symbols");
         rationalExpressionSymbolsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -790,7 +790,7 @@ public class VGI extends javax.swing.JFrame {
         });
         helpMenu.add(rationalExpressionSymbolsMenuItem);
 
-        aboutMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/about.png"))); // NOI18N
+        aboutMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/info.png"))); // NOI18N
         aboutMenuItem.setText("About");
         aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
