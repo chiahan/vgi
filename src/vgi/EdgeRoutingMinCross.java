@@ -175,7 +175,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				nextVectorX = nextVectorX / nextVectorLength;
 				nextVectorY = nextVectorY / nextVectorLength;
 				previousPoint = currentPoint;
-				if (Vector2D.areSameDirection(previousVectorX, previousVectorY, nextVectorX, nextVectorY)) {
+				if (Vector2D.isParallel(previousVectorX, previousVectorY, nextVectorX, nextVectorY)) {
 					double offsetX = -previousVectorX;
 					double offsetY = -previousVectorY;
 					double rightX = -offsetY;
@@ -201,7 +201,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 				double bisectorX;
 				double bisectorY;
-				if (Vector2D.areOpposite(previousVectorX, previousVectorY, nextVectorX, nextVectorY)) {
+				if (Vector2D.isAntiParallel(previousVectorX, previousVectorY, nextVectorX, nextVectorY)) {
 					bisectorX = -nextVectorY;
 					bisectorY = nextVectorX;
 				} else {
@@ -463,7 +463,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			return outPoints;
 		}
 
-		List<mxPoint> edgeUnitVectorsList = new ArrayList<mxPoint>(edgeCount);
+		List<Vector2D> edgeUnitVectorsList = new ArrayList<Vector2D>(edgeCount);
 
 		for (int index = 0; index < edgeCount; index++) {
 			mxICell edge = inVertex.getEdgeAt(index);
@@ -500,66 +500,61 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			} else {
 				throw new IllegalStateException("Edge does not connect to inVertex.");
 			}
-			double offsetX = point.getX() - geometry.getCenterX();
-			double offsetY = point.getY() - geometry.getCenterY();
-			double offsetLength = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
-			edgeUnitVectorsList.add(new mxPoint(offsetX / offsetLength, offsetY / offsetLength));
+			edgeUnitVectorsList.add(Vector2D.subtract(point.getX(), point.getY(),
+					geometry.getCenterX(), geometry.getCenterY()).unitVector());
 		}  // End for (int index = 0; index < edgeCount; index++)
 
 		x = geometry.getWidth() / 2 + MINIMUM_SPACING;
 		y = geometry.getHeight() / 2 + MINIMUM_SPACING;
 		double radius = Math.sqrt(x * x + y * y);
 
-		Collections.sort(edgeUnitVectorsList, new UnitVectorComparator());
+		Collections.sort(edgeUnitVectorsList, new Vector2DComparator());
 
 		for (int index = 0; index < edgeCount; index++) {
 
 			int nextIndex = (index + 1 >= edgeCount) ? (0) : (index + 1);
-			mxPoint currentVector = edgeUnitVectorsList.get(index);
-			mxPoint nextVector = edgeUnitVectorsList.get(nextIndex);
-			if (Vector2D.areSameDirection(currentVector.getX(), currentVector.getY(), nextVector.getX(), nextVector.getY())) {
+			Vector2D currentVector = edgeUnitVectorsList.get(index);
+			Vector2D nextVector = edgeUnitVectorsList.get(nextIndex);
+			if (currentVector.isParallel(nextVector)) {
 				continue;
 			}
-			double rightUnitVectorX = -currentVector.getY();
-			double rightUnitVectorY = currentVector.getX();
-			if (Vector2D.areOpposite(currentVector.getX(), currentVector.getY(), nextVector.getX(), nextVector.getY())) {
+			Vector2D rightUnitVector = currentVector.rotate90DegreesPositively();
+			if (currentVector.isAntiParallel(nextVector)) {
 				outPoints.add(new mxPoint(
-						geometry.getCenterX() + radius * rightUnitVectorX,
-						geometry.getCenterY() + radius * rightUnitVectorY));
+						geometry.getCenterX() + radius * rightUnitVector.getX(),
+						geometry.getCenterY() + radius * rightUnitVector.getY()));
 				continue;
 			}
-			double bisectorX = currentVector.getX() + nextVector.getX();
-			double bisectorY = currentVector.getY() + nextVector.getY();
+			Vector2D bisector = currentVector.add(nextVector);
 			//
 			// if the next vecotr points to the left of the current vector
 			//
-			if (Vector2D.dotProduct(nextVector.getX(), nextVector.getY(), rightUnitVectorX, rightUnitVectorY) < 0) {
-				bisectorX = -bisectorX;
-				bisectorY = -bisectorY;
+			if (nextVector.dotProduct(rightUnitVector) < 0) {
+				bisector = bisector.reverse();
 			}
-			double bisectorLength = Math.sqrt(bisectorX * bisectorX + bisectorY * bisectorY);
+			double bisectorLength = bisector.length();
 			outPoints.add(new mxPoint(
-					geometry.getCenterX() + radius * bisectorX / bisectorLength,
-					geometry.getCenterY() + radius * bisectorY / bisectorLength));
+					geometry.getCenterX() + radius * bisector.getX() / bisectorLength,
+					geometry.getCenterY() + radius * bisector.getY() / bisectorLength));
 
 		}  // End for (int index = 0; index < edgeCount; index++)
 
-		edgeUnitVectorsList = null;  // List<mxPoint> edgeUnitVectorsList = new ArrayList<mxPoint>();
+		edgeUnitVectorsList = null;  // List<Vector2D> edgeUnitVectorsList = new ArrayList<Vector2D>(edgeCount);
 
 		return outPoints;
 	}  // End protected static List<mxPoint> findPointsAroundRoadblock(mxGraph inGraph, mxICell inVertex)
 
-	protected static class UnitVectorComparator implements Comparator<mxPoint> {
+	protected static class Vector2DComparator implements Comparator<Vector2D> {
 
 		@Override
-		public int compare(mxPoint unitVector1, mxPoint unitVector2) {
-			double angle1 = Math.acos(unitVector1.getX());
-			if (unitVector1.getY() < 0) {
-				angle1 = 2 * Math.PI - angle1;
+		public int compare(Vector2D vector1, Vector2D vector2) {
+			double angle1 = vector1.angle();
+			if (angle1 < 0) {
+				angle1 = 2 * Math.PI + angle1;
 			}
-			double angle2 = Math.acos(unitVector2.getX());
-			if (unitVector2.getY() < 0) {
-				angle2 = 2 * Math.PI - angle2;
+			double angle2 = vector2.angle();
+			if (angle2 < 0) {
+				angle2 = 2 * Math.PI + angle2;
 			}
 			double difference = angle1 - angle2;
 			if (difference < 0) {
@@ -567,37 +562,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			} else {
 				return 1;
 			}
-		}  // End public int compare(mxPoint unitVector1, mxPoint unitVector2)
-	}  // End protected static class UnitVectorComparator implements Comparator<mxPoint>
-
-	protected static class Vector2D {
-
-		protected static final double SMALL_VALUE = 0.01;
-
-		public static double dotProduct(double x1, double y1, double x2, double y2) {
-			return (x1 * x2 + y1 * y2);
-		}  // End public static double dotProduct(double x1, double y1, double x2, double y2)
-
-		public static boolean areOpposite(double x1, double y1, double x2, double y2) {
-			double lengthSquared1 = x1 * x1 + y1 * y1;
-			double lengthSquared2 = x2 * x2 + y2 * y2;
-			double dotProduct = Vector2D.dotProduct(x1, y1, x2, y2);
-			return ((Math.abs(lengthSquared1 * lengthSquared2 - dotProduct * dotProduct) < SMALL_VALUE)
-					&& (dotProduct < 0));
-		}  // End public static boolean areOpposite(double x1, double y1, double x2, double y2)
-
-		public static boolean arePerpendicular(double x1, double y1, double x2, double y2) {
-			return (Math.abs(Vector2D.dotProduct(x1, y1, x2, y2)) < SMALL_VALUE);
-		}  // End public static boolean arePerpendicular(double x1, double y1, double x2, double y2)
-
-		public static boolean areSameDirection(double x1, double y1, double x2, double y2) {
-			double lengthSquared1 = x1 * x1 + y1 * y1;
-			double lengthSquared2 = x2 * x2 + y2 * y2;
-			double dotProduct = Vector2D.dotProduct(x1, y1, x2, y2);
-			return ((Math.abs(lengthSquared1 * lengthSquared2 - dotProduct * dotProduct) < SMALL_VALUE)
-					&& (dotProduct > 0));
-		}  // End public static boolean areSameDirection(double x1, double y1, double x2, double y2)
-	}  // End protected static class Vector2D
+		}  // End public int compare(Vector2D vector1, Vector2D vector2)
+	}  // End protected static class Vector2DComparator implements Comparator<Vector2D>
 
 	public void route(mxCell edge) {
 
@@ -1075,7 +1041,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		public static List findBoundaryVertices(Region inRegion1, Region inRegion2) {
 
 			int count = inRegion1.size();
-			List outList = new ArrayList();
+			List<Object> outList = new ArrayList<Object>();
 
 			for (int index = 0; index < count; index++) {
 				Object object = inRegion1.get(index);
