@@ -37,9 +37,24 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
 	protected static final double MINIMUM_SPACING = 9;
 
+	protected static class Hindrance {
+
+		double x1;
+		double y1;
+		double x2;
+		double y2;
+
+		public Hindrance(double x1, double y1, double x2, double y2) {
+			this.x1 = x1;
+			this.y1 = y1;
+			this.x2 = x2;
+			this.y2 = y2;
+		}
+	}  // End protected static class Hindrance
+
 	protected static mxGraph buildWeightedVisibilityGraph(mxGraph inGraph) {
 
-		mxGraph outGraph = inGraph;//new mxGraph();
+		mxGraph outGraph = new mxGraph();
 		Object parent = outGraph.getDefaultParent();
 		Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
 		List<mxRectangle> roadblocksList = new ArrayList<mxRectangle>(objects.length);
@@ -125,8 +140,15 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 			List<mxPoint> controlPoints = edge.getGeometry().getPoints();
 			if ((controlPoints == null) || (controlPoints.isEmpty())) {
+				mxGeometry sourceGeometry = source.getGeometry();
+				mxGeometry targetGeometry = target.getGeometry();
+				hindrancesList.add(new Hindrance(
+						sourceGeometry.getCenterX(),
+						sourceGeometry.getCenterY(),
+						targetGeometry.getCenterX(),
+						targetGeometry.getCenterY()));
 				continue;
-			}
+			}  // End if ((controlPoints == null) || (controlPoints.isEmpty()))
 			mxGeometry geometry = source.getGeometry();
 			mxPoint previousPoint = new mxPoint(geometry.getCenterX(), geometry.getCenterY());
 
@@ -210,7 +232,160 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		}  // End for (int index = 0; index < objects.length; index++)
 
+		objects = outGraph.getChildVertices(parent);
+
+		for (int index = 0; index < objects.length; index++) {
+
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException("A vertex is not of the type mxICell.");
+			}
+			mxICell vertex1 = (mxICell) objects[index];
+			if (!(vertex1.isVertex())) {
+				throw new IllegalArgumentException("vertex1 is not a vertex.");
+			}
+			mxGeometry geometry1 = vertex1.getGeometry();
+			if (geometry1 == null) {
+				throw new IllegalStateException("vertex1 has null geometry.");
+			}
+
+			for (int index2 = index + 1; index2 < objects.length; index2++) {
+
+				if (!(objects[index2] instanceof mxICell)) {
+					throw new IllegalStateException("A vertex is not of the type mxICell.");
+				}
+				mxICell vertex2 = (mxICell) objects[index2];
+				if (!(vertex2.isVertex())) {
+					throw new IllegalArgumentException("vertex2 is not a vertex.");
+				}
+				mxGeometry geometry2 = vertex2.getGeometry();
+				if (geometry2 == null) {
+					throw new IllegalStateException("vertex2 has null geometry.");
+				}
+
+				boolean hitRoadblock = false;
+				int roadblocksCount = roadblocksList.size();
+				for (int index3 = 0; index3 < roadblocksCount; index3++) {
+					mxRectangle rectangle = roadblocksList.get(index3);
+					if (rectangle.intersectLine(
+							geometry1.getCenterX(),
+							geometry1.getCenterY(),
+							geometry2.getCenterX(),
+							geometry2.getCenterY()) != null) {
+						hitRoadblock = true;
+						break;
+					}
+				}  // End for (int index3 = 0; index3 < roadblocksCount; index3++)
+
+				if (hitRoadblock) {
+					continue;
+				}
+
+				List<mxPoint> endPointIntersectionsList = new ArrayList<mxPoint>();
+				int cost = 0;
+				int hindrancesCount = hindrancesList.size();
+
+				for (int index3 = 0; index3 < hindrancesCount; index3++) {
+
+					Hindrance hindrance = hindrancesList.get(index3);
+					mxPoint intersection = mxUtils.intersection(
+							geometry1.getCenterX(),
+							geometry1.getCenterY(),
+							geometry2.getCenterX(),
+							geometry2.getCenterY(),
+							hindrance.x1,
+							hindrance.y1,
+							hindrance.x2,
+							hindrance.y2);
+					if (intersection == null) {
+						continue;
+					}
+					if (((intersection.getX() == hindrance.x1) && (intersection.getY() == hindrance.y1))
+							|| ((intersection.getX() == hindrance.x2) && (intersection.getY() == hindrance.y2))) {
+						if (!(endPointIntersectionsList.contains(intersection))) {
+							endPointIntersectionsList.add(intersection);
+							cost = cost + 1;
+						}
+					} else {
+						cost = cost + 1;
+					}
+
+				}  // End for (int index3 = 0; index3 < hindrancesCount; index3++)
+
+				outGraph.insertEdge(parent, null, cost, vertex1, vertex2);
+
+			}  // End for (int index2 = index + 1; index2 < objects.length; index2++)
+
+		}  // End for (int index = 0; index < objects.length; index++)
+
+		hindrancesList = null;  // List<Hindrance> hindrancesList = new ArrayList<Hindrance>();
 		roadblocksList = null;  // List<mxICell> roadblocksList = new LinkedList<mxICell>();
+
+		HashMap<mxICell, mxICell> oldToNewVerticesMap = new HashMap<mxICell, mxICell>();
+		objects = inGraph.getChildVertices(inGraph.getDefaultParent());
+
+		for (int index = 0; index < objects.length; index++) {
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException("A vertex is not of the type mxICell.");
+			}
+			mxICell vertex = (mxICell) objects[index];
+			mxGeometry geometry = vertex.getGeometry();
+			if (geometry == null) {
+				throw new IllegalStateException("vertex has null geometry.");
+			}
+			mxICell newVertex = (mxICell) outGraph.insertVertex(
+					parent,
+					null,
+					vertex.getValue(),
+					geometry.getX(),
+					geometry.getY(),
+					geometry.getWidth(),
+					geometry.getHeight(),
+					vertex.getStyle(),
+					geometry.isRelative());
+			oldToNewVerticesMap.put(vertex, newVertex);
+		}  // End for (int index = 0; index < objects.length; index++)
+
+		objects = inGraph.getChildEdges(inGraph.getDefaultParent());
+
+		for (int index = 0; index < objects.length; index++) {
+
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException("An edge is not of the type mxICell.");
+			}
+			mxICell edge = (mxICell) objects[index];
+			if (!(edge.isEdge())) {
+				throw new IllegalStateException("edge is not an edge.");
+			}
+			mxGeometry geometry = edge.getGeometry();
+			if (geometry == null) {
+				throw new IllegalStateException("edge has null geometry.");
+			}
+			mxPoint terminalPoint = null;
+			mxICell source = edge.getTerminal(true);
+			if (source == null) {
+				terminalPoint = geometry.getTerminalPoint(true);
+			}
+			mxICell target = edge.getTerminal(false);
+			if (target == null) {
+				terminalPoint = geometry.getTerminalPoint(false);
+			}
+			mxICell newEdge = (mxICell) outGraph.insertEdge(
+					parent,
+					null,
+					edge.getValue(),
+					oldToNewVerticesMap.get(source),
+					oldToNewVerticesMap.get(target),
+					edge.getStyle());
+			geometry = newEdge.getGeometry();
+			if (source == null) {
+				geometry.setTerminalPoint(terminalPoint, true);
+			} else if (target == null) {
+				geometry.setTerminalPoint(terminalPoint, false);
+			}
+
+		}  // End for (int index = 0; index < objects.length; index++)
+
+		oldToNewVerticesMap = null;  // HashMap<mxICell, mxICell> oldToNewVerticesMap = new HashMap<mxICell, mxICell>();
 
 		return outGraph;
 	}  // End protected static mxGraph buildWeightedVisibilityGraph(mxGraph inGraph)
@@ -423,21 +598,6 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					&& (dotProduct > 0));
 		}  // End public static boolean areSameDirection(double x1, double y1, double x2, double y2)
 	}  // End protected static class Vector2D
-
-	protected static class Hindrance {
-
-		double x1;
-		double y1;
-		double x2;
-		double y2;
-
-		public Hindrance(double x1, double y1, double x2, double y2) {
-			this.x1 = x1;
-			this.y1 = y1;
-			this.x2 = x2;
-			this.y2 = y2;
-		}
-	}  // End protected static class Hindrance
 
 	public void route(mxCell edge) {
 
