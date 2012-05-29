@@ -5,6 +5,7 @@
 package vgi;
 
 import java.awt.geom.Point2D;
+import java.text.NumberFormat;
 
 /**
  *
@@ -74,6 +75,14 @@ public class Vector2D {
 		hash = 83 * hash + (int) (Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
 		hash = 83 * hash + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
 		return hash;
+	}
+
+	@Override
+	public String toString() {
+		NumberFormat numberFormat = NumberFormat.getInstance();
+		numberFormat.setGroupingUsed(false);
+		numberFormat.setMinimumFractionDigits(0);
+		return "(" + numberFormat.format(this.x) + ", " + numberFormat.format(this.y) + ")";
 	}
 
 	public static Vector2D add(double x1, double y1, double x2, double y2) {
@@ -198,6 +207,14 @@ public class Vector2D {
 		return Vector2D.rotate90DegreesNegatively(this.x, this.y);
 	}
 
+	public static Vector2D scalarProduct(double x, double y, double scalar) {
+		return new Vector2D(scalar * x, scalar * y);
+	}
+
+	public Vector2D scalarProduct(double scalar) {
+		return Vector2D.scalarProduct(this.x, this.y, scalar);
+	}
+
 	public static Vector2D subtract(double x1, double y1, double x2, double y2) {
 		return new Vector2D(x1 - x2, y1 - y2);
 	}
@@ -214,4 +231,73 @@ public class Vector2D {
 	public Vector2D unitVector() {
 		return Vector2D.unitVecotr(this.x, this.y);
 	}
+
+	public static void main(String args[]) {
+
+		Vector2D vector = new Vector2D(3, 4);
+		Vector2D vector2 = new Vector2D(12, 5);
+		NumberFormat numberFormat = NumberFormat.getInstance();
+		numberFormat.setGroupingUsed(false);
+		numberFormat.setMinimumFractionDigits(0);
+
+		System.out.println(vector + " add " + vector2 + " = "
+				+ vector.add(vector2));
+		System.out.println(vector + "'s angle = " + numberFormat.format(
+				vector.angle()));
+		System.out.println(vector2 + "'s angle = " + numberFormat.format(
+				vector2.angle()));
+		System.out.println(vector + " dot product " + vector2 + " = " + numberFormat.format(
+				vector.dotProduct(vector2)));
+		System.out.println("Vector with length of sqrt(2) and angle of PI * 3 / 4) = "
+				+ Vector2D.fromPolarCoordinates(Math.sqrt(2), Math.PI * 3 / 4));
+		System.out.println(vector + " is anti parallel to " + vector2 + " = "
+				+ vector.isAntiParallel(vector2));
+		System.out.println(vector + " is anti parallel to " + vector.scalarProduct(-2) + " = "
+				+ vector.isAntiParallel(vector.scalarProduct(-2)));
+		System.out.println(vector + " is parallel to " + vector2 + " = "
+				+ vector.isParallel(vector2));
+		System.out.println(vector + " is parallel to " + vector.scalarProduct(3) + " = "
+				+ vector.isParallel(vector.scalarProduct(3)));
+		System.out.println(vector + " is perpendicular to " + vector2 + " = "
+				+ vector.isPerpendicular(vector2));
+		System.out.println(vector + " is perpendicular to " + vector.rotate90DegreesPositively() + " = "
+				+ vector.isPerpendicular(vector.rotate90DegreesPositively()));
+		System.out.println(vector + "'s length = " + numberFormat.format(
+				vector.length()));
+		System.out.println(vector2 + "'s length = " + numberFormat.format(
+				vector2.length()));
+		System.out.println(vector + "'s length squared = " + numberFormat.format(
+				vector.lengthSquared()));
+		System.out.println(vector2 + "'s length squared = " + numberFormat.format(
+				vector2.lengthSquared()));
+		System.out.println(vector + "'s reverse = "
+				+ vector.reverse());
+		System.out.println(vector2 + "'s reverse = "
+				+ vector2.reverse());
+		System.out.println("Rotate " + vector + " by 30 degrees = "
+				+ vector.rotate(Math.PI / 6) + " whose angle = " + numberFormat.format(
+				vector.rotate(Math.PI / 6).angle()));
+		System.out.println("Rotate " + vector2 + " by 30 degrees = "
+				+ vector2.rotate(Math.PI / 6) + " whose angle = " + numberFormat.format(
+				vector2.rotate(Math.PI / 6).angle()));
+		System.out.println("Rotate " + vector + " 90 degrees positively = "
+				+ vector.rotate90DegreesPositively());
+		System.out.println("Rotate " + vector2 + " 90 degrees positively = "
+				+ vector2.rotate90DegreesPositively());
+		System.out.println("Rotate " + vector + " 90 degrees negatively = "
+				+ vector.rotate90DegreesNegatively());
+		System.out.println("Rotate " + vector2 + " 90 degrees negatively = "
+				+ vector2.rotate90DegreesNegatively());
+		double scalar = -2.5;
+		System.out.println(vector + " scalar pruduct " + numberFormat.format(scalar) + " = "
+				+ vector.scalarProduct(scalar));
+		System.out.println(vector2 + " scalar pruduct " + numberFormat.format(scalar) + " = "
+				+ vector2.scalarProduct(scalar));
+		System.out.println(vector + " subtract " + vector2 + " = "
+				+ vector.subtract(vector2));
+		System.out.println(vector + "'s unit vector = "
+				+ vector.unitVector());
+		System.out.println(vector2 + "'s unit vector = "
+				+ vector2.unitVector());
+	}  // End public static void main(String args[])
 }  // End public class Vector2D
