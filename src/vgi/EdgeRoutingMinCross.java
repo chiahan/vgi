@@ -376,12 +376,13 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					oldToNewVerticesMap.get(source),
 					oldToNewVerticesMap.get(target),
 					edge.getStyle());
-			geometry = newEdge.getGeometry();
+			mxGeometry newGeometry = newEdge.getGeometry();
 			if (source == null) {
-				geometry.setTerminalPoint(terminalPoint, true);
+				newGeometry.setTerminalPoint(terminalPoint, true);
 			} else if (target == null) {
-				geometry.setTerminalPoint(terminalPoint, false);
+				newGeometry.setTerminalPoint(terminalPoint, false);
 			}
+			newGeometry.setPoints(geometry.getPoints());
 
 		}  // End for (int index = 0; index < objects.length; index++)
 
@@ -565,6 +566,163 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}  // End public int compare(Vector2D vector1, Vector2D vector2)
 	}  // End protected static class Vector2DComparator implements Comparator<Vector2D>
 
+	public List<List<mxICell>> findShortestPaths(
+			mxGraph inGraph,
+			List<mxICell> sourceVertices,
+			List<mxICell> targetVertices) {
+
+		if ((inGraph == null)
+				|| (sourceVertices == null)
+				|| (targetVertices == null)) {
+			throw new IllegalArgumentException("Invalid inputs to findShortestPath().");
+		}
+
+		List<List<mxICell>> outPaths = new LinkedList<List<mxICell>>();
+		List<mxICell> verticesToBeProcessed = new LinkedList<mxICell>(sourceVertices);
+		Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
+		Map<mxICell, List<List<mxICell>>> vertexToPathsMap = new HashMap<mxICell, List<List<mxICell>>>();
+		double currentMinCost = Double.POSITIVE_INFINITY;
+
+		Iterator<mxICell> iterateVertices = sourceVertices.iterator();
+		while (iterateVertices.hasNext()
+				&& (!(targetVertices.isEmpty()))) {
+
+			mxICell vertex = iterateVertices.next();
+			if (!(vertex.isVertex())) {
+				throw new IllegalStateException("The vertex variable is not a vertex.");
+			}
+			vertexToCostMap.put(vertex, 0.0d);
+			List<mxICell> path = new LinkedList<mxICell>();
+			path.add(vertex);
+			List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
+			paths.add(path);
+			path = null;  // List<mxICell> path = new LinkedList<mxICell>();
+			vertexToPathsMap.put(vertex, paths);
+
+			if ((targetVertices.contains(vertex))
+					&& (0.0d <= currentMinCost)) {
+				targetVertices.remove(vertex);
+				currentMinCost = 0.0d;
+				Iterator<List<mxICell>> iteratePaths = paths.iterator();
+				while (iteratePaths.hasNext()) {
+					path = new LinkedList<mxICell>(iteratePaths.next());
+					outPaths.add(path);
+				}  // End while (iteratePaths.hasNext())
+			}  // End if (targetVertices.contains(vertex))
+			paths = null;  // List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
+
+		}  // End while (iterateVertices.hasNext()
+		// && (!(targetVertices.isEmpty())))
+
+		while (!(verticesToBeProcessed.isEmpty())
+				&& (!(targetVertices.isEmpty()))) {
+
+			mxICell vertex = verticesToBeProcessed.remove(0);
+			List<List<mxICell>> paths = vertexToPathsMap.get(vertex);
+			if ((paths == null) || (paths.isEmpty())) {
+				throw new IllegalStateException("A vertex to be processed cannot have no paths leading to it.");
+			}
+			double cost = vertexToCostMap.get(vertex);
+
+			int edgeCount = vertex.getEdgeCount();
+			for (int index = 0; index < edgeCount; index++) {
+
+				mxICell edge = vertex.getEdgeAt(index);
+				if (!(edge.isEdge())) {
+					throw new IllegalStateException("The edge variable is not an edge.");
+				}
+				mxICell source = edge.getTerminal(true);
+				mxICell target = edge.getTerminal(false);
+				if ((source == null) || (target == null)) {
+					throw new IllegalStateException("An edge has null source or target vertex.");
+				}
+				mxICell neighbour;
+				if (source == vertex) {
+					neighbour = target;
+				} else if (target == vertex) {
+					neighbour = source;
+				} else {
+					throw new IllegalStateException("This edge is not connected to the vertex in question.");
+				}
+
+				double costToNeighbour;
+				Object object = edge.getValue();
+				if (object instanceof Number) {
+					double weight = ((Number) object).doubleValue();
+					if (weight < 0) {
+						throw new IllegalStateException("The weight of an edge cannot be negative for this shortest path algorithm.");
+					}
+					costToNeighbour = cost + weight;
+				} else {
+					costToNeighbour = cost + 1;
+				}
+
+				if (!(vertexToCostMap.containsKey(neighbour))) {
+					ListIterator<mxICell> listIterator = verticesToBeProcessed.listIterator(verticesToBeProcessed.size());
+					while (listIterator.hasPrevious()) {
+						mxICell aVertex = listIterator.previous();
+						if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
+							listIterator.next();
+							break;
+						}
+					}  // End while (listIterator.hasPrevious())
+
+					verticesToBeProcessed.add(listIterator.nextIndex(), neighbour);
+					vertexToCostMap.put(neighbour, costToNeighbour);
+
+					List<List<mxICell>> neightbourPaths = new LinkedList<List<mxICell>>();
+					Iterator<List<mxICell>> iteratePaths = paths.iterator();
+					while (iteratePaths.hasNext()) {
+						List<mxICell> path = iteratePaths.next();
+						path.add(neighbour);
+						neightbourPaths.add(path);
+					}  // End while (iteratePaths.hasNext())
+					vertexToPathsMap.put(neighbour, neightbourPaths);
+					neightbourPaths = null;  // List<List<mxICell>> neightbourPaths = new LinkedList<List<mxICell>>();
+					continue;
+				}  // End if (!(vertexToCostMap.containsKey(neighbour)))
+
+				double neighbourCost = vertexToCostMap.get(neighbour);
+				if (neighbourCost < costToNeighbour) {
+					continue;
+				}
+
+				List<List<mxICell>> neightbourPaths = vertexToPathsMap.get(neighbour);
+				if (neighbourCost > costToNeighbour) {
+					vertexToCostMap.put(neighbour, costToNeighbour);
+					neightbourPaths.clear();
+				}
+
+				Iterator<List<mxICell>> iteratePaths = paths.iterator();
+				while (iteratePaths.hasNext()) {
+					List<mxICell> path = iteratePaths.next();
+					path.add(neighbour);
+					neightbourPaths.add(path);
+				}  // End while (iteratePaths.hasNext())
+
+			}  // End for (int index = 0; index < edgeCount; index++)
+
+			if ((targetVertices.contains(vertex))
+					&& (cost <= currentMinCost)) {
+				targetVertices.remove(vertex);
+				currentMinCost = cost;
+				Iterator<List<mxICell>> iteratePaths = paths.iterator();
+				while (iteratePaths.hasNext()) {
+					List<mxICell> path = new LinkedList<mxICell>(iteratePaths.next());
+					outPaths.add(path);
+				}  // End while (iteratePaths.hasNext())
+			}  // End if (targetVertices.contains(vertex))
+
+		}  // End while (!(verticesToBeProcessed.isEmpty())
+		// && (!(targetVertices.isEmpty())))
+
+		vertexToPathsMap = null;  // Map<mxICell, List<List<mxICell>>> vertexToPathsMap = new HashMap<mxICell, List<List<mxICell>>>();
+		vertexToCostMap = null;  // Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
+		verticesToBeProcessed = null;  // List<mxICell> verticesToBeProcessed = new LinkedList<mxICell>(sources);
+
+		return outPaths;
+	}  // End public List<List<mxICell>> findShortestPaths(...)
+
 	public void route(mxCell edge) {
 
 		if (edge == null) {
@@ -636,7 +794,33 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			throw new IllegalStateException("Cannot find the corresponding source and target vertices in the planar graph.");
 		}
 
-		List<List<mxICell>> paths = findShortestPathsInDualGraph(dualGraph, planarSource, planarTarget);
+//		List<List<mxICell>> paths = findShortestPathsInDualGraph(dualGraph, planarSource, planarTarget);
+		List<mxICell> sourceVertices = new LinkedList<mxICell>();
+		List<mxICell> targetVertices = new LinkedList<mxICell>();
+		objects = dualGraph.getChildVertices(dualGraph.getDefaultParent());
+		count = objects.length;
+
+		for (int index = 0; index < count; index++) {
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException("The vertex variable is not of the type mxICell.");
+			}
+			mxICell vertex = (mxICell) objects[index];
+			if (!(vertex.isVertex())) {
+				throw new IllegalStateException("The vertex variable is not a vertex.");
+			}
+			Object object = vertex.getValue();
+			if (!(object instanceof Region)) {
+				throw new IllegalStateException("The value of the vertex variable is not of the type Region.");
+			}
+			Region region = (Region) object;
+			if (region.contains(planarSource)) {
+				sourceVertices.add(vertex);
+			}
+			if (region.contains(planarTarget)) {
+				targetVertices.add(vertex);
+			}
+		}  // End for (int index = 0; index < count; index++)
+		List<List<mxICell>> paths = findShortestPaths(dualGraph, sourceVertices, targetVertices);
 		if ((paths == null) || (paths.isEmpty())) {
 			return;
 		}
