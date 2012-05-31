@@ -21,6 +21,7 @@ import com.mxgraph.view.mxGraph;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -243,6 +244,7 @@ public class VGI extends javax.swing.JFrame {
 	private void createInternalFrame(JgraphXInternalFrame frame) {
 		frame.setVisible(true);
 		mainDesktopPane.add(frame);
+                //mainDesktopPane.setSelectedFrame(frame);
 		try {
 			frame.setSelected(true);
 		} catch (java.beans.PropertyVetoException e) {
@@ -900,6 +902,43 @@ public class VGI extends javax.swing.JFrame {
 		}
 	}//GEN-LAST:event_openMenuItemActionPerformed
 
+    public void openFile(String filename){
+        System.out.println("open: "+filename+"...");
+        File file=new File(filename);
+        if(file.exists()){
+            FsmXml fsmXml = new FsmXml();
+            List<Automata> automataList = null;
+            try {
+                    automataList = fsmXml.read(file);
+
+            } catch (Exception e) {
+                    e.printStackTrace();
+            }
+            if ((automataList != null) && (automataList.size() > 0)) {
+                    Automata automata = automataList.get(0);
+                    this.pmAutomataType = new TAFKitInterface.AutomataType(automata);
+                    this.updateAlgorithmMenuItems();
+                    this.createInternalFrame(automata, file.getName());
+                    //JgraphXInternalFrame fr = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
+                    JgraphXInternalFrame fr = (JgraphXInternalFrame) mainDesktopPane.getComponent(0);
+                    
+                    if(fr!=null){ 
+                        fr.currentFile = file;
+                        mainDesktopPane.setSelectedFrame(fr);
+                        //System.out.println(fr.getTitle());
+                    }else{
+                        //System.out.println(mainDesktopPane.getComponentCount()+"frame empty!");
+                        
+                    }
+            }       
+        }else{
+            System.out.println(filename+" doesn't exist!!");
+        }
+        
+        
+    }
+        
+        
     private void zoomInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInButtonActionPerformed
 		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
 		if (frame instanceof JgraphXInternalFrame) {
@@ -1341,7 +1380,7 @@ public class VGI extends javax.swing.JFrame {
 	/**
 	 * @param args the command line arguments
 	 */
-	public static void main(String args[]) {
+	public static void main(final String args[]) {
 		/*
 		 * Set the Nimbus look and feel
 		 */
@@ -1372,10 +1411,19 @@ public class VGI extends javax.swing.JFrame {
 		/*
 		 * Create and display the form
 		 */
+                
+                //final String[] filename=args;
 		java.awt.EventQueue.invokeLater(new Runnable() {
 
 			public void run() {
-				new VGI().setVisible(true);
+                                VGI vgi=new VGI();
+                                if(args.length>0){
+                                    String filename=args[0];
+                                    if(filename!=null){
+                                        vgi.openFile(filename);
+                                    }
+                                }
+				vgi.setVisible(true);
 			}
 		});
 	}
