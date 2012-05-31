@@ -33,6 +33,81 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 	public void execute(Object parent) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
+
+	public void routeByWeightedVisibilityGraph(mxCell edge) {
+
+		if (edge == null) {
+			throw new IllegalArgumentException("Input 'edge' is null.");
+		}
+		if (!(edge.isEdge())) {
+			throw new IllegalArgumentException("Input 'edge' is not an edge.");
+		}
+		mxICell source = edge.getSource();
+		if (source == null) {
+			return;
+//			throw new IllegalArgumentException("Input 'edge' has no source vertex.");
+		}
+		mxGeometry sourceGeometry = source.getGeometry();
+		if (sourceGeometry == null) {
+			throw new IllegalArgumentException("Source vertex of input 'edge' has null position data.");
+		}
+		mxICell target = edge.getTarget();
+		if (target == null) {
+			return;
+//			throw new IllegalArgumentException("Input 'edge' has no target vertex.");
+		}
+		mxGeometry targetGeometry = target.getGeometry();
+		if (targetGeometry == null) {
+			throw new IllegalArgumentException("Target vertex of input 'edge' has no position data.");
+		}
+
+		if (source.equals(target)) {
+			//
+			// Loop transition layout to be implemented later.
+			//
+			return;
+		}
+
+		Object sourceValue = source.getValue();
+		Object targetValue = target.getValue();
+		if ((sourceValue != null) && (targetValue != null)) {
+			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
+		}
+		Map<mxICell, List<mxICell>> oldToNewVerticesMap = new HashMap<mxICell, List<mxICell>>();
+		mxGraph weightedVisibilityGraph = EdgeRoutingMinCross.buildWeightedVisibilityGraph(this.getGraph(), oldToNewVerticesMap);
+		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(oldToNewVerticesMap.get(source), oldToNewVerticesMap.get(target));
+		if ((paths == null) || (paths.isEmpty())) {
+			return;
+		}
+
+		Iterator<List<mxICell>> iteratePaths = paths.iterator();
+		while (iteratePaths.hasNext()) {
+
+			mxGraph graph = this.getGraph();
+			mxICell newEdge = (mxICell) graph.insertEdge(
+					graph.getDefaultParent(),
+					null,
+					edge.getValue(),
+					source,
+					target,
+					edge.getStyle());
+			Object cells[] = {newEdge};
+			graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+			List<mxICell> path = iteratePaths.next();
+			List<mxPoint> controlPoints = new LinkedList<mxPoint>();
+			Iterator<mxICell> iterateVertices = path.iterator();
+			while (iterateVertices.hasNext()) {
+				mxICell vertex = iterateVertices.next();
+				mxGeometry geometry = vertex.getGeometry();
+				controlPoints.add(new mxPoint(geometry.getCenterX(), geometry.getCenterY()));
+			}  // End while (iterateVertices.hasNext())
+			super.setEdgePoints(newEdge, controlPoints);
+
+		}  // End while (iteratePaths.hasNext())
+
+//		Object cells[] = {edge};
+//		this.getGraph().removeCells(cells);
+	}  // End public void routeByWeightedVisibilityGraph(mxCell edge)
 	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
 	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
 	protected static final double MINIMUM_SPACING = 9;
@@ -53,6 +128,12 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 	}  // End protected static class Hindrance
 
 	protected static mxGraph buildWeightedVisibilityGraph(mxGraph inGraph) {
+		return EdgeRoutingMinCross.buildWeightedVisibilityGraph(inGraph, null);
+	}  // End protected static mxGraph buildWeightedVisibilityGraph(mxGraph inGraph)
+
+	protected static mxGraph buildWeightedVisibilityGraph(
+			mxGraph inGraph,
+			Map<mxICell, List<mxICell>> outOptionalOldToNewVerticesMap) {
 
 		mxGraph outGraph = new mxGraph();
 		Object parent = outGraph.getDefaultParent();
@@ -68,10 +149,12 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			roadblocksList.add(vertex.getGeometry());
 
 			List<mxPoint> pointsAroundRoadblock = EdgeRoutingMinCross.findPointsAroundRoadblock(inGraph, vertex);
+			List<mxICell> newVertices = new LinkedList<mxICell>();
+
 			Iterator<mxPoint> iteratePointsAroundRoadblock = pointsAroundRoadblock.iterator();
 			while (iteratePointsAroundRoadblock.hasNext()) {
 				mxPoint point = iteratePointsAroundRoadblock.next();
-				outGraph.insertVertex(
+				Object object = outGraph.insertVertex(
 						parent,
 						null,
 						null,
@@ -79,7 +162,16 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 						point.getY() - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
 						VISIBILITY_GRAPH_VERTEX_WDITH,
 						VISIBILITY_GRAPH_VERTEX_HEIGHT);
+				if ((outOptionalOldToNewVerticesMap != null)
+						&& (object instanceof mxICell)) {
+					newVertices.add((mxICell) object);
+				}
 			}  // End while (iteratePointsAroundRoadblock.hasNext())
+
+			if (outOptionalOldToNewVerticesMap != null) {
+				outOptionalOldToNewVerticesMap.put(vertex, newVertices);
+			}
+			newVertices = null;  // List<mxICell> newVertices = new LinkedList<mxICell>();
 
 		}  // End for (int index = 0; index < objects.length; index++)
 
@@ -739,8 +831,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		targetsToBeReached = null;  // List<mxICell> targetsToBeReached = new LinkedList<mxICell>(inTargetVertices);
 		verticesToBeProcessed = null;  // List<mxICell> verticesToBeProcessed = new LinkedList<mxICell>(inSourceVertices);
 
-		if ((!(outPaths.isEmpty())) &&
-				(outOptionalCost != null)) {
+		if ((!(outPaths.isEmpty()))
+				&& (outOptionalCost != null)) {
 			outOptionalCost = currentMinCost;
 		}
 		return outPaths;
