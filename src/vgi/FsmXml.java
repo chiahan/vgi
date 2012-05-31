@@ -717,17 +717,25 @@ public class FsmXml implements FsmXmlInterface {
 				if (targetState == null) {
 					throw new FsmXmlException("Missing state with id \"" + targetId + "\", which is referenced by a transition.");
 				}
-				if (!(Tag.findNextSpecified(xmlStreamReader, TAG_LABEL, Tag.Type.START))) {
-					Tag.assertTag(TAG_LABEL, Tag.Type.START);
-				}
-				WeightedRegularExpression label = parseLabelTag(xmlStreamReader, automata);
+//				if (!(Tag.findNextSpecified(xmlStreamReader, TAG_LABEL, Tag.Type.START))) {
+//					Tag.assertTag(TAG_LABEL, Tag.Type.START);
+//				}
+//				WeightedRegularExpression label = parseLabelTag(xmlStreamReader, automata);
 				Transition transition = new Transition();
 				transition.setSourceState(sourceState);
 				transition.setTargetState(targetState);
-				transition.setLabel(label);
+//				transition.setLabel(label);
 				automata.addTransition(transition);
 
 			} // End if (tag.equals(TAG_TRANSITION, Tag.Type.START))
+			else if (tag.equals(TAG_LABEL, Tag.Type.START)) {
+
+				WeightedRegularExpression label = parseLabelTag(xmlStreamReader, automata);
+				List<Transition> allTransitions = automata.getAllTransitions();
+				Transition transition = allTransitions.get(allTransitions.size() - 1);
+				transition.setLabel(label);
+
+			}  // else if (tag.equals(TAG_LABEL, Tag.Type.START))
 			else if (tag.equals(TAG_GEOMETRIC_DATA, Tag.Type.START)) {
 
 				parseTransitionGeometricData(xmlStreamReader, automata);
