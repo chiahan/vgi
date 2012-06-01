@@ -76,6 +76,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Map<mxICell, List<mxICell>> oldToNewVerticesMap = new HashMap<mxICell, List<mxICell>>();
 		mxGraph weightedVisibilityGraph = EdgeRoutingMinCross.buildWeightedVisibilityGraph(this.getGraph(), oldToNewVerticesMap);
 		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(oldToNewVerticesMap.get(source), oldToNewVerticesMap.get(target));
+		System.out.println(paths.size() + " path(s) is(are) found.");
 		if ((paths == null) || (paths.isEmpty())) {
 			return;
 		}
@@ -658,6 +659,117 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}  // End public int compare(Vector2D vector1, Vector2D vector2)
 	}  // End protected static class Vector2DComparator implements Comparator<Vector2D>
 
+	public static void testShortestPaths(mxGraph inGraph) {
+
+		if (inGraph == null) {
+			System.out.println("inGraph is null.");
+			return;
+		}
+
+		mxGraph testGraph = new mxGraph();
+		Object parent = testGraph.getDefaultParent();
+		Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
+		Map<mxICell, mxICell> oldToNewVertexMap = new HashMap<mxICell, mxICell>(objects.length);
+
+		for (int index = 0; index < objects.length; index++) {
+
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException();
+			}
+			mxICell vertex = (mxICell) objects[index];
+			mxGeometry geometry = vertex.getGeometry();
+			mxICell testVertex = (mxICell) testGraph.insertVertex(
+					parent,
+					null,
+					vertex.getValue(),
+					geometry.getX(),
+					geometry.getY(),
+					geometry.getWidth(),
+					geometry.getHeight(),
+					vertex.getStyle(),
+					geometry.isRelative());
+			oldToNewVertexMap.put(vertex, testVertex);
+
+		}  // End for (int index = 0; index < objects.length; index++)
+
+		List<mxICell> sourceVertices = new LinkedList<mxICell>();
+		List<mxICell> targetVertices = new LinkedList<mxICell>();
+		objects = inGraph.getChildEdges(inGraph.getDefaultParent());
+
+		for (int index = 0; index < objects.length; index++) {
+
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException();
+			}
+			mxICell edge = (mxICell) objects[index];
+			mxICell source = edge.getTerminal(true);
+			mxICell target = edge.getTerminal(false);
+			mxGeometry geometry = edge.getGeometry();
+			if (source == null) {
+				if (target == null) {
+					throw new IllegalStateException();
+				}
+				sourceVertices.add(oldToNewVertexMap.get(target));
+				continue;
+			} else if (target == null) {
+				targetVertices.add(oldToNewVertexMap.get(source));
+				continue;
+			}
+			Object object = edge.getValue();
+			Object value = 0.0d;
+			if (object instanceof WeightedRegularExpression.LeftMultiply) {
+				value = ((WeightedRegularExpression.LeftMultiply) object).getWeightValue();
+			} else if (object instanceof WeightedRegularExpression.RightMultiply) {
+				value = ((WeightedRegularExpression.RightMultiply) object).getWeightValue();
+			}
+			testGraph.insertEdge(
+					parent,
+					null,
+					value,
+					oldToNewVertexMap.get(source),
+					oldToNewVertexMap.get(target));
+
+		}  // End for (int index = 0; index < objects.length; index++)
+
+		Cost cost = new Cost(Double.POSITIVE_INFINITY);
+		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(
+				sourceVertices,
+				targetVertices,
+				Double.POSITIVE_INFINITY,
+				cost);
+		System.out.println(paths.size() + " path(s) is(are) found.");
+
+		Iterator<List<mxICell>> iteratePaths = paths.iterator();
+		while (iteratePaths.hasNext()) {
+
+			List<mxICell> path = iteratePaths.next();
+			System.out.print("This path with cost " + cost + " goes through");
+
+			Iterator<mxICell> iterateVertices = path.iterator();
+			while (iterateVertices.hasNext()) {
+				mxICell vertex = iterateVertices.next();
+				System.out.print(" " + vertex.getValue().toString());
+			}  // End while (iterateVertices.hasNext())
+			System.out.println(".");
+
+		}  // End while (iteratePaths.hasNext())
+
+	}  // End public static void testShortestPaths(mxGraph inGraph)
+
+	protected static class Cost {
+
+		double doubleValue;
+
+		public Cost(double doubleValue) {
+			this.doubleValue = doubleValue;
+		}
+
+		@Override
+		public String toString() {
+			return "" + doubleValue;
+		}
+	}  // End protected static class Cost
+
 	public static List<List<mxICell>> findShortestPaths(
 			List<mxICell> inSourceVertices,
 			List<mxICell> inTargetVertices) {
@@ -672,7 +784,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			List<mxICell> inSourceVertices,
 			List<mxICell> inTargetVertices,
 			Double inOptionalMaxCostAllowed,
-			Double outOptionalCost) {
+			Cost outOptionalCost) {
 
 		if ((inSourceVertices == null)
 				|| (inTargetVertices == null)) {
@@ -809,9 +921,21 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 				List<List<mxICell>> neightbourPaths = vertexToPathsMap.get(neighbour);
 				if (neighbourCost > costToNeighbour) {
+					verticesToBeProcessed.remove(neighbour);
+
+					ListIterator<mxICell> listIterator = verticesToBeProcessed.listIterator(verticesToBeProcessed.size());
+					while (listIterator.hasPrevious()) {
+						mxICell aVertex = listIterator.previous();
+						if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
+							listIterator.next();
+							break;
+						}
+					}  // End while (listIterator.hasPrevious())
+
+					verticesToBeProcessed.add(listIterator.nextIndex(), neighbour);
 					vertexToCostMap.put(neighbour, costToNeighbour);
 					neightbourPaths.clear();
-				}
+				}  // End if (neighbourCost > costToNeighbour)
 
 				Iterator<List<mxICell>> iteratePaths = paths.iterator();
 				while (iteratePaths.hasNext()) {
@@ -833,7 +957,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		if ((!(outPaths.isEmpty()))
 				&& (outOptionalCost != null)) {
-			outOptionalCost = currentMinCost;
+			outOptionalCost.doubleValue = currentMinCost;
 		}
 		return outPaths;
 	}  // End public static List<List<mxICell>> findShortestPaths(...)
