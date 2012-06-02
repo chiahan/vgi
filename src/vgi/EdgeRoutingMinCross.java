@@ -796,6 +796,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		List<mxICell> targetsToBeReached = new LinkedList<mxICell>(inTargetVertices);
 		Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
 		Map<mxICell, List<List<mxICell>>> vertexToPathsMap = new HashMap<mxICell, List<List<mxICell>>>();
+		Map<mxICell, List<mxICell>> sourceToVisitedVerticesMap = new HashMap<mxICell, List<mxICell>>(inSourceVertices.size());
 		double currentMinCost;
 		if ((inOptionalMaxCostAllowed != null)
 				&& (inOptionalMaxCostAllowed.doubleValue() >= 0)) {
@@ -819,11 +820,14 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			path = null;  // List<mxICell> path = new LinkedList<mxICell>();
 			vertexToPathsMap.put(vertex, paths);
 			paths = null;  // List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
+			sourceToVisitedVerticesMap.put(vertex, new LinkedList<mxICell>(inSourceVertices));
 
 		}  // End while (iterateVertices.hasNext())
 
+		double currentCostLevel = vertexToCostMap.get(verticesToBeProcessed.get(0));
+
 		while (!(verticesToBeProcessed.isEmpty())
-				&& (!(targetsToBeReached.isEmpty()))) {
+				/*&& (!(targetsToBeReached.isEmpty()))*/) {
 
 			mxICell vertex = verticesToBeProcessed.remove(0);
 			List<List<mxICell>> paths = vertexToPathsMap.get(vertex);
@@ -836,12 +840,15 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				targetsToBeReached.remove(vertex);
 				if (cost < currentMinCost) {
 					currentMinCost = cost;
-					outPaths.clear();
-					outPaths.addAll(paths);
-				} else if (cost == currentMinCost) {
-					outPaths.addAll(paths);
 				}
+				continue;
 			}  // End if (targetsToBeReached.contains(vertex))
+			if (cost > currentCostLevel) {
+				if (targetsToBeReached.size() < inTargetVertices.size()) {
+					break;
+				}
+				currentCostLevel = cost;
+			}  // End if (cost > currentCostLevel)
 
 			if (cost > currentMinCost) {
 				continue;
@@ -904,10 +911,18 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					List<List<mxICell>> neightbourPaths = new LinkedList<List<mxICell>>();
 					Iterator<List<mxICell>> iteratePaths = paths.iterator();
 					while (iteratePaths.hasNext()) {
-						List<mxICell> path = new LinkedList<mxICell>(iteratePaths.next());
-						path.add(neighbour);
-						neightbourPaths.add(path);
-						path = null;  // List<mxICell> path = new LinkedList<mxICell>(iteratePaths.next());
+						List<mxICell> path = iteratePaths.next();
+						List<mxICell> visitedVertices = sourceToVisitedVerticesMap.get(path.get(0));
+						if (visitedVertices.contains(neighbour)) {
+							continue;
+						}
+						if (!(inTargetVertices.contains(neighbour))) {
+							visitedVertices.add(neighbour);
+						}
+						List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
+						neighbourPath.add(neighbour);
+						neightbourPaths.add(neighbourPath);
+						neighbourPath = null;  // List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
 					}  // End while (iteratePaths.hasNext())
 					vertexToPathsMap.put(neighbour, neightbourPaths);
 					neightbourPaths = null;  // List<List<mxICell>> neightbourPaths = new LinkedList<List<mxICell>>();
@@ -939,16 +954,41 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 				Iterator<List<mxICell>> iteratePaths = paths.iterator();
 				while (iteratePaths.hasNext()) {
-					List<mxICell> path = new LinkedList<mxICell>(iteratePaths.next());
-					path.add(neighbour);
-					neightbourPaths.add(path);
-					path = null;  // List<mxICell> path = new LinkedList<mxICell>(iteratePaths.next());
+						List<mxICell> path = iteratePaths.next();
+						List<mxICell> visitedVertices = sourceToVisitedVerticesMap.get(path.get(0));
+						if (visitedVertices.contains(neighbour)) {
+							continue;
+						}
+						if (!(inTargetVertices.contains(neighbour))) {
+							visitedVertices.add(neighbour);
+						}
+						List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
+						neighbourPath.add(neighbour);
+						neightbourPaths.add(neighbourPath);
+						neighbourPath = null;  // List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
 				}  // End while (iteratePaths.hasNext())
 
 			}  // End for (int index = 0; index < edgeCount; index++)
 
 		}  // End while (!(verticesToBeProcessed.isEmpty())
 		// && (!(targetsToBeReached.isEmpty())))
+
+		iterateVertices = inTargetVertices.iterator();
+		while (iterateVertices.hasNext()) {
+			mxICell target = iterateVertices.next();
+			if ((!(vertexToCostMap.containsKey(target)))
+					|| (verticesToBeProcessed.contains(target))) {
+				continue;
+			}
+			double targetCost = vertexToCostMap.get(target);
+			if (targetCost < currentMinCost) {
+				currentMinCost = targetCost;
+				outPaths.clear();
+				outPaths.addAll(vertexToPathsMap.get(target));
+			} else if (targetCost == currentMinCost) {
+				outPaths.addAll(vertexToPathsMap.get(target));
+			}
+		}  // End while (iterateVertices.hasNext())
 
 		vertexToPathsMap = null;  // Map<mxICell, List<List<mxICell>>> vertexToPathsMap = new HashMap<mxICell, List<List<mxICell>>>();
 		vertexToCostMap = null;  // Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
