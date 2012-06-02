@@ -21,7 +21,6 @@ import com.mxgraph.view.mxGraph;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -367,6 +366,7 @@ public class VGI extends javax.swing.JFrame {
         planarizeMenuItem = new javax.swing.JMenuItem();
         buildDualGraphMenuItem = new javax.swing.JMenuItem();
         buildWeightedVisibilityGraphMenuItem = new javax.swing.JMenuItem();
+        testShortestPathsMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -718,6 +718,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         layoutMenu.add(buildWeightedVisibilityGraphMenuItem);
+
+        testShortestPathsMenuItem.setText("Test Shortest Paths");
+        testShortestPathsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                testShortestPathsMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(testShortestPathsMenuItem);
 
         menuBar.add(layoutMenu);
 
@@ -1293,6 +1301,13 @@ public class VGI extends javax.swing.JFrame {
 		}  // End if (frame instanceof JgraphXInternalFrame)
 	}//GEN-LAST:event_buildWeightedVisibilityGraphMenuItemActionPerformed
 
+	private void testShortestPathsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testShortestPathsMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			EdgeRoutingMinCross.testShortestPaths(((JgraphXInternalFrame) frame).graph);
+		}  // End if (frame instanceof JgraphXInternalFrame)
+	}//GEN-LAST:event_testShortestPathsMenuItemActionPerformed
+
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
@@ -1483,6 +1498,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JCheckBoxMenuItem showPropertiesCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showStatusBarCheckBoxMenuItem;
     private javax.swing.JLabel statusLabel;
+    private javax.swing.JMenuItem testShortestPathsMenuItem;
     private javax.swing.JToolBar toolBar;
     private javax.swing.JToolBar.Separator toolBarSeparator1;
     private javax.swing.JToolBar.Separator toolBarSeparator2;
