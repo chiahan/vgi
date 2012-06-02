@@ -135,7 +135,12 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             mxCircleLayout circleLayout = new mxCircleLayout(this.graph);
             circleLayout.execute(this.graph.getDefaultParent());
         }
-
+        
+        Object[] edges = this.graph.getChildEdges(graph.getDefaultParent());
+        for (int index = 0; index < edges.length; index++) {
+            resetControlPoint((mxCell)edges[index]);
+        }
+        
         setupInitialFinal();
 
         this.graph.refresh();
