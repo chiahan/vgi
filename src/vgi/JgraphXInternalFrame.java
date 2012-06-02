@@ -72,7 +72,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
      * Creates new form JgraphXInternalFrame
      */
     public JgraphXInternalFrame(JSplitPane infoSplitPane, final mxGraph graph,
-            Automata automata, String title, VGI vgi_) {
+            Automata automata, String title_, VGI vgi_) {
         super(automata.getName(),
                 true, //resizable
                 true, //closable
@@ -84,8 +84,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         this.infoSplitPane = infoSplitPane;
         this.graph = graph;
         this.automata = automata;
-        setTitle(title);
-
+        setTitle(title_);
+        
+        System.out.println("title:"+title);
         initGraph();
         installRepaintListener();
         installListeners();
@@ -230,6 +231,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 boolean edgeSelected = false;
                 boolean vertexSelected = false;
                 boolean controlPointSelected = false;
+                
+                boolean isloop=false;
+                
                 if (selected) {
                     DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
 
@@ -250,6 +254,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
                         addTransitionFromMenuItem.setVisible(false);
                         addTransitionToMenuItem.setVisible(false);
+                        
+                        mxCell source=(mxCell)selectedCell.getSource();
+                        mxCell target=(mxCell)selectedCell.getTarget();
+                        if(source==target) isloop=true;
+                        
                     }
 
                     vertexSelected = selectedCell.isVertex();
@@ -274,8 +283,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 }
                 addStateMenuItem.setVisible(!selected);
                 deleteMenuItem.setVisible(selected);
-                addControlPointMenuItem.setVisible(edgeSelected);
-                deleteControlPointMenuItem.setVisible(controlPointSelected);
+                addControlPointMenuItem.setVisible(edgeSelected && !isloop);
+                deleteControlPointMenuItem.setVisible(controlPointSelected && !isloop);
                 resetControlPointMenuItem.setVisible(edgeSelected);
                 routeEdgeMenuItem.setVisible(edgeSelected);
                 routeEdgeWVGMenuItem.setVisible(edgeSelected);
@@ -576,7 +585,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 }
             }
         }
-
+        setModified(true);
+        undoStack.push(STATUS_CHANGE);
+    
     }   
 
     public void addState(double x, double y) {
@@ -651,22 +662,25 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }
 
     public void addTransition(mxCell source, mxCell target) {
-        Object parent = graph.getDefaultParent();
+        //Object parent = graph.getDefaultParent();
         WeightedRegularExpression.Atomic expression =
                 WeightedRegularExpression.Atomic.createAtomic(automata);
         expression.setSymbol(expression.getAlphabet().allSymbols.get(0));
-        Object e = graph.insertEdge(parent, null, expression, source, target, "shape=curve");
+       
+        /*Object e = graph.insertEdge(parent, null, expression, source, target, "shape=curve");
         ArrayList<mxPoint> points = new ArrayList<mxPoint>();
         ((mxCell) e).getGeometry().setPoints(points);
         ((mxCell) e).getGeometry().setY(DEFAULT_LABEL_DISTANCE);
-
+        */
         Transition newTrans = new Transition();
-        cellTable.put((mxCell) e, newTrans);
+       // cellTable.put((mxCell) e, newTrans);
         newTrans.setSourceState(cellToState(source));
         newTrans.setTargetState(cellToState(target));
         newTrans.setLabel(expression);
         automata.addTransition(newTrans);
 
+        addTransition(newTrans);
+        
         System.out.println("total trans:" + automata.getAllTransitions().size());
 //        EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
 //        layout.route((mxCell) e);
@@ -699,8 +713,14 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         mxGeometry geometry = edge.getGeometry();
         if (geometry == null) {
             geometry = new mxGeometry();
+           // ArrayList<mxPoint> points = new ArrayList<mxPoint>();
+           // geometry.setPoints(points);
             edge.setGeometry(geometry);
+            
         }
+        
+        
+        
         TransitionInterface.GeometricData geometricData = transition.getGeometricData();
         if (geometricData == null) {
             geometricData = new TransitionInterface.GeometricData();
@@ -730,6 +750,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             geometry.setPoints(points);
         }
 
+        if(source==target){
+            addControlPoint(edge,source.getGeometry().getCenterX()+source.getGeometry().getWidth(),
+                                 source.getGeometry().getCenterY());
+        }
+        
         graph.setSelectionCell(edge);
         TransitionInterface.DrawingData drawingdata = transition.getDrawingData();
         if (drawingdata != null) {
@@ -739,14 +764,16 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             graph.setCellStyles("endArrow", drawingdata.endArrow);
 
         }
-
-
-
+       
+       
     }  // End public void addTransition(Transition transition)
 
     public void addControlPoint() {
         addControlPoint((mxCell) getGraphComponent().getCellAt((int) popMouseX, (int) popMouseY),
                 popPoint.getX(), popPoint.getY());
+        setModified(true);
+        undoStack.push(STATUS_CHANGE);
+    
     }
 
     public void addControlPoint(mxCell cell, double x, double y) {
@@ -768,8 +795,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         cell.getGeometry().setPoints(points);
         getGraphComponent().refresh();
 
-        setModified(true);
-        undoStack.push(STATUS_CHANGE);
     }
 
     public void deleteControlPoint() {
@@ -778,6 +803,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }
 
     public void deleteControlPoint(mxCell cell, int index) {
+        
         System.out.println("delete Ctrl pt at" + index);
         ArrayList<mxPoint> points = (ArrayList) cell.getGeometry().getPoints();
         points.remove(index - 1);
@@ -787,6 +813,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         setModified(true);
         undoStack.push(STATUS_CHANGE);
+        
     }
 
     public void resetControlPoint() {
@@ -795,15 +822,27 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }
 
     public void resetControlPoint(mxCell cell) {
-        System.out.println("reset contrl pt");
+        
+        mxCell source=(mxCell)cell.getSource();
+        mxCell target=(mxCell)cell.getTarget();
+        
         ArrayList<mxPoint> points = (ArrayList) cell.getGeometry().getPoints();
         points.clear();
+    
+        if(source==target){ //loop
+            mxPoint loopCtrlPt=new mxPoint();
+            loopCtrlPt.setX(source.getGeometry().getCenterX()+source.getGeometry().getWidth());
+            loopCtrlPt.setY(source.getGeometry().getCenterY());
+            points.add(loopCtrlPt);
+            
+            
+        }
+            cell.getGeometry().setPoints(points);
+            getGraphComponent().refresh();
 
-        cell.getGeometry().setPoints(points);
-        getGraphComponent().refresh();
-
-        setModified(true);
-        undoStack.push(STATUS_CHANGE);
+            setModified(true);
+            undoStack.push(STATUS_CHANGE);
+        
     }
 
     public void doCircleLayout() {
