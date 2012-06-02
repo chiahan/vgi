@@ -737,13 +737,13 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				targetVertices,
 				Double.POSITIVE_INFINITY,
 				cost);
-		System.out.println(paths.size() + " path(s) is(are) found.");
+		System.out.println(paths.size() + " path(s) with cost " + cost + " is(are) found.");
 
 		Iterator<List<mxICell>> iteratePaths = paths.iterator();
 		while (iteratePaths.hasNext()) {
 
 			List<mxICell> path = iteratePaths.next();
-			System.out.print("This path with cost " + cost + " goes through");
+			System.out.print("This path goes through");
 
 			Iterator<mxICell> iterateVertices = path.iterator();
 			while (iterateVertices.hasNext()) {
@@ -791,6 +791,267 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			throw new IllegalArgumentException("Invalid inputs to findShortestPath().");
 		}
 
+		if ((inSourceVertices.isEmpty()) || (inTargetVertices.isEmpty())) {
+			return new LinkedList<List<mxICell>>();
+		}
+
+		double minCostToTarget;
+		if ((inOptionalMaxCostAllowed != null)
+				&& (inOptionalMaxCostAllowed.doubleValue() >= 0)) {
+			minCostToTarget = inOptionalMaxCostAllowed.doubleValue();
+		} else {
+			minCostToTarget = Double.POSITIVE_INFINITY;
+		}
+		List<mxICell> verticesToBeProcessed = new LinkedList<mxICell>();
+		Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
+		double minCostToBeProcessed = 0.0d;
+		boolean isPathFound = false;
+
+		Iterator<mxICell> iterateVertices = inSourceVertices.iterator();
+		while (iterateVertices.hasNext()) {
+
+			mxICell vertex = iterateVertices.next();
+			if (!(vertex.isVertex())) {
+				throw new IllegalStateException("The vertex variable is not a vertex.");
+			}
+			verticesToBeProcessed.add(vertex);
+			vertexToCostMap.put(vertex, minCostToBeProcessed);
+
+		}  // End while (iterateVertices.hasNext())
+
+		while (!(verticesToBeProcessed.isEmpty())) {
+
+			mxICell vertex = verticesToBeProcessed.remove(0);
+			Double cost = vertexToCostMap.get(vertex);
+			if (cost == null) {
+				throw new IllegalStateException("The cost variable cannot be null.");
+			}
+
+			if (cost > minCostToTarget) {
+				break;
+			}
+
+			if (cost > minCostToBeProcessed) {
+				if (isPathFound) {
+					break;
+				}
+				minCostToBeProcessed = cost;
+			}  // End if (cost > minCostToBeProcessed)
+
+			if (inTargetVertices.contains(vertex)) {
+				isPathFound = true;
+				if (cost < minCostToTarget) {
+					minCostToTarget = cost;
+				}
+				continue;
+			}  // End if (targetsToBeReached.contains(vertex))
+
+			int edgeCount = vertex.getEdgeCount();
+			for (int index = 0; index < edgeCount; index++) {
+
+				mxICell edge = vertex.getEdgeAt(index);
+				if (!(edge.isEdge())) {
+					throw new IllegalStateException("The edge variable is not an edge.");
+				}
+				mxICell source = edge.getTerminal(true);
+				mxICell target = edge.getTerminal(false);
+				mxICell neighbour;
+				if ((source == null) || (target == null)) {
+					throw new IllegalStateException("An edge has null source or target vertex.");
+				} else if (source == target) {
+					continue;
+				} else if (source == vertex) {
+					neighbour = target;
+				} else if (target == vertex) {
+					neighbour = source;
+				} else {
+					throw new IllegalStateException("This edge is not connected to the vertex in question.");
+				}
+
+				double costToNeighbour;
+				Object object = edge.getValue();
+				if (object instanceof Number) {
+					double weight = ((Number) object).doubleValue();
+					if (weight < 0) {
+						throw new IllegalStateException("The weight of an edge cannot be negative for this shortest path algorithm.");
+					}
+					costToNeighbour = cost + weight;
+				} else {
+					costToNeighbour = cost + 1;
+				}
+
+				Double neighbourCost = vertexToCostMap.get(neighbour);
+				if (neighbourCost == null) {
+					vertexToCostMap.put(neighbour, costToNeighbour);
+
+					ListIterator<mxICell> listIterator = verticesToBeProcessed.listIterator(verticesToBeProcessed.size());
+					while (listIterator.hasPrevious()) {
+						mxICell aVertex = listIterator.previous();
+						if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
+							listIterator.next();
+							break;
+						}
+					}  // End while (listIterator.hasPrevious())
+
+					verticesToBeProcessed.add(listIterator.nextIndex(), neighbour);
+					continue;
+				}  // End if (neighbourCost == null)
+
+				if (costToNeighbour >= neighbourCost) {
+					continue;
+				}
+
+				vertexToCostMap.put(neighbour, costToNeighbour);
+				Integer neighbourIndex = null;
+
+				ListIterator<mxICell> listIterator = verticesToBeProcessed.listIterator(verticesToBeProcessed.size());
+				while (listIterator.hasPrevious()) {
+
+					mxICell aVertex = listIterator.previous();
+					if (neighbourIndex == null) {
+						if (aVertex == neighbour) {
+							neighbourIndex = listIterator.nextIndex();
+						}
+						continue;
+					}  // End if (neighbourIndex == null)
+					if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
+						listIterator.next();
+						int newIndex = listIterator.nextIndex();
+						if (neighbourIndex != newIndex) {
+							verticesToBeProcessed.remove(neighbour);
+							verticesToBeProcessed.add(newIndex, neighbour);
+						}
+						break;
+					}  // End if (vertexToCostMap.get(aVertex) <= costToNeighbour)
+
+				}  // End while (listIterator.hasPrevious())
+
+			}  // End for (int index = 0; index < edgeCount; index++)
+
+		}  // End while (!(verticesToBeProcessed.isEmpty()))
+
+		verticesToBeProcessed = null;  // List<mxICell> verticesToBeProcessed = new LinkedList<mxICell>(inSourceVertices);
+
+		if (!isPathFound) {
+			vertexToCostMap = null;  // Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
+			return new LinkedList<List<mxICell>>();
+		}
+
+		if (outOptionalCost != null) {
+			outOptionalCost.doubleValue = minCostToTarget;
+		}
+		List<List<mxICell>> outPaths = new LinkedList<List<mxICell>>();
+
+		iterateVertices = inTargetVertices.iterator();
+		while (iterateVertices.hasNext()) {
+
+			mxICell vertex = iterateVertices.next();
+			if (!(vertex.isVertex())) {
+				throw new IllegalStateException("The vertex variable is not a vertex.");
+			}
+			Double cost = vertexToCostMap.get(vertex);
+			if ((cost == null) || (cost != minCostToTarget)) {
+				continue;
+			}
+
+			List<mxICell> path = new LinkedList<mxICell>();
+			path.add(0, vertex);
+			List<List<mxICell>> pathsToBeProcessed = new LinkedList<List<mxICell>>();
+			pathsToBeProcessed.add(path);
+			path = null;  // List<mxICell> path = new LinkedList<mxICell>();
+			List<mxICell> visitedVertices = new LinkedList<mxICell>(inTargetVertices);
+
+			while (!(pathsToBeProcessed.isEmpty())) {
+
+				path = pathsToBeProcessed.remove(0);
+				vertex = path.get(0);
+
+				if (inSourceVertices.contains(vertex)) {
+					outPaths.add(path);
+					continue;
+				}
+
+				cost = vertexToCostMap.get(vertex);
+				if (cost == null) {
+					throw new IllegalStateException("A vertex in the path must have a minimum cost to reach.");
+				}
+
+				int edgeCount = vertex.getEdgeCount();
+				for (int index = 0; index < edgeCount; index++) {
+
+					mxICell edge = vertex.getEdgeAt(index);
+					if (!(edge.isEdge())) {
+						throw new IllegalStateException("The edge variable is not an edge.");
+					}
+					mxICell source = edge.getTerminal(true);
+					mxICell target = edge.getTerminal(false);
+					mxICell neighbour;
+					if ((source == null) || (target == null)) {
+						throw new IllegalStateException("An edge has null source or target vertex.");
+					} else if (source == target) {
+						continue;
+					} else if (source == vertex) {
+						neighbour = target;
+					} else if (target == vertex) {
+						neighbour = source;
+					} else {
+						throw new IllegalStateException("This edge is not connected to the vertex in question.");
+					}
+
+					if (visitedVertices.contains(neighbour)) {
+						continue;
+					}
+
+					if (!(inSourceVertices.contains(neighbour))) {
+						visitedVertices.add(neighbour);
+					}
+					double edgeCost;
+					Object object = edge.getValue();
+					if (object instanceof Number) {
+						edgeCost = ((Number) object).doubleValue();
+						if (edgeCost < 0) {
+							throw new IllegalStateException("The cost of an edge cannot be negative for this shortest path algorithm.");
+						}
+					} else {
+						edgeCost = 1;
+					}
+
+					Double neighbourCost = vertexToCostMap.get(neighbour);
+					if ((neighbourCost == null)
+							|| (neighbourCost != cost - edgeCost)) {
+						continue;
+					}
+
+					List<mxICell> nextPath = new LinkedList<mxICell>(path);
+					nextPath.add(0, neighbour);
+					pathsToBeProcessed.add(nextPath);
+					nextPath = null;  // List<mxICell> nextPath = new LinkedList<mxICell>(path);
+
+				}  // End for (int index = 0; index < edgeCount; index++)
+
+			}  // End while (!(pathsToBeProcessed.isEmpty()))
+
+			visitedVertices = null;  // List<mxICell> visitedVertices = new LinkedList<mxICell>(inTargetVertices);
+			pathsToBeProcessed = null;  // List<List<mxICell>> pathsToBeProcessed = new LinkedList<List<mxICell>>();
+
+		}  // End while (iterateVertices.hasNext())
+
+		vertexToCostMap = null;  // Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
+
+		return outPaths;
+	}  // End public static List<List<mxICell>> findShortestPaths(...)
+
+	public static List<List<mxICell>> findShortestPathsV1(
+			List<mxICell> inSourceVertices,
+			List<mxICell> inTargetVertices,
+			Double inOptionalMaxCostAllowed,
+			Cost outOptionalCost) {
+
+		if ((inSourceVertices == null)
+				|| (inTargetVertices == null)) {
+			throw new IllegalArgumentException("Invalid inputs to findShortestPath().");
+		}
+
 		List<List<mxICell>> outPaths = new LinkedList<List<mxICell>>();
 		List<mxICell> verticesToBeProcessed = new LinkedList<mxICell>(inSourceVertices);
 		List<mxICell> targetsToBeReached = new LinkedList<mxICell>(inTargetVertices);
@@ -826,8 +1087,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		double currentCostLevel = vertexToCostMap.get(verticesToBeProcessed.get(0));
 
-		while (!(verticesToBeProcessed.isEmpty())
-				/*&& (!(targetsToBeReached.isEmpty()))*/) {
+		while (!(verticesToBeProcessed.isEmpty())) {
 
 			mxICell vertex = verticesToBeProcessed.remove(0);
 			List<List<mxICell>> paths = vertexToPathsMap.get(vertex);
@@ -954,24 +1214,23 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 				Iterator<List<mxICell>> iteratePaths = paths.iterator();
 				while (iteratePaths.hasNext()) {
-						List<mxICell> path = iteratePaths.next();
-						List<mxICell> visitedVertices = sourceToVisitedVerticesMap.get(path.get(0));
-						if (visitedVertices.contains(neighbour)) {
-							continue;
-						}
-						if (!(inTargetVertices.contains(neighbour))) {
-							visitedVertices.add(neighbour);
-						}
-						List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
-						neighbourPath.add(neighbour);
-						neightbourPaths.add(neighbourPath);
-						neighbourPath = null;  // List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
+					List<mxICell> path = iteratePaths.next();
+					List<mxICell> visitedVertices = sourceToVisitedVerticesMap.get(path.get(0));
+					if (visitedVertices.contains(neighbour)) {
+						continue;
+					}
+					if (!(inTargetVertices.contains(neighbour))) {
+						visitedVertices.add(neighbour);
+					}
+					List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
+					neighbourPath.add(neighbour);
+					neightbourPaths.add(neighbourPath);
+					neighbourPath = null;  // List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
 				}  // End while (iteratePaths.hasNext())
 
 			}  // End for (int index = 0; index < edgeCount; index++)
 
-		}  // End while (!(verticesToBeProcessed.isEmpty())
-		// && (!(targetsToBeReached.isEmpty())))
+		}  // End while (!(verticesToBeProcessed.isEmpty()))
 
 		iterateVertices = inTargetVertices.iterator();
 		while (iterateVertices.hasNext()) {
@@ -1000,7 +1259,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			outOptionalCost.doubleValue = currentMinCost;
 		}
 		return outPaths;
-	}  // End public static List<List<mxICell>> findShortestPaths(...)
+	}  // End public static List<List<mxICell>> findShortestPathsV1(...)
 
 	public void route(mxCell edge) {
 
