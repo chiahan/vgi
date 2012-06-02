@@ -906,7 +906,7 @@ public class VGI extends javax.swing.JFrame {
 			this.updateAlgorithmMenuItems();
 			this.createInternalFrame(automata, fileChooser.getSelectedFile().getName());
 			JgraphXInternalFrame fr = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
-			fr.currentFile = fileChooser.getSelectedFile();
+			fr.setCurrentFile(fileChooser.getSelectedFile());
 		}
 	}//GEN-LAST:event_openMenuItemActionPerformed
 
@@ -931,7 +931,7 @@ public class VGI extends javax.swing.JFrame {
                     JgraphXInternalFrame fr = (JgraphXInternalFrame) mainDesktopPane.getComponent(0);
                     
                     if(fr!=null){ 
-                        fr.currentFile = file;
+                        fr.setCurrentFile(file);
                         mainDesktopPane.setSelectedFrame(fr);
                         //System.out.println(fr.getTitle());
                     }else{
@@ -1034,7 +1034,7 @@ public class VGI extends javax.swing.JFrame {
         public void save(){
             JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
 
-		if (selected.currentFile == null/*
+		if (selected.getCurrentFile() == null/*
 				 * newlyCreatedFile
 				 */) {
 			saveAs();
@@ -1043,7 +1043,7 @@ public class VGI extends javax.swing.JFrame {
 			try {
 				ArrayList<Automata> currentAutomata = new ArrayList<Automata>();
 				currentAutomata.add(selected.getAutomata());
-				fsmXml.write(currentAutomata, selected.currentFile);
+				fsmXml.write(currentAutomata, selected.getCurrentFile());
 				selected.setModified(false);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -1071,7 +1071,7 @@ public class VGI extends javax.swing.JFrame {
 			currentAutomata.add(selected.getAutomata());
 			fsmXml.write(currentAutomata, file);
 
-			selected.currentFile = file;
+			selected.setCurrentFile(file);
 			selected.setTitle(fileChooser.getSelectedFile().getName());
 			selected.setModified(false);
 		} catch (Exception e) {
