@@ -72,7 +72,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
      * Creates new form JgraphXInternalFrame
      */
     public JgraphXInternalFrame(JSplitPane infoSplitPane, final mxGraph graph,
-            Automata automata, String title_, VGI vgi_) {
+            Automata automata,String filename, VGI vgi_) {
         super(automata.getName(),
                 true, //resizable
                 true, //closable
@@ -84,7 +84,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         this.infoSplitPane = infoSplitPane;
         this.graph = graph;
         this.automata = automata;
-        setTitle(title_);
+        //currentFile=file;
+        setTitle(filename);
         
         System.out.println("title:"+title);
         initGraph();
@@ -138,7 +139,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         
         Object[] edges = this.graph.getChildEdges(graph.getDefaultParent());
         for (int index = 0; index < edges.length; index++) {
-            resetControlPoint((mxCell)edges[index]);
+            mxCell edge=(mxCell)edges[index];
+            List<mxPoint> ptList=edge.getGeometry().getPoints();
+            if(ptList.isEmpty())
+                resetControlPoint((mxCell)edges[index]);
         }
         
         setupInitialFinal();
@@ -682,6 +686,13 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         newTrans.setSourceState(cellToState(source));
         newTrans.setTargetState(cellToState(target));
         newTrans.setLabel(expression);
+        
+        if(source==target){
+            TransitionInterface.GeometricData geometricData = newTrans.getGeometricData();
+            geometricData.controlPoints.add(new Point2D.Double(source.getGeometry().getCenterX()+source.getGeometry().getWidth(),
+                                 source.getGeometry().getCenterY()));
+            
+        }
         automata.addTransition(newTrans);
 
         addTransition(newTrans);
@@ -755,11 +766,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             geometry.setPoints(points);
         }
 
-        if(source==target){
+        /*if(source==target){
             addControlPoint(edge,source.getGeometry().getCenterX()+source.getGeometry().getWidth(),
                                  source.getGeometry().getCenterY());
         }
-        
+        */
         graph.setSelectionCell(edge);
         TransitionInterface.DrawingData drawingdata = transition.getDrawingData();
         if (drawingdata != null) {
@@ -824,6 +835,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     public void resetControlPoint() {
 
         resetControlPoint((mxCell) getGraphComponent().getCellAt((int) popMouseX, (int) popMouseY));
+        setModified(true);
+        undoStack.push(STATUS_CHANGE);
     }
 
     public void resetControlPoint(mxCell cell) {
@@ -845,8 +858,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             cell.getGeometry().setPoints(points);
             getGraphComponent().refresh();
 
-            setModified(true);
-            undoStack.push(STATUS_CHANGE);
+         
         
     }
 
@@ -1484,6 +1496,14 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
 
     }
+    
+    
+    public void setCurrentFile(File file){
+        currentFile=file;
+    }
+    public File getCurrentFile(){
+        return currentFile;
+    }
     public static final double DEFAULT_LABEL_DISTANCE = 15;
     private static final long serialVersionUID = -6561623072112577140L;
     private static int openFrameCount = 0;
@@ -1506,7 +1526,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     protected Automata automata;
     private boolean hasGeometricData = true;
     private List<mxCell> initialFinalCells = new ArrayList<mxCell>();
-    protected File currentFile = null;
+    private File currentFile = null;
     ////undo
     protected mxUndoManager undoManager;
     protected mxIEventListener undoHandler = new mxIEventListener() {
