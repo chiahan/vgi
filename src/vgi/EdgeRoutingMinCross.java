@@ -721,6 +721,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				value = ((WeightedRegularExpression.LeftMultiply) object).getWeightValue();
 			} else if (object instanceof WeightedRegularExpression.RightMultiply) {
 				value = ((WeightedRegularExpression.RightMultiply) object).getWeightValue();
+			} else if (object instanceof Number) {
+				value = object;
 			}
 			testGraph.insertEdge(
 					parent,
@@ -758,7 +760,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 	protected static class Cost {
 
-		double doubleValue;
+		public double doubleValue;
 
 		public Cost(double doubleValue) {
 			this.doubleValue = doubleValue;
@@ -1418,26 +1420,11 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		this.getGraph().removeCells(cells);
 	}  // End public void route(mxCell edge)
 
-	protected static class Crossing {
-
-		mxCell edge1;
-		mxCell edge2;
-		public double x;
-		public double y;
-
-		public Crossing() {
-			this.edge1 = null;
-			this.edge2 = null;
-			this.x = 0;
-			this.y = 0;
-		}
-	}  // End protected static class Crossing
-
 	public static mxGraph planarize(mxGraph inGraph) {
 		return EdgeRoutingMinCross.planarize(inGraph, null);
 	}  // End public static mxGraph planarize(mxGraph inGraph)
 
-	public static mxGraph planarize(mxGraph inGraph, mxICell edgeToIgnore) {
+	public static mxGraph planarize(mxGraph inGraph, mxICell inOptionalEdgeToIgnore) {
 
 		if (inGraph == null) {
 			throw new IllegalArgumentException("Input inGraph is null.");
@@ -1460,7 +1447,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			}
 			mxICell newVertex = (mxICell) outGraph.insertVertex(
 					outGraph.getDefaultParent(),
-					vertex.getId(),
+					null,
 					vertex.getValue(),
 					geometry.getX(),
 					geometry.getY(),
@@ -1481,7 +1468,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			if (!(edge.isEdge())) {
 				throw new IllegalStateException("edge is not edge.");
 			}
-			if (edge == edgeToIgnore) {
+			if (edge == inOptionalEdgeToIgnore) {
 				continue;
 			}
 			mxGeometry geometry = edge.getGeometry();
@@ -1593,120 +1580,105 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}  // End for (int index = 0; index < objects.length; index++)
 
 		oldToNewVerticesMap = null;  // HashMap<mxICell, mxICell> oldToNewVerticesMap = new HashMap<mxICell, mxICell>();
-		List<Crossing> crossingList = new ArrayList<Crossing>();
+		List<mxICell> edgesToBeProcessed = new LinkedList<mxICell>();
 		objects = outGraph.getChildEdges(outGraph.getDefaultParent());
 
-		for (int index = 0; index < objects.length - 1; index++) {
-			if (!(objects[index] instanceof mxCell)) {
+		for (int index = 0; index < objects.length; index++) {
+			if (!(objects[index] instanceof mxICell)) {
 				continue;
 			}
-			mxCell edge = (mxCell) objects[index];
+			mxICell edge = (mxICell) objects[index];
 			if (!(edge.isEdge())) {
 				continue;
 			}
-			mxICell source = edge.getSource();
-			mxICell target = edge.getTarget();
+			edgesToBeProcessed.add(edge);
+		}  // End for (int index = 0; index < objects.length; index++)
+
+		while (!(edgesToBeProcessed.isEmpty())) {
+
+			mxICell edge = edgesToBeProcessed.remove(0);
+			mxICell source = edge.getTerminal(true);
+			mxICell target = edge.getTerminal(false);
 			if ((source == null)
 					|| (target == null)
-					|| (source.equals(target))) {
-				continue;
+					|| (source == target)) {
+				throw new IllegalStateException("An edge with null source, null target, or same source and target should not exist in our version of planar graphs.");
 			}
 			mxGeometry geometry = source.getGeometry();
 			if (geometry == null) {
-				continue;
+				throw new IllegalStateException("A vertex has null geometry.");
 			}
 			double x0 = geometry.getCenterX();
 			double y0 = geometry.getCenterY();
 			geometry = target.getGeometry();
 			if (geometry == null) {
-				continue;
+				throw new IllegalStateException("A vertex has null geometry.");
 			}
 			double x1 = geometry.getCenterX();
 			double y1 = geometry.getCenterY();
 
-			for (int index2 = index + 1; index2 < objects.length; index2++) {
-				if (!(objects[index2] instanceof mxCell)) {
-					continue;
-				}
-				mxCell edge2 = (mxCell) objects[index2];
-				if (!(edge2.isEdge())) {
-					continue;
-				}
-				mxICell source2 = edge2.getSource();
-				mxICell target2 = edge2.getTarget();
+			ListIterator<mxICell> listIterator = edgesToBeProcessed.listIterator();
+			while (listIterator.hasNext()) {
+
+				mxICell edge2 = listIterator.next();
+				mxICell source2 = edge2.getTerminal(true);
+				mxICell target2 = edge2.getTerminal(false);
 				if ((source2 == null)
 						|| (target2 == null)
-						|| (source2.equals(target2))) {
-					continue;
+						|| (source2 == target2)) {
+					throw new IllegalStateException("An edge with null source, null target, or same source and target should not exist in our version of planar graphs.");
 				}
 				geometry = source2.getGeometry();
 				if (geometry == null) {
-					continue;
+					throw new IllegalStateException("A vertex has null geometry.");
 				}
 				double x2 = geometry.getCenterX();
 				double y2 = geometry.getCenterY();
 				geometry = target2.getGeometry();
 				if (geometry == null) {
-					continue;
+					throw new IllegalStateException("A vertex has null geometry.");
 				}
 				double x3 = geometry.getCenterX();
 				double y3 = geometry.getCenterY();
-				if (((x0 == x2) && (y0 == y2))
-						|| ((x0 == x3) && (y0 == y3))
-						|| ((x1 == x2) && (y1 == y2))
-						|| ((x1 == x3) && (y1 == y3))) {
-					continue;
-				}
+
 				mxPoint point = mxUtils.intersection(x0, y0, x1, y1, x2, y2, x3, y3);
 				if (point == null) {
 					continue;
 				}
-				Crossing crossing = new Crossing();
-				crossing.edge1 = edge;
-				crossing.edge2 = edge2;
-				crossing.x = point.getX();
-				crossing.y = point.getY();
-				crossingList.add(crossing);
-				crossing = null;  // Crossing crossing = new Crossing();
-			}  // End for (int index2 = index + 1; index2 < objects.length; index2++)
 
-		}  // End for (int index = 0; index < objects.length - 1; index++)
+				if (((point.getX() == x0) && (point.getY() == y0))
+						|| ((point.getX() == x1) && (point.getY() == y1))
+						|| ((point.getX() == x2) && (point.getY() == y2))
+						|| ((point.getX() == x3) && (point.getY() == y3))) {
+					continue;
+				}
 
-		Iterator<Crossing> iterateCrossings = crossingList.iterator();
+				Object[] edges = {edge, edge2};
+				outGraph.removeCells(edges);
+				Object parent = outGraph.getDefaultParent();
+				Object dummyNode = outGraph.insertVertex(
+						parent,
+						null,
+						null,
+						point.getX(),
+						point.getY(),
+						0,
+						0);
+				mxICell newEdge = (mxICell) outGraph.insertEdge(parent, null, null, source, dummyNode);
+				mxICell newEdge1 = (mxICell) outGraph.insertEdge(parent, null, null, dummyNode, target);
+				mxICell newEdge2 = (mxICell) outGraph.insertEdge(parent, null, null, source2, dummyNode);
+				mxICell newEdge3 = (mxICell) outGraph.insertEdge(parent, null, null, dummyNode, target2);
+				edgesToBeProcessed.remove(listIterator.previousIndex());
+				edgesToBeProcessed.add(newEdge);
+				edgesToBeProcessed.add(newEdge1);
+				edgesToBeProcessed.add(newEdge2);
+				edgesToBeProcessed.add(newEdge3);
+				break;
+			}  // End while (listIterator.hasNext())
 
-		while (iterateCrossings.hasNext()) {
-			Crossing crossing = iterateCrossings.next();
-			if ((crossing.edge1 == null) || (crossing.edge2 == null)) {
-				continue;
-			}
-			mxICell source = crossing.edge1.getSource();
-			mxICell target = crossing.edge1.getTarget();
-			mxICell source2 = crossing.edge2.getSource();
-			mxICell target2 = crossing.edge2.getTarget();
-			if ((source == null)
-					|| (target == null)
-					|| (source2 == null)
-					|| (target2 == null)) {
-				continue;
-			}
-			Object[] edges = {crossing.edge1, crossing.edge2};
-			outGraph.removeCells(edges);
-			Object parent = outGraph.getDefaultParent();
-			Object dummyNode = outGraph.insertVertex(
-					parent,
-					null,
-					null,
-					crossing.x,
-					crossing.y,
-					0,
-					0);
-			outGraph.insertEdge(parent, null, null, source, dummyNode);
-			outGraph.insertEdge(parent, null, null, dummyNode, target);
-			outGraph.insertEdge(parent, null, null, source2, dummyNode);
-			outGraph.insertEdge(parent, null, null, dummyNode, target2);
-		}  // End while (iterateCrossings.hasNext())
+		}  // End while (!(edgesToBeProcessed.isEmpty()))
 
-		crossingList = null;  // List<Crossing> crossingList = new ArrayList<Crossing>();
+		edgesToBeProcessed = null;  // List<mxICell> edgesToBeProcessed = new LinkedList<mxICell>();
 
 		return outGraph;
 	}  // End public static mxGraph planarize(mxGraph inGraph, mxICell edgeToIgnore)
@@ -2116,9 +2088,15 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			Region<mxICell> regionVertices = new Region<mxICell>();
 			EdgeDirection edgeDirection = startEdgeDirection;
 			do {
+				mxICell source = edgeDirection.edge.getTerminal(true);
+				mxICell target = edgeDirection.edge.getTerminal(false);
+				String sourceName = (source.getValue() != null) ? (source.getValue().toString()) : (source.getId());
+				String targetName = (target.getValue() != null) ? (target.getValue().toString()) : (target.getId());
 				if (edgeDirection.isSourceToTarget) {
+					System.out.println("Going from " + sourceName + " to " + targetName + ".");
 					edgeVisit.isTargetVisited = true;
 				} else {
+					System.out.println("Going from " + targetName + " to " + sourceName + ".");
 					edgeVisit.isSourceVisited = true;
 				}
 				regionVertices.add(edgeDirection.edge.getTerminal(!(edgeDirection.isSourceToTarget)));
