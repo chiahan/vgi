@@ -141,8 +141,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         for (int index = 0; index < edges.length; index++) {
             mxCell edge=(mxCell)edges[index];
             List<mxPoint> ptList=edge.getGeometry().getPoints();
-            if(ptList.isEmpty())
+            if ((ptList == null) || (ptList.isEmpty())) {
                 resetControlPoint((mxCell)edges[index]);
+            }
         }
         
         setupInitialFinal();
@@ -794,7 +795,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     public void addControlPoint(mxCell cell, double x, double y) {
         System.out.println("add Ctrl pt at" + x + "," + y);
-        ArrayList<mxPoint> points = (ArrayList) cell.getGeometry().getPoints();
+        List<mxPoint> points = cell.getGeometry().getPoints();
         if(points==null) points=new ArrayList<mxPoint>();
         points.add(new mxPoint(x, y));
 
@@ -821,7 +822,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     public void deleteControlPoint(mxCell cell, int index) {
         
         System.out.println("delete Ctrl pt at" + index);
-        ArrayList<mxPoint> points = (ArrayList) cell.getGeometry().getPoints();
+        List<mxPoint> points = cell.getGeometry().getPoints();
         points.remove(index - 1);
 
         cell.getGeometry().setPoints(points);
@@ -844,9 +845,13 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         mxCell source=(mxCell)cell.getSource();
         mxCell target=(mxCell)cell.getTarget();
         
-        ArrayList<mxPoint> points = (ArrayList) cell.getGeometry().getPoints();
-        points.clear();
-    
+        List<mxPoint> points = cell.getGeometry().getPoints();
+        if (points == null) {
+            points = new ArrayList<mxPoint>();
+        } else {
+            points.clear();
+        }
+
         if(source==target){ //loop
             mxPoint loopCtrlPt=new mxPoint();
             loopCtrlPt.setX(source.getGeometry().getCenterX()+source.getGeometry().getWidth());

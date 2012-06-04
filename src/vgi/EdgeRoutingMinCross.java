@@ -134,7 +134,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 	protected static mxGraph buildWeightedVisibilityGraph(
 			mxGraph inGraph,
-			Map<mxICell, List<mxICell>> outOptionalOldToNewVerticesMap) {
+			Map<mxICell, List<mxICell>> outOptionalOriginalToVisibilityVerticesMap) {
 
 		mxGraph outGraph = new mxGraph();
 		Object parent = outGraph.getDefaultParent();
@@ -163,14 +163,14 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 						point.getY() - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
 						VISIBILITY_GRAPH_VERTEX_WDITH,
 						VISIBILITY_GRAPH_VERTEX_HEIGHT);
-				if ((outOptionalOldToNewVerticesMap != null)
+				if ((outOptionalOriginalToVisibilityVerticesMap != null)
 						&& (object instanceof mxICell)) {
 					newVertices.add((mxICell) object);
 				}
 			}  // End while (iteratePointsAroundRoadblock.hasNext())
 
-			if (outOptionalOldToNewVerticesMap != null) {
-				outOptionalOldToNewVerticesMap.put(vertex, newVertices);
+			if (outOptionalOriginalToVisibilityVerticesMap != null) {
+				outOptionalOriginalToVisibilityVerticesMap.put(vertex, newVertices);
 			}
 			newVertices = null;  // List<mxICell> newVertices = new LinkedList<mxICell>();
 
@@ -482,7 +482,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		oldToNewVerticesMap = null;  // HashMap<mxICell, mxICell> oldToNewVerticesMap = new HashMap<mxICell, mxICell>();
 
 		return outGraph;
-	}  // End protected static mxGraph buildWeightedVisibilityGraph(mxGraph inGraph)
+	}  // End protected static mxGraph buildWeightedVisibilityGraph(...)
 
 	protected static List<mxPoint> findPointsAroundRoadblock(mxGraph inGraph, mxICell inVertex) {
 
@@ -721,6 +721,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				value = ((WeightedRegularExpression.LeftMultiply) object).getWeightValue();
 			} else if (object instanceof WeightedRegularExpression.RightMultiply) {
 				value = ((WeightedRegularExpression.RightMultiply) object).getWeightValue();
+			} else if (object instanceof Number) {
+				value = object;
 			}
 			testGraph.insertEdge(
 					parent,
@@ -737,13 +739,13 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				targetVertices,
 				Double.POSITIVE_INFINITY,
 				cost);
-		System.out.println(paths.size() + " path(s) is(are) found.");
+		System.out.println(paths.size() + " path(s) with cost " + cost + " is(are) found.");
 
 		Iterator<List<mxICell>> iteratePaths = paths.iterator();
 		while (iteratePaths.hasNext()) {
 
 			List<mxICell> path = iteratePaths.next();
-			System.out.print("This path with cost " + cost + " goes through");
+			System.out.print("This path goes through");
 
 			Iterator<mxICell> iterateVertices = path.iterator();
 			while (iterateVertices.hasNext()) {
@@ -758,7 +760,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 	protected static class Cost {
 
-		double doubleValue;
+		public double doubleValue;
 
 		public Cost(double doubleValue) {
 			this.doubleValue = doubleValue;
@@ -791,11 +793,273 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			throw new IllegalArgumentException("Invalid inputs to findShortestPath().");
 		}
 
+		if ((inSourceVertices.isEmpty()) || (inTargetVertices.isEmpty())) {
+			return new LinkedList<List<mxICell>>();
+		}
+
+		double minCostToTarget;
+		if ((inOptionalMaxCostAllowed != null)
+				&& (inOptionalMaxCostAllowed.doubleValue() >= 0)) {
+			minCostToTarget = inOptionalMaxCostAllowed.doubleValue();
+		} else {
+			minCostToTarget = Double.POSITIVE_INFINITY;
+		}
+		List<mxICell> verticesToBeProcessed = new LinkedList<mxICell>();
+		Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
+		double minCostToBeProcessed = 0.0d;
+		boolean isPathFound = false;
+
+		Iterator<mxICell> iterateVertices = inSourceVertices.iterator();
+		while (iterateVertices.hasNext()) {
+
+			mxICell vertex = iterateVertices.next();
+			if (!(vertex.isVertex())) {
+				throw new IllegalStateException("The vertex variable is not a vertex.");
+			}
+			verticesToBeProcessed.add(vertex);
+			vertexToCostMap.put(vertex, minCostToBeProcessed);
+
+		}  // End while (iterateVertices.hasNext())
+
+		while (!(verticesToBeProcessed.isEmpty())) {
+
+			mxICell vertex = verticesToBeProcessed.remove(0);
+			Double cost = vertexToCostMap.get(vertex);
+			if (cost == null) {
+				throw new IllegalStateException("The cost variable cannot be null.");
+			}
+
+			if (cost > minCostToTarget) {
+				break;
+			}
+
+			if (cost > minCostToBeProcessed) {
+				if (isPathFound) {
+					break;
+				}
+				minCostToBeProcessed = cost;
+			}  // End if (cost > minCostToBeProcessed)
+
+			if (inTargetVertices.contains(vertex)) {
+				isPathFound = true;
+				if (cost < minCostToTarget) {
+					minCostToTarget = cost;
+				}
+				continue;
+			}  // End if (targetsToBeReached.contains(vertex))
+
+			int edgeCount = vertex.getEdgeCount();
+			for (int index = 0; index < edgeCount; index++) {
+
+				mxICell edge = vertex.getEdgeAt(index);
+				if (!(edge.isEdge())) {
+					throw new IllegalStateException("The edge variable is not an edge.");
+				}
+				mxICell source = edge.getTerminal(true);
+				mxICell target = edge.getTerminal(false);
+				mxICell neighbour;
+				if ((source == null) || (target == null)) {
+					throw new IllegalStateException("An edge has null source or target vertex.");
+				} else if (source == target) {
+					continue;
+				} else if (source == vertex) {
+					neighbour = target;
+				} else if (target == vertex) {
+					neighbour = source;
+				} else {
+					throw new IllegalStateException("This edge is not connected to the vertex in question.");
+				}
+
+				double costToNeighbour;
+				Object object = edge.getValue();
+				if (object instanceof Number) {
+					double weight = ((Number) object).doubleValue();
+					if (weight < 0) {
+						throw new IllegalStateException("The weight of an edge cannot be negative for this shortest path algorithm.");
+					}
+					costToNeighbour = cost + weight;
+				} else {
+					costToNeighbour = cost + 1;
+				}
+
+				Double neighbourCost = vertexToCostMap.get(neighbour);
+				if (neighbourCost == null) {
+					vertexToCostMap.put(neighbour, costToNeighbour);
+
+					ListIterator<mxICell> listIterator = verticesToBeProcessed.listIterator(verticesToBeProcessed.size());
+					while (listIterator.hasPrevious()) {
+						mxICell aVertex = listIterator.previous();
+						if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
+							listIterator.next();
+							break;
+						}
+					}  // End while (listIterator.hasPrevious())
+
+					verticesToBeProcessed.add(listIterator.nextIndex(), neighbour);
+					continue;
+				}  // End if (neighbourCost == null)
+
+				if (costToNeighbour >= neighbourCost) {
+					continue;
+				}
+
+				vertexToCostMap.put(neighbour, costToNeighbour);
+				Integer neighbourIndex = null;
+
+				ListIterator<mxICell> listIterator = verticesToBeProcessed.listIterator(verticesToBeProcessed.size());
+				while (listIterator.hasPrevious()) {
+
+					mxICell aVertex = listIterator.previous();
+					if (neighbourIndex == null) {
+						if (aVertex == neighbour) {
+							neighbourIndex = listIterator.nextIndex();
+						}
+						continue;
+					}  // End if (neighbourIndex == null)
+					if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
+						listIterator.next();
+						int newIndex = listIterator.nextIndex();
+						if (neighbourIndex != newIndex) {
+							verticesToBeProcessed.remove(neighbour);
+							verticesToBeProcessed.add(newIndex, neighbour);
+						}
+						break;
+					}  // End if (vertexToCostMap.get(aVertex) <= costToNeighbour)
+
+				}  // End while (listIterator.hasPrevious())
+
+			}  // End for (int index = 0; index < edgeCount; index++)
+
+		}  // End while (!(verticesToBeProcessed.isEmpty()))
+
+		verticesToBeProcessed = null;  // List<mxICell> verticesToBeProcessed = new LinkedList<mxICell>(inSourceVertices);
+
+		if (!isPathFound) {
+			vertexToCostMap = null;  // Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
+			return new LinkedList<List<mxICell>>();
+		}
+
+		if (outOptionalCost != null) {
+			outOptionalCost.doubleValue = minCostToTarget;
+		}
+		List<List<mxICell>> outPaths = new LinkedList<List<mxICell>>();
+
+		iterateVertices = inTargetVertices.iterator();
+		while (iterateVertices.hasNext()) {
+
+			mxICell vertex = iterateVertices.next();
+			if (!(vertex.isVertex())) {
+				throw new IllegalStateException("The vertex variable is not a vertex.");
+			}
+			Double cost = vertexToCostMap.get(vertex);
+			if ((cost == null) || (cost != minCostToTarget)) {
+				continue;
+			}
+
+			List<mxICell> path = new LinkedList<mxICell>();
+			path.add(0, vertex);
+			List<List<mxICell>> pathsToBeProcessed = new LinkedList<List<mxICell>>();
+			pathsToBeProcessed.add(path);
+			path = null;  // List<mxICell> path = new LinkedList<mxICell>();
+			List<mxICell> visitedVertices = new LinkedList<mxICell>(inTargetVertices);
+
+			while (!(pathsToBeProcessed.isEmpty())) {
+
+				path = pathsToBeProcessed.remove(0);
+				vertex = path.get(0);
+
+				if (inSourceVertices.contains(vertex)) {
+					outPaths.add(path);
+					continue;
+				}
+
+				cost = vertexToCostMap.get(vertex);
+				if (cost == null) {
+					throw new IllegalStateException("A vertex in the path must have a minimum cost to reach.");
+				}
+
+				int edgeCount = vertex.getEdgeCount();
+				for (int index = 0; index < edgeCount; index++) {
+
+					mxICell edge = vertex.getEdgeAt(index);
+					if (!(edge.isEdge())) {
+						throw new IllegalStateException("The edge variable is not an edge.");
+					}
+					mxICell source = edge.getTerminal(true);
+					mxICell target = edge.getTerminal(false);
+					mxICell neighbour;
+					if ((source == null) || (target == null)) {
+						throw new IllegalStateException("An edge has null source or target vertex.");
+					} else if (source == target) {
+						continue;
+					} else if (source == vertex) {
+						neighbour = target;
+					} else if (target == vertex) {
+						neighbour = source;
+					} else {
+						throw new IllegalStateException("This edge is not connected to the vertex in question.");
+					}
+
+					if (visitedVertices.contains(neighbour)) {
+						continue;
+					}
+
+					if (!(inSourceVertices.contains(neighbour))) {
+						visitedVertices.add(neighbour);
+					}
+					double edgeCost;
+					Object object = edge.getValue();
+					if (object instanceof Number) {
+						edgeCost = ((Number) object).doubleValue();
+						if (edgeCost < 0) {
+							throw new IllegalStateException("The cost of an edge cannot be negative for this shortest path algorithm.");
+						}
+					} else {
+						edgeCost = 1;
+					}
+
+					Double neighbourCost = vertexToCostMap.get(neighbour);
+					if ((neighbourCost == null)
+							|| (neighbourCost != cost - edgeCost)) {
+						continue;
+					}
+
+					List<mxICell> nextPath = new LinkedList<mxICell>(path);
+					nextPath.add(0, neighbour);
+					pathsToBeProcessed.add(nextPath);
+					nextPath = null;  // List<mxICell> nextPath = new LinkedList<mxICell>(path);
+
+				}  // End for (int index = 0; index < edgeCount; index++)
+
+			}  // End while (!(pathsToBeProcessed.isEmpty()))
+
+			visitedVertices = null;  // List<mxICell> visitedVertices = new LinkedList<mxICell>(inTargetVertices);
+			pathsToBeProcessed = null;  // List<List<mxICell>> pathsToBeProcessed = new LinkedList<List<mxICell>>();
+
+		}  // End while (iterateVertices.hasNext())
+
+		vertexToCostMap = null;  // Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
+
+		return outPaths;
+	}  // End public static List<List<mxICell>> findShortestPaths(...)
+
+	public static List<List<mxICell>> findShortestPathsV1(
+			List<mxICell> inSourceVertices,
+			List<mxICell> inTargetVertices,
+			Double inOptionalMaxCostAllowed,
+			Cost outOptionalCost) {
+
+		if ((inSourceVertices == null)
+				|| (inTargetVertices == null)) {
+			throw new IllegalArgumentException("Invalid inputs to findShortestPath().");
+		}
+
 		List<List<mxICell>> outPaths = new LinkedList<List<mxICell>>();
 		List<mxICell> verticesToBeProcessed = new LinkedList<mxICell>(inSourceVertices);
 		List<mxICell> targetsToBeReached = new LinkedList<mxICell>(inTargetVertices);
 		Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
 		Map<mxICell, List<List<mxICell>>> vertexToPathsMap = new HashMap<mxICell, List<List<mxICell>>>();
+		Map<mxICell, List<mxICell>> sourceToVisitedVerticesMap = new HashMap<mxICell, List<mxICell>>(inSourceVertices.size());
 		double currentMinCost;
 		if ((inOptionalMaxCostAllowed != null)
 				&& (inOptionalMaxCostAllowed.doubleValue() >= 0)) {
@@ -819,11 +1083,13 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			path = null;  // List<mxICell> path = new LinkedList<mxICell>();
 			vertexToPathsMap.put(vertex, paths);
 			paths = null;  // List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
+			sourceToVisitedVerticesMap.put(vertex, new LinkedList<mxICell>(inSourceVertices));
 
 		}  // End while (iterateVertices.hasNext())
 
-		while (!(verticesToBeProcessed.isEmpty())
-				&& (!(targetsToBeReached.isEmpty()))) {
+		double currentCostLevel = vertexToCostMap.get(verticesToBeProcessed.get(0));
+
+		while (!(verticesToBeProcessed.isEmpty())) {
 
 			mxICell vertex = verticesToBeProcessed.remove(0);
 			List<List<mxICell>> paths = vertexToPathsMap.get(vertex);
@@ -836,12 +1102,15 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				targetsToBeReached.remove(vertex);
 				if (cost < currentMinCost) {
 					currentMinCost = cost;
-					outPaths.clear();
-					outPaths.addAll(paths);
-				} else if (cost == currentMinCost) {
-					outPaths.addAll(paths);
 				}
+				continue;
 			}  // End if (targetsToBeReached.contains(vertex))
+			if (cost > currentCostLevel) {
+				if (targetsToBeReached.size() < inTargetVertices.size()) {
+					break;
+				}
+				currentCostLevel = cost;
+			}  // End if (cost > currentCostLevel)
 
 			if (cost > currentMinCost) {
 				continue;
@@ -904,10 +1173,18 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					List<List<mxICell>> neightbourPaths = new LinkedList<List<mxICell>>();
 					Iterator<List<mxICell>> iteratePaths = paths.iterator();
 					while (iteratePaths.hasNext()) {
-						List<mxICell> path = new LinkedList<mxICell>(iteratePaths.next());
-						path.add(neighbour);
-						neightbourPaths.add(path);
-						path = null;  // List<mxICell> path = new LinkedList<mxICell>(iteratePaths.next());
+						List<mxICell> path = iteratePaths.next();
+						List<mxICell> visitedVertices = sourceToVisitedVerticesMap.get(path.get(0));
+						if (visitedVertices.contains(neighbour)) {
+							continue;
+						}
+						if (!(inTargetVertices.contains(neighbour))) {
+							visitedVertices.add(neighbour);
+						}
+						List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
+						neighbourPath.add(neighbour);
+						neightbourPaths.add(neighbourPath);
+						neighbourPath = null;  // List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
 					}  // End while (iteratePaths.hasNext())
 					vertexToPathsMap.put(neighbour, neightbourPaths);
 					neightbourPaths = null;  // List<List<mxICell>> neightbourPaths = new LinkedList<List<mxICell>>();
@@ -939,16 +1216,40 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 				Iterator<List<mxICell>> iteratePaths = paths.iterator();
 				while (iteratePaths.hasNext()) {
-					List<mxICell> path = new LinkedList<mxICell>(iteratePaths.next());
-					path.add(neighbour);
-					neightbourPaths.add(path);
-					path = null;  // List<mxICell> path = new LinkedList<mxICell>(iteratePaths.next());
+					List<mxICell> path = iteratePaths.next();
+					List<mxICell> visitedVertices = sourceToVisitedVerticesMap.get(path.get(0));
+					if (visitedVertices.contains(neighbour)) {
+						continue;
+					}
+					if (!(inTargetVertices.contains(neighbour))) {
+						visitedVertices.add(neighbour);
+					}
+					List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
+					neighbourPath.add(neighbour);
+					neightbourPaths.add(neighbourPath);
+					neighbourPath = null;  // List<mxICell> neighbourPath = new LinkedList<mxICell>(path);
 				}  // End while (iteratePaths.hasNext())
 
 			}  // End for (int index = 0; index < edgeCount; index++)
 
-		}  // End while (!(verticesToBeProcessed.isEmpty())
-		// && (!(targetsToBeReached.isEmpty())))
+		}  // End while (!(verticesToBeProcessed.isEmpty()))
+
+		iterateVertices = inTargetVertices.iterator();
+		while (iterateVertices.hasNext()) {
+			mxICell target = iterateVertices.next();
+			if ((!(vertexToCostMap.containsKey(target)))
+					|| (verticesToBeProcessed.contains(target))) {
+				continue;
+			}
+			double targetCost = vertexToCostMap.get(target);
+			if (targetCost < currentMinCost) {
+				currentMinCost = targetCost;
+				outPaths.clear();
+				outPaths.addAll(vertexToPathsMap.get(target));
+			} else if (targetCost == currentMinCost) {
+				outPaths.addAll(vertexToPathsMap.get(target));
+			}
+		}  // End while (iterateVertices.hasNext())
 
 		vertexToPathsMap = null;  // Map<mxICell, List<List<mxICell>>> vertexToPathsMap = new HashMap<mxICell, List<List<mxICell>>>();
 		vertexToCostMap = null;  // Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
@@ -960,7 +1261,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			outOptionalCost.doubleValue = currentMinCost;
 		}
 		return outPaths;
-	}  // End public static List<List<mxICell>> findShortestPaths(...)
+	}  // End public static List<List<mxICell>> findShortestPathsV1(...)
 
 	public void route(mxCell edge) {
 
@@ -1001,43 +1302,16 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		if ((sourceValue != null) && (targetValue != null)) {
 			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
 		}
-		mxGraph planarGraph = EdgeRoutingMinCross.planarize(this.getGraph(), edge);
+		Map<mxICell, mxICell> originalToPlanarVerticesMap = new HashMap<mxICell, mxICell>();
+		mxGraph planarGraph = EdgeRoutingMinCross.planarize(this.getGraph(), edge, originalToPlanarVerticesMap);
 		mxGraph dualGraph = EdgeRoutingMinCross.buildDualGraph(planarGraph);
-
-		mxICell planarSource = null;
-		mxICell planarTarget = null;
-		Object objects[] = planarGraph.getChildVertices(planarGraph.getDefaultParent());
-		int count = objects.length;
-
-		for (int index = 0; index < count; index++) {
-			if (!(objects[index] instanceof mxICell)) {
-				throw new IllegalStateException("vertex is not of the type mxICell.");
-			}
-			mxICell vertex = (mxICell) objects[index];
-			if (!(vertex.isVertex())) {
-				throw new IllegalStateException("vertex is not vertex.");
-			}
-			Object object = vertex.getValue();
-			if (object == sourceValue) {
-				planarSource = (mxICell) vertex;
-			}
-			if (object == targetValue) {
-				planarTarget = (mxICell) vertex;
-			}
-			if ((planarSource != null) && (planarTarget != null)) {
-				break;
-			}
-		}  // End for (int index = 0; index < count; index++)
-
-		if ((planarSource == null) || (planarTarget == null)) {
-			throw new IllegalStateException("Cannot find the corresponding source and target vertices in the planar graph.");
-		}
-
+		mxICell planarSource = originalToPlanarVerticesMap.get(source);
+		mxICell planarTarget = originalToPlanarVerticesMap.get(target);
 //		List<List<mxICell>> paths = findShortestPathsInDualGraph(dualGraph, planarSource, planarTarget);
 		List<mxICell> sourceVertices = new LinkedList<mxICell>();
 		List<mxICell> targetVertices = new LinkedList<mxICell>();
-		objects = dualGraph.getChildVertices(dualGraph.getDefaultParent());
-		count = objects.length;
+		Object objects[] = dualGraph.getChildVertices(dualGraph.getDefaultParent());
+		int count = objects.length;
 
 		for (int index = 0; index < count; index++) {
 			if (!(objects[index] instanceof mxICell)) {
@@ -1118,32 +1392,23 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Object cells[] = {edge};
 		this.getGraph().removeCells(cells);
 	}  // End public void route(mxCell edge)
-
-	protected static class Crossing {
-
-		mxCell edge1;
-		mxCell edge2;
-		public double x;
-		public double y;
-
-		public Crossing() {
-			this.edge1 = null;
-			this.edge2 = null;
-			this.x = 0;
-			this.y = 0;
-		}
-	}  // End protected static class Crossing
+	protected static final double DUMMY_NODE_WIDTH = 0;
+	protected static final double DUMMY_NODE_HEIGHT = DUMMY_NODE_WIDTH;
 
 	public static mxGraph planarize(mxGraph inGraph) {
-		return EdgeRoutingMinCross.planarize(inGraph, null);
+		return EdgeRoutingMinCross.planarize(inGraph, null, null);
 	}  // End public static mxGraph planarize(mxGraph inGraph)
 
-	public static mxGraph planarize(mxGraph inGraph, mxICell edgeToIgnore) {
+	public static mxGraph planarize(
+			mxGraph inGraph,
+			mxICell inOptionalEdgeToIgnore,
+			Map<mxICell, mxICell> outOptionalOriginalToPlanarVerticesMap) {
 
 		if (inGraph == null) {
 			throw new IllegalArgumentException("Input inGraph is null.");
 		}
 		mxGraph outGraph = new mxGraph();
+		Map<Point2D.Double, mxICell> point2dToPlanarVerticesMap = new HashMap<Point2D.Double, mxICell>();
 		HashMap<mxICell, mxICell> oldToNewVerticesMap = new HashMap<mxICell, mxICell>();
 		Object objects[] = inGraph.getChildVertices(inGraph.getDefaultParent());
 
@@ -1159,22 +1424,34 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			if (geometry == null) {
 				throw new IllegalStateException("vertex has null geometry.");
 			}
-			mxICell newVertex = (mxICell) outGraph.insertVertex(
-					outGraph.getDefaultParent(),
-					vertex.getId(),
-					vertex.getValue(),
-					geometry.getX(),
-					geometry.getY(),
-					geometry.getWidth(),
-					geometry.getHeight(),
-					vertex.getStyle(),
-					geometry.isRelative());
+			Point2D.Double point2d = new Point2D.Double(geometry.getCenterX(), geometry.getCenterY());
+			mxICell newVertex = point2dToPlanarVerticesMap.get(point2d);
+			if (newVertex == null) {
+				newVertex = (mxICell) outGraph.insertVertex(
+						outGraph.getDefaultParent(),
+						null,
+						vertex.getValue(),
+						geometry.getX(),
+						geometry.getY(),
+						geometry.getWidth(),
+						geometry.getHeight(),
+						vertex.getStyle(),
+						geometry.isRelative());
+				point2dToPlanarVerticesMap.put(point2d, newVertex);
+			} // End if (newVertex == null)
+			else if (!(newVertex.isVertex())) {
+				throw new IllegalStateException("A cell of different type already occupies this location (" + geometry.getCenterX() + ", " + geometry.getCenterY() + ").");
+			}
 			oldToNewVerticesMap.put(vertex, newVertex);
+			if (outOptionalOriginalToPlanarVerticesMap != null) {
+				outOptionalOriginalToPlanarVerticesMap.put(vertex, newVertex);
+			}
 		}  // End for (int index = 0; index < objects.length; index++)
 
 		objects = inGraph.getChildEdges(inGraph.getDefaultParent());
 
 		for (int index = 0; index < objects.length; index++) {
+
 			if (!(objects[index] instanceof mxCell)) {
 				throw new IllegalStateException("edge is not mxCell.");
 			}
@@ -1182,7 +1459,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			if (!(edge.isEdge())) {
 				throw new IllegalStateException("edge is not edge.");
 			}
-			if (edge == edgeToIgnore) {
+			if (edge == inOptionalEdgeToIgnore) {
 				continue;
 			}
 			mxGeometry geometry = edge.getGeometry();
@@ -1196,41 +1473,71 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			}
 
 			Object parent = outGraph.getDefaultParent();
+
 			if (source == null) {
+
 				mxPoint point = geometry.getSourcePoint();
-				Object dummyNode = outGraph.insertVertex(
-						parent,
-						null,
-						null,
-						point.getX(),
-						point.getY(),
-						0,
-						0);
-				outGraph.insertEdge(
-						parent,
-						null,
-						null,
-						dummyNode,
-						oldToNewVerticesMap.get(target));
+				Point2D.Double point2d = new Point2D.Double(point.getX(), point.getY());
+				Object dummyNode = point2dToPlanarVerticesMap.get(point2d);
+				if (dummyNode == null) {
+					dummyNode = outGraph.insertVertex(
+							parent,
+							null,
+							null,
+							point.getX() - DUMMY_NODE_WIDTH / 2,
+							point.getY() - DUMMY_NODE_HEIGHT / 2,
+							DUMMY_NODE_WIDTH,
+							DUMMY_NODE_HEIGHT);
+					point2dToPlanarVerticesMap.put(point2d, (mxICell) dummyNode);
+				} // End if (dummyNode == null)
+				else if (!(((mxICell) dummyNode).isVertex())) {
+					throw new IllegalStateException("A cell of different type already occupies this location (" + point.getX() + ", " + point.getY() + ").");
+				}
+				if (!(EdgeRoutingMinCross.areVerticesConnected(
+						(mxICell) dummyNode,
+						oldToNewVerticesMap.get(target)))) {
+					outGraph.insertEdge(
+							parent,
+							null,
+							null,
+							dummyNode,
+							oldToNewVerticesMap.get(target));
+				}  // End if (!(EdgeRoutingMinCross.areVerticesConnected(...)
 				continue;
+
 			} else if (target == null) {
+
 				mxPoint point = geometry.getTargetPoint();
-				Object dummyNode = outGraph.insertVertex(
-						parent,
-						null,
-						null,
-						point.getX(),
-						point.getY(),
-						0,
-						0);
-				outGraph.insertEdge(
-						parent,
-						null,
-						null,
-						oldToNewVerticesMap.get(source),
-						dummyNode);
+				Point2D.Double point2d = new Point2D.Double(point.getX(), point.getY());
+				Object dummyNode = point2dToPlanarVerticesMap.get(point2d);
+				if (dummyNode == null) {
+					dummyNode = outGraph.insertVertex(
+							parent,
+							null,
+							null,
+							point.getX() - DUMMY_NODE_WIDTH / 2,
+							point.getY() - DUMMY_NODE_HEIGHT / 2,
+							DUMMY_NODE_WIDTH,
+							DUMMY_NODE_HEIGHT);
+					point2dToPlanarVerticesMap.put(point2d, (mxICell) dummyNode);
+				} // End if (dummyNode == null)
+				else if (!(((mxICell) dummyNode).isVertex())) {
+					throw new IllegalStateException("A cell of different type already occupies this location (" + point.getX() + ", " + point.getY() + ").");
+				}
+				if (!(EdgeRoutingMinCross.areVerticesConnected(
+						(mxICell) dummyNode,
+						oldToNewVerticesMap.get(source)))) {
+					outGraph.insertEdge(
+							parent,
+							null,
+							null,
+							oldToNewVerticesMap.get(source),
+							dummyNode);
+				}  // End if (!(EdgeRoutingMinCross.areVerticesConnected(...)
 				continue;
+
 			} else if (source.equals(target)) {
+
 				List<mxPoint> controlPoints = geometry.getPoints();
 				mxPoint point;
 				if ((controlPoints == null) || (controlPoints.isEmpty())) {
@@ -1244,173 +1551,241 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				} else {  // End if ((controlPoints == null) || (controlPoints.isEmpty()))
 					point = controlPoints.get(0);
 				}  // End else part of if ((controlPoints == null) || (controlPoints.isEmpty()))
-				Object dummyNode = outGraph.insertVertex(
-						parent,
-						null,
-						null,
-						point.getX(),
-						point.getY(),
-						0,
-						0);
-				point = null;  // point = new mxPoint(...);
-				outGraph.insertEdge(
-						parent,
-						null,
-						null,
-						oldToNewVerticesMap.get(source),
-						dummyNode);
-				continue;
-			}  // End if (source.equals(target))
-
-			Object previousDummyNode = oldToNewVerticesMap.get(source);
-			List<mxPoint> controlPoints = geometry.getPoints();
-			if (controlPoints != null) {
-				Iterator<mxPoint> iterateControlPoints = controlPoints.iterator();
-				while (iterateControlPoints.hasNext()) {
-					mxPoint point = iterateControlPoints.next();
-					Object dummyNode = outGraph.insertVertex(
+				Point2D.Double point2d = new Point2D.Double(point.getX(), point.getY());
+				Object dummyNode = point2dToPlanarVerticesMap.get(point2d);
+				if (dummyNode == null) {
+					dummyNode = outGraph.insertVertex(
 							parent,
 							null,
 							null,
-							point.getX(),
-							point.getY(),
-							0,
-							0);
+							point.getX() - DUMMY_NODE_WIDTH / 2,
+							point.getY() - DUMMY_NODE_HEIGHT / 2,
+							DUMMY_NODE_WIDTH,
+							DUMMY_NODE_HEIGHT);
+					point2dToPlanarVerticesMap.put(point2d, (mxICell) dummyNode);
+				} // End if (dummyNode == null)
+				else if (!(((mxICell) dummyNode).isVertex())) {
+					throw new IllegalStateException("A cell of different type already occupies this location (" + point.getX() + ", " + point.getY() + ").");
+				}
+				point = null;  // point = new mxPoint(...);
+				if (!(EdgeRoutingMinCross.areVerticesConnected(
+						(mxICell) dummyNode,
+						oldToNewVerticesMap.get(source)))) {
 					outGraph.insertEdge(
 							parent,
 							null,
 							null,
-							previousDummyNode,
+							oldToNewVerticesMap.get(source),
 							dummyNode);
-					previousDummyNode = dummyNode;
+				}  // End if (!(EdgeRoutingMinCross.areVerticesConnected(...)
+				continue;
+
+			}  // End if (source.equals(target))
+
+			Object previousDummyNode = oldToNewVerticesMap.get(source);
+			List<mxPoint> controlPoints = geometry.getPoints();
+
+			if (controlPoints != null) {
+
+				Iterator<mxPoint> iterateControlPoints = controlPoints.iterator();
+				while (iterateControlPoints.hasNext()) {
+					mxPoint point = iterateControlPoints.next();
+					Point2D.Double point2d = new Point2D.Double(point.getX(), point.getY());
+					Object dummyNode = point2dToPlanarVerticesMap.get(point2d);
+					if (dummyNode == null) {
+						dummyNode = outGraph.insertVertex(
+								parent,
+								null,
+								null,
+								point.getX() - DUMMY_NODE_WIDTH / 2,
+								point.getY() - DUMMY_NODE_HEIGHT / 2,
+								DUMMY_NODE_WIDTH,
+								DUMMY_NODE_HEIGHT);
+						point2dToPlanarVerticesMap.put(point2d, (mxICell) dummyNode);
+					} // End if (dummyNode == null)
+					else if (!(((mxICell) dummyNode).isVertex())) {
+						throw new IllegalStateException("A cell of different type already occupies this location (" + point.getX() + ", " + point.getY() + ").");
+					}
+					if (!(EdgeRoutingMinCross.areVerticesConnected(
+							(mxICell) previousDummyNode,
+							(mxICell) dummyNode))) {
+						outGraph.insertEdge(
+								parent,
+								null,
+								null,
+								previousDummyNode,
+								dummyNode);
+						previousDummyNode = dummyNode;
+					}  // End if (!(EdgeRoutingMinCross.areVerticesConnected(...)
 				}  // End while (iterateControlPoints.hasNext())
+
 			}  // End if (controlPoints != null)
-			outGraph.insertEdge(
-					parent,
-					null,
-					null,
-					previousDummyNode,
-					oldToNewVerticesMap.get(target));
+
+			if (!(EdgeRoutingMinCross.areVerticesConnected(
+					(mxICell) previousDummyNode,
+					oldToNewVerticesMap.get(target)))) {
+				outGraph.insertEdge(
+						parent,
+						null,
+						null,
+						previousDummyNode,
+						oldToNewVerticesMap.get(target));
+			}  // End if (!(EdgeRoutingMinCross.areVerticesConnected(...)
+
 		}  // End for (int index = 0; index < objects.length; index++)
 
 		oldToNewVerticesMap = null;  // HashMap<mxICell, mxICell> oldToNewVerticesMap = new HashMap<mxICell, mxICell>();
-		List<Crossing> crossingList = new ArrayList<Crossing>();
+		List<mxICell> edgesToBeProcessed = new LinkedList<mxICell>();
 		objects = outGraph.getChildEdges(outGraph.getDefaultParent());
 
-		for (int index = 0; index < objects.length - 1; index++) {
-			if (!(objects[index] instanceof mxCell)) {
+		for (int index = 0; index < objects.length; index++) {
+			if (!(objects[index] instanceof mxICell)) {
 				continue;
 			}
-			mxCell edge = (mxCell) objects[index];
+			mxICell edge = (mxICell) objects[index];
 			if (!(edge.isEdge())) {
 				continue;
 			}
-			mxICell source = edge.getSource();
-			mxICell target = edge.getTarget();
+			edgesToBeProcessed.add(edge);
+		}  // End for (int index = 0; index < objects.length; index++)
+
+		while (!(edgesToBeProcessed.isEmpty())) {
+
+			mxICell edge = edgesToBeProcessed.remove(0);
+			mxICell source = edge.getTerminal(true);
+			mxICell target = edge.getTerminal(false);
 			if ((source == null)
 					|| (target == null)
-					|| (source.equals(target))) {
-				continue;
+					|| (source == target)) {
+				throw new IllegalStateException("An edge with null source, null target, or same source and target should not exist in our version of planar graphs.");
 			}
 			mxGeometry geometry = source.getGeometry();
 			if (geometry == null) {
-				continue;
+				throw new IllegalStateException("A vertex has null geometry.");
 			}
 			double x0 = geometry.getCenterX();
 			double y0 = geometry.getCenterY();
 			geometry = target.getGeometry();
 			if (geometry == null) {
-				continue;
+				throw new IllegalStateException("A vertex has null geometry.");
 			}
 			double x1 = geometry.getCenterX();
 			double y1 = geometry.getCenterY();
 
-			for (int index2 = index + 1; index2 < objects.length; index2++) {
-				if (!(objects[index2] instanceof mxCell)) {
-					continue;
-				}
-				mxCell edge2 = (mxCell) objects[index2];
-				if (!(edge2.isEdge())) {
-					continue;
-				}
-				mxICell source2 = edge2.getSource();
-				mxICell target2 = edge2.getTarget();
+			ListIterator<mxICell> listIterator = edgesToBeProcessed.listIterator();
+			while (listIterator.hasNext()) {
+
+				mxICell edge2 = listIterator.next();
+				mxICell source2 = edge2.getTerminal(true);
+				mxICell target2 = edge2.getTerminal(false);
 				if ((source2 == null)
 						|| (target2 == null)
-						|| (source2.equals(target2))) {
-					continue;
+						|| (source2 == target2)) {
+					throw new IllegalStateException("An edge with null source, null target, or same source and target should not exist in our version of planar graphs.");
 				}
 				geometry = source2.getGeometry();
 				if (geometry == null) {
-					continue;
+					throw new IllegalStateException("A vertex has null geometry.");
 				}
 				double x2 = geometry.getCenterX();
 				double y2 = geometry.getCenterY();
 				geometry = target2.getGeometry();
 				if (geometry == null) {
-					continue;
+					throw new IllegalStateException("A vertex has null geometry.");
 				}
 				double x3 = geometry.getCenterX();
 				double y3 = geometry.getCenterY();
-				if (((x0 == x2) && (y0 == y2))
-						|| ((x0 == x3) && (y0 == y3))
-						|| ((x1 == x2) && (y1 == y2))
-						|| ((x1 == x3) && (y1 == y3))) {
-					continue;
-				}
+
 				mxPoint point = mxUtils.intersection(x0, y0, x1, y1, x2, y2, x3, y3);
 				if (point == null) {
 					continue;
 				}
-				Crossing crossing = new Crossing();
-				crossing.edge1 = edge;
-				crossing.edge2 = edge2;
-				crossing.x = point.getX();
-				crossing.y = point.getY();
-				crossingList.add(crossing);
-				crossing = null;  // Crossing crossing = new Crossing();
-			}  // End for (int index2 = index + 1; index2 < objects.length; index2++)
 
-		}  // End for (int index = 0; index < objects.length - 1; index++)
+				if (((point.getX() == x0) && (point.getY() == y0))
+						|| ((point.getX() == x1) && (point.getY() == y1))
+						|| ((point.getX() == x2) && (point.getY() == y2))
+						|| ((point.getX() == x3) && (point.getY() == y3))) {
+					continue;
+				}
 
-		Iterator<Crossing> iterateCrossings = crossingList.iterator();
+				Object[] edges = {edge, edge2};
+				outGraph.removeCells(edges);
+				Object parent = outGraph.getDefaultParent();
+				Object dummyNode = outGraph.insertVertex(
+							parent,
+							null,
+							null,
+						point.getX(),
+						point.getY(),
+						0,
+						0);
+				mxICell newEdge = (mxICell) outGraph.insertEdge(parent, null, null, source, dummyNode);
+				mxICell newEdge1 = (mxICell) outGraph.insertEdge(parent, null, null, dummyNode, target);
+				mxICell newEdge2 = (mxICell) outGraph.insertEdge(parent, null, null, source2, dummyNode);
+				mxICell newEdge3 = (mxICell) outGraph.insertEdge(parent, null, null, dummyNode, target2);
+				edgesToBeProcessed.remove(listIterator.previousIndex());
+				edgesToBeProcessed.add(newEdge);
+				edgesToBeProcessed.add(newEdge1);
+				edgesToBeProcessed.add(newEdge2);
+				edgesToBeProcessed.add(newEdge3);
+				break;
 
-		while (iterateCrossings.hasNext()) {
-			Crossing crossing = iterateCrossings.next();
-			if ((crossing.edge1 == null) || (crossing.edge2 == null)) {
-				continue;
-			}
-			mxICell source = crossing.edge1.getSource();
-			mxICell target = crossing.edge1.getTarget();
-			mxICell source2 = crossing.edge2.getSource();
-			mxICell target2 = crossing.edge2.getTarget();
-			if ((source == null)
-					|| (target == null)
-					|| (source2 == null)
-					|| (target2 == null)) {
-				continue;
-			}
-			Object[] edges = {crossing.edge1, crossing.edge2};
-			outGraph.removeCells(edges);
-			Object parent = outGraph.getDefaultParent();
-			Object dummyNode = outGraph.insertVertex(
-					parent,
-					null,
-					null,
-					crossing.x,
-					crossing.y,
-					0,
-					0);
-			outGraph.insertEdge(parent, null, null, source, dummyNode);
-			outGraph.insertEdge(parent, null, null, dummyNode, target);
-			outGraph.insertEdge(parent, null, null, source2, dummyNode);
-			outGraph.insertEdge(parent, null, null, dummyNode, target2);
-		}  // End while (iterateCrossings.hasNext())
+			}  // End while (listIterator.hasNext())
 
-		crossingList = null;  // List<Crossing> crossingList = new ArrayList<Crossing>();
+		}  // End while (!(edgesToBeProcessed.isEmpty()))
+
+		edgesToBeProcessed = null;  // List<mxICell> edgesToBeProcessed = new LinkedList<mxICell>();
+		point2dToPlanarVerticesMap = null;  // Map<Point2D.Double, mxICell> point2dToPlanarVerticesMap = new HashMap<Point2D.Double, mxICell>();
 
 		return outGraph;
-	}  // End public static mxGraph planarize(mxGraph inGraph, mxICell edgeToIgnore)
+	}  // End public static mxGraph planarize(...)
+
+	protected static boolean areVerticesConnected(mxICell vertex1, mxICell vertex2) {
+
+		if ((vertex1 == null) || (!(vertex1.isVertex()))
+				|| (vertex2 == null) || (!(vertex2.isVertex()))) {
+			throw new IllegalArgumentException("At least one of vertex1 and vertex2 is null or not a vertex.");
+		}
+
+		int edgeCount1 = vertex1.getEdgeCount();
+		int edgeCount2 = vertex2.getEdgeCount();
+		int edgeCount = (edgeCount1 < edgeCount2) ? edgeCount1 : edgeCount2;
+		if (edgeCount == 0) {
+			return false;
+		}
+
+		mxICell vertex = (edgeCount1 < edgeCount2) ? vertex1 : vertex2;
+		mxICell otherVertex = (edgeCount1 < edgeCount2) ? vertex2 : vertex1;
+
+		for (int index = 0; index < edgeCount; index++) {
+
+			mxICell edge = vertex.getEdgeAt(index);
+			if (!(edge.isEdge())) {
+				continue;
+			}
+			mxICell neighbour = edge.getTerminal(true);
+			if (neighbour == null) {
+				continue;
+			}
+			if (neighbour == vertex) {
+				neighbour = edge.getTerminal(false);
+				if ((neighbour == null) || (neighbour == vertex)) {
+					continue;
+				}
+			} else {  // End if (neighbour == vertex) 
+				if (edge.getTerminal(false) != vertex) {
+					continue;
+				}
+			}  // End else part of if (neighbour == vertex)
+
+			if (neighbour == otherVertex) {
+				return true;
+			}
+
+		}  // End for (int index = 0; index < edgeCount; index++)
+
+		return false;
+	}  // End protected static boolean areVerticesConnected(mxICell vertex1, mxICell vertex2)
 
 	protected static class EdgeVisit {
 
@@ -1817,9 +2192,15 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			Region<mxICell> regionVertices = new Region<mxICell>();
 			EdgeDirection edgeDirection = startEdgeDirection;
 			do {
+				mxICell source = edgeDirection.edge.getTerminal(true);
+				mxICell target = edgeDirection.edge.getTerminal(false);
+				String sourceName = (source.getValue() != null) ? (source.getValue().toString()) : (source.getId());
+				String targetName = (target.getValue() != null) ? (target.getValue().toString()) : (target.getId());
 				if (edgeDirection.isSourceToTarget) {
+					System.out.println("Going from " + sourceName + " to " + targetName + ".");
 					edgeVisit.isTargetVisited = true;
 				} else {
+					System.out.println("Going from " + targetName + " to " + sourceName + ".");
 					edgeVisit.isSourceVisited = true;
 				}
 				regionVertices.add(edgeDirection.edge.getTerminal(!(edgeDirection.isSourceToTarget)));
@@ -1916,16 +2297,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			}  // End for (int index = 0; index < verticesCount; index++)
 
 			if ((firstRegion != null) && (secondRegion != null)) {
-				boolean alreadyHasEdge = false;
-				for (int index1 = 0; index1 < firstRegion.getEdgeCount(); index1++) {
-					for (int index2 = 0; index2 < secondRegion.getEdgeCount(); index2++) {
-						if (firstRegion.getEdgeAt(index1) == secondRegion.getEdgeAt(index2)) {
-							alreadyHasEdge = true;
-							break;
-						}
-					}  // End for (int index2 = 0; index2 < secondRegion.getEdgeCount(); index2++)
-				}  // End for (int index1 = 0; index1 < firstRegion.getEdgeCount(); index1++)
-				if (!alreadyHasEdge) {
+				if (!(EdgeRoutingMinCross.areVerticesConnected(firstRegion, secondRegion))) {
 					outGraph.insertEdge(
 							outGraph.getDefaultParent(),
 							null,
