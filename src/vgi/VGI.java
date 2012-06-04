@@ -945,8 +945,7 @@ public class VGI extends javax.swing.JFrame {
         
         
     }
-        
-        
+     
     private void zoomInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInButtonActionPerformed
 		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
 		if (frame instanceof JgraphXInternalFrame) {
@@ -1426,7 +1425,8 @@ public class VGI extends javax.swing.JFrame {
 		/*
 		 * Create and display the form
 		 */
-                
+               // FsmXml fsmXml = new FsmXml();
+               // fsmXml.read(System.in);
                 //final String[] filename=args;
 		java.awt.EventQueue.invokeLater(new Runnable() {
 
@@ -1435,7 +1435,29 @@ public class VGI extends javax.swing.JFrame {
                                 if(args.length>0){
                                     String filename=args[0];
                                     if(filename!=null){
-                                        vgi.openFile(filename);
+                                        if(filename.charAt(0)=='-'){
+                                            FsmXml fsmXml=new FsmXml();
+                                            List<Automata> automataList = null;
+           
+                                            try{
+                                                        automataList=fsmXml.read(System.in);
+                                                        //System.out.println(System.in.toString());
+                                                    
+                                            }catch(FsmXmlException ex){
+                                                Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
+                                            }
+                                            
+                                            if ((automataList != null) && (automataList.size() > 0)) {
+       
+                                                Automata automata = automataList.get(0);
+                                                vgi.pmAutomataType = new TAFKitInterface.AutomataType(automata);
+                                                vgi.updateAlgorithmMenuItems();
+                                                vgi.createInternalFrame(automata, "");
+                                            }
+                                            
+                                        }else{
+                                            vgi.openFile(filename);
+                                        }
                                     }
                                 }
 				vgi.setVisible(true);
