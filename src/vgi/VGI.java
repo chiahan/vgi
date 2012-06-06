@@ -367,6 +367,7 @@ public class VGI extends javax.swing.JFrame {
         buildDualGraphMenuItem = new javax.swing.JMenuItem();
         buildWeightedVisibilityGraphMenuItem = new javax.swing.JMenuItem();
         testShortestPathsMenuItem = new javax.swing.JMenuItem();
+        singleVertexEdgesLayoutMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -726,6 +727,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         layoutMenu.add(testShortestPathsMenuItem);
+
+        singleVertexEdgesLayoutMenuItem.setText("Single Vertex Edges Layout");
+        singleVertexEdgesLayoutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                singleVertexEdgesLayoutMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(singleVertexEdgesLayoutMenuItem);
 
         menuBar.add(layoutMenu);
 
@@ -1307,6 +1316,14 @@ public class VGI extends javax.swing.JFrame {
 		}  // End if (frame instanceof JgraphXInternalFrame)
 	}//GEN-LAST:event_testShortestPathsMenuItemActionPerformed
 
+	private void singleVertexEdgesLayoutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_singleVertexEdgesLayoutMenuItemActionPerformed
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			SingleVertexEdgesLayout singleVertexEdgesLayout = new SingleVertexEdgesLayout(((JgraphXInternalFrame) frame).graph);
+			singleVertexEdgesLayout.execute(null);
+		}  // End if (frame instanceof JgraphXInternalFrame)
+	}//GEN-LAST:event_singleVertexEdgesLayoutMenuItemActionPerformed
+
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
@@ -1519,6 +1536,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem setTAFKitPathMenuItem;
     private javax.swing.JCheckBoxMenuItem showPropertiesCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showStatusBarCheckBoxMenuItem;
+    private javax.swing.JMenuItem singleVertexEdgesLayoutMenuItem;
     private javax.swing.JLabel statusLabel;
     private javax.swing.JMenuItem testShortestPathsMenuItem;
     private javax.swing.JToolBar toolBar;
