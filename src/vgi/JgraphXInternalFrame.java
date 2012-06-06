@@ -921,60 +921,180 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     public void doFeatureLayout() {
 
-        graph.getModel().beginUpdate();
-        try {
-            Map<mxCell, List<mxCell>> CycleFeatureNode = new HashMap<mxCell, List<mxCell>>();
+      this.graph.getModel().beginUpdate();
+		try {
+	
+                    ClusterPreProcess clusterDetector = new ClusterPreProcess(this.graph);
+                
+                Map<mxCell, List<mxCell>> ClusterFeatureNode = new HashMap<mxCell, List<mxCell>>();
+                Map<mxCell, List<mxCell>> CycleFeatureNode = new HashMap<mxCell, List<mxCell>>();
+               
+                // create a edges cell list of a graph used for check in clusteringlayout
+                int childCount = this.graph.getModel().getChildCount(this.graph.getDefaultParent());
 
+	            
+                ClusterFeatureNode = clusterDetector.getFeatureNodeList();
+                        
+                List<mxCell> childs = new ArrayList<mxCell>();
+                      
+                // group the nodes in the same cluster : 
+                        
+                        Collection collection = ClusterFeatureNode.keySet();
+                        Iterator iterator = collection.iterator();
+                        while(iterator.hasNext()) {
+                            mxCell FeatureNode = (mxCell)iterator.next();
+                            childs = ClusterFeatureNode.get(FeatureNode);
+                            for(mxCell child : childs){
+                       //         System.out.print("\n Child ID : "+child.getId()+"\n");
+                                (FeatureNode).insert(child);
+                            }
+                        }
+                        
+                        iterator = collection.iterator();
+                        
+                        // if there's no feature node detect by clustering, then detect the cycle 
+                        Iterator cycleIterator;
+                        Collection cycleCollection;
+                       
+                        
+                        
+                        
+                        
+                        if(!iterator.hasNext()){
+                       
+                            PreProcess cycleFilter = new PreProcess(this.graph);
+                            CycleFeatureNode = cycleFilter.getFeatureNodeList();
+                            cycleCollection = CycleFeatureNode.keySet();
+                            cycleIterator = cycleCollection.iterator();
+                            
+                      
+                            childs = new ArrayList<mxCell>();
+                       
+                            
+                            while(cycleIterator.hasNext()){
+                           
+                                mxCell FeatureNode = (mxCell)cycleIterator.next();
+                                childs = CycleFeatureNode.get(FeatureNode);
+                                
+                                for(mxCell child : childs){
+                                    (FeatureNode).insert(child);
+                                }
+                            }
+                        }
+                   
+              
+                // execute the TreeLayout and ClusteringLayout : 
+                        
+                        TreeLayout treelayout = new TreeLayout(this.graph); 
+                        
+                        treelayout.execute(graph.getDefaultParent());  
+                       // treelayout.execute(cellTable.get("0"));
+             
+                 /*     
+                        mxHierarchicalLayout layout = new mxHierarchicalLayout(this.graph);
+                        layout.setOrientation(SwingConstants.WEST);
+                        layout.setFineTuning(false);
+                        layout.execute(this.graph.getDefaultParent());
+                        List<mxICell> cellList = new ArrayList<mxICell>();
+                        List<Object> oldCellList = new ArrayList<Object>();
+                        
+                        childCount = this.graph.getModel().getChildCount(this.graph.getDefaultParent());
+        
+        
+                        for (int i = 0; i < childCount; i++){
+            
+                            Object cell = this.graph.getModel().getChildAt(this.graph.getDefaultParent(), i);
+                            
+                            if(((mxCell)cell).isEdge()){
+                                mxICell source = ((mxICell) cell).getTerminal(true);
+                                mxICell target = ((mxICell) cell).getTerminal(false);
+                                Object value = ((mxCell)cell).getValue();
+ 
+                                mxCell newCell = new mxCell();
+                                newCell.setSource(source);
+                                newCell.setTarget(target);
+                                newCell.setValue(value);
+                    
+                                oldCellList.add(cell);
+                                cellList.add((mxICell)newCell);
+                            }
+                        }   
+                        
+                    this.graph.removeCells(oldCellList.toArray());
+                    Iterator<mxICell> index = cellList.iterator();
+                    while(index.hasNext()){
+                        mxICell cell = index.next();
+            
+                        this.graph.insertEdge(this.graph.getDefaultParent(), null, cell.getValue(), cell.getTerminal(true), cell.getTerminal(false));
+        
+                    }
+                    */ 
+                        
+                        
+                        iterator = collection.iterator();
+                        
+                          while(iterator.hasNext()) {
+                              
+                            ClusteringLayout clusterlayout = new ClusteringLayout(this.graph);
+                            
+                            mxCell FeatureNode = (mxCell)iterator.next();
+                            
+                            clusterlayout.setMoveCircle(true);
+                            clusterlayout.setX0(FeatureNode.getGeometry().getX());
+                            clusterlayout.setY0(FeatureNode.getGeometry().getY());
+                            System.out.print("\n X0 : "+FeatureNode.getGeometry().getX());
+                            System.out.print("\n Y0 : "+FeatureNode.getGeometry().getY());
+                            clusterlayout.execute(FeatureNode);
+                            
+                        }
+                          
+                        
+                        iterator = collection.iterator();
+                        if(!iterator.hasNext()){
+                            
+                           cycleCollection = CycleFeatureNode.keySet();
+                           cycleIterator = cycleCollection.iterator();
+                            
+                          while(cycleIterator.hasNext()) {
+                              
+                            CircleLayout circleLayout = new CircleLayout(this.graph);
 
-            PreProcess cycleFilter = new PreProcess(graph);
-            CycleFeatureNode = cycleFilter.getFeatureNodeList();
-
-            List<mxCell> childs = new ArrayList<mxCell>();
-            Collection collection = CycleFeatureNode.keySet();
-            Iterator iterator = collection.iterator();
-            while (iterator.hasNext()) {
-                mxCell FeatureNode = (mxCell) iterator.next();
-                childs = CycleFeatureNode.get(FeatureNode);
-                for (mxCell child : childs) {
-                    (FeatureNode).insert(child);
-                }
-            }
-
-            TreeLayout layout = new TreeLayout(graph);
-            layout.execute(this.graph.getDefaultParent());
-
-            iterator = collection.iterator();
-            while (iterator.hasNext()) {
-
-                CircleLayout circleLayout = new CircleLayout(graph);
-
-                mxCell FeatureNode = (mxCell) iterator.next();
-
-                circleLayout.setMoveCircle(true);
-                circleLayout.setX0(FeatureNode.getGeometry().getY());
-                circleLayout.setY0(FeatureNode.getGeometry().getX());
-                circleLayout.setRadius(40);
-                circleLayout.execute(FeatureNode);
-
-            }
-
-            iterator = collection.iterator();
-
-
-            while (iterator.hasNext()) {
-                mxCell FeatureNode = (mxCell) iterator.next();
-                graph.ungroupCells(new Object[]{FeatureNode});
-            }
-
-
-            mxParallelEdgeLayout layout2 = new mxParallelEdgeLayout(graph);
-            layout2.execute(graph.getDefaultParent());
-
-            EdgeRoutingLayout layout3 = new EdgeRoutingLayout(graph);
-            layout3.execute(graph.getDefaultParent());
-        } finally {
-            graph.getModel().endUpdate();
-        }
+                            mxCell FeatureNode = (mxCell)cycleIterator.next();
+                            
+                            circleLayout.setMoveCircle(true);
+                            circleLayout.setX0(FeatureNode.getGeometry().getY());
+                            circleLayout.setY0(FeatureNode.getGeometry().getX());
+                     
+                            circleLayout.setRadius(40);
+                            circleLayout.execute(FeatureNode);
+                        
+                          }
+                          
+                          cycleIterator = cycleCollection.iterator();
+                        
+                          while(cycleIterator.hasNext()) {
+                            mxCell FeatureNode = (mxCell)cycleIterator.next();
+                            this.graph.ungroupCells(new Object[]{FeatureNode});
+                          }
+                        }
+                      
+                        
+                // ungroup the cluster :        
+                          
+                        iterator = collection.iterator();
+                        while(iterator.hasNext()) {
+                            mxCell FeatureNode = (mxCell)iterator.next();
+                            this.graph.ungroupCells(new Object[]{FeatureNode});
+                        }
+                      
+                        EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
+                        edgeRoute.execute(this.graph.getDefaultParent());
+               } finally {
+			this.graph.getModel().endUpdate();
+		}
+        
+        
+        
     }
 
     public void routeAllEdges2008() {
