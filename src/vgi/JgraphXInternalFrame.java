@@ -85,6 +85,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         this.infoSplitPane = infoSplitPane;
         this.graph = graph;
+        this.visibilityGraph = new WeightedVisibilityGraph();
         this.automata = automata;
         //currentFile=file;
         setTitle(filename);
@@ -132,14 +133,24 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     private void initAutomata() {
         setupStates();
-        setupTranitions();
 
         if (!(this.hasGeometricData)) {
             mxCircleLayout circleLayout = new mxCircleLayout(this.graph);
             circleLayout.execute(this.graph.getDefaultParent());
         }
-        
-        Object[] edges = this.graph.getChildEdges(graph.getDefaultParent());
+
+		Iterator<mxCell> iterateCells = this.cellTable.keySet().iterator();
+		while (iterateCells.hasNext()) {
+			mxICell cell = iterateCells.next();
+			if (!(cell.isVertex())) {
+				continue;
+			}
+			this.visibilityGraph.addRoadblock(cell);
+		}  // End while (iterateCells.hasNext())
+
+		setupTranitions();
+
+		Object[] edges = this.graph.getChildEdges(graph.getDefaultParent());
         for (int index = 0; index < edges.length; index++) {
             mxCell edge=(mxCell)edges[index];
             List<mxPoint> ptList=edge.getGeometry().getPoints();
@@ -623,7 +634,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         setModified(true);
         undoStack.push(STATUS_ADD);
 
-
+		this.visibilityGraph.addRoadblock(vertex);
     }
 
     public void addState(State state) {
@@ -784,7 +795,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         }
        
-       
+       this.visibilityGraph.addHindrance(edge);
     }  // End public void addTransition(Transition transition)
 
     public void addControlPoint() {
@@ -1677,6 +1688,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     private mxGraphComponent graphComponent = null;
     private mxGraphOutline graphOutline;
     final mxGraph graph;
+    protected WeightedVisibilityGraph visibilityGraph;
     protected boolean modified = false;
     protected boolean isPopupTrigger;
     protected mxRubberband rubberband;
