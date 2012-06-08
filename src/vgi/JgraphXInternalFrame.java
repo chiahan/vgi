@@ -1971,7 +1971,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 return;
             }
             EdgeRoutingMinCross layout = new EdgeRoutingMinCross(this.graph);
-            layout.routeByWeightedVisibilityGraph(cell);
+            layout.routeByWeightedVisibilityGraph(cell, this.visibilityGraph);
 	}//GEN-LAST:event_routeEdgeWVGMenuItemActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addControlPointMenuItem;

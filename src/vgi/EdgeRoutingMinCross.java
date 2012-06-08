@@ -34,7 +34,87 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	public void routeByWeightedVisibilityGraph(mxCell edge) {
+	public void routeByWeightedVisibilityGraph(mxCell edge, WeightedVisibilityGraph weightedVisibilityGraph) {
+
+		if (edge == null) {
+			throw new IllegalArgumentException("Input 'edge' is null.");
+		}
+		if (!(edge.isEdge())) {
+			throw new IllegalArgumentException("Input 'edge' is not an edge.");
+		}
+		mxICell source = edge.getSource();
+		if (source == null) {
+			return;
+//			throw new IllegalArgumentException("Input 'edge' has no source vertex.");
+		}
+		mxGeometry sourceGeometry = source.getGeometry();
+		if (sourceGeometry == null) {
+			throw new IllegalArgumentException("Source vertex of input 'edge' has null position data.");
+		}
+		mxICell target = edge.getTarget();
+		if (target == null) {
+			return;
+//			throw new IllegalArgumentException("Input 'edge' has no target vertex.");
+		}
+		mxGeometry targetGeometry = target.getGeometry();
+		if (targetGeometry == null) {
+			throw new IllegalArgumentException("Target vertex of input 'edge' has no position data.");
+		}
+
+		if (source.equals(target)) {
+			//
+			// Loop transition layout to be implemented later.
+			//
+			return;
+		}
+
+		Object sourceValue = source.getValue();
+		Object targetValue = target.getValue();
+		if ((sourceValue != null) && (targetValue != null)) {
+			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
+		}
+		if (weightedVisibilityGraph == null) {
+			return;
+		}
+		weightedVisibilityGraph.addVerticesIntoOutOf(source);
+		weightedVisibilityGraph.addVerticesIntoOutOf(target);
+		Map<mxICell, List<mxICell>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
+		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
+		System.out.println(paths.size() + " path(s) is(are) found.");
+		if ((paths == null) || (paths.isEmpty())) {
+			return;
+		}
+
+		Iterator<List<mxICell>> iteratePaths = paths.iterator();
+		while (iteratePaths.hasNext()) {
+
+			mxGraph graph = this.getGraph();
+			mxICell newEdge = (mxICell) graph.insertEdge(
+					graph.getDefaultParent(),
+					null,
+					edge.getValue(),
+					source,
+					target,
+					edge.getStyle());
+			Object cells[] = {newEdge};
+			graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+			List<mxICell> path = iteratePaths.next();
+			List<mxPoint> controlPoints = new LinkedList<mxPoint>();
+			Iterator<mxICell> iterateVertices = path.iterator();
+			while (iterateVertices.hasNext()) {
+				mxICell vertex = iterateVertices.next();
+				mxGeometry geometry = vertex.getGeometry();
+				controlPoints.add(new mxPoint(geometry.getCenterX(), geometry.getCenterY()));
+			}  // End while (iterateVertices.hasNext())
+			super.setEdgePoints(newEdge, controlPoints);
+
+		}  // End while (iteratePaths.hasNext())
+
+//		Object cells[] = {edge};
+//		this.getGraph().removeCells(cells);
+	}  // End public void routeByWeightedVisibilityGraph(mxCell edge)
+
+	public void routeByWeightedVisibilityGraphV1(mxCell edge) {
 
 		if (edge == null) {
 			throw new IllegalArgumentException("Input 'edge' is null.");
@@ -108,7 +188,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 //		Object cells[] = {edge};
 //		this.getGraph().removeCells(cells);
-	}  // End public void routeByWeightedVisibilityGraph(mxCell edge)
+	}  // End public void routeByWeightedVisibilityGraphV1(mxCell edge)
 	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
 	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
 	protected static final double MINIMUM_SPACING = 9;
