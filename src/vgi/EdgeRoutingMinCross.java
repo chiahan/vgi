@@ -153,6 +153,11 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		if ((sourceValue != null) && (targetValue != null)) {
 			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
 		}
+		Object value = edge.getValue();
+		String style = edge.getStyle();
+		Object cells[] = new Object[]{edge};
+		this.getGraph().removeCells(cells);
+		cells = null;  // Object cells[] = new Object[]{edge};
 		Map<mxICell, List<mxICell>> oldToNewVerticesMap = new HashMap<mxICell, List<mxICell>>();
 		mxGraph weightedVisibilityGraph = EdgeRoutingMinCross.buildWeightedVisibilityGraph(this.getGraph(), oldToNewVerticesMap);
 		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(oldToNewVerticesMap.get(source), oldToNewVerticesMap.get(target));
@@ -168,12 +173,13 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			mxICell newEdge = (mxICell) graph.insertEdge(
 					graph.getDefaultParent(),
 					null,
-					edge.getValue(),
+					value,
 					source,
 					target,
-					edge.getStyle());
-			Object cells[] = {newEdge};
+					style);
+			cells = new Object[]{newEdge};
 			graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+			cells = null;  // cells = new Object[]{newEdge};
 			List<mxICell> path = iteratePaths.next();
 			List<mxPoint> controlPoints = new LinkedList<mxPoint>();
 			Iterator<mxICell> iterateVertices = path.iterator();
@@ -186,8 +192,6 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		}  // End while (iteratePaths.hasNext())
 
-//		Object cells[] = {edge};
-//		this.getGraph().removeCells(cells);
 	}  // End public void routeByWeightedVisibilityGraph(mxCell edge)
 	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
 	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
