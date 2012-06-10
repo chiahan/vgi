@@ -114,7 +114,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 //		this.getGraph().removeCells(cells);
 	}  // End public void routeByWeightedVisibilityGraph(mxCell edge)
 
-	public void routeByWeightedVisibilityGraphV1(mxCell edge) {
+	public void routeByWeightedVisibilityGraph(mxCell edge) {
 
 		if (edge == null) {
 			throw new IllegalArgumentException("Input 'edge' is null.");
@@ -188,7 +188,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 //		Object cells[] = {edge};
 //		this.getGraph().removeCells(cells);
-	}  // End public void routeByWeightedVisibilityGraphV1(mxCell edge)
+	}  // End public void routeByWeightedVisibilityGraph(mxCell edge)
 	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
 	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
 	protected static final double MINIMUM_SPACING = 9;
@@ -1041,7 +1041,6 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			List<List<mxICell>> pathsToBeProcessed = new LinkedList<List<mxICell>>();
 			pathsToBeProcessed.add(path);
 			path = null;  // List<mxICell> path = new LinkedList<mxICell>();
-			List<mxICell> visitedVertices = new LinkedList<mxICell>(inTargetVertices);
 
 			while (!(pathsToBeProcessed.isEmpty())) {
 
@@ -1080,13 +1079,10 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 						throw new IllegalStateException("This edge is not connected to the vertex in question.");
 					}
 
-					if (visitedVertices.contains(neighbour)) {
+					if ((path.contains(neighbour)) || (inTargetVertices.contains(neighbour))) {
 						continue;
 					}
 
-					if (!(inSourceVertices.contains(neighbour))) {
-						visitedVertices.add(neighbour);
-					}
 					double edgeCost;
 					Object object = edge.getValue();
 					if (object instanceof Number) {
@@ -1113,7 +1109,6 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 			}  // End while (!(pathsToBeProcessed.isEmpty()))
 
-			visitedVertices = null;  // List<mxICell> visitedVertices = new LinkedList<mxICell>(inTargetVertices);
 			pathsToBeProcessed = null;  // List<List<mxICell>> pathsToBeProcessed = new LinkedList<List<mxICell>>();
 
 		}  // End while (iterateVertices.hasNext())
@@ -1792,9 +1787,9 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				outGraph.removeCells(edges);
 				Object parent = outGraph.getDefaultParent();
 				Object dummyNode = outGraph.insertVertex(
-							parent,
-							null,
-							null,
+						parent,
+						null,
+						null,
 						point.getX(),
 						point.getY(),
 						0,
