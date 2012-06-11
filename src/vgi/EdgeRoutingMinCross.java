@@ -1154,15 +1154,19 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					double aHeuristicCost = EdgeRoutingMinCross.heuristicMinCostToTarget(aVertex, inTargetVertices);
 					if (vertexToCostMap.get(aVertex) + aHeuristicCost <= costToNeighbour + heuristicCost) {
 						listIterator.next();
-						int newIndex = listIterator.nextIndex();
-						if (neighbourIndex != newIndex) {
-							verticesToBeProcessed.remove(neighbour);
-							verticesToBeProcessed.add(newIndex, neighbour);
-						}
 						break;
-					}  // End if (vertexToCostMap.get(aVertex) <= costToNeighbour)
+					}
 
 				}  // End while (listIterator.hasPrevious())
+
+				if (neighbourIndex == null) {
+					throw new IllegalStateException("A neighbour vertex whose minimum cost can be updated is not in the list of vertices to be processed.  This should not happen in this algorithm.");
+				}
+				int newIndex = listIterator.nextIndex();
+				if (neighbourIndex != newIndex) {
+					verticesToBeProcessed.remove(neighbourIndex.intValue());
+					verticesToBeProcessed.add(newIndex, neighbour);
+				}
 
 			}  // End for (int index = 0; index < edgeCount; index++)
 
@@ -1427,15 +1431,19 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					}  // End if (neighbourIndex == null)
 					if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
 						listIterator.next();
-						int newIndex = listIterator.nextIndex();
-						if (neighbourIndex != newIndex) {
-							verticesToBeProcessed.remove(neighbour);
-							verticesToBeProcessed.add(newIndex, neighbour);
-						}
 						break;
 					}  // End if (vertexToCostMap.get(aVertex) <= costToNeighbour)
 
 				}  // End while (listIterator.hasPrevious())
+
+				if (neighbourIndex == null) {
+					throw new IllegalStateException("A neighbour vertex whose minimum cost can be updated is not in the list of vertices to be processed.  This should not happen in this algorithm.");
+				}
+				int newIndex = listIterator.nextIndex();
+				if (neighbourIndex != newIndex) {
+					verticesToBeProcessed.remove(neighbourIndex.intValue());
+					verticesToBeProcessed.add(newIndex, neighbour);
+				}
 
 			}  // End for (int index = 0; index < edgeCount; index++)
 
