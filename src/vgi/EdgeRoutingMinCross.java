@@ -161,7 +161,6 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Map<mxICell, List<mxICell>> oldToNewVerticesMap = new HashMap<mxICell, List<mxICell>>();
 		mxGraph weightedVisibilityGraph = EdgeRoutingMinCross.buildWeightedVisibilityGraph(this.getGraph(), oldToNewVerticesMap);
 		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(oldToNewVerticesMap.get(source), oldToNewVerticesMap.get(target));
-		System.out.println(paths.size() + " path(s) is(are) found.");
 		if ((paths == null) || (paths.isEmpty())) {
 			return;
 		}
@@ -241,7 +240,6 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Map<mxICell, List<mxICell>> oldToNewVerticesMap = new HashMap<mxICell, List<mxICell>>();
 		mxGraph weightedVisibilityGraph = EdgeRoutingMinCross.buildWeightedVisibilityGraph(this.getGraph(), oldToNewVerticesMap);
 		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPathsAStar(oldToNewVerticesMap.get(source), oldToNewVerticesMap.get(target));
-		System.out.println(paths.size() + " path(s) is(are) found.");
 		if ((paths == null) || (paths.isEmpty())) {
 			return;
 		}
@@ -556,15 +554,15 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					if (intersection == null) {
 						continue;
 					}
-					if (((intersection.getX() == hindrance.x1) && (intersection.getY() == hindrance.y1))
-							|| ((intersection.getX() == hindrance.x2) && (intersection.getY() == hindrance.y2))) {
+						if (((intersection.getX() == hindrance.x1) && (intersection.getY() == hindrance.y1))
+								|| ((intersection.getX() == hindrance.x2) && (intersection.getY() == hindrance.y2))) {
 						if (!(endPointIntersectionsList.contains(intersection))) {
 							endPointIntersectionsList.add(intersection);
 							cost = cost + 1;
 						}
 					} else {
 						cost = cost + 1;
-					}
+						}
 
 				}  // End for (int index3 = 0; index3 < hindrancesCount; index3++)
 
@@ -576,6 +574,9 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		hindrancesList = null;  // List<Hindrance> hindrancesList = new ArrayList<Hindrance>();
 		roadblocksList = null;  // List<mxICell> roadblocksList = new LinkedList<mxICell>();
+		System.out.println("The weighted visibility graph has "
+				+ (outGraph.getChildVertices(parent)).length + " vertices and "
+				+ (outGraph.getChildEdges(parent)).length + " edges.");
 
 		HashMap<mxICell, mxICell> oldToNewVerticesMap = new HashMap<mxICell, mxICell>();
 		objects = inGraph.getChildVertices(inGraph.getDefaultParent());
@@ -978,7 +979,11 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 	public static List<List<mxICell>> findShortestPathsAStar(
 			List<mxICell> inSourceVertices,
 			List<mxICell> inTargetVertices) {
-		return EdgeRoutingMinCross.findShortestPathsAStar(inSourceVertices, inTargetVertices, null, null);
+		return EdgeRoutingMinCross.findShortestPathsAStar(
+				inSourceVertices,
+				inTargetVertices,
+				null,
+				null);
 	}
 
 	public static List<List<mxICell>> findShortestPathsAStar(
@@ -1035,6 +1040,9 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		}  // End while (iterateVertices.hasNext())
 
+		int numVerticesProcessed = 0;
+		int numEdgesProcessed = 0;
+
 		while (!(verticesToBeProcessed.isEmpty())) {
 
 			mxICell vertex = verticesToBeProcessed.remove(0);
@@ -1042,6 +1050,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			if (cost == null) {
 				throw new IllegalStateException("The cost variable cannot be null.");
 			}
+			numVerticesProcessed++;
 
 			if (cost > minCostToTarget) {
 				break;
@@ -1063,6 +1072,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			}  // End if (targetsToBeReached.contains(vertex))
 
 			int edgeCount = vertex.getEdgeCount();
+			numEdgesProcessed += edgeCount;
 			for (int index = 0; index < edgeCount; index++) {
 
 				mxICell edge = vertex.getEdgeAt(index);
@@ -1132,11 +1142,11 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					}  // End if (neighbourIndex == null)
 					if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
 						listIterator.next();
-						int newIndex = listIterator.nextIndex();
-						if (neighbourIndex != newIndex) {
+				int newIndex = listIterator.nextIndex();
+				if (neighbourIndex != newIndex) {
 							verticesToBeProcessed.remove(neighbour);
-							verticesToBeProcessed.add(newIndex, neighbour);
-						}
+					verticesToBeProcessed.add(newIndex, neighbour);
+				}
 						break;
 					}  // End if (vertexToCostMap.get(aVertex) <= costToNeighbour)
 
@@ -1249,6 +1259,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		vertexToCostMap = null;  // Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
 
+		System.out.println("A* algorithm finds " + outPaths.size() + " path(s) with cost " + minCostToTarget
+				+ " by processing " + numVerticesProcessed + " vertices and " + numEdgesProcessed + " edges.");
 		return outPaths;
 	}  // End public static List<List<mxICell>> findShortestPathsAStar(...)
 
@@ -1301,6 +1313,9 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		}  // End while (iterateVertices.hasNext())
 
+		int numVerticesProcessed = 0;
+		int numEdgesProcessed = 0;
+
 		while (!(verticesToBeProcessed.isEmpty())) {
 
 			mxICell vertex = verticesToBeProcessed.remove(0);
@@ -1308,6 +1323,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			if (cost == null) {
 				throw new IllegalStateException("The cost variable cannot be null.");
 			}
+			numVerticesProcessed++;
 
 			if (cost > minCostToTarget) {
 				break;
@@ -1329,6 +1345,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			}  // End if (targetsToBeReached.contains(vertex))
 
 			int edgeCount = vertex.getEdgeCount();
+			numEdgesProcessed += edgeCount;
 			for (int index = 0; index < edgeCount; index++) {
 
 				mxICell edge = vertex.getEdgeAt(index);
@@ -1515,6 +1532,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		vertexToCostMap = null;  // Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
 
+		System.out.println("Dijkstra's algorithm finds " + outPaths.size() + " path(s) with cost " + minCostToTarget
+				+ " by processing " + numVerticesProcessed + " vertices and " + numEdgesProcessed + " edges.");
 		return outPaths;
 	}  // End public static List<List<mxICell>> findShortestPaths(...)
 
