@@ -1020,7 +1020,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}
 		List<mxICell> verticesToBeProcessed = new LinkedList<mxICell>();
 		Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
-		double minCostToBeProcessed = Double.POSITIVE_INFINITY;
+		double minCostToBeProcessed = 0.0d;
 		boolean isPathFound = false;
 
 		Iterator<mxICell> iterateVertices = inSourceVertices.iterator();
@@ -1031,16 +1031,14 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				throw new IllegalStateException("The vertex variable is not a vertex.");
 			}
 
+			vertexToCostMap.put(vertex, minCostToBeProcessed);
 			double heuristicCost = EdgeRoutingMinCross.heuristicMinCostToTarget(vertex, inTargetVertices);
-			if (heuristicCost < minCostToBeProcessed) {
-				minCostToBeProcessed = heuristicCost;
-			}
-			vertexToCostMap.put(vertex, heuristicCost);
 
 			ListIterator<mxICell> listIterator = verticesToBeProcessed.listIterator(verticesToBeProcessed.size());
 			while (listIterator.hasPrevious()) {
 				mxICell aVertex = listIterator.previous();
-				if (vertexToCostMap.get(aVertex) <= heuristicCost) {
+				double aHeuristicCost = EdgeRoutingMinCross.heuristicMinCostToTarget(aVertex, inTargetVertices);
+				if (aHeuristicCost <= heuristicCost) {
 					listIterator.next();
 					break;
 				}
@@ -1111,19 +1109,21 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					if (weight < 0) {
 						throw new IllegalStateException("The weight of an edge cannot be negative for this shortest path algorithm.");
 					}
-					costToNeighbour = cost + weight + EdgeRoutingMinCross.heuristicMinCostToTarget(neighbour, inTargetVertices);
+					costToNeighbour = cost + weight;
 				} else {
-					costToNeighbour = cost + 1 + EdgeRoutingMinCross.heuristicMinCostToTarget(neighbour, inTargetVertices);
+					costToNeighbour = cost + 1;
 				}
 
 				Double neighbourCost = vertexToCostMap.get(neighbour);
 				if (neighbourCost == null) {
 					vertexToCostMap.put(neighbour, costToNeighbour);
+					double heuristicCost = EdgeRoutingMinCross.heuristicMinCostToTarget(neighbour, inTargetVertices);
 
 					ListIterator<mxICell> listIterator = verticesToBeProcessed.listIterator(verticesToBeProcessed.size());
 					while (listIterator.hasPrevious()) {
 						mxICell aVertex = listIterator.previous();
-						if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
+						double aHeuristicCost = EdgeRoutingMinCross.heuristicMinCostToTarget(aVertex, inTargetVertices);
+						if (vertexToCostMap.get(aVertex) + aHeuristicCost <= costToNeighbour + heuristicCost) {
 							listIterator.next();
 							break;
 						}
@@ -1138,6 +1138,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				}
 
 				vertexToCostMap.put(neighbour, costToNeighbour);
+				double heuristicCost = EdgeRoutingMinCross.heuristicMinCostToTarget(neighbour, inTargetVertices);
 				Integer neighbourIndex = null;
 
 				ListIterator<mxICell> listIterator = verticesToBeProcessed.listIterator(verticesToBeProcessed.size());
@@ -1150,7 +1151,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 						}
 						continue;
 					}  // End if (neighbourIndex == null)
-					if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
+					double aHeuristicCost = EdgeRoutingMinCross.heuristicMinCostToTarget(aVertex, inTargetVertices);
+					if (vertexToCostMap.get(aVertex) + aHeuristicCost <= costToNeighbour + heuristicCost) {
 						listIterator.next();
 						int newIndex = listIterator.nextIndex();
 						if (neighbourIndex != newIndex) {
