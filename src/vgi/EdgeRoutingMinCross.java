@@ -274,6 +274,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
 	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
 	protected static final double MINIMUM_SPACING = 9;
+	protected static final double CROSSING_COST = 500;
 
 	protected static class Hindrance {
 
@@ -535,8 +536,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					continue;
 				}
 
-				List<mxPoint> endPointIntersectionsList = new ArrayList<mxPoint>();
-				int cost = 0;
+				double crossingNumber = 0.0d;
 				int hindrancesCount = hindrancesList.size();
 
 				for (int index3 = 0; index3 < hindrancesCount; index3++) {
@@ -554,18 +554,29 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					if (intersection == null) {
 						continue;
 					}
+					if (((intersection.getX() == geometry1.getCenterX()) && (intersection.getY() == geometry1.getCenterY()))
+							|| ((intersection.getX() == geometry2.getCenterX()) && (intersection.getY() == geometry2.getCenterY()))) {
 						if (((intersection.getX() == hindrance.x1) && (intersection.getY() == hindrance.y1))
 								|| ((intersection.getX() == hindrance.x2) && (intersection.getY() == hindrance.y2))) {
-						if (!(endPointIntersectionsList.contains(intersection))) {
-							endPointIntersectionsList.add(intersection);
-							cost = cost + 1;
+							crossingNumber = crossingNumber + 0.25;
+						} else {
+							crossingNumber = crossingNumber + 0.5;
 						}
 					} else {
-						cost = cost + 1;
+						if (((intersection.getX() == hindrance.x1) && (intersection.getY() == hindrance.y1))
+								|| ((intersection.getX() == hindrance.x2) && (intersection.getY() == hindrance.y2))) {
+							crossingNumber = crossingNumber + 0.5;
+						} else {
+							crossingNumber = crossingNumber + 1;
 						}
+					}
 
 				}  // End for (int index3 = 0; index3 < hindrancesCount; index3++)
 
+				double cost = Vector2D.length(
+						geometry1.getCenterX() - geometry2.getCenterX(),
+						geometry1.getCenterY() - geometry2.getCenterY())
+						+ CROSSING_COST * crossingNumber;
 				outGraph.insertEdge(parent, null, cost, vertex1, vertex2);
 
 			}  // End for (int index2 = index + 1; index2 < objects.length; index2++)
@@ -939,41 +950,40 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 	protected static double heuristicMinCostToTarget(mxICell inVertex, List<mxICell> inTargetVertices) {
 
-		return 0;
-//		if ((inVertex == null) || (!(inVertex.isVertex()))) {
-//			throw new IllegalArgumentException("Input 'inVertex' is null or not a vertex.");
-//		}
-//		mxGeometry geometry = inVertex.getGeometry();
-//		if (geometry == null) {
-//			throw new IllegalArgumentException("Input 'inVertex' has null geometry.");
-//		}
-//		if ((inTargetVertices == null) || (inTargetVertices.isEmpty())) {
-//			throw new IllegalArgumentException("Input 'inTargetVertices' is null or empty.");
-//		}
-//
-//		double minDistanceToTarget = Double.POSITIVE_INFINITY;
-//
-//		Iterator<mxICell> iterateTargetVertices = inTargetVertices.iterator();
-//		while (iterateTargetVertices.hasNext()) {
-//
-//			mxICell target = iterateTargetVertices.next();
-//			if ((target == null) || (!(target.isVertex()))) {
-//				throw new IllegalArgumentException("Input 'inTargetVertices' has a vertex that is null or not a vertex.");
-//			}
-//			mxGeometry targetGeometry = target.getGeometry();
-//			if (targetGeometry == null) {
-//				throw new IllegalArgumentException("Input 'inTargetVertices' has a vertex that has null geometry.");
-//			}
-//			double distance = Vector2D.length(
-//					targetGeometry.getCenterX() - geometry.getCenterX(),
-//					targetGeometry.getCenterY() - geometry.getCenterY());
-//			if (distance < minDistanceToTarget) {
-//				minDistanceToTarget = distance;
-//			}
-//
-//		}  // End while (iterateTargetVertices.hasNext())
-//
-//		return minDistanceToTarget;
+		if ((inVertex == null) || (!(inVertex.isVertex()))) {
+			throw new IllegalArgumentException("Input 'inVertex' is null or not a vertex.");
+		}
+		mxGeometry geometry = inVertex.getGeometry();
+		if (geometry == null) {
+			throw new IllegalArgumentException("Input 'inVertex' has null geometry.");
+		}
+		if ((inTargetVertices == null) || (inTargetVertices.isEmpty())) {
+			throw new IllegalArgumentException("Input 'inTargetVertices' is null or empty.");
+		}
+
+		double minDistanceToTarget = Double.POSITIVE_INFINITY;
+
+		Iterator<mxICell> iterateTargetVertices = inTargetVertices.iterator();
+		while (iterateTargetVertices.hasNext()) {
+
+			mxICell target = iterateTargetVertices.next();
+			if ((target == null) || (!(target.isVertex()))) {
+				throw new IllegalArgumentException("Input 'inTargetVertices' has a vertex that is null or not a vertex.");
+			}
+			mxGeometry targetGeometry = target.getGeometry();
+			if (targetGeometry == null) {
+				throw new IllegalArgumentException("Input 'inTargetVertices' has a vertex that has null geometry.");
+			}
+			double distance = Vector2D.length(
+					targetGeometry.getCenterX() - geometry.getCenterX(),
+					targetGeometry.getCenterY() - geometry.getCenterY());
+			if (distance < minDistanceToTarget) {
+				minDistanceToTarget = distance;
+			}
+
+		}  // End while (iterateTargetVertices.hasNext())
+
+		return minDistanceToTarget;
 	}  // End protected static double heuristicMinCostToTarget(mxICell inVertex, List<mxICell> inTargetVertices)
 
 	public static List<List<mxICell>> findShortestPathsAStar(
@@ -1142,11 +1152,11 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					}  // End if (neighbourIndex == null)
 					if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
 						listIterator.next();
-				int newIndex = listIterator.nextIndex();
-				if (neighbourIndex != newIndex) {
+						int newIndex = listIterator.nextIndex();
+						if (neighbourIndex != newIndex) {
 							verticesToBeProcessed.remove(neighbour);
-					verticesToBeProcessed.add(newIndex, neighbour);
-				}
+							verticesToBeProcessed.add(newIndex, neighbour);
+						}
 						break;
 					}  // End if (vertexToCostMap.get(aVertex) <= costToNeighbour)
 
@@ -1240,7 +1250,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 					Double neighbourCost = vertexToCostMap.get(neighbour);
 					if ((neighbourCost == null)
-							|| (neighbourCost != cost - edgeCost)) {
+							|| (Math.abs(cost - edgeCost - neighbourCost) >= 0.5d)) {
 						continue;
 					}
 
@@ -1513,7 +1523,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 					Double neighbourCost = vertexToCostMap.get(neighbour);
 					if ((neighbourCost == null)
-							|| (neighbourCost != cost - edgeCost)) {
+							|| (Math.abs(cost - edgeCost - neighbourCost) >= 0.5d)) {
 						continue;
 					}
 
