@@ -1968,7 +1968,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 return;
             }
             EdgeRoutingMinCross layout = new EdgeRoutingMinCross(this.graph);
-            layout.routeAStar(cell);
+            layout.route(cell);
 	}//GEN-LAST:event_routeEdgeMenuItemActionPerformed
 
 	private void routeEdgeWVGMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_routeEdgeWVGMenuItemActionPerformed
