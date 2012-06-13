@@ -20,7 +20,7 @@ import vgi.SingleVertexEdgesLayout.Vector2DComparator;
  */
 public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 
-	protected static final boolean IS_ENABLED = false;
+	protected static final boolean IS_ENABLED = true;
 	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
 	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
 	protected static final double MINIMUM_SPACING = VISIBILITY_GRAPH_VERTEX_WDITH;

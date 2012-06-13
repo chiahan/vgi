@@ -85,7 +85,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         this.infoSplitPane = infoSplitPane;
         this.graph = graph;
-        this.visibilityGraph = new WeightedVisibilityGraph();
+        this.visibilityGraph = null;//new WeightedVisibilityGraph();
         this.automata = automata;
         //currentFile=file;
         setTitle(filename);
@@ -145,7 +145,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			if (!(cell.isVertex())) {
 				continue;
 			}
-			this.visibilityGraph.addRoadblock(cell);
+			if (this.visibilityGraph != null) {
+				this.visibilityGraph.addRoadblock(cell);
+			}
 		}  // End while (iterateCells.hasNext())
 
 		setupTranitions();
@@ -634,7 +636,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         setModified(true);
         undoStack.push(STATUS_ADD);
 
-		this.visibilityGraph.addRoadblock(vertex);
+		if (this.visibilityGraph != null) {
+			this.visibilityGraph.addRoadblock(vertex);
+		}
     }
 
     public void addState(State state) {
@@ -795,7 +799,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         }
        
-       this.visibilityGraph.addHindrance(edge);
+		if (this.visibilityGraph != null) {
+			this.visibilityGraph.addHindrance(edge);
+		}
     }  // End public void addTransition(Transition transition)
 
     public void addControlPoint() {
