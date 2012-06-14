@@ -24,6 +24,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
 	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
 	protected static final double MINIMUM_SPACING = VISIBILITY_GRAPH_VERTEX_WDITH;
+	protected static final double CROSSING_COST = 500;
 
 	protected static class LineSegment {
 
@@ -141,16 +142,13 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 				continue;
 			}
 
-			int cost = 0;
-			iterateCells = this.hindranceToLineSegmentsMap.keySet().iterator();
-			while (iterateCells.hasNext()) {
+			double crossingNumber = 0.0d;
 
-				mxICell cell = iterateCells.next();
+			for (mxICell cell : this.hindranceToLineSegmentsMap.keySet()) {
+
 				List<LineSegment> lineSegments = this.hindranceToLineSegmentsMap.get(cell);
-				Iterator<LineSegment> iterateLineSegments = lineSegments.iterator();
-				while (iterateLineSegments.hasNext()) {
+				for (LineSegment lineSegment : lineSegments) {
 
-					LineSegment lineSegment = iterateLineSegments.next();
 					mxPoint intersection = mxUtils.intersection(
 							geometry.getCenterX(),
 							geometry.getCenterY(),
@@ -163,17 +161,31 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 					if (intersection == null) {
 						continue;
 					}
-					if (((intersection.getX() == lineSegment.x1) && (intersection.getY() == lineSegment.y1))
-							|| ((intersection.getX() == lineSegment.x2) && (intersection.getY() == lineSegment.y2))) {
-						cost = cost + 1;
+					if (((intersection.getX() == geometry.getCenterX()) && (intersection.getY() == geometry.getCenterY()))
+							|| ((intersection.getX() == anotherGeometry.getCenterX()) && (intersection.getY() == anotherGeometry.getCenterY()))) {
+						if (((intersection.getX() == lineSegment.x1) && (intersection.getY() == lineSegment.y1))
+								|| ((intersection.getX() == lineSegment.x2) && (intersection.getY() == lineSegment.y2))) {
+							crossingNumber = crossingNumber + 0.25;
+						} else {
+							crossingNumber = crossingNumber + 0.5;
+						}
 					} else {
-						cost = cost + 1;
+						if (((intersection.getX() == lineSegment.x1) && (intersection.getY() == lineSegment.y1))
+								|| ((intersection.getX() == lineSegment.x2) && (intersection.getY() == lineSegment.y2))) {
+							crossingNumber = crossingNumber + 0.5;
+						} else {
+							crossingNumber = crossingNumber + 1;
+						}
 					}
 
-				}  // End while (iterateLineSegments.hasNext())
+				}  // End for (LineSegment lineSegment : lineSegments)
 
-			}  // End while (iterateCells.hasNext())
+			}  // End for (mxICell cell : this.hindranceToLineSegmentsMap.keySet())
 
+			double cost = Vector2D.length(
+					geometry.getCenterX() - anotherGeometry.getCenterX(),
+					geometry.getCenterY() - anotherGeometry.getCenterY())
+					+ CROSSING_COST * crossingNumber;
 			this.insertEdge(
 					parent,
 					null,
@@ -299,86 +311,72 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 			throw new IllegalArgumentException("Input 'hindrance' has null geometry.");
 		}
 		mxICell source = hindrance.getTerminal(true);
+		mxPoint sourcePoint = null;
 		if (source == null) {
-			throw new IllegalStateException("The 'edge' variable has null source.");
-		}
-		mxGeometry sourceGeometry = source.getGeometry();
-		if (sourceGeometry == null) {
-			throw new IllegalStateException("The 'source' variable has null geometry.");
+			sourcePoint = geometry.getSourcePoint();
+		} else {
+			mxGeometry sourceGeometry = source.getGeometry();
+			if (sourceGeometry == null) {
+				throw new IllegalStateException("The 'source' variable has null geometry.");
+			}
+			sourcePoint = new mxPoint(sourceGeometry.getCenterX(), sourceGeometry.getCenterY());
 		}
 		mxICell target = hindrance.getTerminal(false);
+		mxPoint targetPoint = null;
 		if (target == null) {
-			throw new IllegalStateException("The 'edge' variable has null target.");
+			targetPoint = geometry.getTargetPoint();
+		} else {
+			mxGeometry targetGeometry = target.getGeometry();
+			if (targetGeometry == null) {
+				throw new IllegalStateException("The 'target' variable has null geometry.");
+			}
+			targetPoint = new mxPoint(targetGeometry.getCenterX(), targetGeometry.getCenterY());
 		}
-		mxGeometry targetGeometry = target.getGeometry();
-		if (targetGeometry == null) {
-			throw new IllegalStateException("The 'target' variable has null geometry.");
+		if ((sourcePoint == null) || (targetPoint == null)) {
+			throw new IllegalStateException("The 'sourcePoint' or 'targetPoint' variable is null.");
 		}
 
 		List<LineSegment> lineSegments = new LinkedList<LineSegment>();
 		List<mxPoint> newVerticesPositions = new LinkedList<mxPoint>();
-		mxPoint previousPoint = new mxPoint(sourceGeometry.getCenterX(), sourceGeometry.getCenterY());
+		mxPoint previousPoint = sourcePoint;
 		Vector2D previousVector = null;
+		List<mxPoint> allPoints = new LinkedList<mxPoint>();
 		List<mxPoint> points = geometry.getPoints();
+		if (points != null) {
+			allPoints.addAll(points);
+		}
+		points = null;  // List<mxPoint> points = geometry.getPoints();
+		allPoints.add(targetPoint);
 
-		if ((points != null) && (!(points.isEmpty()))) {
+		for (mxPoint point : allPoints) {
 
-			Iterator<mxPoint> iteratePoints = points.iterator();
-			while (iteratePoints.hasNext()) {
+			LineSegment lineSegment = new LineSegment(
+					previousPoint.getX(),
+					previousPoint.getY(),
+					point.getX(),
+					point.getY());
+			lineSegments.add(lineSegment);
+			lineSegment = null; // LineSegment lineSegment = new LineSegment(...)
+			Vector2D vector = Vector2D.subtract(
+					point.getX(),
+					point.getY(),
+					previousPoint.getX(),
+					previousPoint.getY());
+			if (previousVector != null) {
+				Vector2D externalBisector = previousVector.unitVector().
+						subtract(vector.unitVector()).
+						scalarProduct(MINIMUM_SPACING);
+				newVerticesPositions.add(new mxPoint(
+						previousPoint.getX() + externalBisector.getX(),
+						previousPoint.getY() + externalBisector.getY()));
+			}  // End if (previousVector != null)
 
-				mxPoint point = iteratePoints.next();
-				LineSegment lineSegment = new LineSegment(
-						previousPoint.getX(),
-						previousPoint.getY(),
-						point.getX(),
-						point.getY());
-				lineSegments.add(lineSegment);
-				lineSegment = null; // LineSegment lineSegment = new LineSegment(...)
-				Vector2D vector = Vector2D.subtract(
-						point.getX(),
-						point.getY(),
-						previousPoint.getX(),
-						previousPoint.getY());
-				if (previousVector != null) {
-					Vector2D externalBisector = previousVector.unitVector().
-							subtract(vector.unitVector()).
-							unitVector().
-							scalarProduct(MINIMUM_SPACING);
-					newVerticesPositions.add(new mxPoint(
-							previousPoint.getX() + externalBisector.getX(),
-							previousPoint.getY() + externalBisector.getY()));
-				}  // End if (previousVector != null)
+			previousPoint = point;
+			previousVector = vector;
 
-				previousPoint = point;
-				previousVector = vector;
+		}  // End for (mxPoint point : allPoints)
 
-			}  // End while (iteratePoints.hasNext())
-
-		}  // End if ((points != null) && (!(points.isEmpty())))
-
-		LineSegment lineSegment = new LineSegment(
-				previousPoint.getX(),
-				previousPoint.getY(),
-				targetGeometry.getCenterX(),
-				targetGeometry.getCenterY());
-		lineSegments.add(lineSegment);
-		lineSegment = null; // LineSegment lineSegment = new LineSegment(...)
-		Vector2D vector = Vector2D.subtract(
-				targetGeometry.getCenterX(),
-				targetGeometry.getCenterY(),
-				previousPoint.getX(),
-				previousPoint.getY());
-		if (previousVector != null) {
-			Vector2D externalBisector = previousVector.unitVector().
-					subtract(vector.unitVector()).
-					unitVector().
-					scalarProduct(MINIMUM_SPACING);
-			newVerticesPositions.add(new mxPoint(
-					previousPoint.getX() + externalBisector.getX(),
-					previousPoint.getY() + externalBisector.getY()));
-		}  // End if (previousVector != null)
 		this.hindranceToLineSegmentsMap.put(hindrance, lineSegments);
-
 		Object parent = this.getDefaultParent();
 		Object objects[] = this.getChildEdges(parent);
 
@@ -395,7 +393,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 			if (source == null) {
 				throw new IllegalStateException("The 'edge' variable has null source.");
 			}
-			sourceGeometry = source.getGeometry();
+			mxGeometry sourceGeometry = source.getGeometry();
 			if (sourceGeometry == null) {
 				throw new IllegalStateException("The 'source' variable has null geometry.");
 			}
@@ -403,7 +401,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 			if (target == null) {
 				throw new IllegalStateException("The 'edge' variable has null target.");
 			}
-			targetGeometry = target.getGeometry();
+			mxGeometry targetGeometry = target.getGeometry();
 			if (targetGeometry == null) {
 				throw new IllegalStateException("The 'target' variable has null geometry.");
 			}
@@ -412,12 +410,13 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 				throw new IllegalStateException("The 'edge' variable's value is not of the type Number.");
 			}
 			double cost = ((Number) object).doubleValue();
+			double crossingNumber = 0.0d;
 
 			Iterator<LineSegment> iterateLineSegments = lineSegments.iterator();
 			while (iterateLineSegments.hasNext()) {
 
-				lineSegment = iterateLineSegments.next();
-				mxPoint point = mxUtils.intersection(
+				LineSegment lineSegment = iterateLineSegments.next();
+				mxPoint intersection = mxUtils.intersection(
 						sourceGeometry.getCenterX(),
 						sourceGeometry.getCenterY(),
 						targetGeometry.getCenterX(),
@@ -426,13 +425,30 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 						lineSegment.y1,
 						lineSegment.x2,
 						lineSegment.y2);
-				if (point != null) {
-					cost = cost + 1;
+				if (intersection == null) {
+					continue;
+				}
+				if (((intersection.getX() == sourceGeometry.getCenterX()) && (intersection.getY() == sourceGeometry.getCenterY()))
+						|| ((intersection.getX() == targetGeometry.getCenterX()) && (intersection.getY() == targetGeometry.getCenterY()))) {
+					if (((intersection.getX() == lineSegment.x1) && (intersection.getY() == lineSegment.y1))
+							|| ((intersection.getX() == lineSegment.x2) && (intersection.getY() == lineSegment.y2))) {
+						crossingNumber = crossingNumber + 0.25;
+					} else {
+						crossingNumber = crossingNumber + 0.5;
+					}
+				} else {
+					if (((intersection.getX() == lineSegment.x1) && (intersection.getY() == lineSegment.y1))
+							|| ((intersection.getX() == lineSegment.x2) && (intersection.getY() == lineSegment.y2))) {
+						crossingNumber = crossingNumber + 0.5;
+					} else {
+						crossingNumber = crossingNumber + 1;
+					}
 				}
 
 			}  // End while (iterateLineSegments.hasNext())
 
-			if (cost != ((Number) object).doubleValue()) {
+			if (crossingNumber > 0.0d) {
+				cost = cost + CROSSING_COST * crossingNumber;
 				edge.setValue(cost);
 			}
 

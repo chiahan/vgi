@@ -39,18 +39,16 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			double inLineStartY,
 			double inLineEndX,
 			double inLineEndY,
-			Set<mxICell> inOutPotentialRoadblocks) {
+			Set<mxICell> inPotentialRoadblocks) {
 
-		if (inOutPotentialRoadblocks == null) {
-			throw new IllegalArgumentException("Input 'inOutPotentialRoadblocks' is null.");
+		if (inPotentialRoadblocks == null) {
+			throw new IllegalArgumentException("Input 'inPotentialRoadblocks' is null.");
 		}
 
 		Set<mxICell> outRoadblocks = new LinkedHashSet<mxICell>();
 
-		Iterator<mxICell> iterateCells = inOutPotentialRoadblocks.iterator();
-		while (iterateCells.hasNext()) {
+		for (mxICell vertex : inPotentialRoadblocks) {
 
-			mxICell vertex = iterateCells.next();
 			if (!(vertex.isVertex())) {
 				throw new IllegalStateException("The 'vertex' variable is not a vertex.");
 			}
@@ -63,13 +61,65 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				outRoadblocks.add(vertex);
 			}
 
-		}  // End while (iterateCells.hasNext())
+		}  // End for (mxICell vertex : inPotentialRoadblocks)
 
-		iterateCells = outRoadblocks.iterator();
-		while (iterateCells.hasNext()) {
-			mxICell roadblock = iterateCells.next();
-			inOutPotentialRoadblocks.remove(roadblock);
+		return outRoadblocks;
+	}  // protected static Set<mxICell> findRoadblocks(...)
+
+	protected static Set<mxICell> findRoadblocks(
+			List<mxICell> inPath,
+			Set<mxICell> inPotentialRoadblocks) {
+
+		if ((inPath == null)
+				|| (inPotentialRoadblocks == null)) {
+			throw new IllegalArgumentException("Input 'inPath' or inPotentialRoadblocks' is null.");
 		}
+
+		Set<mxICell> outRoadblocks = new LinkedHashSet<mxICell>();
+		mxGeometry previousGeometry = null;
+
+		for (mxICell vertex : inPath) {
+
+			if (!(vertex.isVertex())) {
+				throw new IllegalStateException("The 'vertex' variable is not a vertex.");
+			}
+			mxGeometry geometry = vertex.getGeometry();
+			if (geometry == null) {
+				throw new IllegalStateException("The 'vertex' variable has null geometry.");
+			}
+			if (previousGeometry != null) {
+				outRoadblocks.addAll(EdgeRoutingMinCross.findRoadblocks(
+						previousGeometry.getCenterX(),
+						previousGeometry.getCenterY(),
+						geometry.getCenterX(),
+						geometry.getCenterY(),
+						inPotentialRoadblocks));
+			}  // End if (previousGeometry != null)
+			previousGeometry = geometry;
+
+		}  // End for (mxICell vertex : path)
+
+		return outRoadblocks;
+	}  // protected static Set<mxICell> findRoadblocks(...)
+
+	protected static Set<mxICell> findRoadblocks(
+			Collection<List<mxICell>> inPaths,
+			Set<mxICell> inPotentialRoadblocks) {
+
+		if ((inPaths == null)
+				|| (inPotentialRoadblocks == null)) {
+			throw new IllegalArgumentException("Input 'inPaths' or inPotentialRoadblocks' is null.");
+		}
+
+		Set<mxICell> outRoadblocks = new LinkedHashSet<mxICell>();
+
+		for (List<mxICell> path : inPaths) {
+
+			outRoadblocks.addAll(EdgeRoutingMinCross.findRoadblocks(
+					path,
+					inPotentialRoadblocks));
+
+		}  // End for (List<mxICell> path : inPaths)
 
 		return outRoadblocks;
 	}  // protected static Set<mxICell> findRoadblocks(...)
@@ -79,18 +129,16 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			double inLineStartY,
 			double inLineEndX,
 			double inLineEndY,
-			Set<mxICell> inOutPotentialHindrances) {
+			Set<mxICell> inPotentialHindrances) {
 
-		if (inOutPotentialHindrances == null) {
-			throw new IllegalArgumentException("Input 'inOutPotentialHindrances' is null.");
+		if (inPotentialHindrances == null) {
+			throw new IllegalArgumentException("Input 'inPotentialHindrances' is null.");
 		}
 
 		Set<mxICell> outHindrances = new LinkedHashSet<mxICell>();
 
-		Iterator<mxICell> iterateCells = inOutPotentialHindrances.iterator();
-		while (iterateCells.hasNext()) {
+		for (mxICell edge : inPotentialHindrances) {
 
-			mxICell edge = iterateCells.next();
 			if (!(edge.isEdge())) {
 				throw new IllegalStateException("The 'edge' variable is not an edge.");
 			}
@@ -112,7 +160,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			mxICell target = edge.getTerminal(false);
 			mxPoint targetPoint = null;
 			if (target == null) {
-				targetPoint = geometry.getSourcePoint();
+				targetPoint = geometry.getTargetPoint();
 			} else {
 				mxGeometry targetGeometry = target.getGeometry();
 				if (targetGeometry == null) {
@@ -131,9 +179,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			allPoints.add(targetPoint);
 			mxPoint previousPoint = sourcePoint;
 
-			Iterator<mxPoint> iteratePoints = allPoints.iterator();
-			while (iteratePoints.hasNext()) {
-				mxPoint point = iteratePoints.next();
+			for (mxPoint point : allPoints) {
 				mxPoint intersection = mxUtils.intersection(
 						inLineStartX,
 						inLineStartY,
@@ -148,20 +194,72 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					outHindrances.add(edge);
 					break;
 				}
-			}  // End while (iteratePoints.hasNext())
+			}  // End for (mxPoint point : allPoints)
 
 			allPoints = null;  // List<mxPoint> allPoints = new LinkedList<mxPoint>();
 
-		}  // End while (iterateCells.hasNext())
-
-		iterateCells = outHindrances.iterator();
-		while (iterateCells.hasNext()) {
-			mxICell hindrance = iterateCells.next();
-			inOutPotentialHindrances.remove(hindrance);
-		}
+		}  // End for (mxICell edge : inPotentialHindrances)
 
 		return outHindrances;
-	}  // protected static List<mxICell> findHindrances(...)
+	}  // protected static Set<mxICell> findHindrances(...)
+
+	protected static Set<mxICell> findHindrances(
+			List<mxICell> inPath,
+			Set<mxICell> inPotentialHindrances) {
+
+		if ((inPath == null)
+				|| (inPotentialHindrances == null)) {
+			throw new IllegalArgumentException("Input 'inPath' or inPotentialHindrances' is null.");
+		}
+
+		Set<mxICell> outHindrances = new LinkedHashSet<mxICell>();
+		mxGeometry previousGeometry = null;
+
+		for (mxICell vertex : inPath) {
+
+			if (!(vertex.isVertex())) {
+				throw new IllegalStateException("The 'vertex' variable is not a vertex.");
+			}
+			mxGeometry geometry = vertex.getGeometry();
+			if (geometry == null) {
+				throw new IllegalStateException("The 'vertex' variable has null geometry.");
+			}
+			if (previousGeometry != null) {
+				outHindrances.addAll(EdgeRoutingMinCross.findHindrances(
+						previousGeometry.getCenterX(),
+						previousGeometry.getCenterY(),
+						geometry.getCenterX(),
+						geometry.getCenterY(),
+						inPotentialHindrances));
+			}  // End if (previousGeometry != null)
+			previousGeometry = geometry;
+
+		}  // End for (mxICell vertex : path)
+
+		return outHindrances;
+	}  // protected static Set<mxICell> findHindrances(...)
+
+	protected static Set<mxICell> findHindrances(
+			Collection<List<mxICell>> inPaths,
+			Set<mxICell> inPotentialHindrances) {
+
+		if ((inPaths == null)
+				|| (inPotentialHindrances == null)) {
+			throw new IllegalArgumentException("Input 'inPaths' or inPotentialHindrances' is null.");
+		}
+
+		Set<mxICell> outHindrances = new LinkedHashSet<mxICell>();
+
+		for (List<mxICell> path : inPaths) {
+
+			outHindrances.addAll(EdgeRoutingMinCross.findHindrances(
+					path,
+					inPotentialHindrances));
+
+		}  // End for (List<mxICell> path : inPaths)
+
+		return outHindrances;
+	}  // protected static Set<mxICell> findHindrances(...)
 
 	public void route(mxCell inEdge) {
 
@@ -227,6 +325,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				targetPosition.getX(),
 				targetPosition.getY(),
 				potentialRoadblocks);
+		potentialRoadblocks.removeAll(roadblocks);
 		objects = localGraph.getChildEdges(parent);
 		Set<mxICell> potentialHindrances = new LinkedHashSet<mxICell>();
 		for (Object object : objects) {
@@ -242,6 +341,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				targetPosition.getX(),
 				targetPosition.getY(),
 				potentialHindrances);
+		potentialHindrances.removeAll(hindrances);
 		sourcePosition = null;  // Vector2D sourcePosition = new Vector2D(sourceGeometry.getCenterX(), sourceGeometry.getCenterY());
 		targetPosition = null;  // Vector2D targetPosition = new Vector2D(targetGeometry.getCenterX(), targetGeometry.getCenterY());
 
@@ -255,28 +355,41 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}  // End for (mxICell roadblock : roadblocks)
 
 		for (mxICell hindrance : hindrances) {
+			mxGeometry geometry = hindrance.getGeometry();
 			mxICell tempSource = hindrance.getTerminal(true);
 			mxICell tempTarget = hindrance.getTerminal(false);
-			Object object = tempSource.getValue();
 			String sourceString;
-			if (object == null) {
-				sourceString = tempSource.getId();
-			} else {
-				sourceString = object.toString();
-			}
-			object = tempTarget.getValue();
+			if (tempSource == null) {
+				sourceString = geometry.getSourcePoint().toString();
+			} else {  // End if (tempSource == null)
+				Object object = tempSource.getValue();
+				if (object == null) {
+					sourceString = tempSource.getId();
+				} else {
+					sourceString = object.toString();
+				}
+			}  // End else part of if (tempSource == null)
 			String targetString;
-			if (object == null) {
-				targetString = tempTarget.getId();
-			} else {
-				targetString = object.toString();
-			}
+			if (tempTarget == null) {
+				targetString = geometry.getTargetPoint().toString();
+			} else {  // End if (tempTarget == null)
+				Object object = tempTarget.getValue();
+				if (object == null) {
+					targetString = tempTarget.getId();
+				} else {
+					targetString = object.toString();
+				}
+			}  // End else part of if (tempTarget == null)
 			System.out.println("Passed through hindrance from " + sourceString + " to " + targetString);
 		}  // End for (mxICell hindrance : hindrances)
 
 		if ((roadblocks.isEmpty()) && (hindrances.isEmpty())) {
 			return;
 		}
+
+		Object cells[] = new Object[]{inEdge};
+		localGraph.removeCells(cells);
+		cells = null;  // Object cells[] = new Object[]{inEdge};
 
 		for (mxICell hindrance : hindrances) {
 
@@ -434,48 +547,73 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}  // End for (mxICell roadblock : roadblocks)
 
 		for (mxICell hindrance : hindrances) {
+			mxGeometry geometry = hindrance.getGeometry();
 			mxICell tempSource = hindrance.getTerminal(true);
 			mxICell tempTarget = hindrance.getTerminal(false);
-			Object object = tempSource.getValue();
 			String sourceString;
-			if (object == null) {
-				sourceString = tempSource.getId();
-			} else {
-				sourceString = object.toString();
-			}
-			object = tempTarget.getValue();
+			if (tempSource == null) {
+				sourceString = geometry.getSourcePoint().toString();
+			} else {  // End if (tempSource == null)
+				Object object = tempSource.getValue();
+				if (object == null) {
+					sourceString = tempSource.getId();
+				} else {
+					sourceString = object.toString();
+				}
+			}  // End else part of if (tempSource == null)
 			String targetString;
-			if (object == null) {
-				targetString = tempTarget.getId();
-			} else {
-				targetString = object.toString();
-			}
+			if (tempTarget == null) {
+				targetString = geometry.getTargetPoint().toString();
+			} else {  // End if (tempTarget == null)
+				Object object = tempTarget.getValue();
+				if (object == null) {
+					targetString = tempTarget.getId();
+				} else {
+					targetString = object.toString();
+				}
+			}  // End else part of if (tempTarget == null)
 			System.out.println("Included hindrance from " + sourceString + " to " + targetString);
 		}  // End for (mxICell hindrance : hindrances)
 
 		WeightedVisibilityGraph weightedVisibilityGraph = new WeightedVisibilityGraph();
-		for (mxICell roadblock : roadblocks) {
-			weightedVisibilityGraph.addRoadblock(roadblock);
-		}
-		for (mxICell hindrance : hindrances) {
-			weightedVisibilityGraph.addHindrance(hindrance);
-		}
-		WeightedVisibilityGraph clonedWeightedVisibilityGraph = (WeightedVisibilityGraph) weightedVisibilityGraph.clone();
-		clonedWeightedVisibilityGraph.addVerticesIntoOutOf(source);
-		clonedWeightedVisibilityGraph.addVerticesIntoOutOf(target);
-		Map<mxICell, List<mxICell>> obstacleToVerticesMap = clonedWeightedVisibilityGraph.getObstacleToVerticesMap();
-		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
-		clonedWeightedVisibilityGraph = null;  // WeightedVisibilityGraph clonedWeightedVisibilityGraph = (WeightedVisibilityGraph) weightedVisibilityGraph.clone();
+		weightedVisibilityGraph.addRoadblock(source);
+		weightedVisibilityGraph.addRoadblock(target);
+		weightedVisibilityGraph.addVerticesIntoOutOf(source);
+		weightedVisibilityGraph.addVerticesIntoOutOf(target);
+		Map<mxICell, List<mxICell>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
+		roadblocks.remove(source);
+		roadblocks.remove(target);
+		Set<mxICell> newRoadblocks = roadblocks;
+		Set<mxICell> newHindrances = hindrances;
+		List<List<mxICell>> paths;
+
+		do {
+			potentialRoadblocks.removeAll(newRoadblocks);
+			potentialHindrances.removeAll(newHindrances);
+			for (mxICell roadblock : newRoadblocks) {
+				weightedVisibilityGraph.addRoadblock(roadblock);
+			}
+			for (mxICell hindrance : newHindrances) {
+				weightedVisibilityGraph.addHindrance(hindrance);
+			}
+			paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
+			if ((paths == null) || (paths.isEmpty())) {
+				break;
+			}
+			newRoadblocks = EdgeRoutingMinCross.findRoadblocks(paths, potentialRoadblocks);
+			newHindrances = EdgeRoutingMinCross.findHindrances(paths, potentialHindrances);
+		} while ((!(newRoadblocks.isEmpty())) || (!(newHindrances.isEmpty())));
+
 		weightedVisibilityGraph = null;  // WeightedVisibilityGraph weightedVisibilityGraph = new WeightedVisibilityGraph();
 		potentialHindrances = null;  // Set<mxICell> potentialHindrances = new LinkedHashSet<mxICell>();
 		potentialRoadblocks = null;  // Set<mxICell> potentialRoadblocks = new LinkedHashSet<mxICell>();
+
 		if ((paths == null) || (paths.isEmpty())) {
-			paths = null;  // List<List<mxICell>> paths = new LinkedList<List<mxICell>>();
+			paths = null;  // List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
 			return;
 		}
 
-		Iterator<List<mxICell>> iteratePaths = paths.iterator();
-		while (iteratePaths.hasNext()) {
+		for (List<mxICell> path : paths) {
 
 			mxICell newEdge = (mxICell) localGraph.insertEdge(
 					parent,
@@ -484,25 +622,23 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					source,
 					target,
 					inEdge.getStyle());
-			Object cells[] = new Object[]{newEdge};
+			cells = new Object[]{newEdge};
 			localGraph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
 			cells = null;  // cells = new Object[]{newEdge};
-			List<mxICell> path = iteratePaths.next();
 			List<mxPoint> controlPoints = new LinkedList<mxPoint>();
-			Iterator<mxICell> iterateVertices = path.iterator();
-			while (iterateVertices.hasNext()) {
-				vertex = iterateVertices.next();
-				mxGeometry geometry = vertex.getGeometry();
+			for (mxICell aVertex : path) {
+				mxGeometry geometry = aVertex.getGeometry();
+				if (geometry == null) {
+					throw new IllegalStateException("The 'aVertex' variable has null geometry.");
+				}
 				controlPoints.add(new mxPoint(geometry.getCenterX(), geometry.getCenterY()));
-			}  // End while (iterateVertices.hasNext())
+			}  // End for (mxICell aVertex : path)
 			super.setEdgePoints(newEdge, controlPoints);
 			controlPoints = null;  // List<mxPoint> controlPoints = new LinkedList<mxPoint>();
 
-		}  // End while (iteratePaths.hasNext())
+		}  // End for (List<mxICell> path : paths)
 
-		Object cells[] = new Object[]{inEdge};
-		localGraph.removeCells(cells);
-		cells = null;  // Object cells[] = new Object[]{inEdge};
+		paths = null;  // List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
 		localGraph.refresh();
 	}  // End public void route(mxCell edge)
 
