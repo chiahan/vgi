@@ -18,6 +18,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.*;
+import vgi.WeightedVisibilityGraph.LineSegment;
 
 /**
  *
@@ -180,7 +181,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			mxPoint previousPoint = sourcePoint;
 
 			for (mxPoint point : allPoints) {
-				mxPoint intersection = mxUtils.intersection(
+				mxPoint intersection = LineSegment.intersection(
 						inLineStartX,
 						inLineStartY,
 						inLineEndX,

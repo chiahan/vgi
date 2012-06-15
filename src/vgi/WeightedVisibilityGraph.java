@@ -8,7 +8,6 @@ import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxPoint;
-import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
 import java.util.*;
@@ -28,6 +27,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 
 	protected static class LineSegment {
 
+		protected static double SMALL_VALUE = 0.5d;
 		double x1;
 		double y1;
 		double x2;
@@ -39,6 +39,100 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 			this.x2 = x2;
 			this.y2 = y2;
 		}
+
+		//
+		// Based on information from http://local.wasp.uwa.edu.au/~pbourke/geometry/lineline2d/
+		//
+		public static mxPoint intersection(
+				double x1,
+				double y1,
+				double x2,
+				double y2,
+				double x3,
+				double y3,
+				double x4,
+				double y4) {
+
+			double denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+
+			//
+			// If the line segments are not parallel
+			//
+			if (Math.abs(denominator) >= SMALL_VALUE) {
+				double ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator;
+				double ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator;
+
+				if ((ua >= 0.0d) && (ua <= 1.0d) && (ub >= 0.0d) && (ub <= 1.0d)) {
+					double x = x1 + ua * (x2 - x1);
+					double y = y1 + ua * (y2 - y1);
+					return new mxPoint(x, y);
+				}  // End if ((ua >= 0.0d) && (ua <= 1.0d) && (ub >= 0.0d) && (ub <= 1.0d))
+
+				return null;
+			}  // End if (Math.abs(denominator) >= SMALL_VALUE)
+
+			//
+			// If the line segments are parallel and not vertical.
+			//
+			if (Math.abs(x1 - x2) >= SMALL_VALUE) {
+				double yIntersect1 = y1 - (y2 - y1) / (x2 - x1) * x1;
+				double yIntersect2 = y3 - (y4 - y3) / (x4 - x3) * x3;
+
+				if (Math.abs(yIntersect1 - yIntersect2) >= SMALL_VALUE) {
+					return null;
+				}
+
+				double min1 = (x1 < x2) ? x1 : x2;
+				double max1 = (x1 < x2) ? x2 : x1;
+				double min2 = (x3 < x4) ? x3 : x4;
+				double max2 = (x3 < x4) ? x4 : x3;
+				double leftMin = (min1 < min2) ? min1 : min2;
+				double leftMax = (min1 < min2) ? max1 : max2;
+				double rightMin = (min1 < min2) ? min2 : min1;
+				double rightMax = (min1 < min2) ? max2 : max1;
+				if (leftMax < rightMin) {
+					return null;
+				}
+
+				double x;
+				if (leftMax < rightMax) {
+					x = (leftMax + rightMin) / 2;
+				} else {
+					x = (rightMin + rightMax) / 2;
+				}
+				double y = (y2 - y1) / (x2 - x1) * x + yIntersect1;
+
+				return new mxPoint(x, y);
+			}  // End if (Math.abs(x1 - x2) >= SMALL_VALUE)
+
+			//
+			// If the line segments are parallel and vertical.
+			//
+			if (Math.abs(x1 - x3) >= SMALL_VALUE) {
+				return null;
+			}
+
+			double min1 = (y1 < y2) ? y1 : y2;
+			double max1 = (y1 < y2) ? y2 : y1;
+			double min2 = (y3 < y4) ? y3 : y4;
+			double max2 = (y3 < y4) ? y4 : y3;
+			double leftMin = (min1 < min2) ? min1 : min2;
+			double leftMax = (min1 < min2) ? max1 : max2;
+			double rightMin = (min1 < min2) ? min2 : min1;
+			double rightMax = (min1 < min2) ? max2 : max1;
+			if (leftMax < rightMin) {
+				return null;
+			}
+
+			double y;
+			if (leftMax < rightMax) {
+				y = (leftMax + rightMin) / 2;
+			} else {
+				y = (rightMin + rightMax) / 2;
+			}
+
+			return new mxPoint(x1, y);
+		}  // End public static mxPoint intersection(...)
 	}  // End protected static class LineSegment
 	protected List<mxICell> roadblocks;
 //	protected List<mxICell> hindrances;
@@ -149,7 +243,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 				List<LineSegment> lineSegments = this.hindranceToLineSegmentsMap.get(cell);
 				for (LineSegment lineSegment : lineSegments) {
 
-					mxPoint intersection = mxUtils.intersection(
+					mxPoint intersection = LineSegment.intersection(
 							geometry.getCenterX(),
 							geometry.getCenterY(),
 							anotherGeometry.getCenterX(),
@@ -182,7 +276,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 
 			}  // End for (mxICell cell : this.hindranceToLineSegmentsMap.keySet())
 
-			double cost = Vector2D.length(
+			double cost = 1 + Vector2D.length(
 					geometry.getCenterX() - anotherGeometry.getCenterX(),
 					geometry.getCenterY() - anotherGeometry.getCenterY())
 					+ CROSSING_COST * crossingNumber;
@@ -416,7 +510,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 			while (iterateLineSegments.hasNext()) {
 
 				LineSegment lineSegment = iterateLineSegments.next();
-				mxPoint intersection = mxUtils.intersection(
+				mxPoint intersection = LineSegment.intersection(
 						sourceGeometry.getCenterX(),
 						sourceGeometry.getCenterY(),
 						targetGeometry.getCenterX(),
