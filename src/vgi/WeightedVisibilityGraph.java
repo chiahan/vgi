@@ -27,7 +27,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 
 	protected static class LineSegment {
 
-		protected static double SMALL_VALUE = 0.5d;
+		protected static double ERROR_MARGIN = 0.005d;
 		double x1;
 		double y1;
 		double x2;
@@ -58,27 +58,30 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 			//
 			// If the line segments are not parallel
 			//
-			if (Math.abs(denominator) >= SMALL_VALUE) {
+			if (Math.abs(denominator) >= ERROR_MARGIN) {
 				double ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator;
 				double ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator;
 
-				if ((ua >= 0.0d) && (ua <= 1.0d) && (ub >= 0.0d) && (ub <= 1.0d)) {
+				if ((ua >= (0.0d - ERROR_MARGIN))
+						&& (ua <= (1.0d + ERROR_MARGIN))
+						&& (ub >= (0.0d - ERROR_MARGIN))
+						&& (ub <= (1.0d + ERROR_MARGIN))) {
 					double x = x1 + ua * (x2 - x1);
 					double y = y1 + ua * (y2 - y1);
 					return new mxPoint(x, y);
-				}  // End if ((ua >= 0.0d) && (ua <= 1.0d) && (ub >= 0.0d) && (ub <= 1.0d))
+				}
 
 				return null;
-			}  // End if (Math.abs(denominator) >= SMALL_VALUE)
+			}  // End if (Math.abs(denominator) >= ERROR_MARGIN)
 
 			//
 			// If the line segments are parallel and not vertical.
 			//
-			if (Math.abs(x1 - x2) >= SMALL_VALUE) {
+			if (Math.abs(x1 - x2) >= ERROR_MARGIN) {
 				double yIntersect1 = y1 - (y2 - y1) / (x2 - x1) * x1;
 				double yIntersect2 = y3 - (y4 - y3) / (x4 - x3) * x3;
 
-				if (Math.abs(yIntersect1 - yIntersect2) >= SMALL_VALUE) {
+				if (Math.abs(yIntersect1 - yIntersect2) >= ERROR_MARGIN) {
 					return null;
 				}
 
@@ -103,12 +106,12 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 				double y = (y2 - y1) / (x2 - x1) * x + yIntersect1;
 
 				return new mxPoint(x, y);
-			}  // End if (Math.abs(x1 - x2) >= SMALL_VALUE)
+			}  // End if (Math.abs(x1 - x2) >= ERROR_MARGIN)
 
 			//
 			// If the line segments are parallel and vertical.
 			//
-			if (Math.abs(x1 - x3) >= SMALL_VALUE) {
+			if (Math.abs(x1 - x3) >= ERROR_MARGIN) {
 				return null;
 			}
 
