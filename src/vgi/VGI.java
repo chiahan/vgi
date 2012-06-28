@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.WindowEvent;
@@ -292,7 +293,7 @@ public class VGI extends javax.swing.JFrame {
 		}
 		if (this.pmTAFKit != null) {
 			this.currentSettingMenuItem.setText("Current setting:  " + this.pmTAFKit.getTafKitPath().getAbsolutePath());
-			this.updateAlgorithmMenuItems();
+//			this.updateAlgorithmMenuItems();
 		}
                 
                 
@@ -749,6 +750,15 @@ public class VGI extends javax.swing.JFrame {
 
         algorithmsMenu.setMnemonic('A');
         algorithmsMenu.setText("Algorithms");
+        algorithmsMenu.addMenuListener(new javax.swing.event.MenuListener() {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                algorithmsMenuMenuSelected(evt);
+            }
+            public void menuDeselected(javax.swing.event.MenuEvent evt) {
+            }
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            }
+        });
 
         setTAFKitPathMenuItem.setText("Set TAF-Kit Path...");
         setTAFKitPathMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -872,7 +882,7 @@ public class VGI extends javax.swing.JFrame {
 		if (tafKit != null) {
 			this.currentSettingMenuItem.setText("Current setting:  " + tafKit.getTafKitPath().getAbsolutePath());
 			this.pmTAFKit = tafKit;
-			this.updateAlgorithmMenuItems();
+//			this.updateAlgorithmMenuItems();
 			Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
 			preferences.put("TAF-Kit Path", tafKit.getTafKitPath().getAbsolutePath());
 		}  // End if (pmTAFKit != null)
@@ -920,8 +930,8 @@ public class VGI extends javax.swing.JFrame {
 		}
 		if ((automataList != null) && (automataList.size() > 0)) {
 			Automata automata = automataList.get(0);
-			this.pmAutomataType = new TAFKitInterface.AutomataType(automata);
-			this.updateAlgorithmMenuItems();
+//			this.pmAutomataType = new TAFKitInterface.AutomataType(automata);
+//			this.updateAlgorithmMenuItems();
 			this.createInternalFrame(automata, fileChooser.getSelectedFile().getName());
 			JgraphXInternalFrame fr = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
 			fr.setCurrentFile(fileChooser.getSelectedFile());
@@ -942,8 +952,8 @@ public class VGI extends javax.swing.JFrame {
             }
             if ((automataList != null) && (automataList.size() > 0)) {
                     Automata automata = automataList.get(0);
-                    this.pmAutomataType = new TAFKitInterface.AutomataType(automata);
-                    this.updateAlgorithmMenuItems();
+//                    this.pmAutomataType = new TAFKitInterface.AutomataType(automata);
+//                    this.updateAlgorithmMenuItems();
                     this.createInternalFrame(automata, file.getName());
                     //JgraphXInternalFrame fr = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
                     JgraphXInternalFrame fr = (JgraphXInternalFrame) mainDesktopPane.getComponent(0);
@@ -1347,6 +1357,10 @@ public class VGI extends javax.swing.JFrame {
 		}  // End if (frame instanceof JgraphXInternalFrame)
 	}//GEN-LAST:event_showWeightedVisibilityGraphMenuItemActionPerformed
 
+	private void algorithmsMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_algorithmsMenuMenuSelected
+		this.updateAlgorithmMenuItems();
+	}//GEN-LAST:event_algorithmsMenuMenuSelected
+
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
@@ -1367,17 +1381,13 @@ public class VGI extends javax.swing.JFrame {
 
 	}  // End private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser)
 
-	private void updateAlgorithmMenuItems() {
-
-		if ((this.pmTAFKit == null) || (this.pmAutomataType == null)) {
+	protected void restoreDefaultAlgorithmMenuItems() {
+		int count = this.algorithmsMenu.getMenuComponentCount();
+		if (count <= 0) {
 			return;
 		}
-
-		List<TAFKitInterface.VcsnAlgorithm> vcsnAlgorithms = null;
-
-		try {
-			vcsnAlgorithms = pmTAFKit.listVcsnAlgorithms(pmAutomataType);
-		} catch (FileNotFoundException fileNotFoundException) {
+		Component component = this.algorithmsMenu.getMenuComponent(count - 1);
+		if (component != this.algorithmsMenuSeparator2) {
 			this.algorithmsMenu.removeAll();
 			this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
 			this.algorithmsMenu.add(this.currentSettingMenuItem);
@@ -1388,11 +1398,42 @@ public class VGI extends javax.swing.JFrame {
 			this.algorithmsMenu.add(this.removeEpsilonTransitionsMenuItem);
 			this.algorithmsMenu.add(this.productMenuItem);
 			this.algorithmsMenu.add(this.algorithmsMenuSeparator2);
+		}  // End if (component != this.algorithmsMenuSeparator2)
+	}  // End protected void restoreDefaultAlgorithmMenuItems()
 
-			JMenuItem menuItem = new JMenuItem();
-			menuItem.setText("TAF-Kit currently does not support this type of automata, \"" + pmAutomataType.toExecutableFileName() + "\".");
-			menuItem.setEnabled(false);
-			this.algorithmsMenu.add(menuItem);
+	protected void updateAlgorithmMenuItems() {
+
+		JInternalFrame tempFrame = this.mainDesktopPane.getSelectedFrame();
+		if (tempFrame == null) {
+			this.restoreDefaultAlgorithmMenuItems();
+			this.pmAutomataType = null;
+			return;
+		}
+		if (!(tempFrame instanceof JgraphXInternalFrame)) {
+			return;
+		}
+		JgraphXInternalFrame frame = (JgraphXInternalFrame) tempFrame;
+		if (frame.automata == null) {
+			return;
+		}
+		TAFKitInterface.AutomataType automataType = new TAFKitInterface.AutomataType(frame.automata);
+		if (automataType.equals(this.pmAutomataType)) {
+			return;
+		}
+		if ((this.pmTAFKit == null)) {
+			return;
+		}
+
+		List<TAFKitInterface.VcsnAlgorithm> vcsnAlgorithms = null;
+
+		try {
+			vcsnAlgorithms = pmTAFKit.listVcsnAlgorithms(automataType);
+		} catch (FileNotFoundException fileNotFoundException) {
+			JOptionPane.showMessageDialog(
+					this,
+					"TAF-Kit currently does not support this type of automata, \"" + automataType.toExecutableFileName() + "\".",
+					null,
+					JOptionPane.WARNING_MESSAGE);
 			return;
 		} catch (TAFKitInterface.TAFKitException tafKitException) {
 			JOptionPane.showMessageDialog(
@@ -1403,17 +1444,7 @@ public class VGI extends javax.swing.JFrame {
 			return;
 		}
 
-		this.algorithmsMenu.removeAll();
-		this.algorithmsMenu.add(this.setTAFKitPathMenuItem);
-		this.algorithmsMenu.add(this.currentSettingMenuItem);
-		this.algorithmsMenu.add(this.algorithmsMenuSeparator1);
-		this.algorithmsMenu.add(this.mergeSimilarTransitionsMenuItem);
-		this.algorithmsMenu.add(this.accessibleMenuItem);
-		this.algorithmsMenu.add(this.coaccessibleMenuItem);
-		this.algorithmsMenu.add(this.removeEpsilonTransitionsMenuItem);
-		this.algorithmsMenu.add(this.productMenuItem);
-		this.algorithmsMenu.add(this.algorithmsMenuSeparator2);
-
+		this.restoreDefaultAlgorithmMenuItems();
 		JMenu submenu = null;
 
 		for (int index = 0; index < vcsnAlgorithms.size(); index++) {
@@ -1429,7 +1460,9 @@ public class VGI extends javax.swing.JFrame {
 				submenu.add(menuItem);
 			}
 		}  // End for (int index = 0; index < vcsnAlgorithms.size(); index ++)
-	}  // End private void updateAlgorithmMenuItems()
+
+		this.pmAutomataType = automataType;
+	}  // End protected void updateAlgorithmMenuItems()
 
 	/**
 	 * @param args the command line arguments
@@ -1490,8 +1523,8 @@ public class VGI extends javax.swing.JFrame {
                                             if ((automataList != null) && (automataList.size() > 0)) {
        
                                                 Automata automata = automataList.get(0);
-                                                vgi.pmAutomataType = new TAFKitInterface.AutomataType(automata);
-                                                vgi.updateAlgorithmMenuItems();
+//                                                vgi.pmAutomataType = new TAFKitInterface.AutomataType(automata);
+//                                                vgi.updateAlgorithmMenuItems();
                                                 vgi.createInternalFrame(automata, "");
                                             }
                                             

@@ -1,6 +1,5 @@
 package vgi;
 
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -69,6 +68,46 @@ public interface TAFKitInterface {
 			} else {
 				this.outputAlphabetDataType = null;
 			}
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof AutomataType)) {
+				return false;
+			}
+			AutomataType automataType = (AutomataType) obj;
+			if (this.semiring == null) {
+				if (automataType.semiring != null) {
+					return false;
+				}
+			} else {
+				if (!(this.semiring.equals(automataType.semiring))) {
+					return false;
+				}
+			}
+			if (this.alphabetDataType == null) {
+				if (automataType.alphabetDataType != null) {
+					return false;
+				}
+			} else {
+				if (!(this.alphabetDataType.equals(automataType.alphabetDataType))) {
+					return false;
+				}
+			}
+			if (this.outputAlphabetDataType == null) {
+				return (automataType.outputAlphabetDataType == null);
+			} else {
+				return this.outputAlphabetDataType.equals(automataType.outputAlphabetDataType);
+			}
+		}  // End public boolean equals(Object obj)
+
+		@Override
+		public int hashCode() {
+			int hash = 7;
+			hash = 41 * hash + (this.semiring != null ? this.semiring.hashCode() : 0);
+			hash = 41 * hash + (this.alphabetDataType != null ? this.alphabetDataType.hashCode() : 0);
+			hash = 41 * hash + (this.outputAlphabetDataType != null ? this.outputAlphabetDataType.hashCode() : 0);
+			return hash;
 		}
 
 		public String toExecutableFileName() {
