@@ -973,11 +973,33 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Object value = edge.getValue();
 		String style = edge.getStyle();
 		Object cells[] = new Object[]{edge};
-		this.getGraph().removeCells(cells);
+		mxGraph localGraph = this.getGraph();
+		localGraph.removeCells(cells);
 		cells = null;  // Object cells[] = new Object[]{edge};
-		Map<mxICell, List<mxICell>> oldToNewVerticesMap = new HashMap<mxICell, List<mxICell>>();
-		mxGraph weightedVisibilityGraph = EdgeRoutingMinCross.buildWeightedVisibilityGraph(this.getGraph(), oldToNewVerticesMap);
-		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(oldToNewVerticesMap.get(source), oldToNewVerticesMap.get(target));
+//		Map<mxICell, List<mxICell>> oldToNewVerticesMap = new HashMap<mxICell, List<mxICell>>();
+//		mxGraph weightedVisibilityGraph = EdgeRoutingMinCross.buildWeightedVisibilityGraph(this.getGraph(), oldToNewVerticesMap);
+		WeightedVisibilityGraph weightedVisibilityGraph = new WeightedVisibilityGraph();
+		Object parent = localGraph.getDefaultParent();
+		Object objects[] = localGraph.getChildVertices(parent);
+		for (Object object : objects) {
+			if (!(object instanceof mxICell)) {
+				throw new IllegalStateException("A vertex is not of the type mxICell.");
+			}
+			mxICell roadblock = (mxICell) object;
+			weightedVisibilityGraph.addRoadblock(roadblock);
+		}  // End for (Object object : objects)
+		objects = localGraph.getChildEdges(parent);
+		for (Object object : objects) {
+			if (!(object instanceof mxICell)) {
+				throw new IllegalStateException("An edge is not of the type mxICell.");
+			}
+			mxICell hindrance = (mxICell) object;
+			weightedVisibilityGraph.addHindrance(hindrance);
+		}  // End for (Object object : objects)
+		weightedVisibilityGraph.addVerticesIntoOutOf(source);
+		weightedVisibilityGraph.addVerticesIntoOutOf(target);
+		Map<mxICell, List<mxICell>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
+		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
 		if ((paths == null) || (paths.isEmpty())) {
 			return;
 		}
@@ -985,16 +1007,15 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Iterator<List<mxICell>> iteratePaths = paths.iterator();
 		while (iteratePaths.hasNext()) {
 
-			mxGraph graph = this.getGraph();
-			mxICell newEdge = (mxICell) graph.insertEdge(
-					graph.getDefaultParent(),
+			mxICell newEdge = (mxICell) localGraph.insertEdge(
+					parent,
 					null,
 					value,
 					source,
 					target,
 					style);
 			cells = new Object[]{newEdge};
-			graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+			localGraph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
 			cells = null;  // cells = new Object[]{newEdge};
 			List<mxICell> path = iteratePaths.next();
 			List<mxPoint> controlPoints = new LinkedList<mxPoint>();
