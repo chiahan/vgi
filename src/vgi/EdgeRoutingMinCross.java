@@ -351,6 +351,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 	public void route(mxCell inEdge) {
 
+		Stopwatch stopwatch = new Stopwatch().start();
 		if (inEdge == null) {
 			throw new IllegalArgumentException("Input 'inEdge' is null.");
 		}
@@ -478,6 +479,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}  // End for (mxICell hindrance : hindrances)
 
 		if ((roadblocks.isEmpty()) && (hindrances.isEmpty())) {
+			System.out.println("EXECUTION TIME of route() is " + stopwatch.getElapsedMilliseconds() + " ms.");
 			return;
 		}
 
@@ -819,6 +821,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		if ((paths == null) || (paths.isEmpty())) {
 			paths = null;  // List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
+			System.out.println("EXECUTION TIME of route() is " + stopwatch.getElapsedMilliseconds() + " ms.");
 			return;
 		}
 
@@ -848,6 +851,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}  // End for (List<mxICell> path : paths)
 
 		paths = null;  // List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
+		System.out.println("EXECUTION TIME of route() is " + stopwatch.getElapsedMilliseconds() + " ms.");
 		localGraph.refresh();
 	}  // End public void route(mxCell edge)
 
@@ -933,6 +937,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 	public void routeByWeightedVisibilityGraph(mxCell edge) {
 
+		Stopwatch stopwatch = new Stopwatch().start();
 		if (edge == null) {
 			throw new IllegalArgumentException("Input 'edge' is null.");
 		}
@@ -1001,6 +1006,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Map<mxICell, List<mxICell>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
 		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
 		if ((paths == null) || (paths.isEmpty())) {
+			System.out.println("EXECUTION TIME of routeByWeightedVisibilityGraph() is " + stopwatch.getElapsedMilliseconds() + " ms.");
 			return;
 		}
 
@@ -1029,6 +1035,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		}  // End while (iteratePaths.hasNext())
 
+		System.out.println("EXECUTION TIME of routeByWeightedVisibilityGraph() is " + stopwatch.getElapsedMilliseconds() + " ms.");
+		localGraph.refresh();
 	}  // End public void routeByWeightedVisibilityGraph(mxCell edge)
 
 	public void routeAStar(mxCell edge) {
