@@ -394,7 +394,12 @@ public class CreateAutomataDialog extends javax.swing.JDialog {
 		int count = this.monoidAlphabetComboBox.getItemCount();
 		this.monoidAlphabet = new ArrayList(count);
 		for (int index = 0; index < count; index++) {
-			this.monoidAlphabet.add(this.monoidAlphabetComboBox.getItemAt(index));
+			Object object = this.monoidAlphabetComboBox.getItemAt(index);
+			if(object == null) {
+				this.monoidAlphabet.add(new String());
+			} else {
+				this.monoidAlphabet.add(object);
+			}
 		}
 		alphabet.allSymbols = this.monoidAlphabet;
 		alphabet.identitySymbol = new Character('1');

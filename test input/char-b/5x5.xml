@@ -5,8 +5,7 @@
       <semiring operations="classical" set="B" type="numerical"/>
       <monoid genDescrip="enum" genKind="simple" genSort="letters" type="free">
         <writingData identitySym="1"/>
-        <monGen value=" "/>
-        <monGen value="b"/>
+        <monGen value=""/>
       </monoid>
     </valueType>
     <automatonStruct>

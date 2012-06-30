@@ -10,12 +10,12 @@ package vgi;
  */
 public class Stopwatch {
 
+	protected long elapsedNanoseconds;
 	protected Long startTime;
-	protected Long stopTime;
 
 	public Stopwatch() {
+		this.elapsedNanoseconds = 0;
 		this.startTime = null;
-		this.stopTime = null;
 	}
 
 	public double getElapsedMilliseconds() {
@@ -27,18 +27,21 @@ public class Stopwatch {
 	}
 
 	public long getElapsedNanoseconds() {
-		if (this.startTime == null) {
-			throw new IllegalStateException("The stopwatch did not start so there is no elapsed time.");
-		}
-		if (this.stopTime == null) {
-			return System.nanoTime() - this.startTime;
+		long currentTime = System.nanoTime();
+		if (this.isRunning()) {
+			return this.elapsedNanoseconds + (currentTime - this.startTime.longValue());
 		} else {
-			return this.stopTime - this.startTime;
+			return this.elapsedNanoseconds;
 		}
 	}  // End public long getElapsedNanoseconds()
 
 	public boolean isRunning() {
 		return (this.startTime != null);
+	}
+
+	public void reset() {
+		this.elapsedNanoseconds = 0;
+		this.startTime = null;
 	}
 
 	public Stopwatch start() {
@@ -47,7 +50,11 @@ public class Stopwatch {
 	}  // End public Stopwatch start()
 
 	public void stop() {
-		this.stopTime = System.nanoTime();
-	}
-
+		long currentTime = System.nanoTime();
+		if (!(this.isRunning())) {
+			return;
+		}
+		this.elapsedNanoseconds = this.elapsedNanoseconds + (currentTime - this.startTime.longValue());
+		this.startTime = null;
+	}  // End public void stop()
 }  // End public class Stopwatch

@@ -1361,6 +1361,22 @@ public class VGI extends javax.swing.JFrame {
 		this.updateAlgorithmMenuItems();
 	}//GEN-LAST:event_algorithmsMenuMenuSelected
 
+	void closeSelectedFrame() {
+		this.closeMenuItemActionPerformed(null);
+	}
+
+	void exitProgram() {
+		this.exitMenuItemActionPerformed(null);
+	}
+
+	JgraphXInternalFrame getSelectedFrame() {
+		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+			return (JgraphXInternalFrame) frame;
+		}
+		return null;
+	}  // End JgraphXInternalFrame getSelectedFrame()
+
 	//private static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
         public static File getFileTobeSavedWithExtensionAppended(JFileChooser fileChooser) {
 
