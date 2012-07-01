@@ -174,4 +174,14 @@ public class State implements StateInterface {
     public void setDrawingData(DrawingData drawingData) {
         pmDrawingData=drawingData;
     }
+
+    @Override
+    public String getShape() {
+        return pmGeometricData.shape;
+    }
+
+    @Override
+    public void setShape(String shape_) {
+        pmGeometricData.shape=shape_;
+    }
 }  // End public class State implements StateInterface

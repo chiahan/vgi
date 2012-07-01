@@ -14,10 +14,12 @@ public interface StateInterface {
 	public class GeometricData {
 
 		Point2D location;
-		Shape shape;
+		Point2D size;
+                String shape;
 
 		public GeometricData() {
 			this.location = null;
+                        this.size=null;
 			this.shape = null;
 		}
 	}  // End public class GeometricData
@@ -77,5 +79,8 @@ public interface StateInterface {
         
         public void setDrawingData(DrawingData drawingData);
         
+        public String getShape();
+        
+        public void setShape(String shape);
         
 }  // End public interface StateInterface

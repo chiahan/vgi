@@ -24,9 +24,12 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
+import java.beans.PropertyVetoException;
 import java.io.File;
 import java.util.*;
 import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
@@ -81,6 +84,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 true, //maximizable
                 true);//iconifiable
 
+        setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);  
+        
         initComponents();
 
         this.infoSplitPane = infoSplitPane;
@@ -212,11 +217,17 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 //                System.out.println("Cells moved: " + cells.length + " " + dx + " " + dy);
                 updateInitialFinal(cells, new Point2D.Double(dx, dy));
                 updateControlPoint(cells,new Point2D.Double(dx,dy));
-                
+                setModified(true);
                 
             }
         });
+       graph.addListener(mxEvent.CHANGE, new mxIEventListener() {
 
+            public void invoke(Object sender, mxEventObject evt) {
+                setModified(true);
+                
+            }
+        });
         // Installs mouse wheel listener for zooming
         MouseWheelListener wheelTracker = new MouseWheelListener() {
 
@@ -547,23 +558,36 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             for (int j = 0; j < count; j++) {
                 edge = (mxCell) edges[j];
                 if (edge.getTerminal(true) == null) {
-                    display.showInitialFinal(graph.getDefaultParent(), edge.getValue(), graph.getSelectionCell(), false);
+                    /*display.showInitialFinal(graph.getDefaultParent(), edge.getValue(), graph.getSelectionCell(), false);
                     Object removeEdge[] = {edge};
-                    graph.removeCells(removeEdge);
+                    graph.removeCells(removeEdge);*/
                     
-                    /*List<mxPoint> ptlist=edge.getGeometry().getPoints();
+                    
                     double dx=offset.getX();
                     double dy=offset.getY();
+                    /*List<mxPoint> ptlist=edge.getGeometry().getPoints();
                     for(mxPoint pt:ptlist){
                            pt.setX(pt.getX()+dx);
                            pt.setY(pt.getY()+dy);
                     }
-                    edge.getGeometry().setPoints(ptlist);
-                    */
+                    edge.getGeometry().setPoints(ptlist);*/
+                    mxPoint tpt=edge.getGeometry().getTerminalPoint(true);
+                    tpt.setX(tpt.getX()+dx);
+                    tpt.setY(tpt.getY()+dy);
+                    edge.getGeometry().setTerminalPoint(tpt, true);
+                    
                 } else if (edge.getTerminal(false) == null) {
-                    display.showInitialFinal(graph.getDefaultParent(), edge.getValue(), graph.getSelectionCell(), true);
+                    /*display.showInitialFinal(graph.getDefaultParent(), edge.getValue(), graph.getSelectionCell(), true);
                     Object removeEdge[] = {edge};
-                    graph.removeCells(removeEdge);
+                    graph.removeCells(removeEdge);*/
+                    double dx=offset.getX();
+                    double dy=offset.getY();
+                    mxPoint tpt=edge.getGeometry().getTerminalPoint(false);
+                    tpt.setX(tpt.getX()+dx);
+                    tpt.setY(tpt.getY()+dy);
+                    edge.getGeometry().setTerminalPoint(tpt, false);
+                    
+                    
                 }
             }
         }
@@ -614,16 +638,22 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         undoStack.push(STATUS_CHANGE);
     
     }   
+    
+    public void updateStateSize(Object[] cells){
+        
+        
+    }
 
     public void addState(double x, double y) {
         State newState = new State();
         State.GeometricData geo = new State.GeometricData();
         geo.location = new Point2D.Double(x, y);
-        //geo.shape="elipse";
+        geo.shape="elipse";
+        geo.size=new Point2D.Double(vertexWidth,vertexWidth);
         newState.setGeometricData(geo);
-
+        
         automata.addState(newState);
-        mxCell vertex = createVertex(x, y, newState.getName());
+        mxCell vertex = createVertex(x, y, newState.getName(),vertexWidth,vertexWidth,null);
         cellTable.put(vertex, newState);
 
         DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
@@ -645,14 +675,24 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         StateInterface.GeometricData geometricData = state.getGeometricData();
         double x = 0;
         double y = 0;
+        double w=0;
+        double h=0;
+        String shape=null;
         if ((geometricData == null) || (geometricData.location == null)) {
             this.hasGeometricData = false;
         } else {
             x = geometricData.location.getX();
             y = geometricData.location.getY();
+            
+            if(geometricData.size!=null){
+                w=geometricData.size.getX();
+                h=geometricData.size.getY();
+                System.out.println("get size:"+geometricData.size.toString());
+            }
+            shape=geometricData.shape;
         }
 
-        mxCell vertex = createVertex(x, y, state.getName());
+        mxCell vertex = createVertex(x, y, state.getName(),w,h,shape);
         cellTable.put(vertex, state);
 
 
@@ -676,12 +716,19 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         System.out.println("add state at (" + x + "," + y + ").");
     }  // End public void addState(State state)
 
-    private mxCell createVertex(double x, double y, String name) {
+    private mxCell createVertex(double x, double y, String name,double w,double h,String shape) {
         Object parent = graph.getDefaultParent();
         int id = cellTable.size();
 
+        if(w<=0) w=vertexWidth;
+        if(h<=0) h=vertexWidth;
+        if(shape==null) shape="ellipse";
+        
+        //Object vertex = graph.insertVertex(parent, Integer.toString(id), name,
+        //        x - w / 2, y - h / 2, w, h, "shape=ellipse;perimeter=ellipsePerimeter;");
         Object vertex = graph.insertVertex(parent, Integer.toString(id), name,
-                x - vertexWidth / 2, y - vertexWidth / 2, vertexWidth, vertexWidth, "shape=ellipse;perimeter=ellipsePerimeter;");
+                x - w / 2, y - h / 2, w, h, "shape="+shape+";perimeter="+shape+"Perimeter;");
+        
         graph.setSelectionCell(vertex);
         ((mxCell) vertex).setConnectable(false);
 
@@ -1149,10 +1196,16 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             point2d.setLocation(geometry.getCenterX(), geometry.getCenterY());
             StateInterface.GeometricData geometricData = new StateInterface.GeometricData();
             geometricData.location = point2d;
+            
+            Point2D sizepoint2d = new Point2D.Double();
+            sizepoint2d.setLocation(geometry.getWidth(),geometry.getHeight());
+            geometricData.size=sizepoint2d;
             state.setGeometricData(geometricData);
-
-            StateInterface.DrawingData drawingData = new StateInterface.DrawingData();
+            
             Map<String, Object> styleList = graph.getCellStyle(vertex);
+            state.setShape((String)styleList.get("shape"));
+            
+            StateInterface.DrawingData drawingData = new StateInterface.DrawingData();
             drawingData.fillColor = (String) styleList.get("fillColor");
             drawingData.strokeColor = (String) styleList.get("strokeColor");
             String width = (String) styleList.get("strokeWidth");
@@ -1938,7 +1991,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
         if (modified) {
 
-            int check = JOptionPane.showConfirmDialog(this, "Save before leaving?", "", JOptionPane.YES_NO_OPTION);
+            int check = JOptionPane.showConfirmDialog(this, "Save before leaving?", "", JOptionPane.YES_NO_CANCEL_OPTION);
             if (check == JOptionPane.YES_OPTION) {
 
                 if (currentFile == null) {
@@ -1948,7 +2001,12 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     vgi.save();
 
                 }
+                this.dispose();
+            }else if(check==JOptionPane.NO_OPTION){
+                this.dispose();
             }
+        }else{
+            this.dispose();
         }
 
 

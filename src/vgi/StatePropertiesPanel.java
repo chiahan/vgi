@@ -1,6 +1,7 @@
 package vgi;
 
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxConstants;
@@ -38,6 +39,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         this.graph = display.getGraph();
         this.automata = display.getAutomata();
         this.display = display;
+        
+        
         style = cell.getStyle();
 
 		this.initialEdge = (mxCell) this.display.getInitialEdge(cell);
@@ -53,25 +56,13 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         showTransition();
         showInitialWeight();
         showFinalWeight();
+        showGeometricDataAndDrawingData();
+        
 
-        Map<String, Object> styles = graph.getCellStyle(cell);
-        String color = (String) styles.get("strokeColor");
-        strokeColor = Color.decode(color);
-        strokeColorButton.setBackground(strokeColor);
-
-        fillColor = Color.decode((String) styles.get("fillColor"));
-        colorButton.setBackground(fillColor);
-
-        strokeWidth = (String) styles.get("strokeWidth");
-        //System.out.println(strokeWidth);
-        if (strokeWidth != null) {
-            float width = Float.parseFloat(strokeWidth);
-            int ind = (int) width;
-            strokeWidthBox.setSelectedIndex(ind - 1);
-        }
-
+        
+        
         jInternalFrame=jif;
-    
+        
     }
     
     
@@ -101,8 +92,41 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
             finalWeightTextField.setText(state.getFinalWeight().toString());
         }
     }
+    private void showGeometricDataAndDrawingData(){
+        Map<String, Object> styles = graph.getCellStyle(cell);
+        String color = (String) styles.get("strokeColor");
+        strokeColor = Color.decode(color);
+        strokeColorButton.setBackground(strokeColor);
 
-	public InitialFinalWeight getDefaultWeightValue() {
+        fillColor = Color.decode((String) styles.get("fillColor"));
+        colorButton.setBackground(fillColor);
+
+        strokeWidth = (String) styles.get("strokeWidth");
+        //System.out.println(strokeWidth);
+        if (strokeWidth != null) {
+            float width = Float.parseFloat(strokeWidth);
+            int ind = (int) width;
+            strokeWidthBox.setSelectedIndex(ind - 1);
+        }
+        
+        
+        shape=(String)styles.get("shape");
+        styleComboBox.setSelectedItem(shape.toUpperCase());
+        
+        mxGeometry geo=cell.getGeometry();
+        width=geo.getWidth();
+        height=geo.getHeight();
+        widthTextField.setText(String.valueOf(width));
+        heightTextField.setText(String.valueOf(height));
+        
+        posX=geo.getCenterX();
+        posY=geo.getCenterY();
+        posXTextField.setText(String.valueOf(posX));
+        posYTextField.setText(String.valueOf(posY));
+        
+    }
+    
+    public InitialFinalWeight getDefaultWeightValue() {
 		InitialFinalWeight initialFinalWeight = new InitialFinalWeight();
 		switch (automata.getWeight().semiring) {
 			case Z_INTEGER:
@@ -211,6 +235,12 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         strokeWidthBox = new javax.swing.JComboBox();
         strokeColorButton = new javax.swing.JButton();
+        sizeLabel = new javax.swing.JLabel();
+        widthTextField = new javax.swing.JTextField();
+        heightTextField = new javax.swing.JTextField();
+        positionLabel = new javax.swing.JLabel();
+        posXTextField = new javax.swing.JTextField();
+        posYTextField = new javax.swing.JTextField();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -275,7 +305,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 0.1;
         add(finalWeightTextField, gridBagConstraints);
 
-        styleComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ELLIPSE", "RECTANGLE", "RHOMBUS", "CYLINDER", "ACTOR", "CLOUD", "TRIANGLE", "HEXAGON" }));
+        styleComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ELLIPSE", "RECTANGLE", "RHOMBUS", "HEXAGON" }));
         styleComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 styleComboBoxActionPerformed(evt);
@@ -371,6 +401,70 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         add(strokeColorButton, gridBagConstraints);
         strokeColorButton.getAccessibleContext().setAccessibleName("strokeColorButton");
+
+        sizeLabel.setText("Size :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        add(sizeLabel, gridBagConstraints);
+
+        widthTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                widthTextFieldActionPerformed(evt);
+            }
+        });
+        widthTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                widthTextFieldKeyPressed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(widthTextField, gridBagConstraints);
+
+        heightTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                heightTextFieldActionPerformed(evt);
+            }
+        });
+        heightTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                heightTextFieldKeyPressed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(heightTextField, gridBagConstraints);
+
+        positionLabel.setText("Position :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        add(positionLabel, gridBagConstraints);
+
+        posXTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                posXTextFieldKeyPressed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(posXTextField, gridBagConstraints);
+
+        posYTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                posYTextFieldKeyPressed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(posYTextField, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void nameTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nameTextFieldKeyPressed
@@ -461,11 +555,11 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     private void styleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_styleComboBoxActionPerformed
         JComboBox cb = (JComboBox)evt.getSource();
         //Style = "shape=" + ((String)cb.getSelectedItem()).toLowerCase();
-        Object[] objects = {cell};
+ //       Object[] objects = {cell};
 //        System.out.print(style);
-        graph.setCellStyles("shape", ((String) cb.getSelectedItem()).toLowerCase(), objects);
-        
-        
+       // graph.setCellStyles("shape", ((String) cb.getSelectedItem()).toLowerCase(), objects);
+        //jInternalFrame.setModified(true);
+        setShape(((String) cb.getSelectedItem()).toLowerCase());
     }//GEN-LAST:event_styleComboBoxActionPerformed
 
     private void initialCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_initialCheckBoxItemStateChanged
@@ -514,22 +608,76 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         
     }//GEN-LAST:event_strokeWidthBoxActionPerformed
 
+    private void widthTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_widthTextFieldActionPerformed
+       
+    }//GEN-LAST:event_widthTextFieldActionPerformed
+
+    private void heightTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_heightTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_heightTextFieldActionPerformed
+
+    private void widthTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_widthTextFieldKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            String str = ((JTextField)evt.getSource()).getText();
+            if (str.compareTo("") == 0)
+                str = null;
+            setWidth(str);
+        }
+        graph.refresh();
+    }//GEN-LAST:event_widthTextFieldKeyPressed
+
+    private void heightTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_heightTextFieldKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            String str = ((JTextField)evt.getSource()).getText();
+            if (str.compareTo("") == 0)
+                str = null;
+            setHeight(str);
+        }
+        graph.refresh();
+    }//GEN-LAST:event_heightTextFieldKeyPressed
+
+    private void posXTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_posXTextFieldKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            String str = ((JTextField)evt.getSource()).getText();
+            if (str.compareTo("") == 0)
+                str = null;
+            setPosX(str);
+        }
+        graph.refresh();
+    }//GEN-LAST:event_posXTextFieldKeyPressed
+
+    private void posYTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_posYTextFieldKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            String str = ((JTextField)evt.getSource()).getText();
+            if (str.compareTo("") == 0)
+                str = null;
+            setPosY(str);
+        }
+        graph.refresh();
+    }//GEN-LAST:event_posYTextFieldKeyPressed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton colorButton;
     private javax.swing.JLabel colorLabel;
     private javax.swing.JCheckBox finalCheckBox;
     private javax.swing.JTextField finalWeightTextField;
+    private javax.swing.JTextField heightTextField;
     private javax.swing.JCheckBox initialCheckBox;
     private javax.swing.JTextField initialWeightTextField;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel nameLabel;
     private javax.swing.JTextField nameTextField;
+    private javax.swing.JTextField posXTextField;
+    private javax.swing.JTextField posYTextField;
+    private javax.swing.JLabel positionLabel;
+    private javax.swing.JLabel sizeLabel;
     private javax.swing.JButton strokeColorButton;
     private javax.swing.JComboBox strokeWidthBox;
     private javax.swing.JComboBox styleComboBox;
     private javax.swing.JLabel styleLabel1;
     private javax.swing.JComboBox transitionComboBox;
     private javax.swing.JLabel transitionLabel;
+    private javax.swing.JTextField widthTextField;
     // End of variables declaration//GEN-END:variables
 
     private String style;
@@ -543,7 +691,9 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     private Color fillColor = Color.white;
     private Color strokeColor = Color.white;
     private String strokeWidth = null;
-    
+    private String shape=null;
+    private double width,height;
+    private double posX,posY;
     
     JgraphXInternalFrame jInternalFrame;
     
@@ -551,14 +701,19 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     public void setFillColor(mxGraph graph,Color color){
         Object[] objects = new Object[1];
         objects[0]=cell;
-        graph.setCellStyles("fillColor", mxUtils.hexString(color),objects);
-        jInternalFrame.setModified(true);
+        if(color!=null){
+            graph.setCellStyles("fillColor", mxUtils.hexString(color),objects);
+            jInternalFrame.setModified(true);
+        }
+        
     }
     public void setStrokeColor(mxGraph graph,Color color){
         Object[] objects = new Object[1];
         objects[0]=cell;
-        graph.setCellStyles("strokeColor", mxUtils.hexString(color),objects);
-        jInternalFrame.setModified(true);
+        if(color!=null){
+            graph.setCellStyles("strokeColor", mxUtils.hexString(color),objects);
+            jInternalFrame.setModified(true);
+        }
     }
     public void setStrokeWidth(mxGraph graph,float width){
         Object[] objects = new Object[1];
@@ -617,6 +772,50 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         mxConstants.SHADOW_OFFSETY=offsety;
         
     }
+    public void setShape(String string){
+        graph.setCellStyles("shape",string);
+        if(jInternalFrame!=null) jInternalFrame.setModified(true);
+    }
+    public void setWidth(String w){
+        mxGeometry geo=cell.getGeometry();
+        Double w_=Double.valueOf(w);
+        if(w_!=null){
+            geo.setWidth(w_);
+            cell.setGeometry(geo);
+            jInternalFrame.setModified(true);
+            width=w_;
+        }
+    }
+    public void setHeight(String h){
+        mxGeometry geo=cell.getGeometry();
+        Double h_=Double.valueOf(h);
+        if(h_!=null){
+            geo.setHeight(h_);
+            cell.setGeometry(geo);
+            jInternalFrame.setModified(true);
+            height=h_;
+        }
+    }
+    public void setPosX(String x){
+        mxGeometry geo=cell.getGeometry();
+        Double x_=Double.valueOf(x);
+        if(x_!=null){
+            geo.setX(x_-width/2);
+            cell.setGeometry(geo);
+            jInternalFrame.setModified(true);
+            posX=x_;
+        }
+    }
     
-
+    public void setPosY(String y){
+        mxGeometry geo=cell.getGeometry();
+        Double y_=Double.valueOf(y);
+        if(y_!=null){
+            geo.setY(y_-height/2);
+            cell.setGeometry(geo);
+            jInternalFrame.setModified(true);
+            posY=y_;
+        }
+    }
+    
 }

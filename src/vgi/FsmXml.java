@@ -217,6 +217,10 @@ public class FsmXml implements FsmXmlInterface {
 	private static final String TAG_GEOMETRIC_DATA = "geometricData";
 	private static final String ATR_X = "x";
 	private static final String ATR_Y = "y";
+        private static final String ATR_WIDTH = "width";
+        private static final String ATR_HEIGHT = "height";
+        private static final String ATR_SHAPE="shape";
+        
 	private static final String ATR_LABEL_POS = "labelPos";
 	private static final String ATR_LABEL_DIST = "labelDist";
 	private static final String ATR_LABEL_OFFSET_X = "labelOffsetX";
@@ -658,6 +662,13 @@ public class FsmXml implements FsmXmlInterface {
 		State state = allStates.get(allStates.size() - 1);
 		state.getGeometricData().location = new Point2D.Double(x, y);
 
+                Double w = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_WIDTH));
+		Double h = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_HEIGHT));
+		state.getGeometricData().size=new Point2D.Double(w, h);
+                
+                String shape_=xmlStreamReader.getAttributeValue(null,ATR_SHAPE);
+                state.setShape(shape_);
+                
 		if (!(Tag.findNextSpecified(xmlStreamReader, TAG_GEOMETRIC_DATA, Tag.Type.END))) {
 			Tag.assertTag(TAG_GEOMETRIC_DATA, Tag.Type.END);
 		}
@@ -682,7 +693,6 @@ public class FsmXml implements FsmXmlInterface {
                 drawingdata.fillColor=fillcolor;
                 drawingdata.strokeColor=strokecolor;
                 drawingdata.strokeWidth=strokewidth;
-                
                 state.setDrawingData(drawingdata);
                 
                 if (!(Tag.findNextSpecified(xmlStreamReader, TAG_DRAWING_DATA, Tag.Type.END))) {
@@ -1435,15 +1445,29 @@ public class FsmXml implements FsmXmlInterface {
 			}
 			if (writeGeometricAndDrawingData) {
 				Point2D point2d = state.getGeometricData().location;
+				xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
 				if (point2d != null) {
-					xmlStreamWriter.writeStartElement(TAG_GEOMETRIC_DATA);
-					xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(point2d.getX()));
-					xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
-					xmlStreamWriter.writeEndElement();  // End TAG_GEOMETRIC_DATA
+                                    xmlStreamWriter.writeAttribute(ATR_X, String.valueOf(point2d.getX()));
+                                    xmlStreamWriter.writeAttribute(ATR_Y, String.valueOf(point2d.getY()));
+				    
+                                        
 				}
-			
-                            // write drawing data
-                        
+                                Point2D sizepoint2d = state.getGeometricData().size;
+				if (sizepoint2d != null) {
+					xmlStreamWriter.writeAttribute(ATR_WIDTH, String.valueOf(sizepoint2d.getX()));
+					xmlStreamWriter.writeAttribute(ATR_HEIGHT, String.valueOf(sizepoint2d.getY()));
+				        
+				}
+                                String shape=state.getShape();
+                                if(shape!=null)
+                                    xmlStreamWriter.writeAttribute(ATR_SHAPE, shape);
+                                
+                                xmlStreamWriter.writeEndElement();  
+                                    
+                            // End TAG_GEOMETRIC_DATA
+                                
+                            
+                            // TAG_DRAWING_DATA
                             xmlStreamWriter.writeStartElement(TAG_DRAWING_DATA);
                             xmlStreamWriter.writeAttribute(ATR_FILL_COLOR, state.getDrawingData().fillColor);
                             xmlStreamWriter.writeAttribute(ATR_STROKE_COLOR, state.getDrawingData().strokeColor);

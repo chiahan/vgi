@@ -21,6 +21,7 @@ import com.mxgraph.view.mxGraph;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -297,7 +298,8 @@ public class VGI extends javax.swing.JFrame {
 		}
                 
                 
-                
+                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                setSize(screenSize.width, screenSize.height);
                 
                 
 	}  // End public VGI()
@@ -386,7 +388,7 @@ public class VGI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("VGI");
-        setMinimumSize(new java.awt.Dimension(1280, 960));
+        setMinimumSize(new java.awt.Dimension(1110, 710));
 
         toolBar.setFloatable(false);
         toolBar.setRollover(true);

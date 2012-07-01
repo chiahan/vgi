@@ -93,6 +93,8 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         strokeLabel = new javax.swing.JLabel();
         strokeColorButton = new javax.swing.JButton();
         strokeWidthBox = new javax.swing.JComboBox();
+        angleLabel = new javax.swing.JLabel();
+        angleTextField = new javax.swing.JTextField();
 
         jLabel3.setText("jLabel3");
 
@@ -185,6 +187,22 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
         add(strokeWidthBox, gridBagConstraints);
+
+        angleLabel.setText("Angle :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        add(angleLabel, gridBagConstraints);
+
+        angleTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                angleTextFieldKeyPressed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(angleTextField, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void startStyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startStyleComboBoxActionPerformed
@@ -218,7 +236,13 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         setStrokeWidth(graph,wid);
     }//GEN-LAST:event_strokeWidthBoxActionPerformed
 
+    private void angleTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_angleTextFieldKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_angleTextFieldKeyPressed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel angleLabel;
+    private javax.swing.JTextField angleTextField;
     private javax.swing.JLabel ednStyleLabel;
     private javax.swing.JComboBox endStyleComboBox;
     private javax.swing.JLabel jLabel3;
@@ -237,6 +261,6 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     private DisplayUtil display;
     private Color strokeColor = Color.white;
     private String strokeWidth = null;
-    
+    private double angle;
     JgraphXInternalFrame jInternalFrame;
 }
