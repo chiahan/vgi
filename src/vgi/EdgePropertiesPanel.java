@@ -1,13 +1,19 @@
 package vgi;
 
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGeometry;
+import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JTextField;
 
 /*
  * edge_properties.java
@@ -32,6 +38,57 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         this.automata = display.getAutomata();
         
         showLabel();
+        showGeoAndDrawingData();
+        
+        
+        
+        
+        jInternalFrame=jif;
+    }
+    
+    private void showLabel() {
+        labelTextField.setText(cell.getValue().toString());
+    }
+    
+    private void showGeoAndDrawingData(){
+        
+        mxCell source=(mxCell)cell.getSource();
+        mxCell target=(mxCell)cell.getTarget();
+        if(source==target || source==null || target==null){
+            angleLabel.setVisible(true);
+            angleTextField.setVisible(true);
+        }else{
+            angleLabel.setVisible(false);
+            angleTextField.setVisible(false);
+        }
+        if(source==null){
+            mxPoint term=cell.getGeometry().getTerminalPoint(true);
+            mxPoint center=new mxPoint(target.getGeometry().getCenterX(),target.getGeometry().getCenterY());
+            
+            //System.out.println(term.toString()+" "+center.toString());
+            double theta=Math.atan((term.getY()-center.getY())/(term.getX()-center.getX()));
+            theta=Math.toDegrees(theta);
+            angleTextField.setText(String.valueOf(theta));
+        }else if(target==null){
+            mxPoint term=cell.getGeometry().getTerminalPoint(false);
+            mxPoint center=new mxPoint(source.getGeometry().getCenterX(),source.getGeometry().getCenterY());
+            
+            //System.out.println(term.toString()+" "+center.toString());
+            double theta=Math.atan((term.getY()-center.getY())/(term.getX()-center.getX()));
+            theta=Math.toDegrees(theta);
+            angleTextField.setText(String.valueOf(theta));
+        
+        }else if(source==target){
+            mxPoint controlpt=cell.getGeometry().getPoints().get(0);
+            mxPoint center=new mxPoint(source.getGeometry().getCenterX(),source.getGeometry().getCenterY());
+           
+            double theta=Math.atan((controlpt.getY()-center.getY())/(controlpt.getX()-center.getX()));
+            theta=Math.toDegrees(theta);
+            angleTextField.setText(String.valueOf(theta));
+            //System.out.println(pt.toString()+"-"+center.toString()+" theta: "+theta);
+            
+        }
+        
         Map<String,Object> styles=graph.getCellStyle(cell);
         String color=(String)styles.get("strokeColor");
         strokeColor=Color.decode(color);
@@ -44,13 +101,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             strokeWidthBox.setSelectedIndex(ind-1);
         }
         
-        jInternalFrame=jif;
     }
-    
-    private void showLabel() {
-        labelTextField.setText(cell.getValue().toString());
-    }
-    
     private void setStartEndArrow(JComboBox comboBox, Boolean startEnd) {
         String arrowDir = (startEnd) ? "startArrow" : "endArrow";
         String arrowType = ((String)comboBox.getSelectedItem()).toLowerCase();
@@ -237,9 +288,64 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_strokeWidthBoxActionPerformed
 
     private void angleTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_angleTextFieldKeyPressed
-        // TODO add your handling code here:
+         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            String str = ((JTextField)evt.getSource()).getText();
+            if (str.compareTo("") == 0)
+                str = null;
+            setAngle(str);
+        }
+         graph.refresh();
+        
     }//GEN-LAST:event_angleTextFieldKeyPressed
 
+    private void setAngle(String str){
+        mxGeometry geo=cell.getGeometry();
+        Double angle_=Double.valueOf(str);
+        angle_=Math.toRadians(angle_);
+        
+        if(angle_!=null){
+            mxCell source=(mxCell)cell.getSource();
+            mxCell target=(mxCell)cell.getTarget();
+            if(source==target){
+                mxPoint ctrlpt=geo.getPoints().get(0);
+                
+                double deltax=ctrlpt.getX()-source.getGeometry().getCenterX();
+                double deltay=ctrlpt.getY()-source.getGeometry().getCenterY();
+                double length=Math.sqrt(deltax*deltax+deltay*deltay);
+                
+                mxPoint newterm=new mxPoint(source.getGeometry().getCenterX()+length*Math.cos(angle_),
+                                            source.getGeometry().getCenterY()+length*Math.sin(angle_));
+                ArrayList<mxPoint> list=new ArrayList<mxPoint>();
+                list.add(newterm);
+                geo.setPoints(list);
+                cell.setGeometry(geo);
+                
+            }else if(source==null){
+                //mxPoint terminal=geo.getTerminalPoint(true);
+                mxGeometry vertexgeo=target.getGeometry();
+                
+                mxPoint newterm=new mxPoint();
+                newterm.setX(vertexgeo.getCenterX()+vertexgeo.getWidth()*Math.cos(angle_));
+                newterm.setY(vertexgeo.getCenterY()+vertexgeo.getWidth()*Math.sin(angle_));
+                geo.setTerminalPoint(newterm, true);
+                
+            }else if(target==null){
+                mxGeometry vertexgeo=source.getGeometry();
+                
+                mxPoint newterm=new mxPoint();
+                newterm.setX(vertexgeo.getCenterX()+vertexgeo.getWidth()*Math.cos(angle_));
+                newterm.setY(vertexgeo.getCenterY()+vertexgeo.getWidth()*Math.sin(angle_));
+                geo.setTerminalPoint(newterm, false);
+                
+                
+            }
+            
+            cell.setGeometry(geo);
+            jInternalFrame.setModified(true);
+         }
+    }
+    
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel angleLabel;
     private javax.swing.JTextField angleTextField;
@@ -263,4 +369,5 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     private String strokeWidth = null;
     private double angle;
     JgraphXInternalFrame jInternalFrame;
+    
 }

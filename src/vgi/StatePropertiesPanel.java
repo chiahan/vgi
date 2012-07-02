@@ -235,12 +235,15 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         strokeWidthBox = new javax.swing.JComboBox();
         strokeColorButton = new javax.swing.JButton();
-        sizeLabel = new javax.swing.JLabel();
-        widthTextField = new javax.swing.JTextField();
-        heightTextField = new javax.swing.JTextField();
-        positionLabel = new javax.swing.JLabel();
+        transformPanel = new javax.swing.JPanel();
+        xLabel = new javax.swing.JLabel();
         posXTextField = new javax.swing.JTextField();
+        wLabel = new javax.swing.JLabel();
+        widthTextField = new javax.swing.JTextField();
+        yLabel = new javax.swing.JLabel();
         posYTextField = new javax.swing.JTextField();
+        hLabel = new javax.swing.JLabel();
+        heightTextField = new javax.swing.JTextField();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -266,6 +269,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.1;
         add(nameTextField, gridBagConstraints);
@@ -402,11 +406,20 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         add(strokeColorButton, gridBagConstraints);
         strokeColorButton.getAccessibleContext().setAccessibleName("strokeColorButton");
 
-        sizeLabel.setText("Size :");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 8;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(sizeLabel, gridBagConstraints);
+        transformPanel.setLayout(new java.awt.GridLayout(2, 2));
+
+        xLabel.setText("x :");
+        transformPanel.add(xLabel);
+
+        posXTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                posXTextFieldKeyPressed(evt);
+            }
+        });
+        transformPanel.add(posXTextField);
+
+        wLabel.setText("w :");
+        transformPanel.add(wLabel);
 
         widthTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -418,10 +431,20 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
                 widthTextFieldKeyPressed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 8;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        add(widthTextField, gridBagConstraints);
+        transformPanel.add(widthTextField);
+
+        yLabel.setText("y :");
+        transformPanel.add(yLabel);
+
+        posYTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                posYTextFieldKeyPressed(evt);
+            }
+        });
+        transformPanel.add(posYTextField);
+
+        hLabel.setText("h :");
+        transformPanel.add(hLabel);
 
         heightTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -433,38 +456,15 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
                 heightTextFieldKeyPressed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 8;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        add(heightTextField, gridBagConstraints);
+        transformPanel.add(heightTextField);
 
-        positionLabel.setText("Position :");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.ipady = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(positionLabel, gridBagConstraints);
-
-        posXTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                posXTextFieldKeyPressed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 7;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        add(posXTextField, gridBagConstraints);
-
-        posYTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                posYTextFieldKeyPressed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 7;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        add(posYTextField, gridBagConstraints);
+        add(transformPanel, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void nameTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nameTextFieldKeyPressed
@@ -661,6 +661,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     private javax.swing.JLabel colorLabel;
     private javax.swing.JCheckBox finalCheckBox;
     private javax.swing.JTextField finalWeightTextField;
+    private javax.swing.JLabel hLabel;
     private javax.swing.JTextField heightTextField;
     private javax.swing.JCheckBox initialCheckBox;
     private javax.swing.JTextField initialWeightTextField;
@@ -669,15 +670,17 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     private javax.swing.JTextField nameTextField;
     private javax.swing.JTextField posXTextField;
     private javax.swing.JTextField posYTextField;
-    private javax.swing.JLabel positionLabel;
-    private javax.swing.JLabel sizeLabel;
     private javax.swing.JButton strokeColorButton;
     private javax.swing.JComboBox strokeWidthBox;
     private javax.swing.JComboBox styleComboBox;
     private javax.swing.JLabel styleLabel1;
+    private javax.swing.JPanel transformPanel;
     private javax.swing.JComboBox transitionComboBox;
     private javax.swing.JLabel transitionLabel;
+    private javax.swing.JLabel wLabel;
     private javax.swing.JTextField widthTextField;
+    private javax.swing.JLabel xLabel;
+    private javax.swing.JLabel yLabel;
     // End of variables declaration//GEN-END:variables
 
     private String style;

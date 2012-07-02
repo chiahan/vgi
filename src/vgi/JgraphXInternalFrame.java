@@ -1526,8 +1526,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             this.setTitle(title);
         } else {
             this.setTitle(title + "*");
+             graphComponent.refresh();
         }
-
+        
+       
+        
     }
 
     private State cellToState(mxCell cell) {
