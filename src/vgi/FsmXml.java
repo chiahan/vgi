@@ -217,10 +217,12 @@ public class FsmXml implements FsmXmlInterface {
 	private static final String TAG_GEOMETRIC_DATA = "geometricData";
 	private static final String ATR_X = "x";
 	private static final String ATR_Y = "y";
-        private static final String ATR_WIDTH = "width";
-        private static final String ATR_HEIGHT = "height";
-        private static final String ATR_SHAPE="shape";
-        
+	private static final String ATR_WIDTH = "width";
+	private static final String VAL_DEFAULT_WIDTH = "50.0";
+	private static final String ATR_HEIGHT = "height";
+	private static final String VAL_DEFAULT_HEIGHT = "50.0";
+	private static final String ATR_SHAPE="shape";
+	
 	private static final String ATR_LABEL_POS = "labelPos";
 	private static final String ATR_LABEL_DIST = "labelDist";
 	private static final String ATR_LABEL_OFFSET_X = "labelOffsetX";
@@ -662,13 +664,20 @@ public class FsmXml implements FsmXmlInterface {
 		State state = allStates.get(allStates.size() - 1);
 		state.getGeometricData().location = new Point2D.Double(x, y);
 
-                Double w = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_WIDTH));
-		Double h = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_HEIGHT));
+		String string = xmlStreamReader.getAttributeValue(null, ATR_WIDTH);
+		if (string == null) {
+			string = VAL_DEFAULT_WIDTH;
+		}
+		Double w = Double.valueOf(string);
+		string = xmlStreamReader.getAttributeValue(null, ATR_HEIGHT);
+		if (string == null) {
+			string = VAL_DEFAULT_HEIGHT;
+		}
+		Double h = Double.valueOf(string);
 		state.getGeometricData().size=new Point2D.Double(w, h);
-                
-                String shape_=xmlStreamReader.getAttributeValue(null,ATR_SHAPE);
-                state.setShape(shape_);
-                
+		String shape_=xmlStreamReader.getAttributeValue(null,ATR_SHAPE);
+		state.setShape(shape_);
+
 		if (!(Tag.findNextSpecified(xmlStreamReader, TAG_GEOMETRIC_DATA, Tag.Type.END))) {
 			Tag.assertTag(TAG_GEOMETRIC_DATA, Tag.Type.END);
 		}

@@ -648,7 +648,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         State newState = new State();
         State.GeometricData geo = new State.GeometricData();
         geo.location = new Point2D.Double(x, y);
-        geo.shape="elipse";
+        geo.shape="ellipse";
         geo.size=new Point2D.Double(vertexWidth,vertexWidth);
         newState.setGeometricData(geo);
         
