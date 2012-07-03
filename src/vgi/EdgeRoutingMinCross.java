@@ -847,6 +847,13 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			}  // End for (mxICell aVertex : path)
 			super.setEdgePoints(newEdge, controlPoints);
 			controlPoints = null;  // List<mxPoint> controlPoints = new LinkedList<mxPoint>();
+			mxGeometry geometry = newEdge.getGeometry();
+			if (geometry == null) {
+				throw new IllegalStateException("The newEdge variable has null geometry.");
+			}
+			geometry.setX(0);
+			geometry.setY(JgraphXInternalFrame.DEFAULT_LABEL_DISTANCE);
+			geometry.setOffset(new mxPoint(0, 0));
 
 		}  // End for (List<mxICell> path : paths)
 
