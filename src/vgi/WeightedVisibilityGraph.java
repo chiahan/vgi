@@ -11,6 +11,7 @@ import com.mxgraph.util.mxPoint;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
 import java.util.*;
+import java.util.prefs.Preferences;
 import vgi.SingleVertexEdgesLayout.Vector2DComparator;
 
 /**
@@ -23,7 +24,6 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
 	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
 	protected static final double MINIMUM_SPACING = VISIBILITY_GRAPH_VERTEX_WDITH;
-	protected static final double CROSSING_COST = 500;
 
 	protected static class LineSegment {
 
@@ -142,11 +142,29 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 	protected Map<mxICell, List<mxICell>> obstacleToVerticesMap;
 	protected Map<mxICell, List<LineSegment>> hindranceToLineSegmentsMap;
 
+	protected double costPerUnitLength = 1;
+	protected double costPerEdgeCrossing = 500;
+	protected double costPerSegment = 1;
+
 	protected final void inititializeMembers() {
 		this.roadblocks = new LinkedList<mxICell>();
 //		this.hindrances = new LinkedList<mxICell>();
 		this.obstacleToVerticesMap = new HashMap<mxICell, List<mxICell>>();
 		this.hindranceToLineSegmentsMap = new HashMap<mxICell, List<LineSegment>>();
+
+		Preferences preferences = Preferences.userRoot().node(VGI.class.getName());
+		String string = preferences.get(
+				EdgeCostSettingsDialog.KEY_COST_PER_UNIT_LENGTH,
+				EdgeCostSettingsDialog.VAL_DEFAULT_COST_PER_UNIT_LENGTH);
+		this.costPerUnitLength = Double.valueOf(string);
+		string = preferences.get(
+				EdgeCostSettingsDialog.KEY_COST_PER_EDGE_CROSSING,
+				EdgeCostSettingsDialog.VAL_DEFAULT_COST_PER_EDGE_CROSSING);
+		this.costPerEdgeCrossing = Double.valueOf(string);
+		string = preferences.get(
+				EdgeCostSettingsDialog.KEY_COST_PER_SEGMENT,
+				EdgeCostSettingsDialog.VAL_DEFAULT_COST_PER_SEGMENT);
+		this.costPerSegment = Double.valueOf(string);
 	}  // End protected final void inititializeMembers()
 
 	public WeightedVisibilityGraph(mxIGraphModel model, mxStylesheet stylesheet) {
@@ -279,10 +297,12 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 
 			}  // End for (mxICell cell : this.hindranceToLineSegmentsMap.keySet())
 
-			double cost = 1 + Vector2D.length(
+			double cost = Vector2D.length(
 					geometry.getCenterX() - anotherGeometry.getCenterX(),
 					geometry.getCenterY() - anotherGeometry.getCenterY())
-					+ CROSSING_COST * crossingNumber;
+					* this.costPerUnitLength
+					+ crossingNumber * this.costPerEdgeCrossing
+					+ this.costPerSegment;
 			this.insertEdge(
 					parent,
 					null,
@@ -545,7 +565,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 			}  // End while (iterateLineSegments.hasNext())
 
 			if (crossingNumber > 0.0d) {
-				cost = cost + CROSSING_COST * crossingNumber;
+				cost = cost + this.costPerEdgeCrossing * crossingNumber;
 				edge.setValue(cost);
 			}
 

@@ -372,6 +372,7 @@ public class VGI extends javax.swing.JFrame {
         testShortestPathsMenuItem = new javax.swing.JMenuItem();
         singleVertexEdgesLayoutMenuItem = new javax.swing.JMenuItem();
         showWeightedVisibilityGraphMenuItem = new javax.swing.JMenuItem();
+        edgeCostSettingsMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -747,6 +748,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         layoutMenu.add(showWeightedVisibilityGraphMenuItem);
+
+        edgeCostSettingsMenuItem.setText("Edge Cost Settings...");
+        edgeCostSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                edgeCostSettingsMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(edgeCostSettingsMenuItem);
 
         menuBar.add(layoutMenu);
 
@@ -1363,6 +1372,11 @@ public class VGI extends javax.swing.JFrame {
 		this.updateAlgorithmMenuItems();
 	}//GEN-LAST:event_algorithmsMenuMenuSelected
 
+	private void edgeCostSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_edgeCostSettingsMenuItemActionPerformed
+		EdgeCostSettingsDialog edgeCostSettingsDialog = new EdgeCostSettingsDialog(this, true);
+		edgeCostSettingsDialog.setVisible(true);
+	}//GEN-LAST:event_edgeCostSettingsMenuItemActionPerformed
+
 	void closeSelectedFrame() {
 		this.closeMenuItemActionPerformed(null);
 	}
@@ -1573,6 +1587,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem currentSettingMenuItem;
     private javax.swing.JButton deleteButton;
     private javax.swing.JMenuItem deleteMenuItem;
+    private javax.swing.JMenuItem edgeCostSettingsMenuItem;
     private javax.swing.JMenu editMenu;
     private javax.swing.JPopupMenu.Separator editMenuSeparator1;
     private javax.swing.JMenuItem exitMenuItem;
