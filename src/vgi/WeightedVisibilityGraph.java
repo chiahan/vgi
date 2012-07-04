@@ -146,6 +146,23 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 	protected double costPerEdgeCrossing = 500;
 	protected double costPerSegment = 1;
 
+	public Stopwatch rOther = new Stopwatch();
+	public Stopwatch rIntersectEdges = new Stopwatch();
+	public Stopwatch rAddVertices = new Stopwatch();
+	public Stopwatch rAddEdges = new Stopwatch();
+
+	public Stopwatch stOther = new Stopwatch();
+	public Stopwatch stEdgeVectors = new Stopwatch();
+	public Stopwatch stSortEdgeVectors = new Stopwatch();
+	public Stopwatch stNewPositions = new Stopwatch();
+	public Stopwatch stAddVertices = new Stopwatch();
+	public Stopwatch stAddEdges = new Stopwatch();
+
+	public Stopwatch eOther = new Stopwatch();
+	public Stopwatch eIntersectRoadblocks = new Stopwatch();
+	public Stopwatch eIntersectHindrances = new Stopwatch();
+	public Stopwatch eAddEdges = new Stopwatch();
+
 	protected final void inititializeMembers() {
 		this.roadblocks = new LinkedList<mxICell>();
 //		this.hindrances = new LinkedList<mxICell>();
@@ -204,6 +221,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 
 	protected void addEdgesForVertex(mxICell vertex) {
 
+		this.eOther.start();
 		if (!IS_ENABLED) {
 			return;
 		}
@@ -241,11 +259,15 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 				if (roadblockGeometry == null) {
 					throw new IllegalStateException("The 'roadblock' variable has null geometry.");
 				}
+				this.eOther.stop();
+				this.eIntersectRoadblocks.start();
 				mxPoint point = roadblockGeometry.intersectLine(
 						geometry.getCenterX(),
 						geometry.getCenterY(),
 						anotherGeometry.getCenterX(),
 						anotherGeometry.getCenterY());
+				this.eIntersectRoadblocks.stop();
+				this.eOther.start();
 				if (point != null) {
 					isVisible = false;
 					break;
@@ -264,6 +286,8 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 				List<LineSegment> lineSegments = this.hindranceToLineSegmentsMap.get(cell);
 				for (LineSegment lineSegment : lineSegments) {
 
+					this.eOther.stop();
+					this.eIntersectHindrances.start();
 					mxPoint intersection = LineSegment.intersection(
 							geometry.getCenterX(),
 							geometry.getCenterY(),
@@ -273,6 +297,8 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 							lineSegment.y1,
 							lineSegment.x2,
 							lineSegment.y2);
+					this.eIntersectHindrances.stop();
+					this.eOther.start();
 					if (intersection == null) {
 						continue;
 					}
@@ -303,19 +329,25 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 					* this.costPerUnitLength
 					+ crossingNumber * this.costPerEdgeCrossing
 					+ this.costPerSegment;
+			this.eOther.stop();
+			this.eAddEdges.start();
 			this.insertEdge(
 					parent,
 					null,
 					cost,
 					vertex,
 					anotherVertex);
+			this.eAddEdges.stop();
+			this.eOther.start();
 
 		}  // End for (int index = 0; index < objects.length; index++)
 
+		this.eOther.stop();
 	}  // End public void addEdgesForVertex(mxICell vertex)
 
 	public void addRoadblock(mxICell roadblock) {
 
+		this.rOther.start();
 		if (!IS_ENABLED) {
 			return;
 		}
@@ -356,11 +388,15 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 				throw new IllegalStateException("The 'target' variable has null geometry.");
 			}
 
+			this.rOther.stop();
+			this.rIntersectEdges.start();
 			mxPoint point = geometry.intersectLine(
 					sourceGeometry.getCenterX(),
 					sourceGeometry.getCenterY(),
 					targetGeometry.getCenterX(),
 					targetGeometry.getCenterY());
+			this.rIntersectEdges.stop();
+			this.rOther.start();
 			if (point != null) {
 				Object cells[] = {edge};
 				this.removeCells(cells);
@@ -370,6 +406,8 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 
 		this.roadblocks.add(roadblock);
 		List<mxICell> vertices = new LinkedList<mxICell>();
+		this.rOther.stop();
+		this.rAddVertices.start();
 		mxICell vertex = (mxICell) this.insertVertex(
 				parent,
 				null,
@@ -378,8 +416,12 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 				geometry.getY() - MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
 				VISIBILITY_GRAPH_VERTEX_WDITH,
 				VISIBILITY_GRAPH_VERTEX_HEIGHT);
+		this.rAddVertices.stop();
+		this.rAddEdges.start();
 		this.addEdgesForVertex(vertex);
+		this.rAddEdges.stop();
 		vertices.add(vertex);
+		this.rAddVertices.start();
 		vertex = (mxICell) this.insertVertex(
 				parent,
 				null,
@@ -388,8 +430,12 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 				geometry.getY() - MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
 				VISIBILITY_GRAPH_VERTEX_WDITH,
 				VISIBILITY_GRAPH_VERTEX_HEIGHT);
+		this.rAddVertices.stop();
+		this.rAddEdges.start();
 		this.addEdgesForVertex(vertex);
+		this.rAddEdges.stop();
 		vertices.add(vertex);
+		this.rAddVertices.start();
 		vertex = (mxICell) this.insertVertex(
 				parent,
 				null,
@@ -398,8 +444,12 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 				geometry.getY() + geometry.getHeight() + MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
 				VISIBILITY_GRAPH_VERTEX_WDITH,
 				VISIBILITY_GRAPH_VERTEX_HEIGHT);
+		this.rAddVertices.stop();
+		this.rAddEdges.start();
 		this.addEdgesForVertex(vertex);
+		this.rAddEdges.stop();
 		vertices.add(vertex);
+		this.rAddVertices.start();
 		vertex = (mxICell) this.insertVertex(
 				parent,
 				null,
@@ -408,10 +458,15 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 				geometry.getY() + geometry.getHeight() + MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
 				VISIBILITY_GRAPH_VERTEX_WDITH,
 				VISIBILITY_GRAPH_VERTEX_HEIGHT);
+		this.rAddVertices.stop();
+		this.rAddEdges.start();
 		this.addEdgesForVertex(vertex);
+		this.rAddEdges.stop();
+		this.rOther.start();
 		vertices.add(vertex);
 		this.obstacleToVerticesMap.put(roadblock, vertices);
 		vertices = null;  // List<mxICell> vertices = new LinkedList<mxICell>();
+		this.rOther.stop();
 
 	}  // End public void addRoadblock(mxICell roadblock)
 
@@ -600,6 +655,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 
 	public void addVerticesIntoOutOf(mxICell roadblock) {
 
+		this.stOther.start();
 		if (!IS_ENABLED) {
 			return;
 		}
@@ -616,6 +672,8 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 
 		int edgeCount = roadblock.getEdgeCount();
 		List<Vector2D> edgeUnitVectorsList = new ArrayList<Vector2D>(edgeCount);
+		this.stOther.stop();
+		this.stEdgeVectors.start();
 
 		for (int index = 0; index < edgeCount; index++) {
 			mxICell edge = roadblock.getEdgeAt(index);
@@ -663,7 +721,11 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 		double y = geometry.getHeight() / 2 + MINIMUM_SPACING;
 		double radius = Math.sqrt(x * x + y * y);
 
+		this.stEdgeVectors.stop();
+		this.stSortEdgeVectors.start();
 		Collections.sort(edgeUnitVectorsList, new Vector2DComparator());
+		this.stSortEdgeVectors.stop();
+		this.stNewPositions.start();
 		List<mxPoint> newVerticesPositions = new LinkedList<mxPoint>();
 
 		for (int index = 0; index < edgeCount; index++) {
@@ -694,6 +756,8 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 					geometry.getCenterY() + radius * bisector.getY() / bisectorLength));
 
 		}  // End for (int index = 0; index < edgeCount; index++)
+		this.stNewPositions.stop();
+		this.stOther.start();
 
 		edgeUnitVectorsList = null;  // List<Vector2D> edgeUnitVectorsList = new ArrayList<Vector2D>(edgeCount);
 
@@ -703,6 +767,8 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 		while (iteratePositions.hasNext()) {
 
 			mxPoint position = iteratePositions.next();
+			this.stOther.stop();
+			this.stAddVertices.start();
 			mxICell vertex = (mxICell) this.insertVertex(
 					parent,
 					null,
@@ -711,7 +777,11 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 					position.getY() - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
 					VISIBILITY_GRAPH_VERTEX_WDITH,
 					VISIBILITY_GRAPH_VERTEX_HEIGHT);
+			this.stAddVertices.stop();
+			this.stAddEdges.start();
 			this.addEdgesForVertex(vertex);
+			this.stAddEdges.stop();
+			this.stOther.start();
 			vertices.add(vertex);
 
 		}  // End while (iteratePositions.hasNext())
@@ -723,6 +793,7 @@ public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 		}
 		vertices = null;  // List<mxICell> vertices = new LinkedList<mxICell>();
 		newVerticesPositions = null;  // List<mxPoint> newVerticesPositions = new LinkedList<mxPoint>();
+		this.stOther.stop();
 
 	}  // End public void addVerticesIntoOutOf(mxICell roadblock)
 }  // End public class WeightedVisibilityGraph extends mxGraph implements Cloneable
