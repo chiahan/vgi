@@ -6,9 +6,10 @@ package vgi;
 
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.view.mxGraph;
-import java.awt.geom.Point2D;
+import com.mxgraph.view.mxStylesheet;
 import java.util.*;
 import java.util.prefs.Preferences;
 import vgi.SingleVertexEdgesLayout.Vector2DComparator;
@@ -17,126 +18,12 @@ import vgi.SingleVertexEdgesLayout.Vector2DComparator;
  *
  * @author JLiu
  */
-public class WeightedVisibilityGraph {
+public class WeightedVisibilityGraph extends mxGraph implements Cloneable {
 
-	public static class Vertex {
-
-		public Point2D location;
-		public Set<Edge> edges;
-
-		public Vertex() {
-			this.location = null;
-			this.edges = new LinkedHashSet<Edge>();
-		}
-	}  // End public static class Vertex
-
-	public static class Edge {
-
-		public Vertex source;
-		public Vertex target;
-		public double weight;
-
-		public Edge(Vertex source, Vertex target, double weight) {
-			this.source = source;
-			this.target = target;
-			this.weight = weight;
-		}
-
-		public Edge() {
-			this(null, null, 0d);
-		}
-	}  // End public static class Edge
-	protected Set<Vertex> vertices;
-	protected Set<Edge> edges;
-
-	public boolean contains(Vertex inVertex) {
-
-		if ((inVertex == null)
-				|| (inVertex.location == null)
-				|| (inVertex.edges == null)) {
-			return false;
-		}
-
-		return ((this.vertices.contains(inVertex))
-				&& (this.edges.containsAll(inVertex.edges)));
-	}  // End public boolean contains(Vertex inVertex)
-
-	public boolean contains(Edge inEdge) {
-
-		if ((inEdge == null)
-				|| (inEdge.source == null)
-				|| (inEdge.target == null)) {
-			return false;
-		}
-
-		return ((this.edges.contains(inEdge))
-				&& (this.vertices.contains(inEdge.source))
-				&& (this.vertices.contains(inEdge.target)));
-	}  // End public boolean contains(Edge ineEdge)
-
-	public Set<Vertex> getVertices() {
-		return this.vertices;
-	}
-
-	public Set<Edge> getEdges() {
-		return this.edges;
-	}
-
-	public Vertex addVertex(double inX, double inY) {
-		Vertex vertex = new Vertex();
-		vertex.location = new Point2D.Double(inX, inY);
-		this.vertices.add(vertex);
-		return vertex;
-	}  // End public Vertex addVertex(double inX, double inY)
-
-	public Edge addEdge(
-			Vertex inSource,
-			Vertex inTarget,
-			double inWeight) {
-
-		if ((!(this.contains(inSource)))
-				|| (!(this.contains(inTarget)))) {
-			throw new IllegalArgumentException("The input argument 'inSource' or 'inTarget' is not a vertex of this graph.");
-		}
-
-		Edge edge = new Edge(inSource, inTarget, inWeight);
-		this.edges.add(edge);
-		inSource.edges.add(edge);
-		if (inTarget != inSource) {
-			inTarget.edges.add(edge);
-		}
-
-		return edge;
-	}  // End public Edge addEdge(...)
-
-	public Vertex removeVertex(Vertex inVertex) {
-
-		if (!(this.contains(inVertex))) {
-			throw new IllegalArgumentException("The input argument 'inVertex' is not a vertex of this graph.");
-		}
-
-		for (Edge edge : inVertex.edges) {
-			this.removeEdge(edge);
-		}
-		this.vertices.remove(inVertex);
-
-		return inVertex;
-	}  // End public Vertex removeVertex(Vertex inVertex)
-
-	public Edge removeEdge(Edge inEdge) {
-
-		if (!(this.contains(inEdge))) {
-			throw new IllegalArgumentException("The input argument 'inEdge' is not an edge of this graph.");
-		}
-
-		this.edges.remove(inEdge);
-		inEdge.source.edges.remove(inEdge);
-		if (inEdge.target != inEdge.source) {
-			inEdge.target.edges.remove(inEdge);
-		}
-
-		return inEdge;
-	}  // End public Edge removeEdge(Edge inEdge)
+	protected static final boolean IS_ENABLED = true;
+	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
+	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
+	protected static final double MINIMUM_SPACING = VISIBILITY_GRAPH_VERTEX_WDITH;
 
 	protected static class LineSegment {
 
@@ -250,37 +137,36 @@ public class WeightedVisibilityGraph {
 			return new mxPoint(x1, y);
 		}  // End public static mxPoint intersection(...)
 	}  // End protected static class LineSegment
-	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
-	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
-	protected static final double MINIMUM_SPACING = VISIBILITY_GRAPH_VERTEX_WDITH;
 	protected List<mxICell> roadblocks;
-	protected Map<mxICell, Set<Vertex>> obstacleToVerticesMap;
+//	protected List<mxICell> hindrances;
+	protected Map<mxICell, List<mxICell>> obstacleToVerticesMap;
 	protected Map<mxICell, List<LineSegment>> hindranceToLineSegmentsMap;
+
 	protected double costPerUnitLength = 1;
 	protected double costPerEdgeCrossing = 500;
 	protected double costPerSegment = 1;
+
 	public Stopwatch rOther = new Stopwatch();
 	public Stopwatch rIntersectEdges = new Stopwatch();
 	public Stopwatch rAddVertices = new Stopwatch();
 	public Stopwatch rAddEdges = new Stopwatch();
+
 	public Stopwatch stOther = new Stopwatch();
 	public Stopwatch stEdgeVectors = new Stopwatch();
 	public Stopwatch stSortEdgeVectors = new Stopwatch();
 	public Stopwatch stNewPositions = new Stopwatch();
 	public Stopwatch stAddVertices = new Stopwatch();
 	public Stopwatch stAddEdges = new Stopwatch();
+
 	public Stopwatch eOther = new Stopwatch();
 	public Stopwatch eIntersectRoadblocks = new Stopwatch();
 	public Stopwatch eIntersectHindrances = new Stopwatch();
 	public Stopwatch eAddEdges = new Stopwatch();
 
-	public WeightedVisibilityGraph() {
-
-		this.vertices = new LinkedHashSet<Vertex>();
-		this.edges = new LinkedHashSet<Edge>();
-
+	protected final void inititializeMembers() {
 		this.roadblocks = new LinkedList<mxICell>();
-		this.obstacleToVerticesMap = new HashMap<mxICell, Set<Vertex>>();
+//		this.hindrances = new LinkedList<mxICell>();
+		this.obstacleToVerticesMap = new HashMap<mxICell, List<mxICell>>();
 		this.hindranceToLineSegmentsMap = new HashMap<mxICell, List<LineSegment>>();
 
 		Preferences preferences = Preferences.userRoot().node(VGI.class.getName());
@@ -296,36 +182,79 @@ public class WeightedVisibilityGraph {
 				EdgeCostSettingsDialog.KEY_COST_PER_SEGMENT,
 				EdgeCostSettingsDialog.VAL_DEFAULT_COST_PER_SEGMENT);
 		this.costPerSegment = Double.valueOf(string);
-	}  // End public WeightedVisibilityGraph()
+	}  // End protected final void inititializeMembers()
 
-	public Map<mxICell, Set<Vertex>> getObstacleToVerticesMap() {
+	public WeightedVisibilityGraph(mxIGraphModel model, mxStylesheet stylesheet) {
+		super(model, stylesheet);
+		inititializeMembers();
+	}
+
+	public WeightedVisibilityGraph(mxStylesheet stylesheet) {
+		super(stylesheet);
+		inititializeMembers();
+	}
+
+	public WeightedVisibilityGraph(mxIGraphModel model) {
+		super(model);
+		inititializeMembers();
+	}
+
+	public WeightedVisibilityGraph() {
+		super();
+		inititializeMembers();
+	}
+
+	@Override
+	public Object clone() {
+		WeightedVisibilityGraph clone = new WeightedVisibilityGraph();
+		clone.roadblocks = new LinkedList<mxICell>(this.roadblocks);
+		clone.obstacleToVerticesMap = new HashMap<mxICell, List<mxICell>>(this.obstacleToVerticesMap);
+		clone.hindranceToLineSegmentsMap = new HashMap<mxICell, List<LineSegment>>(this.hindranceToLineSegmentsMap);
+		Object objects[] = this.getChildCells(this.getDefaultParent());
+		clone.addCells(objects);
+		return clone;
+	}  // End public Object clone() throws CloneNotSupportedException
+
+	public Map<mxICell, List<mxICell>> getObstacleToVerticesMap() {
 		return this.obstacleToVerticesMap;
 	}
 
-	protected void addEdgesForVertex(Vertex inVertex) {
+	protected void addEdgesForVertex(mxICell vertex) {
 
 		this.eOther.start();
-		if (inVertex == null) {
+		if (!IS_ENABLED) {
+			return;
+		}
+		if (vertex == null) {
 			throw new IllegalArgumentException("Input 'vertex' is null.");
 		}
-		if (inVertex.location == null) {
-			throw new IllegalArgumentException("Input 'vertex' has null location.");
+		mxGeometry geometry = vertex.getGeometry();
+		if (geometry == null) {
+			throw new IllegalArgumentException("Input 'vertex' has null geometry.");
 		}
 
-		Set<Vertex> vertices = this.getVertices();
+		Object parent = this.getDefaultParent();
+		Object objects[] = this.getChildVertices(parent);
 
-		for (Vertex vertex : vertices) {
+		for (int index = 0; index < objects.length; index++) {
 
-			if (vertex == inVertex) {
+			if (objects[index] == vertex) {
 				continue;
 			}
-			if (vertex.location == null) {
-				throw new IllegalStateException("The 'vertex' variable has null location.");
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException("A vertex is not of the type mxICell.");
+			}
+			mxICell anotherVertex = (mxICell) objects[index];
+			mxGeometry anotherGeometry = anotherVertex.getGeometry();
+			if (anotherGeometry == null) {
+				throw new IllegalStateException("The 'anotherVertex' variable has null geometry.");
 			}
 
 			boolean isVisible = true;
-			for (mxICell roadblock : this.roadblocks) {
+			Iterator<mxICell> iterateCells = this.roadblocks.iterator();
+			while (iterateCells.hasNext()) {
 
+				mxICell roadblock = iterateCells.next();
 				mxGeometry roadblockGeometry = roadblock.getGeometry();
 				if (roadblockGeometry == null) {
 					throw new IllegalStateException("The 'roadblock' variable has null geometry.");
@@ -333,10 +262,10 @@ public class WeightedVisibilityGraph {
 				this.eOther.stop();
 				this.eIntersectRoadblocks.start();
 				mxPoint point = roadblockGeometry.intersectLine(
-						inVertex.location.getX(),
-						inVertex.location.getY(),
-						vertex.location.getX(),
-						vertex.location.getY());
+						geometry.getCenterX(),
+						geometry.getCenterY(),
+						anotherGeometry.getCenterX(),
+						anotherGeometry.getCenterY());
 				this.eIntersectRoadblocks.stop();
 				this.eOther.start();
 				if (point != null) {
@@ -344,7 +273,7 @@ public class WeightedVisibilityGraph {
 					break;
 				}
 
-			}  // End for (mxICell roadblock : this.roadblocks)
+			}  // End while (iterateCells.hasNext())
 
 			if (!isVisible) {
 				continue;
@@ -360,10 +289,10 @@ public class WeightedVisibilityGraph {
 					this.eOther.stop();
 					this.eIntersectHindrances.start();
 					mxPoint intersection = LineSegment.intersection(
-							inVertex.location.getX(),
-							inVertex.location.getY(),
-							vertex.location.getX(),
-							vertex.location.getY(),
+							geometry.getCenterX(),
+							geometry.getCenterY(),
+							anotherGeometry.getCenterX(),
+							anotherGeometry.getCenterY(),
 							lineSegment.x1,
 							lineSegment.y1,
 							lineSegment.x2,
@@ -373,8 +302,8 @@ public class WeightedVisibilityGraph {
 					if (intersection == null) {
 						continue;
 					}
-					if (((intersection.getX() == inVertex.location.getX()) && (intersection.getY() == inVertex.location.getY()))
-							|| ((intersection.getX() == vertex.location.getX()) && (intersection.getY() == vertex.location.getY()))) {
+					if (((intersection.getX() == geometry.getCenterX()) && (intersection.getY() == geometry.getCenterY()))
+							|| ((intersection.getX() == anotherGeometry.getCenterX()) && (intersection.getY() == anotherGeometry.getCenterY()))) {
 						if (((intersection.getX() == lineSegment.x1) && (intersection.getY() == lineSegment.y1))
 								|| ((intersection.getX() == lineSegment.x2) && (intersection.getY() == lineSegment.y2))) {
 							crossingNumber = crossingNumber + 0.25;
@@ -395,25 +324,33 @@ public class WeightedVisibilityGraph {
 			}  // End for (mxICell cell : this.hindranceToLineSegmentsMap.keySet())
 
 			double cost = Vector2D.length(
-					inVertex.location.getX() - vertex.location.getX(),
-					inVertex.location.getY() - vertex.location.getY())
+					geometry.getCenterX() - anotherGeometry.getCenterX(),
+					geometry.getCenterY() - anotherGeometry.getCenterY())
 					* this.costPerUnitLength
 					+ crossingNumber * this.costPerEdgeCrossing
 					+ this.costPerSegment;
 			this.eOther.stop();
 			this.eAddEdges.start();
-			this.addEdge(inVertex, vertex, cost);
+			this.insertEdge(
+					parent,
+					null,
+					cost,
+					vertex,
+					anotherVertex);
 			this.eAddEdges.stop();
 			this.eOther.start();
 
-		}  // End for (Vertex vertex : vertices)
+		}  // End for (int index = 0; index < objects.length; index++)
 
 		this.eOther.stop();
-	}  // End public void addEdgesForVertex(Vertex inVertex)
+	}  // End public void addEdgesForVertex(mxICell vertex)
 
 	public void addRoadblock(mxICell roadblock) {
 
 		this.rOther.start();
+		if (!IS_ENABLED) {
+			return;
+		}
 		if ((roadblock == null) || (!(roadblock.isVertex()))) {
 			throw new IllegalArgumentException("Input 'roadblock' is null or not a vertex.");
 		}
@@ -422,82 +359,105 @@ public class WeightedVisibilityGraph {
 			throw new IllegalArgumentException("Input 'roadblock' has null geometry.");
 		}
 
-		Set<Edge> edges = this.getEdges();
-		Collection<Edge> edgesToRemove = new LinkedHashSet<Edge>();
+		Object parent = this.getDefaultParent();
+		Object objects[] = this.getChildEdges(parent);
 
-		for (Edge edge : edges) {
+		for (int index = 0; index < objects.length; index++) {
 
-			Vertex source = edge.source;
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException("A vertex is not of the type mxICell.");
+			}
+			mxICell edge = (mxICell) objects[index];
+			if (!(edge.isEdge())) {
+				throw new IllegalStateException("The 'edge' variable is not an edge.");
+			}
+			mxICell source = edge.getTerminal(true);
 			if (source == null) {
 				throw new IllegalStateException("The 'edge' variable has null source.");
 			}
-			if (source.location == null) {
-				throw new IllegalStateException("The 'source' variable has null location.");
+			mxGeometry sourceGeometry = source.getGeometry();
+			if (sourceGeometry == null) {
+				throw new IllegalStateException("The 'source' variable has null geometry.");
 			}
-			Vertex target = edge.target;
+			mxICell target = edge.getTerminal(false);
 			if (target == null) {
 				throw new IllegalStateException("The 'edge' variable has null target.");
 			}
-			if (target.location == null) {
-				throw new IllegalStateException("The 'target' variable has null location.");
+			mxGeometry targetGeometry = target.getGeometry();
+			if (targetGeometry == null) {
+				throw new IllegalStateException("The 'target' variable has null geometry.");
 			}
 
 			this.rOther.stop();
 			this.rIntersectEdges.start();
 			mxPoint point = geometry.intersectLine(
-					source.location.getX(),
-					source.location.getY(),
-					target.location.getX(),
-					target.location.getY());
+					sourceGeometry.getCenterX(),
+					sourceGeometry.getCenterY(),
+					targetGeometry.getCenterX(),
+					targetGeometry.getCenterY());
 			this.rIntersectEdges.stop();
 			this.rOther.start();
 			if (point != null) {
-				edgesToRemove.add(edge);
+				Object cells[] = {edge};
+				this.removeCells(cells);
 			}
 
-		}  // End for (Edge edge : edges)
-
-		if (!(edgesToRemove.isEmpty())) {
-			for (Edge edge : edgesToRemove) {
-				this.removeEdge(edge);
-			}
-		}  // End if (!(edgesToRemove.isEmpty()))
-		edgesToRemove = null;  // Collection<Edge> edgesToRemove = new LinkedHashSet<Edge>();
+		}  // End for (int index = 0; index < objects.length; index++)
 
 		this.roadblocks.add(roadblock);
-		Set<Vertex> vertices = new LinkedHashSet<Vertex>();
+		List<mxICell> vertices = new LinkedList<mxICell>();
 		this.rOther.stop();
 		this.rAddVertices.start();
-		Vertex vertex = this.addVertex(
-				geometry.getX() - MINIMUM_SPACING,
-				geometry.getY() - MINIMUM_SPACING);
+		mxICell vertex = (mxICell) this.insertVertex(
+				parent,
+				null,
+				null,
+				geometry.getX() - MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+				geometry.getY() - MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+				VISIBILITY_GRAPH_VERTEX_WDITH,
+				VISIBILITY_GRAPH_VERTEX_HEIGHT);
 		this.rAddVertices.stop();
 		this.rAddEdges.start();
 		this.addEdgesForVertex(vertex);
 		this.rAddEdges.stop();
 		vertices.add(vertex);
 		this.rAddVertices.start();
-		vertex = this.addVertex(
-				geometry.getX() + geometry.getWidth() + MINIMUM_SPACING,
-				geometry.getY() - MINIMUM_SPACING);
+		vertex = (mxICell) this.insertVertex(
+				parent,
+				null,
+				null,
+				geometry.getX() + geometry.getWidth() + MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+				geometry.getY() - MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+				VISIBILITY_GRAPH_VERTEX_WDITH,
+				VISIBILITY_GRAPH_VERTEX_HEIGHT);
 		this.rAddVertices.stop();
 		this.rAddEdges.start();
 		this.addEdgesForVertex(vertex);
 		this.rAddEdges.stop();
 		vertices.add(vertex);
 		this.rAddVertices.start();
-		vertex = this.addVertex(
-				geometry.getX() + geometry.getWidth() + MINIMUM_SPACING,
-				geometry.getY() + geometry.getHeight() + MINIMUM_SPACING);
+		vertex = (mxICell) this.insertVertex(
+				parent,
+				null,
+				null,
+				geometry.getX() + geometry.getWidth() + MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+				geometry.getY() + geometry.getHeight() + MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+				VISIBILITY_GRAPH_VERTEX_WDITH,
+				VISIBILITY_GRAPH_VERTEX_HEIGHT);
 		this.rAddVertices.stop();
 		this.rAddEdges.start();
 		this.addEdgesForVertex(vertex);
 		this.rAddEdges.stop();
 		vertices.add(vertex);
 		this.rAddVertices.start();
-		vertex = this.addVertex(
-				geometry.getX() - MINIMUM_SPACING,
-				geometry.getY() + geometry.getHeight() + MINIMUM_SPACING);
+		vertex = (mxICell) this.insertVertex(
+				parent,
+				null,
+				null,
+				geometry.getX() - MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+				geometry.getY() + geometry.getHeight() + MINIMUM_SPACING - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+				VISIBILITY_GRAPH_VERTEX_WDITH,
+				VISIBILITY_GRAPH_VERTEX_HEIGHT);
 		this.rAddVertices.stop();
 		this.rAddEdges.start();
 		this.addEdgesForVertex(vertex);
@@ -505,13 +465,16 @@ public class WeightedVisibilityGraph {
 		this.rOther.start();
 		vertices.add(vertex);
 		this.obstacleToVerticesMap.put(roadblock, vertices);
-		vertices = null;  // Set<Vertex> vertices = new LinkedHashSet<Vertex>();
+		vertices = null;  // List<mxICell> vertices = new LinkedList<mxICell>();
 		this.rOther.stop();
 
 	}  // End public void addRoadblock(mxICell roadblock)
 
 	public void addHindrance(mxICell hindrance) {
 
+		if (!IS_ENABLED) {
+			return;
+		}
 		if ((hindrance == null) || (!(hindrance.isEdge()))) {
 			throw new IllegalArgumentException("Input 'hindrance' is null or not an edge.");
 		}
@@ -586,33 +549,50 @@ public class WeightedVisibilityGraph {
 		}  // End for (mxPoint point : allPoints)
 
 		this.hindranceToLineSegmentsMap.put(hindrance, lineSegments);
-		Set<Edge> edges = this.getEdges();
+		Object parent = this.getDefaultParent();
+		Object objects[] = this.getChildEdges(parent);
 
-		for (Edge edge : edges) {
+		for (int index = 0; index < objects.length; index++) {
 
-			Vertex sourceV = edge.source;
-			if (sourceV == null) {
+			if (!(objects[index] instanceof mxICell)) {
+				throw new IllegalStateException("A vertex is not of the type mxICell.");
+			}
+			mxICell edge = (mxICell) objects[index];
+			if (!(edge.isEdge())) {
+				throw new IllegalStateException("The 'edge' variable is not an edge.");
+			}
+			source = edge.getTerminal(true);
+			if (source == null) {
 				throw new IllegalStateException("The 'edge' variable has null source.");
 			}
-			if (sourceV.location == null) {
-				throw new IllegalStateException("The 'sourceV' variable has null location.");
+			mxGeometry sourceGeometry = source.getGeometry();
+			if (sourceGeometry == null) {
+				throw new IllegalStateException("The 'source' variable has null geometry.");
 			}
-			Vertex targetV = edge.target;
-			if (targetV == null) {
+			target = edge.getTerminal(false);
+			if (target == null) {
 				throw new IllegalStateException("The 'edge' variable has null target.");
 			}
-			if (targetV.location == null) {
-				throw new IllegalStateException("The 'targetV' variable has null location.");
+			mxGeometry targetGeometry = target.getGeometry();
+			if (targetGeometry == null) {
+				throw new IllegalStateException("The 'target' variable has null geometry.");
 			}
+			Object object = edge.getValue();
+			if (!(object instanceof Number)) {
+				throw new IllegalStateException("The 'edge' variable's value is not of the type Number.");
+			}
+			double cost = ((Number) object).doubleValue();
 			double crossingNumber = 0.0d;
 
-			for (LineSegment lineSegment : lineSegments) {
+			Iterator<LineSegment> iterateLineSegments = lineSegments.iterator();
+			while (iterateLineSegments.hasNext()) {
 
+				LineSegment lineSegment = iterateLineSegments.next();
 				mxPoint intersection = LineSegment.intersection(
-						sourceV.location.getX(),
-						sourceV.location.getY(),
-						targetV.location.getX(),
-						targetV.location.getY(),
+						sourceGeometry.getCenterX(),
+						sourceGeometry.getCenterY(),
+						targetGeometry.getCenterX(),
+						targetGeometry.getCenterY(),
 						lineSegment.x1,
 						lineSegment.y1,
 						lineSegment.x2,
@@ -620,8 +600,8 @@ public class WeightedVisibilityGraph {
 				if (intersection == null) {
 					continue;
 				}
-				if (((intersection.getX() == sourceV.location.getX()) && (intersection.getY() == sourceV.location.getY()))
-						|| ((intersection.getX() == targetV.location.getX()) && (intersection.getY() == targetV.location.getY()))) {
+				if (((intersection.getX() == sourceGeometry.getCenterX()) && (intersection.getY() == sourceGeometry.getCenterY()))
+						|| ((intersection.getX() == targetGeometry.getCenterX()) && (intersection.getY() == targetGeometry.getCenterY()))) {
 					if (((intersection.getX() == lineSegment.x1) && (intersection.getY() == lineSegment.y1))
 							|| ((intersection.getX() == lineSegment.x2) && (intersection.getY() == lineSegment.y2))) {
 						crossingNumber = crossingNumber + 0.25;
@@ -637,30 +617,38 @@ public class WeightedVisibilityGraph {
 					}
 				}
 
-			}  // End for (LineSegment lineSegment : lineSegments)
+			}  // End while (iterateLineSegments.hasNext())
 
 			if (crossingNumber > 0.0d) {
-				edge.weight = edge.weight + this.costPerEdgeCrossing * crossingNumber;
+				cost = cost + this.costPerEdgeCrossing * crossingNumber;
+				edge.setValue(cost);
 			}
 
-		}  // End for (Edge edge : edges)
+		}  // End for (int index = 0; index < objects.length; index++)
 
 		lineSegments = null;  // List<LineSegment> lineSegments = new LinkedList<LineSegment>();
-		Set<Vertex> vertices = new LinkedHashSet<Vertex>();
-		for (mxPoint position : newVerticesPositions) {
+		List<mxICell> vertices = new LinkedList<mxICell>();
+		Iterator<mxPoint> iteratePositions = newVerticesPositions.iterator();
+		while (iteratePositions.hasNext()) {
 
-			Vertex vertex = this.addVertex(
-					position.getX(),
-					position.getY());
+			mxPoint position = iteratePositions.next();
+			mxICell vertex = (mxICell) this.insertVertex(
+					parent,
+					null,
+					null,
+					position.getX() - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+					position.getY() - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+					VISIBILITY_GRAPH_VERTEX_WDITH,
+					VISIBILITY_GRAPH_VERTEX_HEIGHT);
 			this.addEdgesForVertex(vertex);
 			vertices.add(vertex);
 
-		}  // End for (mxPoint position : newVerticesPositions)
+		}  // End while (iteratePositions.hasNext())
 
 		if (!(vertices.isEmpty())) {
 			this.obstacleToVerticesMap.put(hindrance, vertices);
 		}
-		vertices = null;  // Set<Vertex> vertices = new LinkedHashSet<Vertex>();
+		vertices = null;  // List<mxICell> vertices = new LinkedList<mxICell>();
 		newVerticesPositions = null;  // List<mxPoint> newVerticesPositions = new LinkedList<mxPoint>();
 
 	}  // public void addHindrance(mxICell hindrance)
@@ -668,6 +656,9 @@ public class WeightedVisibilityGraph {
 	public void addVerticesIntoOutOf(mxICell roadblock) {
 
 		this.stOther.start();
+		if (!IS_ENABLED) {
+			return;
+		}
 		if ((roadblock == null) || (!(roadblock.isVertex()))) {
 			throw new IllegalArgumentException("Input 'roadblock' is null or not a vertex.");
 		}
@@ -770,14 +761,22 @@ public class WeightedVisibilityGraph {
 
 		edgeUnitVectorsList = null;  // List<Vector2D> edgeUnitVectorsList = new ArrayList<Vector2D>(edgeCount);
 
-		Set<Vertex> vertices = new LinkedHashSet<Vertex>();
-		for (mxPoint position : newVerticesPositions) {
+		Object parent = this.getDefaultParent();
+		List<mxICell> vertices = new LinkedList<mxICell>();
+		Iterator<mxPoint> iteratePositions = newVerticesPositions.iterator();
+		while (iteratePositions.hasNext()) {
 
+			mxPoint position = iteratePositions.next();
 			this.stOther.stop();
 			this.stAddVertices.start();
-			Vertex vertex = this.addVertex(
-					position.getX(),
-					position.getY());
+			mxICell vertex = (mxICell) this.insertVertex(
+					parent,
+					null,
+					null,
+					position.getX() - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
+					position.getY() - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
+					VISIBILITY_GRAPH_VERTEX_WDITH,
+					VISIBILITY_GRAPH_VERTEX_HEIGHT);
 			this.stAddVertices.stop();
 			this.stAddEdges.start();
 			this.addEdgesForVertex(vertex);
@@ -785,306 +784,16 @@ public class WeightedVisibilityGraph {
 			this.stOther.start();
 			vertices.add(vertex);
 
-		}  // End for (mxPoint position : newVerticesPositions)
+		}  // End while (iteratePositions.hasNext())
 
 		if (!(vertices.isEmpty())) {
-			Set<Vertex> moreVertices = this.obstacleToVerticesMap.get(roadblock);
+			List<mxICell> moreVertices = this.obstacleToVerticesMap.get(roadblock);
 			moreVertices.addAll(vertices);
 //			this.obstacleToVerticesMap.put(roadblock, moreVertices);
 		}
-		vertices = null;  // Set<Vertex> vertices = new LinkedHashSet<Vertex>();
+		vertices = null;  // List<mxICell> vertices = new LinkedList<mxICell>();
 		newVerticesPositions = null;  // List<mxPoint> newVerticesPositions = new LinkedList<mxPoint>();
 		this.stOther.stop();
 
 	}  // End public void addVerticesIntoOutOf(mxICell roadblock)
-
-	public static class Cost {
-
-		public double doubleValue;
-
-		public Cost(double doubleValue) {
-			this.doubleValue = doubleValue;
-		}
-
-		@Override
-		public String toString() {
-			return "" + doubleValue;
-		}
-	}  // End public static class Cost
-
-	public static Collection<List<Vertex>> findShortestPaths(
-			Collection<Vertex> inSourceVertices,
-			Collection<Vertex> inTargetVertices) {
-		return findShortestPaths(
-				inSourceVertices,
-				inTargetVertices,
-				null,
-				null);
-	}  // End public static Collection<List<Vertex>> findShortestPaths(...)
-
-	public static Collection<List<Vertex>> findShortestPaths(
-			Collection<Vertex> inSourceVertices,
-			Collection<Vertex> inTargetVertices,
-			Double inOptionalMaxCostAllowed,
-			Cost outOptionalCost) {
-
-		if ((inSourceVertices == null)
-				|| (inTargetVertices == null)) {
-			throw new IllegalArgumentException("Invalid inputs to findShortestPath().");
-		}
-
-		if ((inSourceVertices.isEmpty()) || (inTargetVertices.isEmpty())) {
-			return new LinkedHashSet<List<Vertex>>();
-		}
-
-		double minCostToTarget;
-		if ((inOptionalMaxCostAllowed != null)
-				&& (inOptionalMaxCostAllowed.doubleValue() >= 0)) {
-			minCostToTarget = inOptionalMaxCostAllowed.doubleValue();
-		} else {
-			minCostToTarget = Double.POSITIVE_INFINITY;
-		}
-		List<Vertex> verticesToBeProcessed = new LinkedList<Vertex>();
-		Map<Vertex, Double> vertexToCostMap = new HashMap<Vertex, Double>();
-		double minCostToBeProcessed = 0.0d;
-		boolean isPathFound = false;
-
-		for (Vertex vertex : inSourceVertices) {
-			verticesToBeProcessed.add(vertex);
-			vertexToCostMap.put(vertex, minCostToBeProcessed);
-		}  // End for (Vertex vertex : inSourceVertices)
-
-		int numVerticesProcessed = 0;
-		int numEdgesProcessed = 0;
-
-		while (!(verticesToBeProcessed.isEmpty())) {
-
-			Vertex vertex = verticesToBeProcessed.remove(0);
-			Double cost = vertexToCostMap.get(vertex);
-			if (cost == null) {
-				throw new IllegalStateException("The cost variable cannot be null.");
-			}
-			numVerticesProcessed++;
-
-			if (cost > minCostToTarget) {
-				break;
-			}
-
-			if (cost > minCostToBeProcessed) {
-				if (isPathFound) {
-					break;
-				}
-				minCostToBeProcessed = cost;
-			}  // End if (cost > minCostToBeProcessed)
-
-			if (inTargetVertices.contains(vertex)) {
-				isPathFound = true;
-				if (cost < minCostToTarget) {
-					minCostToTarget = cost;
-				}
-				continue;
-			}  // End if (targetsToBeReached.contains(vertex))
-
-			numEdgesProcessed += vertex.edges.size();
-
-			for (Edge edge : vertex.edges) {
-
-				Vertex source = edge.source;
-				Vertex target = edge.target;
-				Vertex neighbour;
-				if ((source == null) || (target == null)) {
-					throw new IllegalStateException("An edge has null source or target vertex.");
-				} else if (source == target) {
-					continue;
-				} else if (source == vertex) {
-					neighbour = target;
-				} else if (target == vertex) {
-					neighbour = source;
-				} else {
-					throw new IllegalStateException("This edge is not connected to the vertex in question.");
-				}
-
-				double costToNeighbour;
-				double weight = edge.weight;
-				if (weight < 0) {
-					throw new IllegalStateException("The weight of an edge cannot be negative for this shortest path algorithm.");
-				}
-				costToNeighbour = cost + weight;
-
-				Double neighbourCost = vertexToCostMap.get(neighbour);
-				if (neighbourCost == null) {
-					vertexToCostMap.put(neighbour, costToNeighbour);
-
-					ListIterator<Vertex> listIterator = verticesToBeProcessed.listIterator(verticesToBeProcessed.size());
-					while (listIterator.hasPrevious()) {
-						Vertex aVertex = listIterator.previous();
-						if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
-							listIterator.next();
-							break;
-						}
-					}  // End while (listIterator.hasPrevious())
-
-					verticesToBeProcessed.add(listIterator.nextIndex(), neighbour);
-					continue;
-				}  // End if (neighbourCost == null)
-
-				if (costToNeighbour >= neighbourCost) {
-					continue;
-				}
-
-				vertexToCostMap.put(neighbour, costToNeighbour);
-				Integer neighbourIndex = null;
-
-				ListIterator<Vertex> listIterator = verticesToBeProcessed.listIterator(verticesToBeProcessed.size());
-				while (listIterator.hasPrevious()) {
-
-					Vertex aVertex = listIterator.previous();
-					if (neighbourIndex == null) {
-						if (aVertex == neighbour) {
-							neighbourIndex = listIterator.nextIndex();
-						}
-						continue;
-					}  // End if (neighbourIndex == null)
-					if (vertexToCostMap.get(aVertex) <= costToNeighbour) {
-						listIterator.next();
-						break;
-					}  // End if (vertexToCostMap.get(aVertex) <= costToNeighbour)
-
-				}  // End while (listIterator.hasPrevious())
-
-				if (neighbourIndex == null) {
-					throw new IllegalStateException("A neighbour vertex whose minimum cost can be updated is not in the list of vertices to be processed.  This should not happen in this algorithm.");
-				}
-				int newIndex = listIterator.nextIndex();
-				if (neighbourIndex != newIndex) {
-					verticesToBeProcessed.remove(neighbourIndex.intValue());
-					verticesToBeProcessed.add(newIndex, neighbour);
-				}
-
-			}  // End for (int index = 0; index < edgeCount; index++)
-
-		}  // End while (!(verticesToBeProcessed.isEmpty()))
-
-		verticesToBeProcessed = null;  // List<Vertex> verticesToBeProcessed = new LinkedList<Vertex>();
-
-		if (!isPathFound) {
-			vertexToCostMap = null;  // Map<Vertex, Double> vertexToCostMap = new HashMap<Vertex, Double>();
-			return new LinkedHashSet<List<Vertex>>();
-		}
-
-		if (outOptionalCost != null) {
-			outOptionalCost.doubleValue = minCostToTarget;
-		}
-		Set<List<Vertex>> outPaths = new LinkedHashSet<List<Vertex>>();
-
-		for (Vertex vertex : inTargetVertices) {
-
-			Double cost = vertexToCostMap.get(vertex);
-			if ((cost == null) || (cost != minCostToTarget)) {
-				continue;
-			}
-
-			List<Vertex> path = new LinkedList<Vertex>();
-			path.add(0, vertex);
-			List<List<Vertex>> pathsToBeProcessed = new LinkedList<List<Vertex>>();
-			pathsToBeProcessed.add(path);
-			path = null;  // List<Vertex> path = new LinkedList<Vertex>();
-
-			while (!(pathsToBeProcessed.isEmpty())) {
-
-				path = pathsToBeProcessed.remove(0);
-				vertex = path.get(0);
-
-				if (inSourceVertices.contains(vertex)) {
-					outPaths.add(path);
-					continue;
-				}
-
-				cost = vertexToCostMap.get(vertex);
-				if (cost == null) {
-					throw new IllegalStateException("A vertex in the path must have a minimum cost to reach.");
-				}
-
-				for (Edge edge : vertex.edges) {
-
-					Vertex source = edge.source;
-					Vertex target = edge.target;
-					Vertex neighbour;
-					if ((source == null) || (target == null)) {
-						throw new IllegalStateException("An edge has null source or target vertex.");
-					} else if (source == target) {
-						continue;
-					} else if (source == vertex) {
-						neighbour = target;
-					} else if (target == vertex) {
-						neighbour = source;
-					} else {
-						throw new IllegalStateException("This edge is not connected to the vertex in question.");
-					}
-
-					if ((path.contains(neighbour)) || (inTargetVertices.contains(neighbour))) {
-						continue;
-					}
-
-					if (edge.weight < 0) {
-						throw new IllegalStateException("The cost of an edge cannot be negative for this shortest path algorithm.");
-					}
-
-					Double neighbourCost = vertexToCostMap.get(neighbour);
-					if ((neighbourCost == null)
-							|| (Math.abs(cost - edge.weight - neighbourCost) >= 0.5d)) {
-						continue;
-					}
-
-					List<Vertex> nextPath = new LinkedList<Vertex>(path);
-					nextPath.add(0, neighbour);
-					pathsToBeProcessed.add(nextPath);
-					nextPath = null;  // List<Vertex> nextPath = new LinkedList<Vertex>(path);
-
-				}  // End for (int index = 0; index < edgeCount; index++)
-
-			}  // End while (!(pathsToBeProcessed.isEmpty()))
-
-			pathsToBeProcessed = null;  // List<List<Vertex>> pathsToBeProcessed = new LinkedList<List<Vertex>>();
-
-		}  // End for (Vertex vertex : inTargetVertices)
-
-		vertexToCostMap = null;  // Map<Vertex, Double> vertexToCostMap = new HashMap<Vertex, Double>();
-
-		System.out.println("Dijkstra's algorithm finds " + outPaths.size() + " path(s) with cost " + minCostToTarget
-				+ " by processing " + numVerticesProcessed + " vertices and " + numEdgesProcessed + " edges.");
-		return outPaths;
-	}  // End public static Collection<List<Vertex>> findShortestPaths(...)
-
-	public mxGraph toMxGraph() {
-
-		mxGraph graph = new mxGraph();
-		Object parent = graph.getDefaultParent();
-		Map<Vertex, Object> oldToNewVerticesMap = new HashMap<Vertex, Object>();
-
-		for (Vertex vertex : this.vertices) {
-			Object object = graph.insertVertex(
-					parent,
-					null,
-					null,
-					vertex.location.getX() - VISIBILITY_GRAPH_VERTEX_WDITH / 2,
-					vertex.location.getY() - VISIBILITY_GRAPH_VERTEX_HEIGHT / 2,
-					VISIBILITY_GRAPH_VERTEX_WDITH,
-					VISIBILITY_GRAPH_VERTEX_HEIGHT);
-			oldToNewVerticesMap.put(vertex, object);
-		}  // End for (Vertex vertex : this.vertices)
-
-		for (Edge edge : this.edges) {
-			graph.insertEdge(
-					parent,
-					null,
-					null,
-					oldToNewVerticesMap.get(edge.source),
-					oldToNewVerticesMap.get(edge.target));
-		}  // End for (Edge edge : this.edges)
-
-		oldToNewVerticesMap = null;  // Map<Vertex, Object> oldToNewVerticesMap = new HashMap<Vertex, Object>();
-
-		return graph;
-	}  // End public mxGraph toMxGraph()
 }  // End public class WeightedVisibilityGraph extends mxGraph implements Cloneable

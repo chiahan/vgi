@@ -19,7 +19,6 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.*;
 import vgi.WeightedVisibilityGraph.LineSegment;
-import vgi.WeightedVisibilityGraph.Vertex;
 
 /**
  *
@@ -69,7 +68,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 	}  // protected static Set<mxICell> findRoadblocks(...)
 
 	protected static Set<mxICell> findRoadblocks(
-			List<Vertex> inPath,
+			List<mxICell> inPath,
 			Set<mxICell> inPotentialRoadblocks) {
 
 		if ((inPath == null)
@@ -78,30 +77,34 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}
 
 		Set<mxICell> outRoadblocks = new LinkedHashSet<mxICell>();
-		Point2D previousLocation = null;
+		mxGeometry previousGeometry = null;
 
-		for (Vertex vertex : inPath) {
+		for (mxICell vertex : inPath) {
 
-			if (vertex.location == null) {
-				throw new IllegalStateException("The 'vertex' variable has null location.");
+			if (!(vertex.isVertex())) {
+				throw new IllegalStateException("The 'vertex' variable is not a vertex.");
 			}
-			if (previousLocation != null) {
+			mxGeometry geometry = vertex.getGeometry();
+			if (geometry == null) {
+				throw new IllegalStateException("The 'vertex' variable has null geometry.");
+			}
+			if (previousGeometry != null) {
 				outRoadblocks.addAll(EdgeRoutingMinCross.findRoadblocks(
-						previousLocation.getX(),
-						previousLocation.getY(),
-						vertex.location.getX(),
-						vertex.location.getY(),
+						previousGeometry.getCenterX(),
+						previousGeometry.getCenterY(),
+						geometry.getCenterX(),
+						geometry.getCenterY(),
 						inPotentialRoadblocks));
-			}  // End if (previousLocation != null)
-			previousLocation = vertex.location;
+			}  // End if (previousGeometry != null)
+			previousGeometry = geometry;
 
-		}  // End for (Vertex vertex : inPath)
+		}  // End for (mxICell vertex : path)
 
 		return outRoadblocks;
 	}  // protected static Set<mxICell> findRoadblocks(...)
 
 	protected static Set<mxICell> findRoadblocks(
-			Collection<List<Vertex>> inPaths,
+			Collection<List<mxICell>> inPaths,
 			Set<mxICell> inPotentialRoadblocks) {
 
 		if ((inPaths == null)
@@ -111,13 +114,13 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		Set<mxICell> outRoadblocks = new LinkedHashSet<mxICell>();
 
-		for (List<Vertex> path : inPaths) {
+		for (List<mxICell> path : inPaths) {
 
 			outRoadblocks.addAll(EdgeRoutingMinCross.findRoadblocks(
 					path,
 					inPotentialRoadblocks));
 
-		}  // End for (List<Vertex> path : inPaths)
+		}  // End for (List<mxICell> path : inPaths)
 
 		return outRoadblocks;
 	}  // protected static Set<mxICell> findRoadblocks(...)
@@ -202,7 +205,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 	}  // protected static Set<mxICell> findHindrances(...)
 
 	protected static Set<mxICell> findHindrances(
-			List<Vertex> inPath,
+			List<mxICell> inPath,
 			Set<mxICell> inPotentialHindrances) {
 
 		if ((inPath == null)
@@ -211,30 +214,34 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}
 
 		Set<mxICell> outHindrances = new LinkedHashSet<mxICell>();
-		Point2D previousLocation = null;
+		mxGeometry previousGeometry = null;
 
-		for (Vertex vertex : inPath) {
+		for (mxICell vertex : inPath) {
 
-			if (vertex.location == null) {
-				throw new IllegalStateException("The 'vertex' variable has null location.");
+			if (!(vertex.isVertex())) {
+				throw new IllegalStateException("The 'vertex' variable is not a vertex.");
 			}
-			if (previousLocation != null) {
+			mxGeometry geometry = vertex.getGeometry();
+			if (geometry == null) {
+				throw new IllegalStateException("The 'vertex' variable has null geometry.");
+			}
+			if (previousGeometry != null) {
 				outHindrances.addAll(EdgeRoutingMinCross.findHindrances(
-						previousLocation.getX(),
-						previousLocation.getY(),
-						vertex.location.getX(),
-						vertex.location.getY(),
+						previousGeometry.getCenterX(),
+						previousGeometry.getCenterY(),
+						geometry.getCenterX(),
+						geometry.getCenterY(),
 						inPotentialHindrances));
-			}  // End if (previousLocation != null)
-			previousLocation = vertex.location;
+			}  // End if (previousGeometry != null)
+			previousGeometry = geometry;
 
-		}  // End for (Vertex vertex : inPath)
+		}  // End for (mxICell vertex : path)
 
 		return outHindrances;
 	}  // protected static Set<mxICell> findHindrances(...)
 
 	protected static Set<mxICell> findHindrances(
-			Collection<List<Vertex>> inPaths,
+			Collection<List<mxICell>> inPaths,
 			Set<mxICell> inPotentialHindrances) {
 
 		if ((inPaths == null)
@@ -244,13 +251,13 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		Set<mxICell> outHindrances = new LinkedHashSet<mxICell>();
 
-		for (List<Vertex> path : inPaths) {
+		for (List<mxICell> path : inPaths) {
 
 			outHindrances.addAll(EdgeRoutingMinCross.findHindrances(
 					path,
 					inPotentialHindrances));
 
-		}  // End for (List<Vertex> path : inPaths)
+		}  // End for (List<mxICell> path : inPaths)
 
 		return outHindrances;
 	}  // protected static Set<mxICell> findHindrances(...)
@@ -438,16 +445,16 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		sourcePosition = null;  // Vector2D sourcePosition = new Vector2D(sourceGeometry.getCenterX(), sourceGeometry.getCenterY());
 		targetPosition = null;  // Vector2D targetPosition = new Vector2D(targetGeometry.getCenterX(), targetGeometry.getCenterY());
 
-//		System.out.println("Hit " + roadblocks.size()
-//				+ " roadblock(s) and passed through " + hindrances.size()
-//				+ " hindrance(s).");
+		System.out.println("Hit " + roadblocks.size()
+				+ " roadblock(s) and passed through " + hindrances.size()
+				+ " hindrance(s).");
 
 		for (mxICell roadblock : roadblocks) {
 			Object object = roadblock.getValue();
 			if (object == null) {
-//				System.out.println("Hit roadblock " + roadblock.getId());
+				System.out.println("Hit roadblock " + roadblock.getId());
 			} else {
-//				System.out.println("Hit roadblock " + object.toString());
+				System.out.println("Hit roadblock " + object.toString());
 			}
 		}  // End for (mxICell roadblock : roadblocks)
 
@@ -477,7 +484,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					targetString = object.toString();
 				}
 			}  // End else part of if (tempTarget == null)
-//			System.out.println("Passed through hindrance from " + sourceString + " to " + targetString);
+			System.out.println("Passed through hindrance from " + sourceString + " to " + targetString);
 		}  // End for (mxICell hindrance : hindrances)
 
 		if ((roadblocks.isEmpty()) && (hindrances.isEmpty())) {
@@ -650,9 +657,9 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		for (mxICell roadblock : roadblocks) {
 			Object object = roadblock.getValue();
 			if (object == null) {
-//				System.out.println("Included roadblock " + roadblock.getId());
+				System.out.println("Included roadblock " + roadblock.getId());
 			} else {
-//				System.out.println("Included roadblock " + object.toString());
+				System.out.println("Included roadblock " + object.toString());
 			}
 		}  // End for (mxICell roadblock : roadblocks)
 
@@ -682,20 +689,20 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					targetString = object.toString();
 				}
 			}  // End else part of if (tempTarget == null)
-//			System.out.println("Included hindrance from " + sourceString + " to " + targetString);
+			System.out.println("Included hindrance from " + sourceString + " to " + targetString);
 		}  // End for (mxICell hindrance : hindrances)
 
 		WeightedVisibilityGraph weightedVisibilityGraph = new WeightedVisibilityGraph();
-//		System.out.println("Adding " + roadblocks.size()
-//				+ " roadblock(s) to weighted visibility graph.");
+		System.out.println("Adding " + roadblocks.size()
+				+ " roadblock(s) to weighted visibility graph.");
 		otherTimer.stop();
 		Stopwatch addRoadblocksTimer = new Stopwatch().start();
 		for (mxICell roadblock : roadblocks) {
 			weightedVisibilityGraph.addRoadblock(roadblock);
 		}
 		addRoadblocksTimer.stop();
-//		System.out.println("Adding " + hindrances.size()
-//				+ " hindrance(s) to weighted visibility graph.");
+		System.out.println("Adding " + hindrances.size()
+				+ " hindrance(s) to weighted visibility graph.");
 		Stopwatch addHindrancesTimer = new Stopwatch().start();
 		for (mxICell hindrance : hindrances) {
 			weightedVisibilityGraph.addHindrance(hindrance);
@@ -707,14 +714,14 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		addSourceTargetTimer.stop();
 		otherTimer.start();
 		Stopwatch shortestPathsTimer = new Stopwatch();
-		Map<mxICell, Set<Vertex>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
-		Collection<List<Vertex>> paths;
+		Map<mxICell, List<mxICell>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
+		List<List<mxICell>> paths;
 
 		while (true) {
 
 			otherTimer.stop();
 			shortestPathsTimer.start();
-			paths = WeightedVisibilityGraph.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
+			paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
 			shortestPathsTimer.stop();
 			if ((paths == null) || (paths.isEmpty())) {
 				break;
@@ -725,16 +732,16 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			collisionDetectionTimer.stop();
 			otherTimer.start();
 
-//			System.out.println("Hit " + newRoadblocks.size()
-//					+ " new roadblock(s) and passed through " + newHindrances.size()
-//					+ " new hindrance(s).");
+			System.out.println("Hit " + newRoadblocks.size()
+					+ " new roadblock(s) and passed through " + newHindrances.size()
+					+ " new hindrance(s).");
 
 			for (mxICell roadblock : newRoadblocks) {
 				Object object = roadblock.getValue();
 				if (object == null) {
-//					System.out.println("Hit roadblock " + roadblock.getId());
+					System.out.println("Hit roadblock " + roadblock.getId());
 				} else {
-//					System.out.println("Hit roadblock " + object.toString());
+					System.out.println("Hit roadblock " + object.toString());
 				}
 			}  // End for (mxICell roadblock : newRoadblocks)
 
@@ -764,7 +771,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 						targetString = object.toString();
 					}
 				}  // End else part of if (tempTarget == null)
-//				System.out.println("Passed through hindrance from " + sourceString + " to " + targetString);
+				System.out.println("Passed through hindrance from " + sourceString + " to " + targetString);
 			}  // End for (mxICell hindrance : newHindrances)
 
 			if ((newRoadblocks.isEmpty()) && (newHindrances.isEmpty())) {
@@ -782,9 +789,9 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			for (mxICell roadblock : newRoadblocks) {
 				Object object = roadblock.getValue();
 				if (object == null) {
-//					System.out.println("Included roadblock " + roadblock.getId());
+					System.out.println("Included roadblock " + roadblock.getId());
 				} else {
-//					System.out.println("Included roadblock " + object.toString());
+					System.out.println("Included roadblock " + object.toString());
 				}
 			}  // End for (mxICell roadblock : newRoadblocks)
 
@@ -814,21 +821,21 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 						targetString = object.toString();
 					}
 				}  // End else part of if (tempTarget == null)
-//				System.out.println("Included hindrance from " + sourceString + " to " + targetString);
+				System.out.println("Included hindrance from " + sourceString + " to " + targetString);
 			}  // End for (mxICell hindrance : newHindrances)
 
 			roadblocks.addAll(newRoadblocks);
 			hindrances.addAll(newHindrances);
-//			System.out.println("Adding " + newRoadblocks.size()
-//					+ " new roadblock(s) to weighted visibility graph.");
+			System.out.println("Adding " + newRoadblocks.size()
+					+ " new roadblock(s) to weighted visibility graph.");
 			otherTimer.stop();
 			addRoadblocksTimer.start();
 			for (mxICell roadblock : newRoadblocks) {
 				weightedVisibilityGraph.addRoadblock(roadblock);
 			}
 			addRoadblocksTimer.stop();
-//			System.out.println("Adding " + newHindrances.size()
-//					+ " new hindrance(s) to weighted visibility graph.");
+			System.out.println("Adding " + newHindrances.size()
+					+ " new hindrance(s) to weighted visibility graph.");
 			addHindrancesTimer.start();
 			for (mxICell hindrance : newHindrances) {
 				weightedVisibilityGraph.addHindrance(hindrance);
@@ -841,10 +848,10 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 //		weightedVisibilityGraph = null;  // WeightedVisibilityGraph weightedVisibilityGraph = new WeightedVisibilityGraph();
 		potentialHindrances = null;  // Set<mxICell> potentialHindrances = new LinkedHashSet<mxICell>();
 		potentialRoadblocks = null;  // Set<mxICell> potentialRoadblocks = new LinkedHashSet<mxICell>();
-//		System.out.println("Finally, " + roadblocks.size() + " out of "
-//				+ numVertices + " vertices and " + hindrances.size()
-//				+ " out of " + numEdges
-//				+ " edges of the original graph are needed to route this new edge.");
+		System.out.println("Finally, " + roadblocks.size() + " out of "
+				+ numVertices + " vertices and " + hindrances.size()
+				+ " out of " + numEdges
+				+ " edges of the original graph are needed to route this new edge.");
 
 		if ((paths == null) || (paths.isEmpty())) {
 			paths = null;  // List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
@@ -862,7 +869,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		otherTimer.stop();
 		Stopwatch addEdgesTimer = new Stopwatch().start();
-		for (List<Vertex> path : paths) {
+		for (List<mxICell> path : paths) {
 
 			mxICell newEdge = (mxICell) localGraph.insertEdge(
 					parent,
@@ -875,12 +882,13 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			localGraph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
 			cells = null;  // cells = new Object[]{newEdge};
 			List<mxPoint> controlPoints = new LinkedList<mxPoint>();
-			for (Vertex aVertex : path) {
-				if (aVertex.location == null) {
-					throw new IllegalStateException("The 'aVertex' variable has null location.");
+			for (mxICell aVertex : path) {
+				mxGeometry geometry = aVertex.getGeometry();
+				if (geometry == null) {
+					throw new IllegalStateException("The 'aVertex' variable has null geometry.");
 				}
-				controlPoints.add(new mxPoint(aVertex.location.getX(), aVertex.location.getY()));
-			}  // End for (Vertex aVertex : path)
+				controlPoints.add(new mxPoint(geometry.getCenterX(), geometry.getCenterY()));
+			}  // End for (mxICell aVertex : path)
 			super.setEdgePoints(newEdge, controlPoints);
 			controlPoints = null;  // List<mxPoint> controlPoints = new LinkedList<mxPoint>();
 			mxGeometry geometry = newEdge.getGeometry();
@@ -891,7 +899,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			geometry.setY(JgraphXInternalFrame.DEFAULT_LABEL_DISTANCE);
 			geometry.setOffset(new mxPoint(0, 0));
 
-		}  // End for (List<Vertex> path : paths)
+		}  // End for (List<mxICell> path : paths)
 		addEdgesTimer.stop();
 		otherTimer.start();
 
@@ -907,20 +915,20 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		System.out.println("Adding edges took " + addEdgesTimer.getElapsedMilliseconds() + " ms.");
 		System.out.println("Other tasks took " + otherTimer.getElapsedMilliseconds() + " ms.");
 		System.out.println("EXECUTION TIME of route() is " + stopwatch.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addRoadblock() edge intersection took " + weightedVisibilityGraph.rIntersectEdges.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addRoadblock() add vertices took " + weightedVisibilityGraph.rAddVertices.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addRoadblock() add edges took " + weightedVisibilityGraph.rAddEdges.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addRoadblock() other tasks took " + weightedVisibilityGraph.rOther.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addVerticesIntoOutOf() edge vectors took " + weightedVisibilityGraph.stEdgeVectors.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addVerticesIntoOutOf() sorting edge vectors took " + weightedVisibilityGraph.stSortEdgeVectors.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addVerticesIntoOutOf() new positions took " + weightedVisibilityGraph.stNewPositions.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addVerticesIntoOutOf() add vertices took " + weightedVisibilityGraph.stAddVertices.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addVerticesIntoOutOf() add edges took " + weightedVisibilityGraph.stAddEdges.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addVerticesIntoOutOf() other tasks took " + weightedVisibilityGraph.stOther.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addEdgesForVertex() roadblocks intersections took " + weightedVisibilityGraph.eIntersectRoadblocks.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addEdgesForVertex() hindrances intersections took " + weightedVisibilityGraph.eIntersectHindrances.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addEdgesForVertex() add edges took " + weightedVisibilityGraph.eAddEdges.getElapsedMilliseconds() + " ms.");
-//		System.out.println("addEdgesForVertex() other tasks took " + weightedVisibilityGraph.eOther.getElapsedMilliseconds() + " ms.");
+		System.out.println("addRoadblock() edge intersection took " + weightedVisibilityGraph.rIntersectEdges.getElapsedMilliseconds() + " ms.");
+		System.out.println("addRoadblock() add vertices took " + weightedVisibilityGraph.rAddVertices.getElapsedMilliseconds() + " ms.");
+		System.out.println("addRoadblock() add edges took " + weightedVisibilityGraph.rAddEdges.getElapsedMilliseconds() + " ms.");
+		System.out.println("addRoadblock() other tasks took " + weightedVisibilityGraph.rOther.getElapsedMilliseconds() + " ms.");
+		System.out.println("addVerticesIntoOutOf() edge vectors took " + weightedVisibilityGraph.stEdgeVectors.getElapsedMilliseconds() + " ms.");
+		System.out.println("addVerticesIntoOutOf() sorting edge vectors took " + weightedVisibilityGraph.stSortEdgeVectors.getElapsedMilliseconds() + " ms.");
+		System.out.println("addVerticesIntoOutOf() new positions took " + weightedVisibilityGraph.stNewPositions.getElapsedMilliseconds() + " ms.");
+		System.out.println("addVerticesIntoOutOf() add vertices took " + weightedVisibilityGraph.stAddVertices.getElapsedMilliseconds() + " ms.");
+		System.out.println("addVerticesIntoOutOf() add edges took " + weightedVisibilityGraph.stAddEdges.getElapsedMilliseconds() + " ms.");
+		System.out.println("addVerticesIntoOutOf() other tasks took " + weightedVisibilityGraph.stOther.getElapsedMilliseconds() + " ms.");
+		System.out.println("addEdgesForVertex() roadblocks intersections took " + weightedVisibilityGraph.eIntersectRoadblocks.getElapsedMilliseconds() + " ms.");
+		System.out.println("addEdgesForVertex() hindrances intersections took " + weightedVisibilityGraph.eIntersectHindrances.getElapsedMilliseconds() + " ms.");
+		System.out.println("addEdgesForVertex() add edges took " + weightedVisibilityGraph.eAddEdges.getElapsedMilliseconds() + " ms.");
+		System.out.println("addEdgesForVertex() other tasks took " + weightedVisibilityGraph.eOther.getElapsedMilliseconds() + " ms.");
 	}  // End public void route(mxCell edge)
 
 	public void routeByWeightedVisibilityGraph(mxCell edge, WeightedVisibilityGraph weightedVisibilityGraph) {
@@ -967,14 +975,15 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}
 		weightedVisibilityGraph.addVerticesIntoOutOf(source);
 		weightedVisibilityGraph.addVerticesIntoOutOf(target);
-		Map<mxICell, Set<Vertex>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
-		Collection<List<Vertex>> paths = WeightedVisibilityGraph.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
+		Map<mxICell, List<mxICell>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
+		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
 		System.out.println(paths.size() + " path(s) is(are) found.");
 		if ((paths == null) || (paths.isEmpty())) {
 			return;
 		}
 
-		for (List<Vertex> path : paths) {
+		Iterator<List<mxICell>> iteratePaths = paths.iterator();
+		while (iteratePaths.hasNext()) {
 
 			mxGraph graph = this.getGraph();
 			mxICell newEdge = (mxICell) graph.insertEdge(
@@ -986,13 +995,17 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 					edge.getStyle());
 			Object cells[] = {newEdge};
 			graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+			List<mxICell> path = iteratePaths.next();
 			List<mxPoint> controlPoints = new LinkedList<mxPoint>();
-			for (Vertex vertex : path) {
-				controlPoints.add(new mxPoint(vertex.location.getX(), vertex.location.getY()));
-			}
+			Iterator<mxICell> iterateVertices = path.iterator();
+			while (iterateVertices.hasNext()) {
+				mxICell vertex = iterateVertices.next();
+				mxGeometry geometry = vertex.getGeometry();
+				controlPoints.add(new mxPoint(geometry.getCenterX(), geometry.getCenterY()));
+			}  // End while (iterateVertices.hasNext())
 			super.setEdgePoints(newEdge, controlPoints);
 
-		}  // End for (List<Vertex> path : paths)
+		}  // End while (iteratePaths.hasNext())
 
 //		Object cells[] = {edge};
 //		this.getGraph().removeCells(cells);
@@ -1066,14 +1079,15 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		}  // End for (Object object : objects)
 		weightedVisibilityGraph.addVerticesIntoOutOf(source);
 		weightedVisibilityGraph.addVerticesIntoOutOf(target);
-		Map<mxICell, Set<Vertex>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
-		Collection<List<Vertex>> paths = WeightedVisibilityGraph.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
+		Map<mxICell, List<mxICell>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
+		List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
 		if ((paths == null) || (paths.isEmpty())) {
 			System.out.println("EXECUTION TIME of routeByWeightedVisibilityGraph() is " + stopwatch.getElapsedMilliseconds() + " ms.");
 			return;
 		}
 
-		for (List<Vertex> path : paths) {
+		Iterator<List<mxICell>> iteratePaths = paths.iterator();
+		while (iteratePaths.hasNext()) {
 
 			mxICell newEdge = (mxICell) localGraph.insertEdge(
 					parent,
@@ -1085,13 +1099,17 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			cells = new Object[]{newEdge};
 			localGraph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
 			cells = null;  // cells = new Object[]{newEdge};
+			List<mxICell> path = iteratePaths.next();
 			List<mxPoint> controlPoints = new LinkedList<mxPoint>();
-			for (Vertex vertex : path) {
-				controlPoints.add(new mxPoint(vertex.location.getX(), vertex.location.getY()));
-			}
+			Iterator<mxICell> iterateVertices = path.iterator();
+			while (iterateVertices.hasNext()) {
+				mxICell vertex = iterateVertices.next();
+				mxGeometry geometry = vertex.getGeometry();
+				controlPoints.add(new mxPoint(geometry.getCenterX(), geometry.getCenterY()));
+			}  // End while (iterateVertices.hasNext())
 			super.setEdgePoints(newEdge, controlPoints);
 
-		}  // End for (List<Vertex> path : paths)
+		}  // End while (iteratePaths.hasNext())
 
 		System.out.println("EXECUTION TIME of routeByWeightedVisibilityGraph() is " + stopwatch.getElapsedMilliseconds() + " ms.");
 		localGraph.refresh();

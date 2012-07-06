@@ -1356,16 +1356,23 @@ public class VGI extends javax.swing.JFrame {
 
 	private void showWeightedVisibilityGraphMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showWeightedVisibilityGraphMenuItemActionPerformed
 		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
-		if (frame instanceof JgraphXInternalFrame) {
-			mxGraph graph = ((JgraphXInternalFrame) frame).visibilityGraph;
-			JgraphXInternalFrame newFrame = new JgraphXInternalFrame(
-					this.infoSplitPane,
-					graph,
-					new Automata(),
-					"Weighted Visibility Graph of " + frame.getTitle(),
-					this);
-			this.createInternalFrame(newFrame);
-		}  // End if (frame instanceof JgraphXInternalFrame)
+		if (!(frame instanceof JgraphXInternalFrame)) {
+			return;
+		}
+		if (((JgraphXInternalFrame) frame).visibilityGraph == null) {
+			return;
+		}
+		mxGraph graph = ((JgraphXInternalFrame) frame).visibilityGraph.toMxGraph();
+		if (graph == null) {
+			return;
+		}
+		JgraphXInternalFrame newFrame = new JgraphXInternalFrame(
+				this.infoSplitPane,
+				graph,
+				new Automata(),
+				"Weighted Visibility Graph of " + frame.getTitle(),
+				this);
+		this.createInternalFrame(newFrame);
 	}//GEN-LAST:event_showWeightedVisibilityGraphMenuItemActionPerformed
 
 	private void algorithmsMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_algorithmsMenuMenuSelected

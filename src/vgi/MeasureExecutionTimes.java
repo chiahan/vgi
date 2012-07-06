@@ -109,93 +109,89 @@ public class MeasureExecutionTimes {
 
 		PrintStream printStream = null;
 		try {
-			printStream = new PrintStream(new File(inFilePathWithoutExtension + ".log"));
+			printStream = new PrintStream(new File(inFilePathWithoutExtension + ".txt"));
 		} catch (FileNotFoundException exception) {
 			exception.printStackTrace();
 		}
 
-		List<Long> dataEntries = new LinkedList();
+		long dataEntries[] = new long[inTimesToRepeat];
+		long minimum = Long.MAX_VALUE;
+		long maximum = Long.MIN_VALUE;
+		long totalDuration = 0;
 
 		for (int index = 0; index < inTimesToRepeat; index++) {
+			long currentDuration;
 			try {
-				Long currentDuration = MeasureExecutionTimes.measure(
+				currentDuration = MeasureExecutionTimes.measure(
 						inVgi,
 						inFilePathWithoutExtension + ".xml",
 						inSourceName,
 						inTargetName,
 						inAddTransition,
 						false);
-				dataEntries.add(currentDuration);
 			} catch (Exception exception) {
 				exception.printStackTrace();
-				dataEntries = null;  // List<Long> dataEntries = new LinkedList();
+				dataEntries = null;  // long dataEntries[] = new long[inTimesToRepeat];
 				printStream.close();
 				return;
 			}
-		}  // End for (int index = 0; index < inTimesToRepeat; index++)
-
-		Long minimum = Long.MAX_VALUE;
-		Long maximum = Long.MIN_VALUE;
-
-		for (Long currentDuration : dataEntries) {
+			dataEntries[index] = currentDuration;
 			if (currentDuration < minimum) {
 				minimum = currentDuration;
 			}
 			if (currentDuration > maximum) {
 				maximum = currentDuration;
 			}
-		}  // End for (Long currentDuration : dataEntries)
+			totalDuration = totalDuration + currentDuration;
+		}  // End for (int index = 0; index < inTimesToRepeat; index++)
 
 		printStream.println("Weighted Visibility Graph Execution Time in ms:");
-		long totalDuration = 0;
+		totalDuration = totalDuration - minimum - maximum;
 
-		for (Long currentDuration : dataEntries) {
+		for (long currentDuration : dataEntries) {
 			if (currentDuration == minimum) {
 				printStream.println(currentDuration + " min");
 			} else if (currentDuration == maximum) {
 				printStream.println(currentDuration + " max");
 			} else {
 				printStream.println(currentDuration);
-				totalDuration = totalDuration + currentDuration.longValue();
 			}
 		}  // End for (Long currentDuration : dataEntries)
 
-		printStream.println("Average:  " + Math.round(((double) totalDuration) / (inTimesToRepeat - 2)));
+		printStream.println("Average:  " + Math.round(((double) totalDuration) / (dataEntries.length - 2)));
 
-		dataEntries.clear();
+		minimum = Long.MAX_VALUE;
+		maximum = Long.MIN_VALUE;
+		totalDuration = 0;
 
 		for (int index = 0; index < inTimesToRepeat; index++) {
+			long currentDuration;
 			try {
-				Long currentDuration = MeasureExecutionTimes.measure(
+				currentDuration = MeasureExecutionTimes.measure(
 						inVgi,
 						inFilePathWithoutExtension + ".xml",
 						inSourceName,
 						inTargetName,
 						inAddTransition,
 						true);
-				dataEntries.add(currentDuration);
 			} catch (Exception exception) {
 				exception.printStackTrace();
-				dataEntries = null;  // List<Long> dataEntries = new LinkedList();
+				dataEntries = null;  // long dataEntries[] = new long[inTimesToRepeat];
 				printStream.close();
 				return;
 			}
-		}  // End for (int index = 0; index < inTimesToRepeat; index++)
-
-		minimum = Long.MAX_VALUE;
-		maximum = Long.MIN_VALUE;
-
-		for (Long currentDuration : dataEntries) {
+			dataEntries[index] = currentDuration;
 			if (currentDuration < minimum) {
 				minimum = currentDuration;
 			}
 			if (currentDuration > maximum) {
 				maximum = currentDuration;
 			}
-		}  // End for (Long currentDuration : dataEntries)
+			totalDuration = totalDuration + currentDuration;
+		}  // End for (int index = 0; index < inTimesToRepeat; index++)
 
 		printStream.println("Repeatedly Expanding Subgraph Execution Time in ms:");
-		totalDuration = 0;
+		totalDuration = totalDuration - minimum - maximum;
 
 		for (Long currentDuration : dataEntries) {
 			if (currentDuration == minimum) {
@@ -204,13 +200,12 @@ public class MeasureExecutionTimes {
 				printStream.println(currentDuration + " max");
 			} else {
 				printStream.println(currentDuration);
-				totalDuration = totalDuration + currentDuration.longValue();
 			}
 		}  // End for (Long currentDuration : dataEntries)
 
-		printStream.println("Average:  " + Math.round(((double) totalDuration) / (inTimesToRepeat - 2)));
+		printStream.println("Average:  " + Math.round(((double) totalDuration) / (dataEntries.length - 2)));
 
-		dataEntries = null;  // List<Long> dataEntries = new LinkedList();
+		dataEntries = null;  // long dataEntries[] = new long[inTimesToRepeat];
 		printStream.close();
 	}  // End protected static void logRun(...)
 
@@ -218,10 +213,11 @@ public class MeasureExecutionTimes {
 		VGI vgi = new VGI();
 //		vgi.setVisible(true);
 		MeasureExecutionTimes.logRun(vgi, "test input/char-b/1 crossing max", "s0", "s2", true, 5);
-//		MeasureExecutionTimes.logRun(vgi, "test input/char-b/1 crossing max", "s0", "s2", true, NUM_MEASUREMENTS);
-//		MeasureExecutionTimes.logRun(vgi, "test input/char-b/cycle test", "s4", "s1", false, NUM_MEASUREMENTS);
-//		MeasureExecutionTimes.logRun(vgi, "test input/char-b/5x5mesh", "s6", "s18", true, NUM_MEASUREMENTS);
-//		MeasureExecutionTimes.logRun(vgi, "test input/char-b/5x5", "s6", "s18", true, NUM_MEASUREMENTS);
+		MeasureExecutionTimes.logRun(vgi, "test input/char-b/1 crossing max", "s0", "s2", true, NUM_MEASUREMENTS);
+		MeasureExecutionTimes.logRun(vgi, "test input/char-b/cycle test", "s4", "s1", false, NUM_MEASUREMENTS);
+//		MeasureExecutionTimes.logRun(vgi, "test input/char-b/cycle test", "s12", "s8", false, NUM_MEASUREMENTS);
+		MeasureExecutionTimes.logRun(vgi, "test input/char-b/5x5mesh", "s6", "s18", true, NUM_MEASUREMENTS);
+		MeasureExecutionTimes.logRun(vgi, "test input/char-b/5x5", "s6", "s18", true, NUM_MEASUREMENTS);
 		vgi.exitProgram();
 	}  // End public static void main(String args[])
 }  // End public class MeasureExecutionTimes
