@@ -20,7 +20,7 @@ public class MeasureExecutionTimes {
 
 	protected static final int NUM_MEASUREMENTS = 12;
 
-	protected static long measure(
+	protected static double measure(
 			VGI inVgi,
 			String inFilePath,
 			String inSourceName,
@@ -96,8 +96,8 @@ public class MeasureExecutionTimes {
 		frame.modified = false;
 		inVgi.closeSelectedFrame();
 
-		return Math.round(stopwatch.getElapsedMilliseconds());
-	}  // End protected static long measure(...)
+		return stopwatch.getElapsedMilliseconds();
+	}  // End protected static double measure(...)
 
 	protected static void logRun(
 			VGI inVgi,
@@ -114,60 +114,19 @@ public class MeasureExecutionTimes {
 			exception.printStackTrace();
 		}
 
-		long dataEntries[] = new long[inTimesToRepeat];
-		long minimum = Long.MAX_VALUE;
-		long maximum = Long.MIN_VALUE;
-		long totalDuration = 0;
+		double wvgData[] = new double[inTimesToRepeat];
+		double resData[] = new double[inTimesToRepeat];
 
 		for (int index = 0; index < inTimesToRepeat; index++) {
-			long currentDuration;
 			try {
-				currentDuration = MeasureExecutionTimes.measure(
+				wvgData[index] = MeasureExecutionTimes.measure(
 						inVgi,
 						inFilePathWithoutExtension + ".xml",
 						inSourceName,
 						inTargetName,
 						inAddTransition,
 						false);
-			} catch (Exception exception) {
-				exception.printStackTrace();
-				dataEntries = null;  // long dataEntries[] = new long[inTimesToRepeat];
-				printStream.close();
-				return;
-			}
-			dataEntries[index] = currentDuration;
-			if (currentDuration < minimum) {
-				minimum = currentDuration;
-			}
-			if (currentDuration > maximum) {
-				maximum = currentDuration;
-			}
-			totalDuration = totalDuration + currentDuration;
-		}  // End for (int index = 0; index < inTimesToRepeat; index++)
-
-		printStream.println("Weighted Visibility Graph Execution Time in ms:");
-		totalDuration = totalDuration - minimum - maximum;
-
-		for (long currentDuration : dataEntries) {
-			if (currentDuration == minimum) {
-				printStream.println(currentDuration + " min");
-			} else if (currentDuration == maximum) {
-				printStream.println(currentDuration + " max");
-			} else {
-				printStream.println(currentDuration);
-			}
-		}  // End for (Long currentDuration : dataEntries)
-
-		printStream.println("Average:  " + Math.round(((double) totalDuration) / (dataEntries.length - 2)));
-
-		minimum = Long.MAX_VALUE;
-		maximum = Long.MIN_VALUE;
-		totalDuration = 0;
-
-		for (int index = 0; index < inTimesToRepeat; index++) {
-			long currentDuration;
-			try {
-				currentDuration = MeasureExecutionTimes.measure(
+				resData[index] = MeasureExecutionTimes.measure(
 						inVgi,
 						inFilePathWithoutExtension + ".xml",
 						inSourceName,
@@ -175,12 +134,20 @@ public class MeasureExecutionTimes {
 						inAddTransition,
 						true);
 			} catch (Exception exception) {
-				exception.printStackTrace();
-				dataEntries = null;  // long dataEntries[] = new long[inTimesToRepeat];
+				wvgData = null;  // double wvgData[] = new double[inTimesToRepeat];
+				resData = null;  // double resData[] = new double[inTimesToRepeat];
 				printStream.close();
+				exception.printStackTrace();
 				return;
 			}
-			dataEntries[index] = currentDuration;
+		}  // End for (int index = 0; index < inTimesToRepeat; index++)
+
+		double dataEntries[] = wvgData;
+		double minimum = Double.POSITIVE_INFINITY;
+		double maximum = Double.NEGATIVE_INFINITY;
+		double totalDuration = 0;
+
+		for (double currentDuration : dataEntries) {
 			if (currentDuration < minimum) {
 				minimum = currentDuration;
 			}
@@ -188,36 +155,97 @@ public class MeasureExecutionTimes {
 				maximum = currentDuration;
 			}
 			totalDuration = totalDuration + currentDuration;
-		}  // End for (int index = 0; index < inTimesToRepeat; index++)
+		}  // End for (double currentDuration : dataEntries)
+
+		printStream.println("Weighted Visibility Graph Execution Time in ms:");
+		totalDuration = totalDuration - minimum - maximum;
+		double average = totalDuration / (dataEntries.length - 2);
+		double sumOfSquaredError = 0;
+
+		for (double currentDuration : dataEntries) {
+			if (currentDuration == minimum) {
+				printStream.println(Math.round(currentDuration) + " min");
+			} else if (currentDuration == maximum) {
+				printStream.println(Math.round(currentDuration) + " max");
+			} else {
+				printStream.println(Math.round(currentDuration));
+			}
+			sumOfSquaredError = sumOfSquaredError
+					+ (currentDuration - average) * (currentDuration - average);
+		}  // End for (Long currentDuration : dataEntries)
+
+		sumOfSquaredError = sumOfSquaredError
+				- (minimum - average) * (minimum - average)
+				- (maximum - average) * (maximum - average);
+		printStream.println("Average:  " + Math.round(average));
+		printStream.println("Sample standard deviation:  "
+				+ Math.round(Math.sqrt(
+				sumOfSquaredError / (dataEntries.length - 2 - 1))));
+
+		dataEntries = resData;
+		minimum = Double.POSITIVE_INFINITY;
+		maximum = Double.NEGATIVE_INFINITY;
+		totalDuration = 0;
+
+		for (double currentDuration : dataEntries) {
+			if (currentDuration < minimum) {
+				minimum = currentDuration;
+			}
+			if (currentDuration > maximum) {
+				maximum = currentDuration;
+			}
+			totalDuration = totalDuration + currentDuration;
+		}  // End for (double currentDuration : dataEntries)
 
 		printStream.println("Repeatedly Expanding Subgraph Execution Time in ms:");
 		totalDuration = totalDuration - minimum - maximum;
+		average = ((double) totalDuration) / (dataEntries.length - 2);
+		sumOfSquaredError = 0;
 
-		for (Long currentDuration : dataEntries) {
+		for (double currentDuration : dataEntries) {
 			if (currentDuration == minimum) {
-				printStream.println(currentDuration + " min");
+				printStream.println(Math.round(currentDuration) + " min");
 			} else if (currentDuration == maximum) {
-				printStream.println(currentDuration + " max");
+				printStream.println(Math.round(currentDuration) + " max");
 			} else {
-				printStream.println(currentDuration);
+				printStream.println(Math.round(currentDuration));
 			}
+			sumOfSquaredError = sumOfSquaredError
+					+ (currentDuration - average) * (currentDuration - average);
 		}  // End for (Long currentDuration : dataEntries)
 
-		printStream.println("Average:  " + Math.round(((double) totalDuration) / (dataEntries.length - 2)));
+		sumOfSquaredError = sumOfSquaredError
+				- (minimum - average) * (minimum - average)
+				- (maximum - average) * (maximum - average);
+		printStream.println("Average:  " + Math.round(average));
+		printStream.println("Sample standard deviation:  "
+				+ Math.round(Math.sqrt(
+				sumOfSquaredError / (dataEntries.length - 2 - 1))));
 
-		dataEntries = null;  // long dataEntries[] = new long[inTimesToRepeat];
+		wvgData = null;  // double wvgData[] = new double[inTimesToRepeat];
+		resData = null;  // double resData[] = new double[inTimesToRepeat];
 		printStream.close();
 	}  // End protected static void logRun(...)
 
 	public static void main(String args[]) {
 		VGI vgi = new VGI();
 //		vgi.setVisible(true);
-		MeasureExecutionTimes.logRun(vgi, "test input/char-b/1 crossing max", "s0", "s2", true, 5);
+		MeasureExecutionTimes.logRun(vgi, "test input/char-b/1 crossing max", "s0", "s2", true, 10);
 		MeasureExecutionTimes.logRun(vgi, "test input/char-b/1 crossing max", "s0", "s2", true, NUM_MEASUREMENTS);
+		MeasureExecutionTimes.logRun(vgi, "test input/char-b/cycle test", "s4", "s1", false, 10);
 		MeasureExecutionTimes.logRun(vgi, "test input/char-b/cycle test", "s4", "s1", false, NUM_MEASUREMENTS);
-//		MeasureExecutionTimes.logRun(vgi, "test input/char-b/cycle test", "s12", "s8", false, NUM_MEASUREMENTS);
+		File file = new File("test input/char-b/cycle test.txt");
+		if (file.exists()) {
+			file.renameTo(new File("test input/char-b/cycle test s4 to s1.txt"));
+		}
+		MeasureExecutionTimes.logRun(vgi, "test input/char-b/cycle test", "s12", "s8", false, NUM_MEASUREMENTS);
+		file = new File("test input/char-b/cycle test.txt");
+		if (file.exists()) {
+			file.renameTo(new File("test input/char-b/cycle test s12 to s8.txt"));
+		}
 		MeasureExecutionTimes.logRun(vgi, "test input/char-b/5x5mesh", "s6", "s18", true, NUM_MEASUREMENTS);
 		MeasureExecutionTimes.logRun(vgi, "test input/char-b/5x5", "s6", "s18", true, NUM_MEASUREMENTS);
+		MeasureExecutionTimes.logRun(vgi, "test input/char-b/5x5+48", "s0", "s24", true, NUM_MEASUREMENTS);
 		vgi.exitProgram();
 	}  // End public static void main(String args[])
 }  // End public class MeasureExecutionTimes
