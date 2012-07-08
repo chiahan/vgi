@@ -1811,6 +1811,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         routeEdgeMenuItem = new javax.swing.JMenuItem();
         routeEdgeWVGMenuItem = new javax.swing.JMenuItem();
 
+        addStateMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/addstate.png"))); // NOI18N
         addStateMenuItem.setText("Add State");
         addStateMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1819,6 +1820,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(addStateMenuItem);
 
+        addTransitionFromMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/addtransitionfrom.png"))); // NOI18N
         addTransitionFromMenuItem.setText("Add Transition (From)");
         addTransitionFromMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1827,6 +1829,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(addTransitionFromMenuItem);
 
+        addTransitionToMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/addtransitionto.png"))); // NOI18N
         addTransitionToMenuItem.setText("Add Transition (To)");
         addTransitionToMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1835,6 +1838,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(addTransitionToMenuItem);
 
+        addControlPointMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/addcontrolpoint.png"))); // NOI18N
         addControlPointMenuItem.setText("Add Control Point");
         addControlPointMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1843,6 +1847,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(addControlPointMenuItem);
 
+        deleteMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/delete.png"))); // NOI18N
         deleteMenuItem.setText("Delete");
         deleteMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

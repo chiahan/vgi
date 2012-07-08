@@ -36,6 +36,8 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         this.transition = transition;
         this.graph = display.getGraph();
         this.automata = display.getAutomata();
+        jInternalFrame=jif;
+        
         
         showLabel();
         showGeoAndDrawingData();
@@ -43,7 +45,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         
         
         
-        jInternalFrame=jif;
+        
     }
     
     private void showLabel() {
@@ -100,6 +102,12 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             int ind=(int)width;
             strokeWidthBox.setSelectedIndex(ind-1);
         }
+        String startArrow=(String)styles.get("startArrow");
+        if(startArrow!=null) startStyleComboBox.setSelectedItem(startArrow);
+        
+        String endArrow=(String)styles.get("endArrow");
+        if(endArrow!=null) endStyleComboBox.setSelectedItem(endArrow);
+        
         
     }
     private void setStartEndArrow(JComboBox comboBox, Boolean startEnd) {

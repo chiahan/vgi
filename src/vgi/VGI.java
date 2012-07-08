@@ -317,18 +317,11 @@ public class VGI extends javax.swing.JFrame {
     private void initComponents() {
 
         toolBar = new javax.swing.JToolBar();
-        addStateButton = new javax.swing.JButton();
-        addTransitionButton = new javax.swing.JButton();
-        deleteButton = new javax.swing.JButton();
-        toolBarSeparator1 = new javax.swing.JToolBar.Separator();
         fitWindowButton = new javax.swing.JButton();
         zoomInButton = new javax.swing.JButton();
         zoomOutButton = new javax.swing.JButton();
         actualSizeButton = new javax.swing.JButton();
         toolBarSeparator2 = new javax.swing.JToolBar.Separator();
-        setAsInitialStateButton = new javax.swing.JButton();
-        setAsFinalStateButton = new javax.swing.JButton();
-        toolBarSeparator3 = new javax.swing.JToolBar.Separator();
         undoButton = new javax.swing.JButton();
         redoButton = new javax.swing.JButton();
         mainSplitPane = new javax.swing.JSplitPane();
@@ -394,28 +387,6 @@ public class VGI extends javax.swing.JFrame {
         toolBar.setFloatable(false);
         toolBar.setRollover(true);
 
-        addStateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/add.png"))); // NOI18N
-        addStateButton.setEnabled(false);
-        addStateButton.setFocusable(false);
-        addStateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        addStateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        toolBar.add(addStateButton);
-
-        addTransitionButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/arrow_right.png"))); // NOI18N
-        addTransitionButton.setEnabled(false);
-        addTransitionButton.setFocusable(false);
-        addTransitionButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        addTransitionButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        toolBar.add(addTransitionButton);
-
-        deleteButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/close.png"))); // NOI18N
-        deleteButton.setEnabled(false);
-        deleteButton.setFocusable(false);
-        deleteButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        deleteButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        toolBar.add(deleteButton);
-        toolBar.add(toolBarSeparator1);
-
         fitWindowButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/fit-32.png"))); // NOI18N
         fitWindowButton.setFocusable(false);
         fitWindowButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -460,21 +431,6 @@ public class VGI extends javax.swing.JFrame {
         });
         toolBar.add(actualSizeButton);
         toolBar.add(toolBarSeparator2);
-
-        setAsInitialStateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/object_07.png"))); // NOI18N
-        setAsInitialStateButton.setEnabled(false);
-        setAsInitialStateButton.setFocusable(false);
-        setAsInitialStateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        setAsInitialStateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        toolBar.add(setAsInitialStateButton);
-
-        setAsFinalStateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/24/object_06.png"))); // NOI18N
-        setAsFinalStateButton.setEnabled(false);
-        setAsFinalStateButton.setFocusable(false);
-        setAsFinalStateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        setAsFinalStateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        toolBar.add(setAsFinalStateButton);
-        toolBar.add(toolBarSeparator3);
 
         undoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/undo-32.png"))); // NOI18N
         undoButton.setFocusable(false);
@@ -563,6 +519,7 @@ public class VGI extends javax.swing.JFrame {
         fileMenu.add(closeMenuItem);
 
         saveMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        saveMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/save.png"))); // NOI18N
         saveMenuItem.setText("Save");
         saveMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -572,6 +529,7 @@ public class VGI extends javax.swing.JFrame {
         fileMenu.add(saveMenuItem);
 
         saveAsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
+        saveAsMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/saveas.png"))); // NOI18N
         saveAsMenuItem.setText("Save As...");
         saveAsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -596,7 +554,7 @@ public class VGI extends javax.swing.JFrame {
         editMenu.setText("Edit");
 
         deleteMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DELETE, 0));
-        deleteMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/close.png"))); // NOI18N
+        deleteMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/delete.png"))); // NOI18N
         deleteMenuItem.setText("Delete");
         deleteMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -621,19 +579,19 @@ public class VGI extends javax.swing.JFrame {
         viewMenu.setMnemonic('V');
         viewMenu.setText("View");
 
-        fitWindowMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoom.png"))); // NOI18N
+        fitWindowMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/fit-16.png"))); // NOI18N
         fitWindowMenuItem.setText("Fit Window");
         viewMenu.add(fitWindowMenuItem);
 
-        zoomInMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoomin.png"))); // NOI18N
+        zoomInMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/zoomin-16.png"))); // NOI18N
         zoomInMenuItem.setText("Zoom In");
         viewMenu.add(zoomInMenuItem);
 
-        zoomOutMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/zoomout.png"))); // NOI18N
+        zoomOutMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/zoomout-16.png"))); // NOI18N
         zoomOutMenuItem.setText("Zoom Out");
         viewMenu.add(zoomOutMenuItem);
 
-        actualSizeMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/refresh.png"))); // NOI18N
+        actualSizeMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/actual-16.png"))); // NOI18N
         actualSizeMenuItem.setText("Actual Size");
         viewMenu.add(actualSizeMenuItem);
         viewMenu.add(viewMenuSeparator1);
@@ -1581,8 +1539,6 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem accessibleMenuItem;
     private javax.swing.JButton actualSizeButton;
     private javax.swing.JMenuItem actualSizeMenuItem;
-    private javax.swing.JButton addStateButton;
-    private javax.swing.JButton addTransitionButton;
     private javax.swing.JMenu algorithmsMenu;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator1;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator2;
@@ -1592,7 +1548,6 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem closeMenuItem;
     private javax.swing.JMenuItem coaccessibleMenuItem;
     private javax.swing.JMenuItem currentSettingMenuItem;
-    private javax.swing.JButton deleteButton;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JMenuItem edgeCostSettingsMenuItem;
     private javax.swing.JMenu editMenu;
@@ -1625,9 +1580,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem routeAllEdgesBranchingMenuItem;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
-    private javax.swing.JButton setAsFinalStateButton;
     private javax.swing.JMenuItem setAsFinalStateMenuItem;
-    private javax.swing.JButton setAsInitialStateButton;
     private javax.swing.JMenuItem setAsInitialStateMenuItem;
     private javax.swing.JMenuItem setTAFKitPathMenuItem;
     private javax.swing.JCheckBoxMenuItem showPropertiesCheckBoxMenuItem;
@@ -1637,9 +1590,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JLabel statusLabel;
     private javax.swing.JMenuItem testShortestPathsMenuItem;
     private javax.swing.JToolBar toolBar;
-    private javax.swing.JToolBar.Separator toolBarSeparator1;
     private javax.swing.JToolBar.Separator toolBarSeparator2;
-    private javax.swing.JToolBar.Separator toolBarSeparator3;
     private javax.swing.JButton undoButton;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JPopupMenu.Separator viewMenuSeparator1;
