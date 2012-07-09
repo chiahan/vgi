@@ -1013,7 +1013,10 @@ public class FsmXml implements FsmXmlInterface {
             
             drawingdata.strokeColor=strokecolor;
             drawingdata.strokeWidth=strokewidth;
-             
+            drawingdata.startArrow=startArrow;
+            drawingdata.endArrow=endArrow;
+            
+            
             List<Transition> allTransitions = automata.getAllTransitions();
             Transition transition = allTransitions.get(allTransitions.size() - 1);
             transition.setDrawingData(drawingdata);

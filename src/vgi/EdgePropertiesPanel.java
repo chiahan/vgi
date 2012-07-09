@@ -36,6 +36,8 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         this.transition = transition;
         this.graph = display.getGraph();
         this.automata = display.getAutomata();
+        jInternalFrame=jif;
+        
         
         showLabel();
         showGeoAndDrawingData();
@@ -43,7 +45,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         
         
         
-        jInternalFrame=jif;
+        
     }
     
     private void showLabel() {
@@ -57,36 +59,61 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         if(source==target || source==null || target==null){
             angleLabel.setVisible(true);
             angleTextField.setVisible(true);
+            lengthLabel.setVisible(true);
+            lengthTextField.setVisible(true);
         }else{
             angleLabel.setVisible(false);
             angleTextField.setVisible(false);
+            lengthLabel.setVisible(false);
+            lengthTextField.setVisible(false);
         }
+        
         if(source==null){
             mxPoint term=cell.getGeometry().getTerminalPoint(true);
             mxPoint center=new mxPoint(target.getGeometry().getCenterX(),target.getGeometry().getCenterY());
             
             //System.out.println(term.toString()+" "+center.toString());
-            double theta=Math.atan((term.getY()-center.getY())/(term.getX()-center.getX()));
+            
+            double deltax=term.getX()-center.getX();
+            double deltay=term.getY()-center.getY();
+            double length=Math.sqrt(deltax*deltax+deltay*deltay);
+            lengthTextField.setText(String.valueOf(length));
+            
+            double theta=Math.atan2(deltay,deltax);
             theta=Math.toDegrees(theta);
             angleTextField.setText(String.valueOf(theta));
+                
+            
+            
         }else if(target==null){
             mxPoint term=cell.getGeometry().getTerminalPoint(false);
             mxPoint center=new mxPoint(source.getGeometry().getCenterX(),source.getGeometry().getCenterY());
             
             //System.out.println(term.toString()+" "+center.toString());
-            double theta=Math.atan((term.getY()-center.getY())/(term.getX()-center.getX()));
+             
+            double deltax=term.getX()-center.getX();
+            double deltay=term.getY()-center.getY();
+            double length=Math.sqrt(deltax*deltax+deltay*deltay);
+            lengthTextField.setText(String.valueOf(length));
+            
+            double theta=Math.atan2(deltay,deltax);
             theta=Math.toDegrees(theta);
             angleTextField.setText(String.valueOf(theta));
         
         }else if(source==target){
             mxPoint controlpt=cell.getGeometry().getPoints().get(0);
             mxPoint center=new mxPoint(source.getGeometry().getCenterX(),source.getGeometry().getCenterY());
-           
-            double theta=Math.atan((controlpt.getY()-center.getY())/(controlpt.getX()-center.getX()));
+            
+            double deltax=controlpt.getX()-center.getX();
+            double deltay=controlpt.getY()-center.getY();
+            double length=Math.sqrt(deltax*deltax+deltay*deltay);
+            lengthTextField.setText(String.valueOf(length));
+            
+            double theta=Math.atan2(deltay,deltax);
             theta=Math.toDegrees(theta);
             angleTextField.setText(String.valueOf(theta));
-            //System.out.println(pt.toString()+"-"+center.toString()+" theta: "+theta);
             
+          
         }
         
         Map<String,Object> styles=graph.getCellStyle(cell);
@@ -100,6 +127,12 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             int ind=(int)width;
             strokeWidthBox.setSelectedIndex(ind-1);
         }
+        String startArrow=(String)styles.get("startArrow");
+        if(startArrow!=null) startStyleComboBox.setSelectedItem(startArrow);
+        
+        String endArrow=(String)styles.get("endArrow");
+        if(endArrow!=null) endStyleComboBox.setSelectedItem(endArrow);
+        
         
     }
     private void setStartEndArrow(JComboBox comboBox, Boolean startEnd) {
@@ -146,6 +179,8 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         strokeWidthBox = new javax.swing.JComboBox();
         angleLabel = new javax.swing.JLabel();
         angleTextField = new javax.swing.JTextField();
+        lengthLabel = new javax.swing.JLabel();
+        lengthTextField = new javax.swing.JTextField();
 
         jLabel3.setText("jLabel3");
 
@@ -254,6 +289,22 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         add(angleTextField, gridBagConstraints);
+
+        lengthLabel.setText("Length :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        add(lengthLabel, gridBagConstraints);
+
+        lengthTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                lengthTextFieldKeyPressed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(lengthTextField, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void startStyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startStyleComboBoxActionPerformed
@@ -288,7 +339,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_strokeWidthBoxActionPerformed
 
     private void angleTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_angleTextFieldKeyPressed
-         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             String str = ((JTextField)evt.getSource()).getText();
             if (str.compareTo("") == 0)
                 str = null;
@@ -298,6 +349,16 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         
     }//GEN-LAST:event_angleTextFieldKeyPressed
 
+    private void lengthTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_lengthTextFieldKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            String str = ((JTextField)evt.getSource()).getText();
+            if (str.compareTo("") == 0)
+                str = null;
+            setLength(str);
+        }
+         graph.refresh();
+    }//GEN-LAST:event_lengthTextFieldKeyPressed
+
     private void setAngle(String str){
         mxGeometry geo=cell.getGeometry();
         Double angle_=Double.valueOf(str);
@@ -306,7 +367,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         if(angle_!=null){
             mxCell source=(mxCell)cell.getSource();
             mxCell target=(mxCell)cell.getTarget();
-            if(source==target){
+            if(source==target){ // loop
                 mxPoint ctrlpt=geo.getPoints().get(0);
                 
                 double deltax=ctrlpt.getX()-source.getGeometry().getCenterX();
@@ -320,23 +381,38 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
                 geo.setPoints(list);
                 cell.setGeometry(geo);
                 
-            }else if(source==null){
-                //mxPoint terminal=geo.getTerminalPoint(true);
+            }else if(source==null){ // initial
+                mxPoint terminal=geo.getTerminalPoint(true);
+                
                 mxGeometry vertexgeo=target.getGeometry();
+                mxPoint center=new mxPoint(vertexgeo.getCenterX(),vertexgeo.getCenterY());
+                
+                double deltax=terminal.getX()-center.getX();
+                double deltay=terminal.getY()-center.getY();
+                double length=Math.sqrt(deltax*deltax+deltay*deltay);
+                
                 
                 mxPoint newterm=new mxPoint();
-                newterm.setX(vertexgeo.getCenterX()+vertexgeo.getWidth()*Math.cos(angle_));
-                newterm.setY(vertexgeo.getCenterY()+vertexgeo.getWidth()*Math.sin(angle_));
+                newterm.setX(center.getX()+length*Math.cos(angle_));
+                newterm.setY(center.getY()+length*Math.sin(angle_));
                 geo.setTerminalPoint(newterm, true);
                 
-            }else if(target==null){
+            }else if(target==null){ // final
+                mxPoint terminal=geo.getTerminalPoint(false);
+                
                 mxGeometry vertexgeo=source.getGeometry();
+                mxPoint center=new mxPoint(vertexgeo.getCenterX(),vertexgeo.getCenterY());
+                
+                double deltax=terminal.getX()-center.getX();
+                double deltay=terminal.getY()-center.getY();
+                double length=Math.sqrt(deltax*deltax+deltay*deltay);
+                
                 
                 mxPoint newterm=new mxPoint();
-                newterm.setX(vertexgeo.getCenterX()+vertexgeo.getWidth()*Math.cos(angle_));
-                newterm.setY(vertexgeo.getCenterY()+vertexgeo.getWidth()*Math.sin(angle_));
+                newterm.setX(center.getX()+length*Math.cos(angle_));
+                newterm.setY(center.getY()+length*Math.sin(angle_));
                 geo.setTerminalPoint(newterm, false);
-                
+               
                 
             }
             
@@ -344,7 +420,69 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             jInternalFrame.setModified(true);
          }
     }
-    
+    private void setLength(String str){
+        mxGeometry geo=cell.getGeometry();
+        Double len=Double.valueOf(str);
+        
+        if(len!=null){
+            mxCell source=(mxCell)cell.getSource();
+            mxCell target=(mxCell)cell.getTarget();
+            if(source==target){ // loop
+                mxPoint ctrlpt=geo.getPoints().get(0);
+                
+                double deltax=ctrlpt.getX()-source.getGeometry().getCenterX();
+                double deltay=ctrlpt.getY()-source.getGeometry().getCenterY();
+                
+                double theta=Math.atan2(deltay,deltax);
+                
+                mxPoint newterm=new mxPoint(source.getGeometry().getCenterX()+len*Math.cos(theta),
+                                            source.getGeometry().getCenterY()+len*Math.sin(theta));
+                ArrayList<mxPoint> list=new ArrayList<mxPoint>();
+                list.add(newterm);
+                geo.setPoints(list);
+                cell.setGeometry(geo);
+                
+            }else if(source==null){ // initial
+                mxPoint terminal=geo.getTerminalPoint(true);
+                
+                mxGeometry vertexgeo=target.getGeometry();
+                mxPoint center=new mxPoint(vertexgeo.getCenterX(),vertexgeo.getCenterY());
+                
+                double deltax=terminal.getX()-center.getX();
+                double deltay=terminal.getY()-center.getY();
+                double theta=Math.atan2(deltay,deltax);
+                
+                mxPoint newterm=new mxPoint();
+                newterm.setX(center.getX()+len*Math.cos(theta));
+                newterm.setY(center.getY()+len*Math.sin(theta));
+                geo.setTerminalPoint(newterm, true);
+                
+            }else if(target==null){ // final
+                mxPoint terminal=geo.getTerminalPoint(false);
+                
+                mxGeometry vertexgeo=source.getGeometry();
+                mxPoint center=new mxPoint(vertexgeo.getCenterX(),vertexgeo.getCenterY());
+                
+                double deltax=terminal.getX()-center.getX();
+                double deltay=terminal.getY()-center.getY();
+                double theta=Math.atan2(deltay,deltax);
+                
+                
+                mxPoint newterm=new mxPoint();
+                newterm.setX(center.getX()+len*Math.cos(theta));
+                newterm.setY(center.getY()+len*Math.sin(theta));
+                geo.setTerminalPoint(newterm, false);
+               
+                
+            }
+            
+            cell.setGeometry(geo);
+            jInternalFrame.setModified(true);
+         }
+        
+        
+        
+    }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel angleLabel;
@@ -354,6 +492,8 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel labelLabel;
     private javax.swing.JTextField labelTextField;
+    private javax.swing.JLabel lengthLabel;
+    private javax.swing.JTextField lengthTextField;
     private javax.swing.JComboBox startStyleComboBox;
     private javax.swing.JLabel startStyleLabel;
     private javax.swing.JButton strokeColorButton;
