@@ -1078,7 +1078,7 @@ public class WeightedVisibilityGraph {
 			graph.insertEdge(
 					parent,
 					null,
-					null,
+					edge.weight,
 					oldToNewVerticesMap.get(edge.source),
 					oldToNewVerticesMap.get(edge.target));
 		}  // End for (Edge edge : this.edges)
