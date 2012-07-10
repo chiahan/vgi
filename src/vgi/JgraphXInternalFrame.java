@@ -326,8 +326,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 routeEdgeWVGMenuItem.setVisible(edgeSelected);
 
                 cancelMenuItem.setVisible((transitionFrom == null) ? false : true);
-                setInitialMenuItem.setVisible(vertexSelected);
-                setFinalMenuItem.setVisible(vertexSelected);
 
 
 
@@ -1737,8 +1735,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         addControlPointMenuItem = new javax.swing.JMenuItem();
         deleteMenuItem = new javax.swing.JMenuItem();
         cancelMenuItem = new javax.swing.JMenuItem();
-        setInitialMenuItem = new javax.swing.JMenuItem();
-        setFinalMenuItem = new javax.swing.JMenuItem();
         deleteControlPointMenuItem = new javax.swing.JMenuItem();
         resetControlPointMenuItem = new javax.swing.JMenuItem();
         routeEdgeMenuItem = new javax.swing.JMenuItem();
@@ -1797,12 +1793,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(cancelMenuItem);
 
-        setInitialMenuItem.setText("Set Initial State");
-        graphPopupMenu.add(setInitialMenuItem);
-
-        setFinalMenuItem.setText("Set Final State");
-        graphPopupMenu.add(setFinalMenuItem);
-
         deleteControlPointMenuItem.setText("Delete Control Point");
         deleteControlPointMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1836,21 +1826,21 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         graphPopupMenu.add(routeEdgeWVGMenuItem);
 
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
-            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
-                formInternalFrameClosing(evt);
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameClosed(evt);
             }
-            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosing(evt);
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
             }
-            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
             }
-            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
             }
         });
         addMouseWheelListener(new java.awt.event.MouseWheelListener() {
@@ -1990,7 +1980,5 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     private javax.swing.JMenuItem resetControlPointMenuItem;
     private javax.swing.JMenuItem routeEdgeMenuItem;
     private javax.swing.JMenuItem routeEdgeWVGMenuItem;
-    private javax.swing.JMenuItem setFinalMenuItem;
-    private javax.swing.JMenuItem setInitialMenuItem;
     // End of variables declaration//GEN-END:variables
 }
