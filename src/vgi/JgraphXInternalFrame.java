@@ -989,40 +989,42 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         Iterator cycleIterator;
                         Collection cycleCollection;
                        
-                        
-                        
-                        
-                        
+                        boolean isTreeOrHierarchical = true;
                         if(!iterator.hasNext()){
-                       
-                            PreProcess cycleFilter = new PreProcess(this.graph);
+                                             
+                           PreProcess cycleFilter = new PreProcess(this.graph);
                             CycleFeatureNode = cycleFilter.getFeatureNodeList();
                             cycleCollection = CycleFeatureNode.keySet();
                             cycleIterator = cycleCollection.iterator();
                             
                       
                             childs = new ArrayList<mxCell>();
-                       
+                            
+                            if(!cycleIterator.hasNext())
+                                isTreeOrHierarchical = false;
                             
                             while(cycleIterator.hasNext()){
                            
-                                mxCell FeatureNode = (mxCell)cycleIterator.next();
-                                childs = CycleFeatureNode.get(FeatureNode);
-                                
-                                for(mxCell child : childs){
-                                    (FeatureNode).insert(child);
-                                }
-                            }
+                                    mxCell FeatureNode = (mxCell)cycleIterator.next();
+                                    childs = CycleFeatureNode.get(FeatureNode);
+                                    
+                                    for(mxCell child : childs){
+                                        (FeatureNode).insert(child);
+                                    }
+                             } // end of  (cycleIterator.hasNext())
+                          
                         }
                    
               
                 // execute the TreeLayout and ClusteringLayout : 
-                        
+                if(isTreeOrHierarchical== true){        
                         TreeLayout treelayout = new TreeLayout(this.graph); 
-                        
                         treelayout.execute(graph.getDefaultParent());  
                        // treelayout.execute(cellTable.get("0"));
-             
+                }
+                else if(isTreeOrHierarchical== false){
+                        this.doHierarchicalLayout();
+                }
              
                         
                         
