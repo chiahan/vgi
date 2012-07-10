@@ -943,39 +943,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         mxHierarchicalLayout layout = new mxHierarchicalLayout(this.graph);
         layout.setOrientation(SwingConstants.WEST);
         layout.setFineTuning(false);
+        layout.setDisableEdgeStyle(false);
         layout.execute(this.graph.getDefaultParent());
-        List<mxICell> cellList = new ArrayList<mxICell>();
-        List<Object> oldCellList = new ArrayList<Object>();
-        
-        int childCount = graph.getModel().getChildCount(graph.getDefaultParent());
-        
-        for (int i = 0; i < childCount; i++){
-            
-		Object cell = graph.getModel().getChildAt(graph.getDefaultParent(), i);
-
-                if(((mxCell)cell).isEdge()){
-                    mxICell source = ((mxICell) cell).getTerminal(true);
-                    mxICell target = ((mxICell) cell).getTerminal(false);
-                    Object value = ((mxCell)cell).getValue();
- 
-                    mxCell newCell = new mxCell();
-                    newCell.setSource(source);
-                    newCell.setTarget(target);
-                    newCell.setValue(value);
-                    
-                    oldCellList.add(cell);
-                    cellList.add((mxICell)newCell);
-                }
-            }   
-        this.graph.removeCells(oldCellList.toArray());
-        Iterator<mxICell> index = cellList.iterator();
-        while(index.hasNext()){
-            mxICell cell = index.next();
-            
-            this.graph.insertEdge(graph.getDefaultParent(), null, cell.getValue(), cell.getTerminal(true), cell.getTerminal(false));
-        
-        }
-        
         EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
         edgeRoute.execute(this.graph.getDefaultParent());
         
@@ -1054,45 +1023,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         treelayout.execute(graph.getDefaultParent());  
                        // treelayout.execute(cellTable.get("0"));
              
-                 /*     
-                        mxHierarchicalLayout layout = new mxHierarchicalLayout(this.graph);
-                        layout.setOrientation(SwingConstants.WEST);
-                        layout.setFineTuning(false);
-                        layout.execute(this.graph.getDefaultParent());
-                        List<mxICell> cellList = new ArrayList<mxICell>();
-                        List<Object> oldCellList = new ArrayList<Object>();
-                        
-                        childCount = this.graph.getModel().getChildCount(this.graph.getDefaultParent());
-        
-        
-                        for (int i = 0; i < childCount; i++){
-            
-                            Object cell = this.graph.getModel().getChildAt(this.graph.getDefaultParent(), i);
-                            
-                            if(((mxCell)cell).isEdge()){
-                                mxICell source = ((mxICell) cell).getTerminal(true);
-                                mxICell target = ((mxICell) cell).getTerminal(false);
-                                Object value = ((mxCell)cell).getValue();
- 
-                                mxCell newCell = new mxCell();
-                                newCell.setSource(source);
-                                newCell.setTarget(target);
-                                newCell.setValue(value);
-                    
-                                oldCellList.add(cell);
-                                cellList.add((mxICell)newCell);
-                            }
-                        }   
-                        
-                    this.graph.removeCells(oldCellList.toArray());
-                    Iterator<mxICell> index = cellList.iterator();
-                    while(index.hasNext()){
-                        mxICell cell = index.next();
-            
-                        this.graph.insertEdge(this.graph.getDefaultParent(), null, cell.getValue(), cell.getTerminal(true), cell.getTerminal(false));
-        
-                    }
-                    */ 
+             
                         
                         
                         iterator = collection.iterator();
@@ -1115,7 +1046,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         
                         iterator = collection.iterator();
                         if(!iterator.hasNext()){
-                            
+                           
                            cycleCollection = CycleFeatureNode.keySet();
                            cycleIterator = cycleCollection.iterator();
                             
