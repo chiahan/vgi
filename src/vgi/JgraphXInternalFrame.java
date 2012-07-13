@@ -727,7 +727,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         //Object vertex = graph.insertVertex(parent, Integer.toString(id), name,
         //        x - w / 2, y - h / 2, w, h, "shape=ellipse;perimeter=ellipsePerimeter;");
         Object vertex = graph.insertVertex(parent, Integer.toString(id), name,
-                x - w / 2, y - h / 2, w, h, "shape="+shape+";perimeter="+shape+"Perimeter;");
+                x - w / 2, y - h / 2, w, h, "shape="+shape+";perimeter="+shape+"Perimeter;fontSize="+defaultFontSize);
         
         graph.setSelectionCell(vertex);
         ((mxCell) vertex).setConnectable(false);
@@ -789,7 +789,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(),
                 null, transition.getLabel(), source, target,
-                "shape=curve"));
+                "shape=curve;fontSize="+defaultFontSize));
         cellTable.put(edge, transition);
         mxGeometry geometry = edge.getGeometry();
         if (geometry == null) {
@@ -1739,6 +1739,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     
     public void setCurrentFile(File file){
         currentFile=file;
+        this.title=currentFile.getName();
     }
     public File getCurrentFile(){
         return currentFile;
@@ -1781,6 +1782,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     static final int STATUS_ADD = 1;
     static final int STATUS_DELETE = 2;
     static final int STATUS_CHANGE = 3;
+    ///
+    static final float defaultFontSize=13;
     ////
     VGI vgi;
     ////
