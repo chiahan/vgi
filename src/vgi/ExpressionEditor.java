@@ -155,37 +155,38 @@ public class ExpressionEditor extends javax.swing.JDialog {
 
 	private Object parseWeightTextField() {
 
-		switch (this.expressionRoot.getWeight().semiring) {
-			case Z_INTEGER:
-			case ZMIN_MIN_TROPICAL:
-			case ZMAX_MAX_TROPICAL:
-				try {
-					Integer integerObj = Integer.valueOf(this.weightTextField.getText());
-					this.weightTextField.setText(integerObj.toString());
-					return integerObj;
-				} catch (NumberFormatException numberFormatException) {
-					JOptionPane.showMessageDialog(this, "Please enter an integer for weight.", null, JOptionPane.ERROR_MESSAGE);
-					return null;
-				}
-			case Q_RATIONAL:
-			case R_REAL:
-				try {
-					Double doubleObj = Double.valueOf(this.weightTextField.getText());
-					NumberFormat numberFormat = NumberFormat.getInstance();
-					numberFormat.setGroupingUsed(false);
-					String string = numberFormat.format((Double) doubleObj);
-					this.weightTextField.setText(string);
-					return doubleObj;
-				} catch (NumberFormatException numberFormatException) {
-					JOptionPane.showMessageDialog(this, "Please enter a number for weight.", null, JOptionPane.ERROR_MESSAGE);
-					return null;
-				}
-			case B_BOOLEAN:
-			case F2_TWO_ELEMENT_FIELD:
-				throw new IllegalArgumentException("The boolean semiring and the two-element field do not need explicitly written weights.");
-			default:
-				throw new IllegalArgumentException("Unrecognizable semiring set.");
-		}  // End switch (this.expressionRoot.getWeight().semiring)
+		return this.weightTextField.getText();
+//		switch (this.expressionRoot.getWeight().semiring) {
+//			case Z_INTEGER:
+//			case ZMIN_MIN_TROPICAL:
+//			case ZMAX_MAX_TROPICAL:
+//				try {
+//					Integer integerObj = Integer.valueOf(this.weightTextField.getText());
+//					this.weightTextField.setText(integerObj.toString());
+//					return integerObj;
+//				} catch (NumberFormatException numberFormatException) {
+//					JOptionPane.showMessageDialog(this, "Please enter an integer for weight.", null, JOptionPane.ERROR_MESSAGE);
+//					return null;
+//				}
+//			case Q_RATIONAL:
+//			case R_REAL:
+//				try {
+//					Double doubleObj = Double.valueOf(this.weightTextField.getText());
+//					NumberFormat numberFormat = NumberFormat.getInstance();
+//					numberFormat.setGroupingUsed(false);
+//					String string = numberFormat.format((Double) doubleObj);
+//					this.weightTextField.setText(string);
+//					return doubleObj;
+//				} catch (NumberFormatException numberFormatException) {
+//					JOptionPane.showMessageDialog(this, "Please enter a number for weight.", null, JOptionPane.ERROR_MESSAGE);
+//					return null;
+//				}
+//			case B_BOOLEAN:
+//			case F2_TWO_ELEMENT_FIELD:
+//				throw new IllegalArgumentException("The boolean semiring and the two-element field do not need explicitly written weights.");
+//			default:
+//				throw new IllegalArgumentException("Unrecognizable semiring set.");
+//		}  // End switch (this.expressionRoot.getWeight().semiring)
 
 	}  // End private Object parseWeightTextField()
 
