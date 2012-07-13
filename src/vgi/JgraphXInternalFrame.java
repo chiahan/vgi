@@ -447,10 +447,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     private void setupStates() {
         Iterator<State> iterator = this.automata.getAllStates().iterator();
+        int num=0;
         while (iterator.hasNext()) {
             State state = iterator.next();
             this.addState(state);
-        }  // End while (stateIterator.hasNext())
+             }  // End while (stateIterator.hasNext())
     }
 
     private void setupTranitions() {
