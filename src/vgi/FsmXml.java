@@ -857,7 +857,7 @@ public class FsmXml implements FsmXmlInterface {
 					}
 				} else if (TAG_RIGHT_EXT_MUL.equals(localName)) {
 					if ((firstChild != null) && (weight != null)) {
-						label = new WeightedRegularExpression.RightMultiply(secondChild, weight);
+						label = new WeightedRegularExpression.RightMultiply(firstChild, weight);
 					}
 				} else if (TAG_LABEL.equals(localName)) {
 					label = firstChild;
