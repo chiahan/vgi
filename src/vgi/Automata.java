@@ -85,8 +85,9 @@ public class Automata implements AutomataInterface {
 		pmAllStates.add(state);
 		String name = state.getName();
 		if (name == null) {
-			state.setName("s" + Integer.toString(counter++));
+			state.setName("s" + Integer.toString(counter));
 		}
+                counter++;
 	}
 
 	/**
@@ -147,6 +148,8 @@ public class Automata implements AutomataInterface {
 		}  // End while (iterateStates.hasNext())
 		return arrayList;
 	}
+        
+        
 	private String pmName;
 	private WritingData pmWritingData;
 	private Weight pmWeight;
