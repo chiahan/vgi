@@ -114,6 +114,8 @@ public class DisplayUtil {
 
         Object[] cell = {edge};
         getGraph().setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cell);
+        getGraph().setCellStyles("fontSize", String.valueOf(JgraphXInternalFrame.defaultFontSize), cell);
+        
         getGraph().getCellGeometry(edge).setTerminalPoint(terminalPoint, !vertexIsSource);
         ((mxCell) edge).getGeometry().setY(JgraphXInternalFrame.DEFAULT_LABEL_DISTANCE);
 

@@ -143,6 +143,11 @@ public class VGI extends javax.swing.JFrame {
 				outputs = pmTAFKit.runVcsnAlgorithm(pmAutomataType, this.vcsnAlgorithm, inputs);
 			} catch (Exception exception) {
 				exception.printStackTrace();
+                                JOptionPane.showMessageDialog(
+                                        pmVGI,
+					exception.getMessage(),
+					null,
+					JOptionPane.WARNING_MESSAGE);
 				return;
 			}
 
@@ -896,7 +901,14 @@ public class VGI extends javax.swing.JFrame {
 			automataList = fsmXml.read(fileChooser.getSelectedFile());
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+                        int returnValue_ = JOptionPane.showConfirmDialog(
+						this,
+						e.getMessage(),
+						"Fail to open",
+						JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.WARNING_MESSAGE);
+			
 		}
 		if ((automataList != null) && (automataList.size() > 0)) {
 			Automata automata = automataList.get(0);
@@ -918,7 +930,13 @@ public class VGI extends javax.swing.JFrame {
                     automataList = fsmXml.read(file);
 
             } catch (Exception e) {
-                    e.printStackTrace();
+                    int returnValue_ = JOptionPane.showConfirmDialog(
+						this,
+						e.getMessage(),
+						"Fail to open",
+                                                JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.WARNING_MESSAGE);
+			
             }
             if ((automataList != null) && (automataList.size() > 0)) {
                     Automata automata = automataList.get(0);
@@ -1043,7 +1061,12 @@ public class VGI extends javax.swing.JFrame {
 				fsmXml.write(currentAutomata, selected.getCurrentFile());
 				selected.setModified(false);
 			} catch (Exception e) {
-				e.printStackTrace();
+				JOptionPane.showConfirmDialog(
+						this,
+						e.getMessage(),
+						"Fail to save",
+                                                JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.WARNING_MESSAGE);
 			}
 		}
 
@@ -1073,6 +1096,12 @@ public class VGI extends javax.swing.JFrame {
 			selected.setModified(false);
 		} catch (Exception e) {
 			e.printStackTrace();
+                        JOptionPane.showConfirmDialog(
+						this,
+						e.getMessage(),
+						"Fail to save",
+                                                JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.WARNING_MESSAGE);
 		}
             
             
@@ -1481,6 +1510,14 @@ public class VGI extends javax.swing.JFrame {
 		this.pmAutomataType = automataType;
 	}  // End protected void updateAlgorithmMenuItems()
 
+        public void showErrorDialog(String errorString){
+            
+            JOptionPane.showMessageDialog(
+			this,
+                        errorString,
+                        null,
+			JOptionPane.WARNING_MESSAGE);
+        }
 	/**
 	 * @param args the command line arguments
 	 */
@@ -1522,6 +1559,9 @@ public class VGI extends javax.swing.JFrame {
 
 			public void run() {
                                 VGI vgi=new VGI();
+                                boolean standardInputError=false;
+                                String errorString=null;
+                                    
                                 if(args.length>0){
                                     String filename=args[0];
                                     if(filename!=null){
@@ -1535,6 +1575,8 @@ public class VGI extends javax.swing.JFrame {
                                                     
                                             }catch(FsmXmlException ex){
                                                 Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
+                                                standardInputError=true;
+                                                errorString=ex.getMessage();
                                             }
                                             
                                             if ((automataList != null) && (automataList.size() > 0)) {
@@ -1551,6 +1593,8 @@ public class VGI extends javax.swing.JFrame {
                                     }
                                 }
 				vgi.setVisible(true);
+                                if(standardInputError) vgi.showErrorDialog(errorString);
+                                
 			}
 		});
 	}
