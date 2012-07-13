@@ -71,16 +71,6 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cancelMenuItemActionPerformed"/>
           </Events>
         </MenuItem>
-        <MenuItem class="javax.swing.JMenuItem" name="setInitialMenuItem">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Set Initial State"/>
-          </Properties>
-        </MenuItem>
-        <MenuItem class="javax.swing.JMenuItem" name="setFinalMenuItem">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Set Final State"/>
-          </Properties>
-        </MenuItem>
         <MenuItem class="javax.swing.JMenuItem" name="deleteControlPointMenuItem">
           <Properties>
             <Property name="text" type="java.lang.String" value="Delete Control Point"/>

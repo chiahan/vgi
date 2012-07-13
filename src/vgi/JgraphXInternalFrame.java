@@ -326,8 +326,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 routeEdgeWVGMenuItem.setVisible(edgeSelected);
 
                 cancelMenuItem.setVisible((transitionFrom == null) ? false : true);
-                setInitialMenuItem.setVisible(vertexSelected);
-                setFinalMenuItem.setVisible(vertexSelected);
 
 
 
@@ -943,39 +941,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         mxHierarchicalLayout layout = new mxHierarchicalLayout(this.graph);
         layout.setOrientation(SwingConstants.WEST);
         layout.setFineTuning(false);
+        layout.setDisableEdgeStyle(false);
         layout.execute(this.graph.getDefaultParent());
-        List<mxICell> cellList = new ArrayList<mxICell>();
-        List<Object> oldCellList = new ArrayList<Object>();
-        
-        int childCount = graph.getModel().getChildCount(graph.getDefaultParent());
-        
-        for (int i = 0; i < childCount; i++){
-            
-		Object cell = graph.getModel().getChildAt(graph.getDefaultParent(), i);
-
-                if(((mxCell)cell).isEdge()){
-                    mxICell source = ((mxICell) cell).getTerminal(true);
-                    mxICell target = ((mxICell) cell).getTerminal(false);
-                    Object value = ((mxCell)cell).getValue();
- 
-                    mxCell newCell = new mxCell();
-                    newCell.setSource(source);
-                    newCell.setTarget(target);
-                    newCell.setValue(value);
-                    
-                    oldCellList.add(cell);
-                    cellList.add((mxICell)newCell);
-                }
-            }   
-        this.graph.removeCells(oldCellList.toArray());
-        Iterator<mxICell> index = cellList.iterator();
-        while(index.hasNext()){
-            mxICell cell = index.next();
-            
-            this.graph.insertEdge(graph.getDefaultParent(), null, cell.getValue(), cell.getTerminal(true), cell.getTerminal(false));
-        
-        }
-        
         EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
         edgeRoute.execute(this.graph.getDefaultParent());
         
@@ -1020,79 +987,43 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         Iterator cycleIterator;
                         Collection cycleCollection;
                        
-                        
-                        
-                        
-                        
+                        boolean isTreeOrHierarchical = true;
                         if(!iterator.hasNext()){
-                       
-                            PreProcess cycleFilter = new PreProcess(this.graph);
+                                             
+                           PreProcess cycleFilter = new PreProcess(this.graph);
                             CycleFeatureNode = cycleFilter.getFeatureNodeList();
                             cycleCollection = CycleFeatureNode.keySet();
                             cycleIterator = cycleCollection.iterator();
                             
                       
                             childs = new ArrayList<mxCell>();
-                       
+                            
+                            if(!cycleIterator.hasNext())
+                                isTreeOrHierarchical = false;
                             
                             while(cycleIterator.hasNext()){
                            
-                                mxCell FeatureNode = (mxCell)cycleIterator.next();
-                                childs = CycleFeatureNode.get(FeatureNode);
-                                
-                                for(mxCell child : childs){
-                                    (FeatureNode).insert(child);
-                                }
-                            }
+                                    mxCell FeatureNode = (mxCell)cycleIterator.next();
+                                    childs = CycleFeatureNode.get(FeatureNode);
+                                    
+                                    for(mxCell child : childs){
+                                        (FeatureNode).insert(child);
+                                    }
+                             } // end of  (cycleIterator.hasNext())
+                          
                         }
                    
               
                 // execute the TreeLayout and ClusteringLayout : 
-                        
+                if(isTreeOrHierarchical== true){        
                         TreeLayout treelayout = new TreeLayout(this.graph); 
-                        
                         treelayout.execute(graph.getDefaultParent());  
                        // treelayout.execute(cellTable.get("0"));
+                }
+                else if(isTreeOrHierarchical== false){
+                        this.doHierarchicalLayout();
+                }
              
-                 /*     
-                        mxHierarchicalLayout layout = new mxHierarchicalLayout(this.graph);
-                        layout.setOrientation(SwingConstants.WEST);
-                        layout.setFineTuning(false);
-                        layout.execute(this.graph.getDefaultParent());
-                        List<mxICell> cellList = new ArrayList<mxICell>();
-                        List<Object> oldCellList = new ArrayList<Object>();
-                        
-                        childCount = this.graph.getModel().getChildCount(this.graph.getDefaultParent());
-        
-        
-                        for (int i = 0; i < childCount; i++){
-            
-                            Object cell = this.graph.getModel().getChildAt(this.graph.getDefaultParent(), i);
-                            
-                            if(((mxCell)cell).isEdge()){
-                                mxICell source = ((mxICell) cell).getTerminal(true);
-                                mxICell target = ((mxICell) cell).getTerminal(false);
-                                Object value = ((mxCell)cell).getValue();
- 
-                                mxCell newCell = new mxCell();
-                                newCell.setSource(source);
-                                newCell.setTarget(target);
-                                newCell.setValue(value);
-                    
-                                oldCellList.add(cell);
-                                cellList.add((mxICell)newCell);
-                            }
-                        }   
-                        
-                    this.graph.removeCells(oldCellList.toArray());
-                    Iterator<mxICell> index = cellList.iterator();
-                    while(index.hasNext()){
-                        mxICell cell = index.next();
-            
-                        this.graph.insertEdge(this.graph.getDefaultParent(), null, cell.getValue(), cell.getTerminal(true), cell.getTerminal(false));
-        
-                    }
-                    */ 
                         
                         
                         iterator = collection.iterator();
@@ -1115,7 +1046,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         
                         iterator = collection.iterator();
                         if(!iterator.hasNext()){
-                            
+                           
                            cycleCollection = CycleFeatureNode.keySet();
                            cycleIterator = cycleCollection.iterator();
                             
@@ -1807,8 +1738,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         addControlPointMenuItem = new javax.swing.JMenuItem();
         deleteMenuItem = new javax.swing.JMenuItem();
         cancelMenuItem = new javax.swing.JMenuItem();
-        setInitialMenuItem = new javax.swing.JMenuItem();
-        setFinalMenuItem = new javax.swing.JMenuItem();
         deleteControlPointMenuItem = new javax.swing.JMenuItem();
         resetControlPointMenuItem = new javax.swing.JMenuItem();
         routeEdgeMenuItem = new javax.swing.JMenuItem();
@@ -1867,12 +1796,6 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(cancelMenuItem);
 
-        setInitialMenuItem.setText("Set Initial State");
-        graphPopupMenu.add(setInitialMenuItem);
-
-        setFinalMenuItem.setText("Set Final State");
-        graphPopupMenu.add(setFinalMenuItem);
-
         deleteControlPointMenuItem.setText("Delete Control Point");
         deleteControlPointMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1906,21 +1829,21 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         graphPopupMenu.add(routeEdgeWVGMenuItem);
 
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
-            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
-                formInternalFrameClosing(evt);
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameClosed(evt);
             }
-            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosing(evt);
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
             }
-            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
             }
-            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
             }
         });
         addMouseWheelListener(new java.awt.event.MouseWheelListener() {
@@ -2060,7 +1983,5 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     private javax.swing.JMenuItem resetControlPointMenuItem;
     private javax.swing.JMenuItem routeEdgeMenuItem;
     private javax.swing.JMenuItem routeEdgeWVGMenuItem;
-    private javax.swing.JMenuItem setFinalMenuItem;
-    private javax.swing.JMenuItem setInitialMenuItem;
     // End of variables declaration//GEN-END:variables
 }

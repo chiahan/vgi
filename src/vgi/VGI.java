@@ -1,5 +1,6 @@
 package vgi;
 
+import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.mxGraphComponent;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -1315,7 +1316,26 @@ public class VGI extends javax.swing.JFrame {
 	private void buildWeightedVisibilityGraphMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buildWeightedVisibilityGraphMenuItemActionPerformed
 		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
 		if (frame instanceof JgraphXInternalFrame) {
-			mxGraph graph = EdgeRoutingMinCross.buildWeightedVisibilityGraph(((JgraphXInternalFrame) frame).graph);
+			mxGraph graph = ((JgraphXInternalFrame) frame).graph;
+			WeightedVisibilityGraph weightedVisibilityGraph = new WeightedVisibilityGraph();
+			Object parent = graph.getDefaultParent();
+			Object objects[] = graph.getChildVertices(parent);
+			for (Object object : objects) {
+				if (!(object instanceof mxICell)) {
+					throw new IllegalStateException("A vertex is not of the type mxICell.");
+				}
+				mxICell roadblock = (mxICell) object;
+				weightedVisibilityGraph.addRoadblock(roadblock);
+			}  // End for (Object object : objects)
+			objects = graph.getChildEdges(parent);
+			for (Object object : objects) {
+				if (!(object instanceof mxICell)) {
+					throw new IllegalStateException("An edge is not of the type mxICell.");
+				}
+				mxICell hindrance = (mxICell) object;
+				weightedVisibilityGraph.addHindrance(hindrance);
+			}  // End for (Object object : objects)
+			graph = weightedVisibilityGraph.toMxGraph();
 			JgraphXInternalFrame newFrame = new JgraphXInternalFrame(
 					this.infoSplitPane,
 					graph,

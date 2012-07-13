@@ -932,23 +932,23 @@ public class FsmXml implements FsmXmlInterface {
 			throws XMLStreamException,
 			FsmXmlException {
 
-		Object object = null;//xmlStreamReader.getAttributeValue(null, ATR_VALUE);
-		switch (automata.getWeight().semiring) {
-			case Z_INTEGER:
-			case ZMIN_MIN_TROPICAL:
-			case ZMAX_MAX_TROPICAL:
-				object = Integer.valueOf(xmlStreamReader.getAttributeValue(null, ATR_VALUE));
-				break;
-			case Q_RATIONAL:
-			case R_REAL:
-				object = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_VALUE));
-				break;
-			case B_BOOLEAN:
-			case F2_TWO_ELEMENT_FIELD:
-				throw new FsmXmlException("The boolean semiring and the two-element field should not have any weight tags.");
-			default:
-				throw new FsmXmlException("Unrecognizable semiring set.");
-		}  // End switch (automata.getWeight().semiring)
+		Object object = xmlStreamReader.getAttributeValue(null, ATR_VALUE);
+//		switch (automata.getWeight().semiring) {
+//			case Z_INTEGER:
+//			case ZMIN_MIN_TROPICAL:
+//			case ZMAX_MAX_TROPICAL:
+//				object = Integer.valueOf(xmlStreamReader.getAttributeValue(null, ATR_VALUE));
+//				break;
+//			case Q_RATIONAL:
+//			case R_REAL:
+//				object = Double.valueOf(xmlStreamReader.getAttributeValue(null, ATR_VALUE));
+//				break;
+//			case B_BOOLEAN:
+//			case F2_TWO_ELEMENT_FIELD:
+//				throw new FsmXmlException("The boolean semiring and the two-element field should not have any weight tags.");
+//			default:
+//				throw new FsmXmlException("Unrecognizable semiring set.");
+//		}  // End switch (automata.getWeight().semiring)
 
 		if (!(Tag.findNextSpecified(xmlStreamReader, TAG_WEIGHT, Tag.Type.END))) {
 			Tag.assertTag(TAG_WEIGHT, Tag.Type.END);

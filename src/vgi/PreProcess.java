@@ -1,12 +1,10 @@
 package vgi;
 
 
+import com.mxgraph.model.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mxgraph.model.mxGeometry;
-import com.mxgraph.model.mxICell;
-import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 import java.util.*;
@@ -15,7 +13,6 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
-import com.mxgraph.model.mxCell;
 
 public  class PreProcess
 {
@@ -46,7 +43,7 @@ public  class PreProcess
            int childCount = graph.getModel().getChildCount(graph.getDefaultParent());
             
             Object parent = graph.getDefaultParent();
-			
+	    
             for (int i = 0; i < childCount; i++)
             {
 		Object cell = graph.getModel().getChildAt(parent, i);
@@ -54,12 +51,22 @@ public  class PreProcess
 		if (((mxCell)cell).isVertex()){
                     g.addVertex(((mxCell)cell).getId());
                 }
-                
+            }    
+            
+            
+            for (int i = 0; i < childCount; i++)
+            {
+		Object cell = graph.getModel().getChildAt(parent, i);
+
                 if(((mxCell)cell).isEdge()){
                 
-                    String preId = ((mxCell)cell).getTerminal(true).getId();
-                    String succId = ((mxCell)cell).getTerminal(false).getId();
-                    g.addEdge(preId, succId);
+                    if((((mxCell)cell).getTerminal(true)!=null)  && (((mxCell)cell).getTerminal(false)!=null))
+                    {
+                        String preId = ((mxCell)cell).getTerminal(true).getId();
+                        String succId = ((mxCell)cell).getTerminal(false).getId();
+                    
+                        g.addEdge(preId, succId);
+                    }
                 }
             }    
    
@@ -72,7 +79,7 @@ public  class PreProcess
                 Iterator<String> iterator;
                 Set<String> cycleVertices;
                 Set<String> subCycle;
-              
+                mxGraphModel model = (mxGraphModel)graph.getModel();
                 String cycle;
 
                 System.out.println("Cycles detected.");
@@ -109,9 +116,7 @@ public  class PreProcess
               
                         
                         
-                        
-                        
-                        Object[] in = graph.getIncomingEdges(graph.getModel().getChildAt(parent, Integer.parseInt(sub)-2) );
+                        Object[] in = graph.getIncomingEdges(model.getCell(sub));
                 
                         for(int i = 0; i< in.length;i++){
                     
@@ -126,12 +131,8 @@ public  class PreProcess
                         }
                         
                         
-                        
-                        
-                        
-                        
-                        
-                        Object[] out = graph.getOutgoingEdges(graph.getModel().getChildAt(parent, Integer.parseInt(sub)-2));
+                     
+                        Object[] out = graph.getOutgoingEdges(model.getCell(sub));
                         
                         for(int i = 0; i< out.length;i++){
                         
