@@ -115,8 +115,11 @@ public class WeightedVisibilityGraph {
 			throw new IllegalArgumentException("The input argument 'inVertex' is not a vertex of this graph.");
 		}
 
-		for (Edge edge : inVertex.edges) {
+		Iterator<Edge> iterateEdges = inVertex.edges.iterator();
+		while (iterateEdges.hasNext()) {
+			Edge edge = iterateEdges.next();
 			this.removeEdge(edge);
+			iterateEdges = inVertex.edges.iterator();
 		}
 		this.vertices.remove(inVertex);
 
@@ -574,7 +577,7 @@ public class WeightedVisibilityGraph {
 			if (previousVector != null) {
 				Vector2D externalBisector = previousVector.unitVector().
 						subtract(vector.unitVector()).
-						scalarProduct(MINIMUM_SPACING);
+						unitVector().scalarProduct(MINIMUM_SPACING);
 				newVerticesPositions.add(new mxPoint(
 						previousPoint.getX() + externalBisector.getX(),
 						previousPoint.getY() + externalBisector.getY()));

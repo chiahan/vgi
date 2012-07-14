@@ -323,7 +323,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 deleteControlPointMenuItem.setVisible(controlPointSelected && !isloop);
                 resetControlPointMenuItem.setVisible(edgeSelected);
                 routeEdgeMenuItem.setVisible(edgeSelected);
-                routeEdgeWVGMenuItem.setVisible(edgeSelected);
+                routeEdgeWVGMenuItem.setVisible(false);
 
                 cancelMenuItem.setVisible((transitionFrom == null) ? false : true);
 
