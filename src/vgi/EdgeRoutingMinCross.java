@@ -387,8 +387,16 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Vector2D sourcePosition = new Vector2D(sourceGeometry.getCenterX(), sourceGeometry.getCenterY());
 		Vector2D targetPosition = new Vector2D(targetGeometry.getCenterX(), targetGeometry.getCenterY());
 		Vector2D sourceToTargetUnitVector = targetPosition.subtract(sourcePosition).unitVector();
-		sourcePosition = sourcePosition.add(sourceToTargetUnitVector);
-		targetPosition = targetPosition.subtract(sourceToTargetUnitVector);
+		double length = (sourceGeometry.getWidth() < sourceGeometry.getHeight())
+				? sourceGeometry.getWidth() / 2
+				: sourceGeometry.getHeight() / 2;
+		sourcePosition = sourcePosition.add(
+				sourceToTargetUnitVector.scalarProduct(length));
+		length = (targetGeometry.getWidth() < targetGeometry.getHeight())
+				? targetGeometry.getWidth() / 2
+				: targetGeometry.getHeight() / 2;
+		targetPosition = targetPosition.subtract(
+				sourceToTargetUnitVector.scalarProduct(length));
 
 		mxGraph localGraph = this.getGraph();
 		Object parent = localGraph.getDefaultParent();
@@ -493,23 +501,28 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		localGraph.removeCells(cells);
 		cells = null;  // Object cells[] = new Object[]{inEdge};
 
-//		for (mxICell hindrance : hindrances) {
-//
-//			if (!(hindrance.isEdge())) {
-//				throw new IllegalStateException("The 'hindrance' variable is not an edge.");
-//			}
-//			mxICell vertex = hindrance.getTerminal(true);
-//			if ((vertex != null) && (!(roadblocks.contains(vertex)))) {
-//				roadblocks.add(vertex);
-//				potentialRoadblocks.remove(vertex);
-//			}
-//			vertex = hindrance.getTerminal(false);
-//			if ((vertex != null) && (!(roadblocks.contains(vertex)))) {
-//				roadblocks.add(vertex);
-//				potentialRoadblocks.remove(vertex);
-//			}
-//
-//		}  // End for (mxICell hindrance : hindrances)
+		boolean existsHindranceWithSameSourceAndTarget = false;
+		for (mxICell hindrance : hindrances) {
+
+			if (!(hindrance.isEdge())) {
+				throw new IllegalStateException("The 'hindrance' variable is not an edge.");
+			}
+			if ((((hindrance.getTerminal(true) == source)
+					&& (hindrance.getTerminal(false) == target))
+					|| ((hindrance.getTerminal(true) == target)
+					&& (hindrance.getTerminal(false) == source)))) {
+				mxGeometry geometry = hindrance.getGeometry();
+				if (geometry == null) {
+					throw new IllegalStateException("The 'hindrance' variable has null geometry.");
+				}
+				List<mxPoint> points = geometry.getPoints();
+				if ((points == null) || (points.isEmpty())) {
+					existsHindranceWithSameSourceAndTarget = true;
+					break;
+				}
+			}
+
+		}  // End for (mxICell hindrance : hindrances)
 
 		roadblocks.add(source);
 		mxICell vertex = source;
@@ -688,6 +701,25 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		WeightedVisibilityGraph weightedVisibilityGraph = new WeightedVisibilityGraph();
 //		System.out.println("Adding " + roadblocks.size()
 //				+ " roadblock(s) to weighted visibility graph.");
+		if (existsHindranceWithSameSourceAndTarget) {
+			Vector2D midPoint = Vector2D.add(
+					sourceGeometry.getCenterX(),
+					sourceGeometry.getCenterY(),
+					targetGeometry.getCenterX(),
+					targetGeometry.getCenterY()).
+					scalarProduct(0.5);
+			Vector2D offsetVector = Vector2D.subtract(
+					targetGeometry.getCenterX(),
+					targetGeometry.getCenterY(),
+					sourceGeometry.getCenterX(),
+					sourceGeometry.getCenterY()).
+					rotate90DegreesPositively().
+					scalarProduct(0.15);
+			Vector2D position = midPoint.add(offsetVector);
+			weightedVisibilityGraph.addVertex(position.getX(), position.getY());
+			position = midPoint.subtract(offsetVector);
+			weightedVisibilityGraph.addVertex(position.getX(), position.getY());
+		}  // End if (existsHindranceWithSameSourceAndTarget)
 		otherTimer.stop();
 		Stopwatch addRoadblocksTimer = new Stopwatch().start();
 		for (mxICell roadblock : roadblocks) {
