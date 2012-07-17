@@ -255,7 +255,7 @@ public class WeightedVisibilityGraph {
 	}  // End protected static class LineSegment
 	protected static final double VISIBILITY_GRAPH_VERTEX_WDITH = 5;
 	protected static final double VISIBILITY_GRAPH_VERTEX_HEIGHT = VISIBILITY_GRAPH_VERTEX_WDITH;
-	protected static final double MINIMUM_SPACING = VISIBILITY_GRAPH_VERTEX_WDITH;
+	protected static final double MINIMUM_SPACING = 25;
 	protected List<mxICell> roadblocks;
 	protected Map<mxICell, Set<Vertex>> obstacleToVerticesMap;
 	protected Map<mxICell, List<LineSegment>> hindranceToLineSegmentsMap;
@@ -524,10 +524,11 @@ public class WeightedVisibilityGraph {
 		}
 		mxICell source = hindrance.getTerminal(true);
 		mxPoint sourcePoint = null;
+		mxGeometry sourceGeometry = null;
 		if (source == null) {
 			sourcePoint = geometry.getSourcePoint();
 		} else {
-			mxGeometry sourceGeometry = source.getGeometry();
+			sourceGeometry = source.getGeometry();
 			if (sourceGeometry == null) {
 				throw new IllegalStateException("The 'source' variable has null geometry.");
 			}
@@ -535,10 +536,11 @@ public class WeightedVisibilityGraph {
 		}
 		mxICell target = hindrance.getTerminal(false);
 		mxPoint targetPoint = null;
+		mxGeometry targetGeometry = null;
 		if (target == null) {
 			targetPoint = geometry.getTargetPoint();
 		} else {
-			mxGeometry targetGeometry = target.getGeometry();
+			targetGeometry = target.getGeometry();
 			if (targetGeometry == null) {
 				throw new IllegalStateException("The 'target' variable has null geometry.");
 			}
@@ -559,6 +561,42 @@ public class WeightedVisibilityGraph {
 		}
 		points = null;  // List<mxPoint> points = geometry.getPoints();
 		allPoints.add(targetPoint);
+
+		if (sourceGeometry != null) {
+			double offsetLength = (sourceGeometry.getWidth() < sourceGeometry.getHeight())
+					? sourceGeometry.getWidth() / 2
+					: sourceGeometry.getHeight() / 2;
+			mxPoint neighbourPoint = allPoints.get(0);
+			Vector2D offsetVector = Vector2D.subtract(
+					neighbourPoint.getX(),
+					neighbourPoint.getY(),
+					sourcePoint.getX(),
+					sourcePoint.getY()).
+					unitVector().
+					scalarProduct(offsetLength);
+			sourcePoint.setX(sourcePoint.getX() + offsetVector.getX());
+			sourcePoint.setY(sourcePoint.getY() + offsetVector.getY());
+		}  // End if (sourceGeometry != null)
+		if (targetGeometry != null) {
+			double offsetLength = (targetGeometry.getWidth() < targetGeometry.getHeight())
+					? targetGeometry.getWidth() / 2
+					: targetGeometry.getHeight() / 2;
+			mxPoint neighbourPoint;
+			if (allPoints.size() >= 2) {
+				neighbourPoint = allPoints.get(allPoints.size() - 2);
+			} else {
+				neighbourPoint = sourcePoint;
+			}
+			Vector2D offsetVector = Vector2D.subtract(
+					neighbourPoint.getX(),
+					neighbourPoint.getY(),
+					targetPoint.getX(),
+					targetPoint.getY()).
+					unitVector().
+					scalarProduct(offsetLength);
+			targetPoint.setX(targetPoint.getX() + offsetVector.getX());
+			targetPoint.setY(targetPoint.getY() + offsetVector.getY());
+		}  // End if (targetGeometry != null)
 
 		for (mxPoint point : allPoints) {
 
@@ -682,121 +720,135 @@ public class WeightedVisibilityGraph {
 			throw new IllegalArgumentException("Input 'roadblock' has null geometry.");
 		}
 
-		int edgeCount = roadblock.getEdgeCount();
-		List<Vector2D> edgeUnitVectorsList = new ArrayList<Vector2D>(edgeCount);
-		this.stOther.stop();
-		this.stEdgeVectors.start();
-
-		for (int index = 0; index < edgeCount; index++) {
-			mxICell edge = roadblock.getEdgeAt(index);
-			if ((edge == null) || (!(edge.isEdge()))) {
-				throw new IllegalStateException("The 'edge' variable is null or not an edge.");
-			}
-			mxGeometry edgeGeometry = edge.getGeometry();
-			if (edgeGeometry == null) {
-				throw new IllegalStateException("The 'edge' variable has null geometry.");
-			}
-			List<mxPoint> points = edgeGeometry.getPoints();
-			mxICell source = edge.getTerminal(true);
-			mxICell target = edge.getTerminal(false);
-			mxPoint point;
-			if (roadblock == source) {
-				if ((points == null) || (points.isEmpty())) {
-					if (target == null) {
-						point = edgeGeometry.getTargetPoint();
-					} else {
-						mxGeometry targetGeometry = target.getGeometry();
-						point = new mxPoint(targetGeometry.getCenterX(), targetGeometry.getCenterY());
-					}
-				} else {
-					point = points.get(0);
-				}
-			} else if (roadblock == target) {
-				if ((points == null) || (points.isEmpty())) {
-					if (source == null) {
-						point = edgeGeometry.getSourcePoint();
-					} else {
-						mxGeometry sourceGeometry = source.getGeometry();
-						point = new mxPoint(sourceGeometry.getCenterX(), sourceGeometry.getCenterY());
-					}
-				} else {
-					point = points.get(points.size() - 1);
-				}
-			} else {
-				throw new IllegalStateException("Edge does not connect to roadblock.");
-			}
-			edgeUnitVectorsList.add(Vector2D.subtract(point.getX(), point.getY(),
-					geometry.getCenterX(), geometry.getCenterY()).unitVector());
-		}  // End for (int index = 0; index < edgeCount; index++)
-
-		double x = geometry.getWidth() / 2 + MINIMUM_SPACING;
-		double y = geometry.getHeight() / 2 + MINIMUM_SPACING;
-		double radius = Math.sqrt(x * x + y * y);
-
-		this.stEdgeVectors.stop();
-		this.stSortEdgeVectors.start();
-		Collections.sort(edgeUnitVectorsList, new Vector2DComparator());
-		this.stSortEdgeVectors.stop();
-		this.stNewPositions.start();
-		List<mxPoint> newVerticesPositions = new LinkedList<mxPoint>();
-
-		for (int index = 0; index < edgeCount; index++) {
-
-			int nextIndex = (index + 1 >= edgeCount) ? (0) : (index + 1);
-			Vector2D currentVector = edgeUnitVectorsList.get(index);
-			Vector2D nextVector = edgeUnitVectorsList.get(nextIndex);
-			if (currentVector.isParallel(nextVector)) {
-				continue;
-			}
-			Vector2D rightUnitVector = currentVector.rotate90DegreesPositively();
-			if (currentVector.isAntiParallel(nextVector)) {
-				newVerticesPositions.add(new mxPoint(
-						geometry.getCenterX() + radius * rightUnitVector.getX(),
-						geometry.getCenterY() + radius * rightUnitVector.getY()));
-				continue;
-			}
-			Vector2D bisector = currentVector.add(nextVector);
-			//
-			// if the next vecotr points to the left of the current vector
-			//
-			if (nextVector.dotProduct(rightUnitVector) < 0) {
-				bisector = bisector.reverse();
-			}
-			double bisectorLength = bisector.length();
-			newVerticesPositions.add(new mxPoint(
-					geometry.getCenterX() + radius * bisector.getX() / bisectorLength,
-					geometry.getCenterY() + radius * bisector.getY() / bisectorLength));
-
-		}  // End for (int index = 0; index < edgeCount; index++)
-		this.stNewPositions.stop();
-		this.stOther.start();
-
-		edgeUnitVectorsList = null;  // List<Vector2D> edgeUnitVectorsList = new ArrayList<Vector2D>(edgeCount);
-
-		Set<Vertex> vertices = new LinkedHashSet<Vertex>();
-		for (mxPoint position : newVerticesPositions) {
-
-			this.stOther.stop();
-			this.stAddVertices.start();
-			Vertex vertex = this.addVertex(
-					position.getX(),
-					position.getY());
-			this.stAddVertices.stop();
-			this.stAddEdges.start();
-			this.addEdgesForVertex(vertex);
-			this.stAddEdges.stop();
-			this.stOther.start();
-			vertices.add(vertex);
-
-		}  // End for (mxPoint position : newVerticesPositions)
-
-		if (!(vertices.isEmpty())) {
-			Set<Vertex> moreVertices = this.obstacleToVerticesMap.get(roadblock);
-			moreVertices.addAll(vertices);
-//			this.obstacleToVerticesMap.put(roadblock, moreVertices);
+		Set<Vertex> vertices = this.obstacleToVerticesMap.get(roadblock);
+		for (Vertex vertex : vertices) {
+			this.removeVertex(vertex);
 		}
-		vertices = null;  // Set<Vertex> vertices = new LinkedHashSet<Vertex>();
-		newVerticesPositions = null;  // List<mxPoint> newVerticesPositions = new LinkedList<mxPoint>();
+		vertices.clear();
+
+		this.roadblocks.remove(roadblock);
+		Vertex vertex = this.addVertex(
+				geometry.getCenterX(),
+				geometry.getCenterY());
+		this.addEdgesForVertex(vertex);
+		vertices.add(vertex);
+		this.roadblocks.add(roadblock);
+
+//		int edgeCount = roadblock.getEdgeCount();
+//		List<Vector2D> edgeUnitVectorsList = new ArrayList<Vector2D>(edgeCount);
+//		this.stOther.stop();
+//		this.stEdgeVectors.start();
+//
+//		for (int index = 0; index < edgeCount; index++) {
+//			mxICell edge = roadblock.getEdgeAt(index);
+//			if ((edge == null) || (!(edge.isEdge()))) {
+//				throw new IllegalStateException("The 'edge' variable is null or not an edge.");
+//			}
+//			mxGeometry edgeGeometry = edge.getGeometry();
+//			if (edgeGeometry == null) {
+//				throw new IllegalStateException("The 'edge' variable has null geometry.");
+//			}
+//			List<mxPoint> points = edgeGeometry.getPoints();
+//			mxICell source = edge.getTerminal(true);
+//			mxICell target = edge.getTerminal(false);
+//			mxPoint point;
+//			if (roadblock == source) {
+//				if ((points == null) || (points.isEmpty())) {
+//					if (target == null) {
+//						point = edgeGeometry.getTargetPoint();
+//					} else {
+//						mxGeometry targetGeometry = target.getGeometry();
+//						point = new mxPoint(targetGeometry.getCenterX(), targetGeometry.getCenterY());
+//					}
+//				} else {
+//					point = points.get(0);
+//				}
+//			} else if (roadblock == target) {
+//				if ((points == null) || (points.isEmpty())) {
+//					if (source == null) {
+//						point = edgeGeometry.getSourcePoint();
+//					} else {
+//						mxGeometry sourceGeometry = source.getGeometry();
+//						point = new mxPoint(sourceGeometry.getCenterX(), sourceGeometry.getCenterY());
+//					}
+//				} else {
+//					point = points.get(points.size() - 1);
+//				}
+//			} else {
+//				throw new IllegalStateException("Edge does not connect to roadblock.");
+//			}
+//			edgeUnitVectorsList.add(Vector2D.subtract(point.getX(), point.getY(),
+//					geometry.getCenterX(), geometry.getCenterY()).unitVector());
+//		}  // End for (int index = 0; index < edgeCount; index++)
+//
+//		double x = geometry.getWidth() / 2 + MINIMUM_SPACING;
+//		double y = geometry.getHeight() / 2 + MINIMUM_SPACING;
+//		double radius = Math.sqrt(x * x + y * y);
+//
+//		this.stEdgeVectors.stop();
+//		this.stSortEdgeVectors.start();
+//		Collections.sort(edgeUnitVectorsList, new Vector2DComparator());
+//		this.stSortEdgeVectors.stop();
+//		this.stNewPositions.start();
+//		List<mxPoint> newVerticesPositions = new LinkedList<mxPoint>();
+//
+//		for (int index = 0; index < edgeCount; index++) {
+//
+//			int nextIndex = (index + 1 >= edgeCount) ? (0) : (index + 1);
+//			Vector2D currentVector = edgeUnitVectorsList.get(index);
+//			Vector2D nextVector = edgeUnitVectorsList.get(nextIndex);
+//			if (currentVector.isParallel(nextVector)) {
+//				continue;
+//			}
+//			Vector2D rightUnitVector = currentVector.rotate90DegreesPositively();
+//			if (currentVector.isAntiParallel(nextVector)) {
+//				newVerticesPositions.add(new mxPoint(
+//						geometry.getCenterX() + radius * rightUnitVector.getX(),
+//						geometry.getCenterY() + radius * rightUnitVector.getY()));
+//				continue;
+//			}
+//			Vector2D bisector = currentVector.add(nextVector);
+//			//
+//			// if the next vecotr points to the left of the current vector
+//			//
+//			if (nextVector.dotProduct(rightUnitVector) < 0) {
+//				bisector = bisector.reverse();
+//			}
+//			double bisectorLength = bisector.length();
+//			newVerticesPositions.add(new mxPoint(
+//					geometry.getCenterX() + radius * bisector.getX() / bisectorLength,
+//					geometry.getCenterY() + radius * bisector.getY() / bisectorLength));
+//
+//		}  // End for (int index = 0; index < edgeCount; index++)
+//		this.stNewPositions.stop();
+//		this.stOther.start();
+//
+//		edgeUnitVectorsList = null;  // List<Vector2D> edgeUnitVectorsList = new ArrayList<Vector2D>(edgeCount);
+//
+//		Set<Vertex> vertices = new LinkedHashSet<Vertex>();
+//		for (mxPoint position : newVerticesPositions) {
+//
+//			this.stOther.stop();
+//			this.stAddVertices.start();
+//			Vertex vertex = this.addVertex(
+//					position.getX(),
+//					position.getY());
+//			this.stAddVertices.stop();
+//			this.stAddEdges.start();
+//			this.addEdgesForVertex(vertex);
+//			this.stAddEdges.stop();
+//			this.stOther.start();
+//			vertices.add(vertex);
+//
+//		}  // End for (mxPoint position : newVerticesPositions)
+//
+//		if (!(vertices.isEmpty())) {
+//			Set<Vertex> moreVertices = this.obstacleToVerticesMap.get(roadblock);
+//			moreVertices.addAll(vertices);
+////			this.obstacleToVerticesMap.put(roadblock, moreVertices);
+//		}
+//		vertices = null;  // Set<Vertex> vertices = new LinkedHashSet<Vertex>();
+//		newVerticesPositions = null;  // List<mxPoint> newVerticesPositions = new LinkedList<mxPoint>();
 		this.stOther.stop();
 
 	}  // End public void addVerticesIntoOutOf(mxICell roadblock)

@@ -701,10 +701,6 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			weightedVisibilityGraph.addHindrance(hindrance);
 		}
 		addHindrancesTimer.stop();
-		Stopwatch addSourceTargetTimer = new Stopwatch().start();
-		weightedVisibilityGraph.addVerticesIntoOutOf(source);
-		weightedVisibilityGraph.addVerticesIntoOutOf(target);
-		addSourceTargetTimer.stop();
 		otherTimer.start();
 		Stopwatch shortestPathsTimer = new Stopwatch();
 		Map<mxICell, Set<Vertex>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
@@ -713,6 +709,10 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		while (true) {
 
 			otherTimer.stop();
+			Stopwatch addSourceTargetTimer = new Stopwatch().start();
+			weightedVisibilityGraph.addVerticesIntoOutOf(source);
+			weightedVisibilityGraph.addVerticesIntoOutOf(target);
+			addSourceTargetTimer.stop();
 			shortestPathsTimer.start();
 			paths = WeightedVisibilityGraph.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
 			shortestPathsTimer.stop();
@@ -881,6 +881,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				}
 				controlPoints.add(new mxPoint(aVertex.location.getX(), aVertex.location.getY()));
 			}  // End for (Vertex aVertex : path)
+			controlPoints.remove(0);
+			controlPoints.remove(controlPoints.size() - 1);
 			super.setEdgePoints(newEdge, controlPoints);
 			controlPoints = null;  // List<mxPoint> controlPoints = new LinkedList<mxPoint>();
 			mxGeometry geometry = newEdge.getGeometry();
@@ -1089,6 +1091,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			for (Vertex vertex : path) {
 				controlPoints.add(new mxPoint(vertex.location.getX(), vertex.location.getY()));
 			}
+			controlPoints.remove(0);
+			controlPoints.remove(controlPoints.size() - 1);
 			super.setEdgePoints(newEdge, controlPoints);
 
 		}  // End for (List<Vertex> path : paths)
