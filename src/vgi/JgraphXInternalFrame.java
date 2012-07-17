@@ -490,6 +490,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, null, vertex);
                         Object[] cells = {edge};
                         this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+        this.graph.setCellStyles("fontSize", String.valueOf(JgraphXInternalFrame.defaultFontSize), cells);
+        this.graph.setCellStyles("textShape","default", cells);
                         mxGeometry edgeGeometry = edge.getGeometry();
                         if (edgeGeometry != null) {
                             edgeGeometry.setSourcePoint(point);
@@ -524,6 +526,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, vertex, null);
                         Object[] cells = {edge};
                         this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+        this.graph.setCellStyles("fontSize", String.valueOf(JgraphXInternalFrame.defaultFontSize), cells);
+        this.graph.setCellStyles("textShape","default", cells);
                         mxGeometry edgeGeometry = edge.getGeometry();
                         if (edgeGeometry != null) {
                             edgeGeometry.setTargetPoint(point);

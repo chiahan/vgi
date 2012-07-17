@@ -905,6 +905,12 @@ public class Automata implements AutomataInterface {
 		switch (semiring) {
 			case B_BOOLEAN:
 			case F2_TWO_ELEMENT_FIELD:
+                            if (weight1 instanceof String) {
+                                weight1 = Boolean.valueOf((String) weight1);
+                            }
+                            if (weight2 instanceof String) {
+                                weight2 = Boolean.valueOf((String) weight2);
+                            }
 				if ((Boolean.class.isInstance(weight1))
 						&& (((Boolean) weight1) == true)
 						&& (Boolean.class.isInstance(weight2))
@@ -913,13 +919,30 @@ public class Automata implements AutomataInterface {
 				}
 				break;
 			case Z_INTEGER:
+                            if (weight1 instanceof String) {
+                                weight1 = Integer.valueOf((String) weight1);
+                            }
+                            if (weight2 instanceof String) {
+                                weight2 = Integer.valueOf((String) weight2);
+                            }
 				if ((Integer.class.isInstance(weight1))
 						&& (Integer.class.isInstance(weight2))) {
 					return new Integer(((Integer) weight1) * ((Integer) weight2));
 				}
 				break;
 			case Q_RATIONAL:
+				if ((weight1 instanceof String)
+					&& (weight2 instanceof String)) {
+					return weight1 + " * " + weight2;
+				}
+                            break;
 			case R_REAL:
+                            if (weight1 instanceof String) {
+                                weight1 = Double.valueOf((String) weight1);
+                            }
+                            if (weight2 instanceof String) {
+                                weight2 = Double.valueOf((String) weight2);
+                            }
 				if ((Double.class.isInstance(weight1))
 						&& (Double.class.isInstance(weight2))) {
 					return new Double(((Double) weight1) * ((Double) weight2));
@@ -927,6 +950,12 @@ public class Automata implements AutomataInterface {
 				break;
 			case ZMIN_MIN_TROPICAL:
 			case ZMAX_MAX_TROPICAL:
+                            if (weight1 instanceof String) {
+                                weight1 = Integer.valueOf((String) weight1);
+                            }
+                            if (weight2 instanceof String) {
+                                weight2 = Integer.valueOf((String) weight2);
+                            }
 				if ((Integer.class.isInstance(weight1))
 						&& (Integer.class.isInstance(weight2))) {
 					return new Integer(((Integer) weight1) + ((Integer) weight2));
@@ -934,6 +963,6 @@ public class Automata implements AutomataInterface {
 				break;
 		}  // End switch (semiring)
 
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException("multiplyWeights() failed.");
 	}  // End protected static Object productOfWeights()
 }  // End public class Automata implements AutomataInterface
