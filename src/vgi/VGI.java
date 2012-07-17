@@ -290,6 +290,15 @@ public class VGI extends javax.swing.JFrame {
 		initComponents();
 		this.editMenu.setVisible(false);
 		this.viewMenu.setVisible(false);
+                this.routeAllEdges2008MenuItem.setVisible(false);
+                this.routeAllEdgesBranchingMenuItem.setVisible(false);
+                this.planarizeMenuItem.setVisible(false);
+                this.buildDualGraphMenuItem.setVisible(false);
+                this.buildWeightedVisibilityGraphMenuItem.setVisible(false);
+                this.testShortestPathsMenuItem.setVisible(false);
+                this.showWeightedVisibilityGraphMenuItem.setVisible(false);
+                this.edgeCostSettingsMenuItem.setVisible(false);
+                
 
 		Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
 		String string = preferences.get("TAF-Kit Path", defaultFolderPath);
@@ -306,6 +315,9 @@ public class VGI extends javax.swing.JFrame {
                 
                 Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
                 setSize(screenSize.width, screenSize.height);
+                
+                
+                
                 
                 
 	}  // End public VGI()
@@ -383,7 +395,6 @@ public class VGI extends javax.swing.JFrame {
         productMenuItem = new javax.swing.JMenuItem();
         algorithmsMenuSeparator2 = new javax.swing.JPopupMenu.Separator();
         helpMenu = new javax.swing.JMenu();
-        rationalExpressionSymbolsMenuItem = new javax.swing.JMenuItem();
         aboutMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -794,15 +805,6 @@ public class VGI extends javax.swing.JFrame {
         helpMenu.setMnemonic('H');
         helpMenu.setText("Help");
 
-        rationalExpressionSymbolsMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/question.png"))); // NOI18N
-        rationalExpressionSymbolsMenuItem.setText("Rational Expression Symbols");
-        rationalExpressionSymbolsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                rationalExpressionSymbolsMenuItemActionPerformed(evt);
-            }
-        });
-        helpMenu.add(rationalExpressionSymbolsMenuItem);
-
         aboutMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/info.png"))); // NOI18N
         aboutMenuItem.setText("About");
         aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -1015,14 +1017,9 @@ public class VGI extends javax.swing.JFrame {
 		this.statusLabel.setVisible(showStatusBarCheckBoxMenuItem.getState());
     }//GEN-LAST:event_showStatusBarCheckBoxMenuItemStateChanged
 
-    private void rationalExpressionSymbolsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rationalExpressionSymbolsMenuItemActionPerformed
-		// TODO add your handling code here:
-		JOptionPane.showMessageDialog(this, "Under Construction");
-    }//GEN-LAST:event_rationalExpressionSymbolsMenuItemActionPerformed
-
     private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
 		// TODO add your handling code here:
-		JOptionPane.showMessageDialog(this, "Under Construction");
+                JOptionPane.showMessageDialog(this, "Vacanson Graphical Interface (VGI) version 12.07.17");
     }//GEN-LAST:event_aboutMenuItemActionPerformed
 
 	private void saveMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveMenuItemActionPerformed
@@ -1637,7 +1634,6 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JPanel outlinePanel;
     private javax.swing.JMenuItem planarizeMenuItem;
     private javax.swing.JMenuItem productMenuItem;
-    private javax.swing.JMenuItem rationalExpressionSymbolsMenuItem;
     private javax.swing.JButton redoButton;
     private javax.swing.JMenuItem removeEpsilonTransitionsMenuItem;
     private javax.swing.JMenuItem routeAllEdges2008MenuItem;
