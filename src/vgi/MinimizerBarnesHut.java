@@ -131,7 +131,7 @@ public class MinimizerBarnesHut {
 		printStatistics(octTree);
 		double energySum = 0.0;
 		for (Node node : nodes) energySum += getEnergy(node, octTree);
-		System.out.println("initial energy " + energySum);
+//		System.out.println("initial energy " + energySum);
 
 		// minimize energy
 		final double[] oldPos = new double[nrDims];
@@ -200,9 +200,9 @@ public class MinimizerBarnesHut {
                 octTree.addNode(node, pos, 0);
 				energySum += bestEnergy;
 			}
-			System.out.println("iteration " + step 
-			  + "   energy " + energySum
-			  + "   repulsion " + repuExponent);
+//			System.out.println("iteration " + step 
+//			  + "   energy " + energySum
+//			  + "   repulsion " + repuExponent);
 		}
 		printStatistics(octTree);
         if (octTree.getHeight() >= OctTree.MAX_DEPTH) {
@@ -483,20 +483,20 @@ public class MinimizerBarnesHut {
 	 * Computes and outputs some statistics. 
 	 */
 	private void printStatistics(final OctTree octTree) {
-        System.out.println("Number of nodes: " + nodes.size());
+//        System.out.println("Number of nodes: " + nodes.size());
 		double attrSum = 0.0;
 		for (Node node : nodes) {
 			for (Edge edge : attrEdges.get(node)) {
 				attrSum += edge.weight;
 			}
 		}
-		System.out.println("Overall attraction: " + attrSum);
+//		System.out.println("Overall attraction: " + attrSum);
 		double meanAttrEnergy = 0.0;
 		for (Node node : nodes) meanAttrEnergy += getAttractionEnergy(node);
 		meanAttrEnergy = (attrExponent == 0.0)
 			? Math.exp(meanAttrEnergy / attrSum)
 			: Math.pow(meanAttrEnergy * attrExponent / attrSum, 1.0 / attrExponent); 
-		System.out.println("Weighted mean of attraction energy: " + meanAttrEnergy);
+//		System.out.println("Weighted mean of attraction energy: " + meanAttrEnergy);
 		
 		double repuSum = 0.0, repuSquareSum = 0.0;
 		for (Node node : nodes) {
@@ -504,16 +504,16 @@ public class MinimizerBarnesHut {
 			repuSquareSum += node.weight * node.weight;
 		}
 		repuSum = repuSum*repuSum - repuSquareSum;
-		System.out.println("Overall repulsion: " + repuSum);
+//		System.out.println("Overall repulsion: " + repuSum);
 		double meanRepuEnergy = 0.0;
 		for (Node node : nodes) meanRepuEnergy += getRepulsionEnergy(node, octTree);
 		meanRepuEnergy /= repuFactor; 
 		meanRepuEnergy = (repuExponent == 0.0) 
 			? Math.exp(-meanRepuEnergy / repuSum)
 			: Math.pow(-meanRepuEnergy * repuExponent / repuSum, 1.0 / repuExponent); 
-		System.out.println("Weighted mean of repulsion energy: " + meanRepuEnergy);
+//		System.out.println("Weighted mean of repulsion energy: " + meanRepuEnergy);
 		
-		System.out.println("Mean attraction / mean repulsion: " + meanAttrEnergy / meanRepuEnergy);
+//		System.out.println("Mean attraction / mean repulsion: " + meanAttrEnergy / meanRepuEnergy);
 	}
 
 

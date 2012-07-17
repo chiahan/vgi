@@ -67,8 +67,8 @@ public  class ClusterPreProcess
                 }
                 ClusterNodes.get(cluster).add(node.name);
                        
-                System.out.print("\n"+" Node ID :" +node.name+"\n");
-                System.out.print("\n"+" Cluster :" +nodeToCluster.get(node) +"\n");
+//                System.out.print("\n"+" Node ID :" +node.name+"\n");
+//                System.out.print("\n"+" Cluster :" +nodeToCluster.get(node) +"\n");
             }
             
             
@@ -118,7 +118,7 @@ public  class ClusterPreProcess
                         
                         // assign all the nodes in cluster2 to cluster1 
                         if(isFeature){
-                            System.out.print("\n edgesNodeRatio : "+edgesNodeRatio+"\n");
+//                            System.out.print("\n edgesNodeRatio : "+edgesNodeRatio+"\n");
                             isbreak = true;
                             for(String nodeId : ClusterNodes.get(cluster2)){
                             
@@ -284,7 +284,7 @@ public  class ClusterPreProcess
                  */
                 while ( iterator.hasNext() ) {
               
-                    System.out.println("Cluster :");
+//                    System.out.println("Cluster :");
 
                     cluster = iterator.next();
 

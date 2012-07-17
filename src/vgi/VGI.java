@@ -873,13 +873,13 @@ public class VGI extends javax.swing.JFrame {
 			automata.setAlphabet(createDialog.getAlphabet());
 			automata.setWeight(createDialog.getWeight());
 			automata.setWritingData(createDialog.getWritingData());
-			System.out.println("Create automata from 'NewMenuItem'");
+//			System.out.println("Create automata from 'NewMenuItem'");
 
 			/*
 			 * Create draw panel for new automata
 			 */
 			this.createInternalFrame(automata);
-			System.out.println("adding DrawPanel is done! ");
+//			System.out.println("adding DrawPanel is done! ");
 		}
     }//GEN-LAST:event_newMenuItemActionPerformed
 
@@ -921,7 +921,7 @@ public class VGI extends javax.swing.JFrame {
 	}//GEN-LAST:event_openMenuItemActionPerformed
 
     public void openFile(String filename){
-        System.out.println("open: "+filename+"...");
+//        System.out.println("open: "+filename+"...");
         File file=new File(filename);
         if(file.exists()){
             FsmXml fsmXml = new FsmXml();
@@ -956,7 +956,7 @@ public class VGI extends javax.swing.JFrame {
                     }
             }       
         }else{
-            System.out.println(filename+" doesn't exist!!");
+//            System.out.println(filename+" doesn't exist!!");
         }
         
         

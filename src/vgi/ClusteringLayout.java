@@ -176,7 +176,7 @@ public class ClusteringLayout extends mxGraphLayout
                 childCount = graph.getModel().getChildCount(graph.getDefaultParent());
             
                 
-                System.out.print(" \n edgeCount : "+childCount+"\n");
+//                System.out.print(" \n edgeCount : "+childCount+"\n");
                 
                 for (int i = 0; i < childCount; i++)
 		{

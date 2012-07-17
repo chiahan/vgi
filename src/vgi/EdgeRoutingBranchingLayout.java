@@ -80,7 +80,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 		Object sourceValue = source.getValue();
 		Object targetValue = target.getValue();
 		if ((sourceValue != null) && (targetValue != null)) {
-			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
+//			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
 		}
 		List<mxPoint> controlPoints = new ArrayList<mxPoint>();
 		this.route(
@@ -116,7 +116,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 			throw new IllegalArgumentException("Input 'controlPoints' must be an empty ArrayList<mxPoint>.");
 		}
 
-		System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f, remainingCost: %.1f\n", sourceX, sourceY, targetX, targetY, remainingCost);
+//		System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f, remainingCost: %.1f\n", sourceX, sourceY, targetX, targetY, remainingCost);
 		mxCell source = null;
 		mxCell target = null;
 		List<mxCell> obstacles = new ArrayList<mxCell>();
@@ -162,7 +162,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 		double straightCost = Math.sqrt(offsetX * offsetX + offsetY * offsetY) + obstacles.size() * 1000;
 
 		if (obstacles.isEmpty()) {
-			System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f, cost: %.1f\n", sourceX, sourceY, targetX, targetY, straightCost);
+//			System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f, cost: %.1f\n", sourceX, sourceY, targetX, targetY, straightCost);
 			return straightCost;
 		}
 
@@ -442,7 +442,7 @@ public class EdgeRoutingBranchingLayout extends mxGraphLayout {
 				cost = route.cost;
 			}
 		}  // End if (!(routeList.isEmpty()))
-		System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f, cost: %.1f\n", sourceX, sourceY, targetX, targetY, cost);
+//		System.out.printf("sourceX: %.1f, sourceY: %.1f, targetX: %.1f, targetY: %.1f, cost: %.1f\n", sourceX, sourceY, targetX, targetY, cost);
 		return cost;
 	}  // End protected double route(...)
 

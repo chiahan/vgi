@@ -381,7 +381,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Object sourceValue = source.getValue();
 		Object targetValue = target.getValue();
 		if ((sourceValue != null) && (targetValue != null)) {
-			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
+//			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
 		}
 
 		Vector2D sourcePosition = new Vector2D(sourceGeometry.getCenterX(), sourceGeometry.getCenterY());
@@ -483,9 +483,9 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		if ((roadblocks.isEmpty()) && (hindrances.isEmpty())) {
 			otherTimer.stop();
 			stopwatch.stop();
-			System.out.println("Collision detection took " + collisionDetectionTimer.getElapsedMilliseconds() + " ms.");
-			System.out.println("Other tasks took " + otherTimer.getElapsedMilliseconds() + " ms.");
-			System.out.println("EXECUTION TIME of route() is " + stopwatch.getElapsedMilliseconds() + " ms.");
+//			System.out.println("Collision detection took " + collisionDetectionTimer.getElapsedMilliseconds() + " ms.");
+//			System.out.println("Other tasks took " + otherTimer.getElapsedMilliseconds() + " ms.");
+//			System.out.println("EXECUTION TIME of route() is " + stopwatch.getElapsedMilliseconds() + " ms.");
 			return;
 		}
 
@@ -850,13 +850,13 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			paths = null;  // List<List<mxICell>> paths = EdgeRoutingMinCross.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
 			otherTimer.stop();
 			stopwatch.stop();
-			System.out.println("Collision detection took " + collisionDetectionTimer.getElapsedMilliseconds() + " ms.");
-			System.out.println("Adding roadblocks took " + addRoadblocksTimer.getElapsedMilliseconds() + " ms.");
-			System.out.println("Adding hindrances took " + addHindrancesTimer.getElapsedMilliseconds() + " ms.");
-			System.out.println("Adding source and target took " + addSourceTargetTimer.getElapsedMilliseconds() + " ms.");
-			System.out.println("Finding shortest paths took " + shortestPathsTimer.getElapsedMilliseconds() + " ms.");
-			System.out.println("Other tasks took " + otherTimer.getElapsedMilliseconds() + " ms.");
-			System.out.println("EXECUTION TIME of route() is " + stopwatch.getElapsedMilliseconds() + " ms.");
+//			System.out.println("Collision detection took " + collisionDetectionTimer.getElapsedMilliseconds() + " ms.");
+//			System.out.println("Adding roadblocks took " + addRoadblocksTimer.getElapsedMilliseconds() + " ms.");
+//			System.out.println("Adding hindrances took " + addHindrancesTimer.getElapsedMilliseconds() + " ms.");
+//			System.out.println("Adding source and target took " + addSourceTargetTimer.getElapsedMilliseconds() + " ms.");
+//			System.out.println("Finding shortest paths took " + shortestPathsTimer.getElapsedMilliseconds() + " ms.");
+//			System.out.println("Other tasks took " + otherTimer.getElapsedMilliseconds() + " ms.");
+//			System.out.println("EXECUTION TIME of route() is " + stopwatch.getElapsedMilliseconds() + " ms.");
 			return;
 		}
 
@@ -899,14 +899,14 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		localGraph.refresh();
 		otherTimer.stop();
 		stopwatch.stop();
-		System.out.println("Collision detection took " + collisionDetectionTimer.getElapsedMilliseconds() + " ms.");
-		System.out.println("Adding roadblocks took " + addRoadblocksTimer.getElapsedMilliseconds() + " ms.");
-		System.out.println("Adding hindrances took " + addHindrancesTimer.getElapsedMilliseconds() + " ms.");
-		System.out.println("Adding source and target took " + addSourceTargetTimer.getElapsedMilliseconds() + " ms.");
-		System.out.println("Finding shortest paths took " + shortestPathsTimer.getElapsedMilliseconds() + " ms.");
-		System.out.println("Adding edges took " + addEdgesTimer.getElapsedMilliseconds() + " ms.");
-		System.out.println("Other tasks took " + otherTimer.getElapsedMilliseconds() + " ms.");
-		System.out.println("EXECUTION TIME of route() is " + stopwatch.getElapsedMilliseconds() + " ms.");
+//		System.out.println("Collision detection took " + collisionDetectionTimer.getElapsedMilliseconds() + " ms.");
+//		System.out.println("Adding roadblocks took " + addRoadblocksTimer.getElapsedMilliseconds() + " ms.");
+//		System.out.println("Adding hindrances took " + addHindrancesTimer.getElapsedMilliseconds() + " ms.");
+//		System.out.println("Adding source and target took " + addSourceTargetTimer.getElapsedMilliseconds() + " ms.");
+//		System.out.println("Finding shortest paths took " + shortestPathsTimer.getElapsedMilliseconds() + " ms.");
+//		System.out.println("Adding edges took " + addEdgesTimer.getElapsedMilliseconds() + " ms.");
+//		System.out.println("Other tasks took " + otherTimer.getElapsedMilliseconds() + " ms.");
+//		System.out.println("EXECUTION TIME of route() is " + stopwatch.getElapsedMilliseconds() + " ms.");
 //		System.out.println("addRoadblock() edge intersection took " + weightedVisibilityGraph.rIntersectEdges.getElapsedMilliseconds() + " ms.");
 //		System.out.println("addRoadblock() add vertices took " + weightedVisibilityGraph.rAddVertices.getElapsedMilliseconds() + " ms.");
 //		System.out.println("addRoadblock() add edges took " + weightedVisibilityGraph.rAddEdges.getElapsedMilliseconds() + " ms.");
@@ -960,7 +960,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Object sourceValue = source.getValue();
 		Object targetValue = target.getValue();
 		if ((sourceValue != null) && (targetValue != null)) {
-			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
+//			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
 		}
 		if (weightedVisibilityGraph == null) {
 			return;
@@ -969,7 +969,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		weightedVisibilityGraph.addVerticesIntoOutOf(target);
 		Map<mxICell, Set<Vertex>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
 		Collection<List<Vertex>> paths = WeightedVisibilityGraph.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
-		System.out.println(paths.size() + " path(s) is(are) found.");
+//		System.out.println(paths.size() + " path(s) is(are) found.");
 		if ((paths == null) || (paths.isEmpty())) {
 			return;
 		}
@@ -1036,7 +1036,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Object sourceValue = source.getValue();
 		Object targetValue = target.getValue();
 		if ((sourceValue != null) && (targetValue != null)) {
-			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
+//			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
 		}
 		Object value = edge.getValue();
 		String style = edge.getStyle();
@@ -1069,7 +1069,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Map<mxICell, Set<Vertex>> obstacleToVerticesMap = weightedVisibilityGraph.getObstacleToVerticesMap();
 		Collection<List<Vertex>> paths = WeightedVisibilityGraph.findShortestPaths(obstacleToVerticesMap.get(source), obstacleToVerticesMap.get(target));
 		if ((paths == null) || (paths.isEmpty())) {
-			System.out.println("EXECUTION TIME of routeByWeightedVisibilityGraph() is " + stopwatch.getElapsedMilliseconds() + " ms.");
+//			System.out.println("EXECUTION TIME of routeByWeightedVisibilityGraph() is " + stopwatch.getElapsedMilliseconds() + " ms.");
 			return;
 		}
 
@@ -1093,7 +1093,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		}  // End for (List<Vertex> path : paths)
 
-		System.out.println("EXECUTION TIME of routeByWeightedVisibilityGraph() is " + stopwatch.getElapsedMilliseconds() + " ms.");
+//		System.out.println("EXECUTION TIME of routeByWeightedVisibilityGraph() is " + stopwatch.getElapsedMilliseconds() + " ms.");
 		localGraph.refresh();
 	}  // End public void routeByWeightedVisibilityGraph(mxCell edge)
 
@@ -1134,7 +1134,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Object sourceValue = source.getValue();
 		Object targetValue = target.getValue();
 		if ((sourceValue != null) && (targetValue != null)) {
-			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
+//			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
 		}
 		Object value = edge.getValue();
 		String style = edge.getStyle();
@@ -1489,9 +1489,9 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		hindrancesList = null;  // List<Hindrance> hindrancesList = new ArrayList<Hindrance>();
 		roadblocksList = null;  // List<mxICell> roadblocksList = new LinkedList<mxICell>();
-		System.out.println("The weighted visibility graph has "
-				+ (outGraph.getChildVertices(parent)).length + " vertices and "
-				+ (outGraph.getChildEdges(parent)).length + " edges.");
+//		System.out.println("The weighted visibility graph has "
+//				+ (outGraph.getChildVertices(parent)).length + " vertices and "
+//				+ (outGraph.getChildEdges(parent)).length + " edges.");
 
 		HashMap<mxICell, mxICell> oldToNewVerticesMap = new HashMap<mxICell, mxICell>();
 		objects = inGraph.getChildVertices(inGraph.getDefaultParent());
@@ -1742,7 +1742,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 	public static void testShortestPaths(mxGraph inGraph) {
 
 		if (inGraph == null) {
-			System.out.println("inGraph is null.");
+//			System.out.println("inGraph is null.");
 			return;
 		}
 
@@ -1819,20 +1819,20 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				targetVertices,
 				Double.POSITIVE_INFINITY,
 				cost);
-		System.out.println(paths.size() + " path(s) with cost " + cost + " is(are) found.");
+//		System.out.println(paths.size() + " path(s) with cost " + cost + " is(are) found.");
 
 		Iterator<List<mxICell>> iteratePaths = paths.iterator();
 		while (iteratePaths.hasNext()) {
 
 			List<mxICell> path = iteratePaths.next();
-			System.out.print("This path goes through");
+//			System.out.print("This path goes through");
 
 			Iterator<mxICell> iterateVertices = path.iterator();
 			while (iterateVertices.hasNext()) {
 				mxICell vertex = iterateVertices.next();
-				System.out.print(" " + vertex.getValue().toString());
+//				System.out.print(" " + vertex.getValue().toString());
 			}  // End while (iterateVertices.hasNext())
-			System.out.println(".");
+//			System.out.println(".");
 
 		}  // End while (iteratePaths.hasNext())
 
@@ -2179,8 +2179,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		vertexToCostMap = null;  // Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
 
-		System.out.println("A* algorithm finds " + outPaths.size() + " path(s) with cost " + minCostToTarget
-				+ " by processing " + numVerticesProcessed + " vertices and " + numEdgesProcessed + " edges.");
+//		System.out.println("A* algorithm finds " + outPaths.size() + " path(s) with cost " + minCostToTarget
+//				+ " by processing " + numVerticesProcessed + " vertices and " + numEdgesProcessed + " edges.");
 		return outPaths;
 	}  // End public static List<List<mxICell>> findShortestPathsAStar(...)
 
@@ -2456,8 +2456,8 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 		vertexToCostMap = null;  // Map<mxICell, Double> vertexToCostMap = new HashMap<mxICell, Double>();
 
-		System.out.println("Dijkstra's algorithm finds " + outPaths.size() + " path(s) with cost " + minCostToTarget
-				+ " by processing " + numVerticesProcessed + " vertices and " + numEdgesProcessed + " edges.");
+//		System.out.println("Dijkstra's algorithm finds " + outPaths.size() + " path(s) with cost " + minCostToTarget
+//				+ " by processing " + numVerticesProcessed + " vertices and " + numEdgesProcessed + " edges.");
 		return outPaths;
 	}  // End public static List<List<mxICell>> findShortestPaths(...)
 
@@ -2718,7 +2718,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Object sourceValue = source.getValue();
 		Object targetValue = target.getValue();
 		if ((sourceValue != null) && (targetValue != null)) {
-			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
+//			System.out.println("Routing edge from " + sourceValue.toString() + " to " + targetValue.toString() + ".");
 		}
 		Map<mxICell, mxICell> originalToPlanarVerticesMap = new HashMap<mxICell, mxICell>();
 		mxGraph planarGraph = EdgeRoutingMinCross.planarize(this.getGraph(), edge, originalToPlanarVerticesMap);
@@ -2762,12 +2762,12 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 
 			List<mxICell> path = iteratePaths.next();
 			if ((path != null) && (!(path.isEmpty()))) {
-				System.out.print("Shortest path goes through");
+//				System.out.print("Shortest path goes through");
 
 				Iterator<mxICell> iterateVertices = path.iterator();
 				while (iterateVertices.hasNext()) {
 					mxICell vertex = iterateVertices.next();
-					System.out.print(" {" + vertex.getValue().toString() + "}");
+//					System.out.print(" {" + vertex.getValue().toString() + "}");
 //					Region region = (Region) vertex.getValue();
 //					System.out.print(" contains (10, 10)? " + region.contains(10, 10));
 //					System.out.print(" contains (200, 200)? " + region.contains(200, 200));
@@ -2782,7 +2782,7 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 //					}  // End while (iterateRegionVertices.hasNext())
 				}  // End while (iterateVertices.hasNext())
 
-				System.out.println();
+//				System.out.println();
 				confirmedPathsList.addAll(EdgeRoutingMinCross.findPathsThroughRegions(planarSource, planarTarget, path));
 			}  // End if ((path != null) && (!(path.isEmpty())))
 
@@ -3615,10 +3615,10 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 				String sourceName = (source.getValue() != null) ? (source.getValue().toString()) : (source.getId());
 				String targetName = (target.getValue() != null) ? (target.getValue().toString()) : (target.getId());
 				if (edgeDirection.isSourceToTarget) {
-					System.out.println("Going from " + sourceName + " to " + targetName + ".");
+//					System.out.println("Going from " + sourceName + " to " + targetName + ".");
 					edgeVisit.isTargetVisited = true;
 				} else {
-					System.out.println("Going from " + targetName + " to " + sourceName + ".");
+//					System.out.println("Going from " + targetName + " to " + sourceName + ".");
 					edgeVisit.isSourceVisited = true;
 				}
 				regionVertices.add(edgeDirection.edge.getTerminal(!(edgeDirection.isSourceToTarget)));

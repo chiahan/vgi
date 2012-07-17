@@ -1054,8 +1054,8 @@ public class WeightedVisibilityGraph {
 
 		vertexToCostMap = null;  // Map<Vertex, Double> vertexToCostMap = new HashMap<Vertex, Double>();
 
-		System.out.println("Dijkstra's algorithm finds " + outPaths.size() + " path(s) with cost " + minCostToTarget
-				+ " by processing " + numVerticesProcessed + " vertices and " + numEdgesProcessed + " edges.");
+//		System.out.println("Dijkstra's algorithm finds " + outPaths.size() + " path(s) with cost " + minCostToTarget
+//				+ " by processing " + numVerticesProcessed + " vertices and " + numEdgesProcessed + " edges.");
 		return outPaths;
 	}  // End public static Collection<List<Vertex>> findShortestPaths(...)
 

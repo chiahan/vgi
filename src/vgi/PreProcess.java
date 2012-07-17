@@ -70,7 +70,7 @@ public  class PreProcess
                 }
             }    
    
-            System.out.println(g.toString());
+//            System.out.println(g.toString());
 
             cycleDetector = new CycleDetector<String, DefaultEdge>(g);
    
@@ -82,7 +82,7 @@ public  class PreProcess
                 mxGraphModel model = (mxGraphModel)graph.getModel();
                 String cycle;
 
-                System.out.println("Cycles detected.");
+//                System.out.println("Cycles detected.");
 
                 cycleVertices = cycleDetector.findCycles();
         
@@ -93,7 +93,7 @@ public  class PreProcess
                  */
                 while (! cycleVertices.isEmpty()) {
               
-                    System.out.println("Cycle:");
+//                    System.out.println("Cycle:");
 
          
                     iterator = cycleVertices.iterator();
@@ -190,10 +190,10 @@ public  class PreProcess
 
          orderIterator =
             new TopologicalOrderIterator<String, DefaultEdge>(g);
-         System.out.println("\nOrdering:");
+//         System.out.println("\nOrdering:");
          while (orderIterator.hasNext()) {
             v = orderIterator.next();
-            System.out.println(v);
+//            System.out.println(v);
          }
       }
            

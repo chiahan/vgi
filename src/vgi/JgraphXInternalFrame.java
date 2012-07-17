@@ -95,7 +95,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         //currentFile=file;
         setTitle(filename);
         
-        System.out.println("title:"+title);
+//        System.out.println("title:"+title);
         initGraph();
         installRepaintListener();
         installListeners();
@@ -658,8 +658,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         infoSplitPane.setTopComponent(
                 new StatePropertiesPanel((mxCell) vertex, newState, display, JgraphXInternalFrame.this));
 
-        System.out.println("add state at" + x + "," + y);
-        System.out.println("total states:" + automata.getAllStates().size());
+//        System.out.println("add state at" + x + "," + y);
+//        System.out.println("total states:" + automata.getAllStates().size());
 
         setModified(true);
         undoStack.push(STATUS_ADD);
@@ -685,7 +685,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             if(geometricData.size!=null){
                 w=geometricData.size.getX();
                 h=geometricData.size.getY();
-                System.out.println("get size:"+geometricData.size.toString());
+//                System.out.println("get size:"+geometricData.size.toString());
             }
             shape=geometricData.shape;
         }
@@ -711,7 +711,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 //        infoSplitPane.setTopComponent(
 //                new StatePropertiesPanel((mxCell) vertex, 
 //                JgraphXInternalFrame.this.cellToState(vertex), display));
-        System.out.println("add state at (" + x + "," + y + ").");
+//        System.out.println("add state at (" + x + "," + y + ").");
     }  // End public void addState(State state)
 
     private mxCell createVertex(double x, double y, String name,double w,double h,String shape) {
@@ -760,7 +760,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         addTransition(newTrans);
         
-        System.out.println("total trans:" + automata.getAllTransitions().size());
+//        System.out.println("total trans:" + automata.getAllTransitions().size());
 //        EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
 //        layout.route((mxCell) e);
         setModified(true);
@@ -858,7 +858,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }
 
     public void addControlPoint(mxCell cell, double x, double y) {
-        System.out.println("add Ctrl pt at" + x + "," + y);
+//        System.out.println("add Ctrl pt at" + x + "," + y);
         List<mxPoint> points = cell.getGeometry().getPoints();
         if(points==null) points=new ArrayList<mxPoint>();
         points.add(new mxPoint(x, y));
@@ -885,7 +885,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     public void deleteControlPoint(mxCell cell, int index) {
         
-        System.out.println("delete Ctrl pt at" + index);
+//        System.out.println("delete Ctrl pt at" + index);
         List<mxPoint> points = cell.getGeometry().getPoints();
         points.remove(index - 1);
 
@@ -1037,8 +1037,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                             clusterlayout.setMoveCircle(true);
                             clusterlayout.setX0(FeatureNode.getGeometry().getX());
                             clusterlayout.setY0(FeatureNode.getGeometry().getY());
-                            System.out.print("\n X0 : "+FeatureNode.getGeometry().getX());
-                            System.out.print("\n Y0 : "+FeatureNode.getGeometry().getY());
+//                            System.out.print("\n X0 : "+FeatureNode.getGeometry().getX());
+//                            System.out.print("\n Y0 : "+FeatureNode.getGeometry().getY());
                             clusterlayout.execute(FeatureNode);
                             
                         }
@@ -1294,7 +1294,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
             drawingData.startArrow = (String) styleList.get("startArrow");
             drawingData.endArrow = (String) styleList.get("endArrow");
-            System.out.println("style:" + drawingData.strokeColor + " " + drawingData.strokeWidth + " " + drawingData.startArrow + " " + drawingData.endArrow);
+//            System.out.println("style:" + drawingData.strokeColor + " " + drawingData.strokeWidth + " " + drawingData.startArrow + " " + drawingData.endArrow);
 
             transition.setDrawingData(drawingData);
 
@@ -1417,12 +1417,12 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             } else if (cell.isEdge()) {
                 Transition trans = cellToTransition(cell);
                 if (trans == null) {
-                    System.out.println("can't find trans");
+//                    System.out.println("can't find trans");
                 }
                 List<Transition> transList = automata.getAllTransitions();
                 transList.remove(trans);
                 automata.setAllTransitions(transList);
-                System.out.println("trans list size: " + automata.getAllTransitions().size());
+//                System.out.println("trans list size: " + automata.getAllTransitions().size());
 
 
             }
@@ -1432,11 +1432,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             mxCell[] cells = {cell};
             graph.removeCells(cells);
 
-            System.out.println("cell table size: " + cellTable.size());
+//            System.out.println("cell table size: " + cellTable.size());
 
 
         } else {
-            System.out.println("Cell is empty");
+//            System.out.println("Cell is empty");
         }
         graph.refresh();
 
@@ -1493,7 +1493,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             int stat = undoStack.pop();
             redoStack.push(stat);
 
-            System.out.println("stack pop:" + stat);
+//            System.out.println("stack pop:" + stat);
 
             for (Object cel : changedCell) {
 
@@ -1578,7 +1578,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             int stat = redoStack.pop();
             undoStack.push(stat);
 
-            System.out.println("stack pop:" + stat);
+//            System.out.println("stack pop:" + stat);
 
             for (Object cel : changedCell) {
 
