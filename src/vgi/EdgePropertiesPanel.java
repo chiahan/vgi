@@ -37,7 +37,6 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         this.transition = transition;
         this.graph = display.getGraph();
         this.automata = display.getAutomata();
-        jInternalFrame=jif;
         
         
         showLabel();
@@ -45,6 +44,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         
         
         
+        jInternalFrame=jif;
         
         
     }
@@ -146,13 +146,13 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         Object[] edge = {cell};
         
         graph.setCellStyles(arrowDir, arrowType, edge);
-        jInternalFrame.setModified(true);
+        if(jInternalFrame!=null) jInternalFrame.setModified(true);
     }
     
     public void setStrokeColor(mxGraph graph, Color color) {
         Object[] edge = {cell};
         graph.setCellStyles("strokeColor", mxUtils.hexString(color), edge);
-        jInternalFrame.setModified(true);
+        if(jInternalFrame!=null)jInternalFrame.setModified(true);
     }
 
     public void setStrokeWidth(mxGraph graph, float width) {
