@@ -281,10 +281,15 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
                     shape=new mxDefaultTextShape();
                 }else{
                     shape = getTextShape(style);
-                    String curveString=(String)style.get("textShape");
-                    if(curveString.equals("curve")){
-                        mxCurveShape cShape=(mxCurveShape)getShape(style);
-                        shape=new mxCurveLabelShape(state,cShape.getCurve());
+                    if(style.containsKey("textShape")){
+                        String curveString=(String)style.get("textShape");
+                        if(curveString.equals("curve")){
+                            mxCurveShape cShape=(mxCurveShape)getShape(style);
+                            shape=new mxCurveLabelShape(state,cShape.getCurve());
+                        }else{
+                            shape=new mxDefaultTextShape();
+                
+                        }
                     }
                 }
                 
