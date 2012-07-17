@@ -6,6 +6,7 @@ import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import java.awt.Color;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -133,6 +134,10 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         String endArrow=(String)styles.get("endArrow");
         if(endArrow!=null) endStyleComboBox.setSelectedItem(endArrow);
         
+        String textShape=(String)styles.get("textShape");
+        if(textShape.equals("curve")) curveLabelCheckBox.setSelected(true);
+        
+        
         
     }
     private void setStartEndArrow(JComboBox comboBox, Boolean startEnd) {
@@ -181,6 +186,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         angleTextField = new javax.swing.JTextField();
         lengthLabel = new javax.swing.JLabel();
         lengthTextField = new javax.swing.JTextField();
+        curveLabelCheckBox = new javax.swing.JCheckBox();
 
         jLabel3.setText("jLabel3");
 
@@ -249,6 +255,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         strokeLabel.setText("Stroke :");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(strokeLabel, gridBagConstraints);
 
@@ -259,7 +266,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         add(strokeColorButton, gridBagConstraints);
 
@@ -271,12 +278,12 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         add(strokeWidthBox, gridBagConstraints);
 
         angleLabel.setText("Angle :");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(angleLabel, gridBagConstraints);
 
@@ -286,13 +293,13 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         add(angleTextField, gridBagConstraints);
 
         lengthLabel.setText("Length :");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(lengthLabel, gridBagConstraints);
 
@@ -302,9 +309,19 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         add(lengthTextField, gridBagConstraints);
+
+        curveLabelCheckBox.setText("curve label");
+        curveLabelCheckBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                curveLabelCheckBoxItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 8;
+        add(curveLabelCheckBox, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void startStyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startStyleComboBoxActionPerformed
@@ -358,6 +375,15 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         }
          graph.refresh();
     }//GEN-LAST:event_lengthTextFieldKeyPressed
+
+    private void curveLabelCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_curveLabelCheckBoxItemStateChanged
+        if (evt.getStateChange() == ItemEvent.SELECTED){
+            
+            setCurveLabel(true);
+        }else if (evt.getStateChange() == ItemEvent.DESELECTED){
+            setCurveLabel(false);
+        }
+    }//GEN-LAST:event_curveLabelCheckBoxItemStateChanged
 
     private void setAngle(String str){
         mxGeometry geo=cell.getGeometry();
@@ -483,10 +509,21 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         
         
     }
-    
+    private void setCurveLabel(boolean useCurveLabel){
+        
+        Object[] edge = {cell};
+        if(useCurveLabel)
+            graph.setCellStyles("textShape","curve");
+        else
+            graph.setCellStyles("textShape","default");
+        
+        if(jInternalFrame!=null) jInternalFrame.setModified(true);
+        
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel angleLabel;
     private javax.swing.JTextField angleTextField;
+    private javax.swing.JCheckBox curveLabelCheckBox;
     private javax.swing.JLabel ednStyleLabel;
     private javax.swing.JComboBox endStyleComboBox;
     private javax.swing.JLabel jLabel3;

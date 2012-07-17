@@ -725,7 +725,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         //Object vertex = graph.insertVertex(parent, Integer.toString(id), name,
         //        x - w / 2, y - h / 2, w, h, "shape=ellipse;perimeter=ellipsePerimeter;");
         Object vertex = graph.insertVertex(parent, Integer.toString(id), name,
-                x - w / 2, y - h / 2, w, h, "shape="+shape+";perimeter="+shape+"Perimeter;fontSize="+defaultFontSize);
+                x - w / 2, y - h / 2, w, h, "shape="+shape+";perimeter="+shape+"Perimeter;fontSize="+defaultFontSize+";");
         
         graph.setSelectionCell(vertex);
         ((mxCell) vertex).setConnectable(false);
@@ -787,7 +787,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
         mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(),
                 null, transition.getLabel(), source, target,
-                "shape=curve;fontSize="+defaultFontSize));
+                "shape=curve;fontSize="+defaultFontSize+";textShape=default;"));
         cellTable.put(edge, transition);
         mxGeometry geometry = edge.getGeometry();
         if (geometry == null) {

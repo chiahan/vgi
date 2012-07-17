@@ -7761,7 +7761,6 @@ public class mxGraph extends mxEventSource
 				if (label != null && state.getLabelBounds() != null)
 				{
 					lab = canvas.drawLabel(label, state, isHtmlLabel(cell));
-					//lab = canvas.drawLabel(label, state);
 				}
 			}
 

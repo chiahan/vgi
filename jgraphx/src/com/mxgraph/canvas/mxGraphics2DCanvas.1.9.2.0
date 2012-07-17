@@ -4,8 +4,6 @@
  */
 package com.mxgraph.canvas;
 
-import com.mxgraph.model.mxCell;
-import com.mxgraph.shape.*;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -24,6 +22,26 @@ import java.util.Map;
 
 import javax.swing.CellRendererPane;
 
+import com.mxgraph.shape.mxActorShape;
+import com.mxgraph.shape.mxArrowShape;
+import com.mxgraph.shape.mxCloudShape;
+import com.mxgraph.shape.mxConnectorShape;
+import com.mxgraph.shape.mxCurveShape;
+import com.mxgraph.shape.mxCylinderShape;
+import com.mxgraph.shape.mxDefaultTextShape;
+import com.mxgraph.shape.mxDoubleEllipseShape;
+import com.mxgraph.shape.mxEllipseShape;
+import com.mxgraph.shape.mxHexagonShape;
+import com.mxgraph.shape.mxHtmlTextShape;
+import com.mxgraph.shape.mxIShape;
+import com.mxgraph.shape.mxITextShape;
+import com.mxgraph.shape.mxImageShape;
+import com.mxgraph.shape.mxLabelShape;
+import com.mxgraph.shape.mxLineShape;
+import com.mxgraph.shape.mxRectangleShape;
+import com.mxgraph.shape.mxRhombusShape;
+import com.mxgraph.shape.mxSwimlaneShape;
+import com.mxgraph.shape.mxTriangleShape;
 import com.mxgraph.swing.util.mxSwingConstants;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxPoint;
@@ -46,13 +64,6 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 	 */
 	public static final String TEXT_SHAPE_HTML = "html";
 
-        
-        /**
-	 * 
-	 */
-	public static final String TEXT_SHAPE_CURVE="curve";
-        
-        
 	/**
 	 * Specifies the image scaling quality. Default is Image.SCALE_SMOOTH.
 	 */
@@ -92,9 +103,6 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 		putShape(mxConstants.SHAPE_TRIANGLE, new mxTriangleShape());
 		putTextShape(TEXT_SHAPE_DEFAULT, new mxDefaultTextShape());
 		putTextShape(TEXT_SHAPE_HTML, new mxHtmlTextShape());
-                
-                putTextShape(TEXT_SHAPE_CURVE, new mxCurveLabelShape(null,null));
-                
 	}
 
 	/**
@@ -165,7 +173,7 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 	public mxITextShape getTextShape(Map<String, Object> style, boolean html)
 	{
 		String name;
-                
+
 		if (html)
 		{
 			name = TEXT_SHAPE_HTML;
@@ -177,17 +185,7 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 
 		return textShapes.get(name);
 	}
-        /**
-         * new
-         * get text shape:default or curved
-         */
-        public mxITextShape getTextShape(Map<String, Object> style)
-	{
-		String name=(String) style.get("textShape");
-                return textShapes.get(name);
-	}
-        
-        
+
 	/**
 	 * 
 	 */
@@ -242,7 +240,7 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 	 * (non-Javadoc)
 	 * @see com.mxgraph.canvas.mxICanvas#drawLabel()
 	 */
-	/*public Object drawLabel(String text, mxCellState state, boolean html)
+	public Object drawLabel(String text, mxCellState state, boolean html)
 	{
 		Map<String, Object> style = state.getStyle();
 		mxITextShape shape = getTextShape(style, html);
@@ -271,49 +269,7 @@ public class mxGraphics2DCanvas extends mxBasicCanvas
 
 		return shape;
 	}
-        */
-        public Object drawLabel(String text, mxCellState state, boolean html)
-	{
-		Map<String, Object> style = state.getStyle();
-		mxITextShape shape;
 
-                if(((mxCell)state.getCell()).isVertex()){
-                    shape=new mxDefaultTextShape();
-                }else{
-                    shape = getTextShape(style);
-                    String curveString=(String)style.get("textShape");
-                    if(curveString.equals("curve")){
-                        mxCurveShape cShape=(mxCurveShape)getShape(style);
-                        shape=new mxCurveLabelShape(state,cShape.getCurve());
-                    }
-                }
-                
-                
-                
-		if (g != null && shape != null && drawLabels && text != null
-				&& text.length() > 0)
-		{
-			// Creates a temporary graphics instance for drawing this shape
-			float opacity = mxUtils.getFloat(style,
-					mxConstants.STYLE_TEXT_OPACITY, 100);
-			Graphics2D previousGraphics = g;
-			g = createTemporaryGraphics(style, opacity, null);
-
-			// Draws the label background and border
-			Color bg = mxUtils.getColor(style,
-					mxConstants.STYLE_LABEL_BACKGROUNDCOLOR);
-			Color border = mxUtils.getColor(style,
-					mxConstants.STYLE_LABEL_BORDERCOLOR);
-			paintRectangle(state.getLabelBounds().getRectangle(), bg, border);
-
-			// Paints the label and restores the graphics object
-			shape.paintShape(this, text, state, style);
-			g.dispose();
-			g = previousGraphics;
-		}
-
-		return shape;
-	}
 	/**
 	 * 
 	 */

@@ -363,6 +363,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         colorLabel.setText("FillColor :");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(colorLabel, gridBagConstraints);
 
@@ -373,13 +374,13 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         add(colorButton, gridBagConstraints);
 
         jLabel1.setText("Stroke:");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(jLabel1, gridBagConstraints);
 
@@ -391,7 +392,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 7;
         add(strokeWidthBox, gridBagConstraints);
 
         strokeColorButton.addActionListener(new java.awt.event.ActionListener() {
@@ -401,7 +402,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         add(strokeColorButton, gridBagConstraints);
         strokeColorButton.getAccessibleContext().setAccessibleName("strokeColorButton");
@@ -459,7 +460,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         transformPanel.add(heightTextField);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridy = 8;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipady = 10;
