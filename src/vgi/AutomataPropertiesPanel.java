@@ -86,6 +86,11 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
     
     private void setSelectionCell(Object[] cells, Object object, Boolean state) {
         for (int i=0; i<cells.length; i++) {
+            
+            mxCell source=(mxCell)((mxCell)cells[i]).getSource();
+            mxCell target=(mxCell)((mxCell)cells[i]).getTarget();
+            if(!state && (source==null || target==null)) continue;
+            
             String cellString = (state) ?
                                 ((mxCell)cells[i]).getValue().toString():
                                 ((mxCell)cells[i]).getValue().toString() + " : '" + 

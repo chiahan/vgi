@@ -1327,18 +1327,23 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         public void mouseReleased(MouseEvent e) {
                             if (isEnabled()) {
                                 if (!e.isConsumed() && isEditEvent(e)) {
-                                    Object cell = getCellAt(e.getX(), e.getY(), false);
+                                    mxCell cell = (mxCell)getCellAt(e.getX(), e.getY(), false);
 
                                     if (cell != null && getGraph().isCellEditable(cell)) {
                                         if (((mxCell) cell).isVertex()) {
                                             startEditingAtCell(cell, e);
                                         } else {
+                                            mxCell source=(mxCell)cell.getSource();
+                                            mxCell target=(mxCell)cell.getTarget();
+                                            
+                                            if(source!=null && target!=null){
                                             ExpressionEditor editor =
                                                     new ExpressionEditor(
                                                     new JFrame(), true,
                                                     (WeightedRegularExpression) ((mxCell) cell).getValue());
                                             editor.setVisible(true);
                                             ((mxCell) cell).setValue(editor.getExpression());
+                                            }
                                         }
                                     }
                                 } else {
