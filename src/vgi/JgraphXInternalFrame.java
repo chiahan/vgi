@@ -759,16 +759,18 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         }
         automata.addTransition(newTrans);
 
-        addTransition(newTrans);
+        mxCell edge = addTransition(newTrans);
         
 //        System.out.println("total trans:" + automata.getAllTransitions().size());
-//        EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
-//        layout.route((mxCell) e);
+		if (this.vgi.getRouteEdgeWhileAdding()) {
+			EdgeRoutingMinCross edgeRoutingMinCross = new EdgeRoutingMinCross(this.graph);
+			edgeRoutingMinCross.route(edge);
+		}
         setModified(true);
         undoStack.push(STATUS_ADD);
     }
 
-    public void addTransition(Transition transition) {
+    public mxCell addTransition(Transition transition) {
         mxCell source = null, target = null;
         Enumeration keys = cellTable.keys();
         while (keys.hasMoreElements()) {
@@ -848,7 +850,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 		if (this.visibilityGraph != null) {
 			this.visibilityGraph.addHindrance(edge);
 		}
-    }  // End public void addTransition(Transition transition)
+		return edge;
+    }  // End public mxCell addTransition(Transition transition)
 
     public void addControlPoint() {
         addControlPoint((mxCell) getGraphComponent().getCellAt((int) popMouseX, (int) popMouseY),

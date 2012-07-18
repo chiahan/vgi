@@ -497,9 +497,9 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			return;
 		}
 
-		Object cells[] = new Object[]{inEdge};
-		localGraph.removeCells(cells);
-		cells = null;  // Object cells[] = new Object[]{inEdge};
+//		Object cells[] = new Object[]{inEdge};
+//		localGraph.removeCells(cells);
+//		cells = null;  // Object cells[] = new Object[]{inEdge};
 
 		boolean existsHindranceWithSameSourceAndTarget = false;
 		for (mxICell hindrance : hindrances) {
@@ -896,16 +896,16 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 		Stopwatch addEdgesTimer = new Stopwatch().start();
 		for (List<Vertex> path : paths) {
 
-			mxICell newEdge = (mxICell) localGraph.insertEdge(
-					parent,
-					null,
-					inEdge.getValue(),
-					source,
-					target,
-					inEdge.getStyle());
-			cells = new Object[]{newEdge};
-			localGraph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
-			cells = null;  // cells = new Object[]{newEdge};
+//			mxICell newEdge = (mxICell) localGraph.insertEdge(
+//					parent,
+//					null,
+//					inEdge.getValue(),
+//					source,
+//					target,
+//					inEdge.getStyle());
+//			cells = new Object[]{newEdge};
+//			localGraph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+//			cells = null;  // cells = new Object[]{newEdge};
 			List<mxPoint> controlPoints = new LinkedList<mxPoint>();
 			for (Vertex aVertex : path) {
 				if (aVertex.location == null) {
@@ -915,15 +915,16 @@ public class EdgeRoutingMinCross extends mxGraphLayout {
 			}  // End for (Vertex aVertex : path)
 			controlPoints.remove(0);
 			controlPoints.remove(controlPoints.size() - 1);
-			super.setEdgePoints(newEdge, controlPoints);
+			super.setEdgePoints(inEdge, controlPoints);
 			controlPoints = null;  // List<mxPoint> controlPoints = new LinkedList<mxPoint>();
-			mxGeometry geometry = newEdge.getGeometry();
-			if (geometry == null) {
-				throw new IllegalStateException("The newEdge variable has null geometry.");
-			}
-			geometry.setX(0);
-			geometry.setY(JgraphXInternalFrame.DEFAULT_LABEL_DISTANCE);
-			geometry.setOffset(new mxPoint(0, 0));
+			break;
+//			mxGeometry geometry = newEdge.getGeometry();
+//			if (geometry == null) {
+//				throw new IllegalStateException("The newEdge variable has null geometry.");
+//			}
+//			geometry.setX(0);
+//			geometry.setY(JgraphXInternalFrame.DEFAULT_LABEL_DISTANCE);
+//			geometry.setOffset(new mxPoint(0, 0));
 
 		}  // End for (List<Vertex> path : paths)
 		addEdgesTimer.stop();

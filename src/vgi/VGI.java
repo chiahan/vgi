@@ -372,6 +372,7 @@ public class VGI extends javax.swing.JFrame {
         showPropertiesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showStatusBarCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         layoutMenu = new javax.swing.JMenu();
+        routeEdgeWhileAddingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         circleMenuItem = new javax.swing.JMenuItem();
         hierarchicalMenuItem = new javax.swing.JMenuItem();
         featureMenuItem = new javax.swing.JMenuItem();
@@ -635,6 +636,10 @@ public class VGI extends javax.swing.JFrame {
 
         layoutMenu.setMnemonic('L');
         layoutMenu.setText("Layout");
+
+        routeEdgeWhileAddingCheckBoxMenuItem.setSelected(true);
+        routeEdgeWhileAddingCheckBoxMenuItem.setText("Route Edge While Adding");
+        layoutMenu.add(routeEdgeWhileAddingCheckBoxMenuItem);
 
         circleMenuItem.setText("Circle");
         circleMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -1515,6 +1520,9 @@ public class VGI extends javax.swing.JFrame {
                         null,
 			JOptionPane.WARNING_MESSAGE);
         }
+		public boolean getRouteEdgeWhileAdding() {
+			return this.routeEdgeWhileAddingCheckBoxMenuItem.getState();
+		}  // End public boolean getRouteEdgeWhileAdding()
 	/**
 	 * @param args the command line arguments
 	 */
@@ -1638,6 +1646,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem removeEpsilonTransitionsMenuItem;
     private javax.swing.JMenuItem routeAllEdges2008MenuItem;
     private javax.swing.JMenuItem routeAllEdgesBranchingMenuItem;
+    private javax.swing.JCheckBoxMenuItem routeEdgeWhileAddingCheckBoxMenuItem;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
     private javax.swing.JMenuItem setAsFinalStateMenuItem;
