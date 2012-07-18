@@ -101,7 +101,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             
             double theta=Math.atan2(deltay,deltax);
             theta=Math.toDegrees(theta);
-            angleTextField.setText(String.valueOf(theta));
+            angleTextField.setText(formatter.format(theta));
         
         }else if(source==target){
             mxPoint controlpt=cell.getGeometry().getPoints().get(0);
