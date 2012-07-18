@@ -1,13 +1,14 @@
 package vgi;
 
 
+import java.io.Serializable;
 import java.text.NumberFormat;
 
 /**
  *
  * @author JLiu
  */
-public abstract class WeightedRegularExpression {
+public abstract class WeightedRegularExpression implements Serializable {
 
 	public class HighlightRange {
 
@@ -819,4 +820,4 @@ public abstract class WeightedRegularExpression {
 
 		}  // End public static void main(String args[])
 	}  // End public static class RightMultiply extends ExpressionWithOneChildExpression
-}  // End public class WeightedRegularExpression
+}  // End public abstract class WeightedRegularExpression implements Serializable

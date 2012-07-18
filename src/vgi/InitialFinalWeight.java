@@ -5,13 +5,14 @@
 package vgi;
 
 import java.awt.geom.Point2D;
+import java.io.Serializable;
 import java.text.NumberFormat;
 
 /**
  *
  * @author JLiu
  */
-public class InitialFinalWeight {
+public class InitialFinalWeight implements Serializable {
 
 	public static class GeometricData {
 
@@ -63,4 +64,4 @@ public class InitialFinalWeight {
 		}
 		return this.value.toString();
 	}  // End public String toString()
-}  // End public class InitialFinalWeight 
+}  // End public class InitialFinalWeight implements Serializable

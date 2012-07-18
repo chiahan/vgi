@@ -1,5 +1,6 @@
 package vgi;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public interface AutomataInterface {
 
-	public class WritingData {
+	public class WritingData implements Serializable {
 
 		public Character closePar;
 		public Character openPar;
@@ -20,9 +21,9 @@ public interface AutomataInterface {
 		public Character weightClosing;
 		public Character weightOpening;
 		public Character zeroSym;
-	}  // End public class WritingData
+	}  // End public class WritingData implements Serializable
 
-	public class Weight {
+	public class Weight implements Serializable {
 
 		public TAFKitInterface.AutomataType.Semiring semiring;
 		public Object identitySymbol;
@@ -33,9 +34,9 @@ public interface AutomataInterface {
 			this.identitySymbol = null;
 			this.zeroSymbol = null;
 		}
-	}  // End public class Weight
+	}  // End public class Weight implements Serializable
 
-	public class Alphabet {
+	public class Alphabet implements Serializable {
 
 		public TAFKitInterface.AutomataType.AlphabetDataType dataType;
 		public List<Object> allSymbols;
@@ -48,7 +49,7 @@ public interface AutomataInterface {
 			this.identitySymbol = null;
 			this.timesSymbol = null;
 		}
-	}  // End public class Alphabet
+	}  // End public class Alphabet implements Serializable
 
 	public class SymbolPair<E> extends ArrayList<E> {
 	}
