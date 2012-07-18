@@ -8,6 +8,8 @@ import com.mxgraph.view.mxGraph;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +70,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             lengthLabel.setVisible(false);
             lengthTextField.setVisible(false);
         }
-        
+        NumberFormat formatter=new DecimalFormat("#.##");
         if(source==null){
             mxPoint term=cell.getGeometry().getTerminalPoint(true);
             mxPoint center=new mxPoint(target.getGeometry().getCenterX(),target.getGeometry().getCenterY());
@@ -78,11 +80,11 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             double deltax=term.getX()-center.getX();
             double deltay=term.getY()-center.getY();
             double length=Math.sqrt(deltax*deltax+deltay*deltay);
-            lengthTextField.setText(String.valueOf(length));
+            lengthTextField.setText(formatter.format(length));
             
             double theta=Math.atan2(deltay,deltax);
             theta=Math.toDegrees(theta);
-            angleTextField.setText(String.valueOf(theta));
+            angleTextField.setText(formatter.format(theta));
                 
             
             
@@ -95,7 +97,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             double deltax=term.getX()-center.getX();
             double deltay=term.getY()-center.getY();
             double length=Math.sqrt(deltax*deltax+deltay*deltay);
-            lengthTextField.setText(String.valueOf(length));
+            lengthTextField.setText(formatter.format(length));
             
             double theta=Math.atan2(deltay,deltax);
             theta=Math.toDegrees(theta);
@@ -108,11 +110,11 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             double deltax=controlpt.getX()-center.getX();
             double deltay=controlpt.getY()-center.getY();
             double length=Math.sqrt(deltax*deltax+deltay*deltay);
-            lengthTextField.setText(String.valueOf(length));
+            lengthTextField.setText(formatter.format(length));
             
             double theta=Math.atan2(deltay,deltax);
             theta=Math.toDegrees(theta);
-            angleTextField.setText(String.valueOf(theta));
+            angleTextField.setText(formatter.format(theta));
             
           
         }
