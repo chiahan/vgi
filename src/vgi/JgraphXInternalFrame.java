@@ -404,31 +404,13 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
             @Override
             public void internalFrameActivated(InternalFrameEvent e) {
-                boolean selected = !graph.isSelectionEmpty();
-                mxCell selectedCell = (mxCell) graph.getSelectionCell();
+				JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+						new AutomataPropertiesPanel(
+						new DisplayUtil(graph, automata, cellTable), JgraphXInternalFrame.this));
 
-                if (selected) {
-                    DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
-
-                    if (selectedCell.isEdge()) {
-                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new EdgePropertiesPanel(selectedCell,
-                                display.cellToTransition(selectedCell),
-                                display, JgraphXInternalFrame.this));
-                    } else if (selectedCell.isVertex()) {
-                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                                new StatePropertiesPanel(selectedCell,
-                                JgraphXInternalFrame.this.cellToState(selectedCell),
-                                display, JgraphXInternalFrame.this));
-                    }
-                } else {
-                    JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
-                            new AutomataPropertiesPanel(
-                            new DisplayUtil(graph, automata, cellTable), JgraphXInternalFrame.this));
-                }
-
-                JgraphXInternalFrame.this.infoSplitPane.setBottomComponent(
-                        graphOutline);
+				JgraphXInternalFrame.this.infoSplitPane.setBottomComponent(
+						graphOutline);
+				JgraphXInternalFrame.this.graph.clearSelection();
             }
 
             public void internalFrameClosing(InternalFrameEvent e) {
