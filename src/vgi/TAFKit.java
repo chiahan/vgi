@@ -264,11 +264,11 @@ public class TAFKit implements TAFKitInterface {
 				|| (algorithm.name == null)
 				|| (algorithm.name.isEmpty())
 				|| (algorithm.inputsInfo == null)
-				|| (algorithm.inputsInfo.isEmpty())
+				|| ((algorithm.inputsInfo.isEmpty()) && (!(inputs.get(0) instanceof AutomataInterface.Alphabet)))
 				|| (algorithm.outputsInfo == null)
 				|| (algorithm.outputsInfo.isEmpty())
 				|| (inputs == null)
-				|| (inputs.size() != algorithm.inputsInfo.size())) {
+				|| (inputs.size() < algorithm.inputsInfo.size())) {
 			throw new IllegalArgumentException("The VcsnAlgorithm algorithm argument is invalid.");
 		}
 
@@ -279,10 +279,12 @@ public class TAFKit implements TAFKitInterface {
 		List<Automata> automataList = new ArrayList<Automata>();
 		List<File> tempFileList = new ArrayList<File>();
 
-		for (int index = 0; index < inputs.size(); index++) {
+		for (int index = 0, infoIndex = 0;
+				infoIndex < algorithm.inputsInfo.size();
+				index++, infoIndex++) {
 
 			Object object = inputs.get(index);
-			switch (algorithm.inputsInfo.get(index).type) {
+			switch (algorithm.inputsInfo.get(infoIndex).type) {
 
 				case AUTOMATON:
 					File file;
@@ -313,12 +315,23 @@ public class TAFKit implements TAFKitInterface {
 					break;
 
 				case REGULAR_EXPRESSION:
+					if (!(object instanceof AutomataInterface.Alphabet)) {
+						break;
+					}
+					AutomataInterface.Alphabet alphabet = (AutomataInterface.Alphabet) object;
+					String specifyAlphabet = "-a";
+					for (Object symbol : alphabet.allSymbols) {
+						specifyAlphabet = specifyAlphabet + symbol.toString();
+					}
+					commandTokens.add(specifyAlphabet);
+					object = inputs.get(index + 1);
 					if (object instanceof String) {
 						String string = (String) object;
 						commandTokens.add(string);
 					} else {
 						throw new IllegalArgumentException("The " + (index + 1) + "th argument should be a regular expression, but it is not!");
 					}
+					index++;
 					break;
 
 				case TEXT:
@@ -347,7 +360,21 @@ public class TAFKit implements TAFKitInterface {
 
 			}  // End switch (algorithm.inputsInfo.get(index).type)
 
-		}  // End for (int index = 0; index < inputs.size(); index++)
+		}  // End for (int index = 0, infoIndex = 0;
+		//		infoIndex < algorithm.inputsInfo.size();
+		//		index++, infoIndex++)
+
+		if (algorithm.inputsInfo.isEmpty()) {
+			Object object = inputs.get(0);
+			if (object instanceof AutomataInterface.Alphabet) {
+				AutomataInterface.Alphabet alphabet = (AutomataInterface.Alphabet) object;
+				String specifyAlphabet = "-a";
+				for (Object symbol : alphabet.allSymbols) {
+					specifyAlphabet = specifyAlphabet + symbol.toString();
+				}
+				commandTokens.add(specifyAlphabet);
+			}
+		}  // End if (algorithm.inputsInfo.isEmpty())
 
 		Process process;
 		InputStream inputStream;

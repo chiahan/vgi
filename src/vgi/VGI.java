@@ -106,6 +106,17 @@ public class VGI extends javax.swing.JFrame {
 						break;
 
 					case REGULAR_EXPRESSION:
+						JInternalFrame frame = mainDesktopPane.getSelectedFrame();
+						if (!(frame instanceof JgraphXInternalFrame)) {
+							JOptionPane.showMessageDialog(
+									VGI.this,
+									"The currently displaying internal frame is not an automaton.",
+									null,
+									JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+						AutomataInterface.Alphabet alphabet = ((JgraphXInternalFrame) frame).getAutomata().getAlphabet();
+						inputs.add(alphabet);
 						string = JOptionPane.showInputDialog("Please input a regular expression.");
 						if ((string == null) || (string.isEmpty())) {
 							return;
@@ -137,6 +148,20 @@ public class VGI extends javax.swing.JFrame {
 
 				}  // End switch (inputInfo.type)
 			}  // End for (int index = 0; index < this.vcsnAlgorithm.inputsInfo.size(); index++)
+
+			if (this.vcsnAlgorithm.inputsInfo.isEmpty()) {
+				JInternalFrame frame = mainDesktopPane.getSelectedFrame();
+				if (!(frame instanceof JgraphXInternalFrame)) {
+					JOptionPane.showMessageDialog(
+							VGI.this,
+							"The currently displaying internal frame is not an automaton.",
+							null,
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				AutomataInterface.Alphabet alphabet = ((JgraphXInternalFrame) frame).getAutomata().getAlphabet();
+				inputs.add(alphabet);
+			}  // End if (this.vcsnAlgorithm.inputsInfo.isEmpty())
 
 			List<Object> outputs;
 			try {
