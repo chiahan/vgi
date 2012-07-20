@@ -1024,7 +1024,7 @@ public class VGI extends javax.swing.JFrame {
 
     private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
 		// TODO add your handling code here:
-                JOptionPane.showMessageDialog(this, "Vacanson Graphical Interface (VGI) version 12.07.17");
+                JOptionPane.showMessageDialog(this, "Vacanson Graphical Interface (VGI) version 12.07.18");
     }//GEN-LAST:event_aboutMenuItemActionPerformed
 
 	private void saveMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveMenuItemActionPerformed
