@@ -1729,7 +1729,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     
     public void setCurrentFile(File file){
         currentFile=file;
-        this.title=currentFile.getName();
+        this.setTitle(currentFile.getName());
     }
     public File getCurrentFile(){
         return currentFile;

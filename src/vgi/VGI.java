@@ -1051,9 +1051,7 @@ public class VGI extends javax.swing.JFrame {
         public void save(){
             JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
 
-		if (selected.getCurrentFile() == null/*
-				 * newlyCreatedFile
-				 */) {
+		if (selected.getCurrentFile() == null){
 			saveAs();
 		} else {
 			FsmXml fsmXml = new FsmXml();
@@ -1062,6 +1060,7 @@ public class VGI extends javax.swing.JFrame {
 				currentAutomata.add(selected.getAutomata());
 				fsmXml.write(currentAutomata, selected.getCurrentFile());
 				selected.setModified(false);
+                                
 			} catch (Exception e) {
 				JOptionPane.showConfirmDialog(
 						this,
@@ -1094,8 +1093,7 @@ public class VGI extends javax.swing.JFrame {
 			fsmXml.write(currentAutomata, file);
 
 			selected.setCurrentFile(file);
-			selected.setTitle(fileChooser.getSelectedFile().getName());
-			selected.setModified(false);
+                        selected.setModified(false);
 		} catch (Exception e) {
 			e.printStackTrace();
                         JOptionPane.showConfirmDialog(
