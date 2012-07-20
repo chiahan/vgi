@@ -515,9 +515,9 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         
         Object[] edge = {cell};
         if(useCurveLabel)
-            graph.setCellStyles("textShape","curve");
+            graph.setCellStyles("textShape","curve",edge);
         else
-            graph.setCellStyles("textShape","default");
+            graph.setCellStyles("textShape","default",edge);
         
         if(jInternalFrame!=null) jInternalFrame.setModified(true);
         

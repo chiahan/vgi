@@ -777,8 +777,9 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         
     }
     public void setShape(String string){
-        graph.setCellStyles("shape",string);
-        graph.setCellStyles("perimeter",string+"Perimeter");
+        
+        graph.setCellStyles("shape",string,new Object[]{cell});
+        graph.setCellStyles("perimeter",string+"Perimeter",new Object[]{cell});
         
         if(jInternalFrame!=null) jInternalFrame.setModified(true);
     }
