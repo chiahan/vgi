@@ -132,7 +132,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         }
         String startArrow=(String)styles.get("startArrow");
         if(startArrow!=null) startStyleComboBox.setSelectedItem(startArrow);
-        
+               
         String endArrow=(String)styles.get("endArrow");
         if(endArrow!=null) endStyleComboBox.setSelectedItem(endArrow);
         
@@ -327,11 +327,11 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void startStyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startStyleComboBoxActionPerformed
-        setStartEndArrow((JComboBox)evt.getSource(), true);
+        if(jInternalFrame!=null) setStartEndArrow((JComboBox)evt.getSource(), true);
     }//GEN-LAST:event_startStyleComboBoxActionPerformed
 
     private void endStyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_endStyleComboBoxActionPerformed
-        setStartEndArrow((JComboBox)evt.getSource(), false);
+        if(jInternalFrame!=null) setStartEndArrow((JComboBox)evt.getSource(), false);
     }//GEN-LAST:event_endStyleComboBoxActionPerformed
 
     private void labelTextFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelTextFieldMouseClicked
@@ -346,15 +346,17 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     private void strokeColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeColorButtonActionPerformed
         strokeColor=JColorChooser.showDialog( this,
                      "Fill color", strokeColor );
-        setStrokeColor(graph,strokeColor);
         strokeColorButton.setBackground(strokeColor);
+        
+        if(jInternalFrame!=null) setStrokeColor(graph,strokeColor);
+        
     }//GEN-LAST:event_strokeColorButtonActionPerformed
 
     private void strokeWidthBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeWidthBoxActionPerformed
         JComboBox cb = (JComboBox)evt.getSource();
         String width=(String)cb.getSelectedItem();
         float wid=Float.parseFloat(width);
-        setStrokeWidth(graph,wid);
+        if(jInternalFrame!=null) setStrokeWidth(graph,wid);
     }//GEN-LAST:event_strokeWidthBoxActionPerformed
 
     private void angleTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_angleTextFieldKeyPressed
@@ -362,7 +364,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             String str = ((JTextField)evt.getSource()).getText();
             if (str.compareTo("") == 0)
                 str = null;
-            setAngle(str);
+            if(jInternalFrame!=null) setAngle(str);
         }
          graph.refresh();
         
@@ -373,7 +375,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             String str = ((JTextField)evt.getSource()).getText();
             if (str.compareTo("") == 0)
                 str = null;
-            setLength(str);
+            if(jInternalFrame!=null) setLength(str);
         }
          graph.refresh();
     }//GEN-LAST:event_lengthTextFieldKeyPressed
@@ -381,9 +383,9 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     private void curveLabelCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_curveLabelCheckBoxItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED){
             
-            setCurveLabel(true);
+            if(jInternalFrame!=null) setCurveLabel(true);
         }else if (evt.getStateChange() == ItemEvent.DESELECTED){
-            setCurveLabel(false);
+            if(jInternalFrame!=null) setCurveLabel(false);
         }
     }//GEN-LAST:event_curveLabelCheckBoxItemStateChanged
 

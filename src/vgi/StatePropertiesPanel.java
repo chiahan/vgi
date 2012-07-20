@@ -560,7 +560,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 //        System.out.print(style);
        // graph.setCellStyles("shape", ((String) cb.getSelectedItem()).toLowerCase(), objects);
         //jInternalFrame.setModified(true);
-        setShape(((String) cb.getSelectedItem()).toLowerCase());
+        if(jInternalFrame!=null) setShape(((String) cb.getSelectedItem()).toLowerCase());
     }//GEN-LAST:event_styleComboBoxActionPerformed
 
     private void initialCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_initialCheckBoxItemStateChanged
@@ -587,7 +587,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         
         fillColor=JColorChooser.showDialog( this,
                      "Fill color", fillColor );
-        setFillColor(graph,fillColor);
+        if(jInternalFrame!=null) setFillColor(graph,fillColor);
         colorButton.setBackground(fillColor);
         
         
@@ -596,7 +596,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     private void strokeColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeColorButtonActionPerformed
         strokeColor=JColorChooser.showDialog( this,
                      "Fill color", strokeColor );
-        setStrokeColor(graph,strokeColor);
+        if(jInternalFrame!=null) setStrokeColor(graph,strokeColor);
         strokeColorButton.setBackground(strokeColor);
         
     }//GEN-LAST:event_strokeColorButtonActionPerformed
@@ -605,7 +605,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         JComboBox cb = (JComboBox)evt.getSource();
         String width=(String)cb.getSelectedItem();
         float wid=Float.parseFloat(width);
-        setStrokeWidth(graph,wid);
+        if(jInternalFrame!=null) setStrokeWidth(graph,wid);
         
     }//GEN-LAST:event_strokeWidthBoxActionPerformed
 
