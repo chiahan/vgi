@@ -204,6 +204,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }
 
     protected void installListeners() {
+        
         graph.addListener(mxEvent.MOVE_CELLS, new mxIEventListener() {
 
             public void invoke(Object sender, mxEventObject evt) {
@@ -211,7 +212,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 Double dx = (Double) evt.getProperty("dx");
                 Double dy = (Double) evt.getProperty("dy");
 
-//                System.out.println("Cells moved: " + cells.length + " " + dx + " " + dy);
+                //System.out.println("Cells moved: " + evt.getProperties());
                 updateInitialFinal(cells, new Point2D.Double(dx, dy));
                 updateControlPoint(cells,new Point2D.Double(dx,dy));
                 setModified(true);
@@ -584,35 +585,116 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         for (int i = 0; i < length; i++) {
         
             vertex = (mxCell) cells[i];
+            
+            mxPoint oldVertexPoint=new mxPoint();
+            oldVertexPoint.setX(vertex.getGeometry().getCenterX()-dx);
+            oldVertexPoint.setY(vertex.getGeometry().getCenterY()-dy);
+                
+            
+            mxPoint newVertexPoint=new mxPoint();
+            newVertexPoint.setX(vertex.getGeometry().getCenterX());
+            newVertexPoint.setY(vertex.getGeometry().getCenterY());
+            
             Object edges[] = graph.getEdges(vertex);
             int count = edges.length;
+            
             
             for (int j = 0; j < count; j++) {
                 edge = (mxCell) edges[j];
                 
                 mxCell source=(mxCell)edge.getSource();
                 mxCell target=(mxCell)edge.getTarget();
-                if(source==target){ // only loop
+                
+                mxPoint targetPoint;
+                if(target==vertex) 
+                    targetPoint=new mxPoint(source.getGeometry().getCenterX(),source.getGeometry().getCenterY());
+                else  targetPoint=new mxPoint(target.getGeometry().getCenterX(),target.getGeometry().getCenterY());
+                
+               // if(source==target){ // only loop
                     mxGeometry geo=edge.getGeometry();
                     if (geo != null){
                             // Resets the control points
                             List<mxPoint> points = geo.getPoints();
-
+                            
                             if (points != null && !points.isEmpty()){
 
                                     List<mxPoint> ptlist=geo.getPoints();
                                     for(mxPoint pt:ptlist){
-
-                                        pt.setX(pt.getX()+dx);
-                                        pt.setY(pt.getY()+dy);
-
-                                        //System.out.println("update control pt!");
+                                        
+                                       /* double deltaX=targetPoint.getX()-oldVertexPoint.getX();
+                                        double deltaY=targetPoint.getY()-oldVertexPoint.getY();
+                                        System.out.println("deltaX "+deltaX+" deltaY "+deltaY);
+                                        double newX,newY;
+                                        if(Math.abs(deltaX)>0.01){
+                                            newX=newVertexPoint.getX()+(targetPoint.getX()-newVertexPoint.getX())*(pt.getX()-oldVertexPoint.getX())/deltaX;
+                                            System.out.println((targetPoint.getX()-newVertexPoint.getX())+" * "+(pt.getX()-oldVertexPoint.getX())+" / "+deltaX);
+                                        
+                                        }else
+                                            newX=newVertexPoint.getX()+(targetPoint.getX()-newVertexPoint.getX())*(pt.getY()-oldVertexPoint.getY())/deltaY;
+                                        
+                                        if(Math.abs(deltaY)>0.001){
+                                            newY=newVertexPoint.getY()+(targetPoint.getY()-newVertexPoint.getY())*(pt.getY()-oldVertexPoint.getY())/deltaY;
+                                            System.out.println((targetPoint.getY()-newVertexPoint.getY())+" * "+(pt.getY()-oldVertexPoint.getY())+" / "+deltaY);
+                                        
+                                        }else
+                                            newY=newVertexPoint.getY()+(targetPoint.getY()-newVertexPoint.getY())*(pt.getX()-oldVertexPoint.getX())/deltaX;
+                                        
+                                        pt.setX(newX);
+                                        pt.setY(newY);
+                                        */
+                                        
+                                        double a=targetPoint.getX()-oldVertexPoint.getX();
+                                        double b=targetPoint.getY()-oldVertexPoint.getY();
+                                        
+                                        double theta=-Math.atan2(b, a);
+                                        //theta=Math.toDegrees(theta);
+                                        
+                                        double len=Math.sqrt(a*a+b*b);
+                                                
+                                        double c1=pt.getX()-oldVertexPoint.getX();
+                                        double c2=pt.getY()-oldVertexPoint.getY();
+                                        
+                                        double rc1=Math.cos(theta)*c1-Math.sin(theta)*c2;
+                                        double rc2=Math.sin(theta)*c1+Math.cos(theta)*c2;
+                                        
+                                        double area=len*rc2;
+                                     //   System.out.println("\narea: "+area+"\n theta: "+Math.toDegrees(theta) +" len: "+len+" c: "+rc1+" , "+rc2);
+                                       
+                                        double xc1=Math.cos(theta)*a-Math.sin(theta)*b;
+                                     //   System.out.println(" X: "+xc1);
+                                        double newa=targetPoint.getX()-newVertexPoint.getX();
+                                        double newb=targetPoint.getY()-newVertexPoint.getY();
+                                        
+                                        
+                                        double newtheta=-Math.atan2(newb, newa);
+                                        
+                                        double newlen=Math.sqrt(newa*newa+newb*newb);
+                                        
+                                        double newxc1=Math.cos(newtheta)*newa-Math.sin(newtheta)*newb;
+                                       // System.out.println(" newX: "+newxc1);
+                                        double newrc2=rc2;
+                                        /*if(newlen>len)
+                                            newrc2=area/(newlen*0.8);
+                                        else
+                                            newrc2=rc2/len*(newlen*1.2);*/
+                                        double newrc1=rc1/xc1*newxc1;
+                                       // System.out.println("new theta: "+Math.toDegrees(newtheta) +" len: "+newlen+" c: "+newrc1+" , "+newrc2);
+                                        
+                                        double newc1=Math.cos(-newtheta)*newrc1-Math.sin(-newtheta)*newrc2;
+                                        double newc2=Math.sin(-newtheta)*newrc1+Math.cos(-newtheta)*newrc2;
+                                        
+                                        newc1=newc1+newVertexPoint.getX();
+                                        newc2=newc2+newVertexPoint.getY();
+                                        
+                                        pt.setX(newc1);
+                                        pt.setY(newc2);
+                                        System.out.println("update control pt: "+pt);
                                     }
-
+                                    
                                     edge.getGeometry().setPoints(ptlist);
                             }
                     }
-                }
+               // }
             }
         }
         setModified(true);
@@ -979,8 +1061,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         layout.setFineTuning(false);
         layout.setDisableEdgeStyle(false);
         layout.execute(this.graph.getDefaultParent());
-        EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
-        edgeRoute.execute(this.graph.getDefaultParent());
+        //EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
+        //edgeRoute.execute(this.graph.getDefaultParent());
         
         
         
@@ -1138,6 +1220,25 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         layout.execute(this.graph.getDefaultParent());
     }  // End public void routeAllEdgesBranching()
 
+    
+    public void doLinearLayout(){
+        
+        LinearLayout layout=new LinearLayout(this.graph);
+        layout.execute(this.graph.getDefaultParent());
+        graph.refresh();
+        
+        /*Object[] allCell=graph.getChildCells(this.graph.getDefaultParent());
+        for(Object cell:allCell){
+            mxCell edge=(mxCell)cell;
+            if(edge.isEdge()){
+                System.out.println(edge.getGeometry().getPoints());
+            }
+            
+        }*/
+        //routeAllEdgesBranching();
+    }
+    
+    
     public Automata getAutomata() {
 
         Automata automata = new Automata();
@@ -1922,6 +2023,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         if (cell != null) {
             if (((mxCell) cell).isVertex()) {
                 transitionFrom = (mxCell) cell;
+               // System.out.println("add transition from :"+((mxCell)cell).getId());
             }
         }
     }//GEN-LAST:event_addTransitionFromMenuItemActionPerformed
@@ -1936,7 +2038,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 if (transitionFrom != null) {
                     transitionTo = (mxCell) cell;
                     addTransition(transitionFrom, transitionTo);
-
+                    // System.out.println("add transition to :"+((mxCell)cell).getId());
                     transitionFrom = null;
                     transitionTo = null;
                 }

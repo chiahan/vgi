@@ -315,14 +315,14 @@ public class VGI extends javax.swing.JFrame {
 		initComponents();
 		this.editMenu.setVisible(false);
 		this.viewMenu.setVisible(false);
-                this.routeAllEdges2008MenuItem.setVisible(false);
-                this.routeAllEdgesBranchingMenuItem.setVisible(false);
-                this.planarizeMenuItem.setVisible(false);
-                this.buildDualGraphMenuItem.setVisible(false);
-                this.buildWeightedVisibilityGraphMenuItem.setVisible(false);
-                this.testShortestPathsMenuItem.setVisible(false);
-                this.showWeightedVisibilityGraphMenuItem.setVisible(false);
-                this.edgeCostSettingsMenuItem.setVisible(false);
+                //this.routeAllEdges2008MenuItem.setVisible(false);
+                //this.routeAllEdgesBranchingMenuItem.setVisible(false);
+                //this.planarizeMenuItem.setVisible(false);
+                //this.buildDualGraphMenuItem.setVisible(false);
+                //this.buildWeightedVisibilityGraphMenuItem.setVisible(false);
+                //this.testShortestPathsMenuItem.setVisible(false);
+                //this.showWeightedVisibilityGraphMenuItem.setVisible(false);
+                //this.edgeCostSettingsMenuItem.setVisible(false);
                 
 
 		Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
@@ -410,6 +410,7 @@ public class VGI extends javax.swing.JFrame {
         singleVertexEdgesLayoutMenuItem = new javax.swing.JMenuItem();
         showWeightedVisibilityGraphMenuItem = new javax.swing.JMenuItem();
         edgeCostSettingsMenuItem = new javax.swing.JMenuItem();
+        linearLayoutMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -662,8 +663,12 @@ public class VGI extends javax.swing.JFrame {
         layoutMenu.setMnemonic('L');
         layoutMenu.setText("Layout");
 
-        routeEdgeWhileAddingCheckBoxMenuItem.setSelected(true);
         routeEdgeWhileAddingCheckBoxMenuItem.setText("Route Edge While Adding");
+        routeEdgeWhileAddingCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                routeEdgeWhileAddingCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
         layoutMenu.add(routeEdgeWhileAddingCheckBoxMenuItem);
 
         circleMenuItem.setText("Circle");
@@ -761,6 +766,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         layoutMenu.add(edgeCostSettingsMenuItem);
+
+        linearLayoutMenuItem.setText("Linear");
+        linearLayoutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                linearLayoutMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(linearLayoutMenuItem);
 
         menuBar.add(layoutMenu);
 
@@ -1416,6 +1429,15 @@ public class VGI extends javax.swing.JFrame {
 		edgeCostSettingsDialog.setVisible(true);
 	}//GEN-LAST:event_edgeCostSettingsMenuItemActionPerformed
 
+    private void linearLayoutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_linearLayoutMenuItemActionPerformed
+        JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
+        selected.doLinearLayout();	
+    }//GEN-LAST:event_linearLayoutMenuItemActionPerformed
+
+    private void routeEdgeWhileAddingCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_routeEdgeWhileAddingCheckBoxMenuItemActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_routeEdgeWhileAddingCheckBoxMenuItemActionPerformed
+
 	void closeSelectedFrame() {
 		this.closeMenuItemActionPerformed(null);
 	}
@@ -1655,6 +1677,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JPanel infoPanel;
     private javax.swing.JSplitPane infoSplitPane;
     private javax.swing.JMenu layoutMenu;
+    private javax.swing.JMenuItem linearLayoutMenuItem;
     private javax.swing.JDesktopPane mainDesktopPane;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JSplitPane mainSplitPane;
