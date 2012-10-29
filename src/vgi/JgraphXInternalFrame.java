@@ -1002,57 +1002,57 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     public void doCircleLayout() {
         mxCircleLayout layout = new mxCircleLayout(this.graph);
         layout.setResetEdges(true);
-		layout.setMoveCircle(true);
-		layout.setX0(100);
-		layout.setY0(100);
-		Object parent = this.graph.getDefaultParent();
+        layout.setMoveCircle(true);
+        layout.setX0(100);
+        layout.setY0(100);
+        Object parent = this.graph.getDefaultParent();
         layout.execute(this.graph.getDefaultParent());
-		Object objects[] = this.graph.getChildEdges(parent);
-		for (Object object : objects) {
-			if (!(object instanceof mxICell)) {
-				continue;
-			}
-			mxICell edge = (mxICell) object;
-			if (!(edge.isEdge())) {
-				continue;
-			}
-			Object value = edge.getValue();
-			if (!(value instanceof InitialFinalWeight)) {
-				continue;
-			}
-			InitialFinalWeight initialFinalWeight = (InitialFinalWeight) value;
-			InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
-			double offsetX = 50;
-			double offsetY = 0;
-			if ((geometricData != null) && (geometricData.offset != null)) {
-				offsetX = geometricData.offset.x;
-				offsetY = geometricData.offset.y;
-			}
-			mxGeometry geometry = edge.getGeometry();
-			if (geometry == null) {
-				continue;
-			}
-			mxICell source = edge.getTerminal(true);
-			mxICell target = edge.getTerminal(false);
-			if (source == null) {
-				if (target == null) {
-					continue;
-				}
-				mxGeometry vertexGeometry = target.getGeometry();
-				geometry.setSourcePoint(
-						new mxPoint(
-						vertexGeometry.getCenterX() + offsetX,
-						vertexGeometry.getCenterY() + offsetY));
-			} else if (target == null) {
-				mxGeometry vertexGeometry = source.getGeometry();
-				geometry.setTargetPoint(
-						new mxPoint(
-						vertexGeometry.getCenterX() + offsetX,
-						vertexGeometry.getCenterY() + offsetY));
-			}
-		}  // End for (Object object : objects)
-		SingleVertexEdgesLayout singleVertexEdgesLayout = new SingleVertexEdgesLayout(this.graph);
-		singleVertexEdgesLayout.execute(this.graph.getDefaultParent());
+        Object objects[] = this.graph.getChildEdges(parent);
+        for (Object object : objects) {
+                if (!(object instanceof mxICell)) {
+                        continue;
+                }
+                mxICell edge = (mxICell) object;
+                if (!(edge.isEdge())) {
+                        continue;
+                }
+                Object value = edge.getValue();
+                if (!(value instanceof InitialFinalWeight)) {
+                        continue;
+                }
+                InitialFinalWeight initialFinalWeight = (InitialFinalWeight) value;
+                InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
+                double offsetX = 50;
+                double offsetY = 0;
+                if ((geometricData != null) && (geometricData.offset != null)) {
+                        offsetX = geometricData.offset.x;
+                        offsetY = geometricData.offset.y;
+                }
+                mxGeometry geometry = edge.getGeometry();
+                if (geometry == null) {
+                        continue;
+                }
+                mxICell source = edge.getTerminal(true);
+                mxICell target = edge.getTerminal(false);
+                if (source == null) {
+                        if (target == null) {
+                                continue;
+                        }
+                        mxGeometry vertexGeometry = target.getGeometry();
+                        geometry.setSourcePoint(
+                                        new mxPoint(
+                                        vertexGeometry.getCenterX() + offsetX,
+                                        vertexGeometry.getCenterY() + offsetY));
+                } else if (target == null) {
+                        mxGeometry vertexGeometry = source.getGeometry();
+                        geometry.setTargetPoint(
+                                        new mxPoint(
+                                        vertexGeometry.getCenterX() + offsetX,
+                                        vertexGeometry.getCenterY() + offsetY));
+                }
+        }  // End for (Object object : objects)
+        SingleVertexEdgesLayout singleVertexEdgesLayout = new SingleVertexEdgesLayout(this.graph);
+        singleVertexEdgesLayout.execute(this.graph.getDefaultParent());
     }  // End public void doCircleLayout()
 
     public void doHierarchicalLayout() {
@@ -1061,9 +1061,12 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         layout.setFineTuning(false);
         layout.setDisableEdgeStyle(false);
         layout.execute(this.graph.getDefaultParent());
-        //EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
-        //edgeRoute.execute(this.graph.getDefaultParent());
         
+        EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
+        edgeRoute.execute(this.graph.getDefaultParent());
+        
+        EdgeRoutingBranchingLayout layout2 = new EdgeRoutingBranchingLayout(this.graph);
+        layout2.execute(this.graph.getDefaultParent());
         
         
     }  // End public void doHierarchicalLayout()
@@ -1199,13 +1202,43 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                             mxCell FeatureNode = (mxCell)iterator.next();
                             this.graph.ungroupCells(new Object[]{FeatureNode});
                         }
-                      
-                        EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
-                        edgeRoute.execute(this.graph.getDefaultParent());
+                     
+                 for(int i = 0; i < childCount-1; ++i){
+               
+                       Object child = graph.getModel().getChildAt(this.graph.getDefaultParent(), i);
+                       if(((mxCell)child).isVertex()){
+                            mxCell cell=(mxCell)child;
+                            Object[] edges=graph.getEdges(cell);
+                            
+                            for(int j=0;j<edges.length;++j){
+                                mxCell edge=(mxCell)edges[j];
+                                mxCell source=(mxCell)edge.getSource();
+                                mxCell target=(mxCell)edge.getTarget();
+                
+                                if(target==source){
+                                    ArrayList<mxPoint> points = new ArrayList<mxPoint>();
+                                    mxPoint loopCtrlPt=new mxPoint();
+                                    loopCtrlPt.setX(source.getGeometry().getCenterX());
+                                    loopCtrlPt.setY(source.getGeometry().getCenterY()+source.getGeometry().getHeight());
+                                    points.add(loopCtrlPt);
+
+                                    edge.getGeometry().setPoints(points);
+                                }
+                                
+                            }
+                        }
+                 }       
+                        
+                        
+                        //EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
+                        //edgeRoute.execute(this.graph.getDefaultParent());
+                 EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
+                 layout.execute(this.graph.getDefaultParent());
+        
                } finally {
 			this.graph.getModel().endUpdate();
 		}
-        
+                
         
         
     }
@@ -1218,6 +1251,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     public void routeAllEdgesBranching() {
         EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
         layout.execute(this.graph.getDefaultParent());
+        
+        
+        SingleVertexEdgesLayout singleVertexEdgesLayout = new SingleVertexEdgesLayout(this.graph);
+	singleVertexEdgesLayout.execute(null);
     }  // End public void routeAllEdgesBranching()
 
     
@@ -1226,6 +1263,53 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         LinearLayout layout=new LinearLayout(this.graph);
         layout.execute(this.graph.getDefaultParent());
         graph.refresh();
+        
+        Object objects[] = this.graph.getChildEdges(graph.getDefaultParent());
+        for (Object object : objects) {
+                if (!(object instanceof mxICell)) {
+                        continue;
+                }
+                mxICell edge = (mxICell) object;
+                if (!(edge.isEdge())) {
+                        continue;
+                }
+                Object value = edge.getValue();
+                if (!(value instanceof InitialFinalWeight)) {
+                        continue;
+                }
+                InitialFinalWeight initialFinalWeight = (InitialFinalWeight) value;
+                InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
+                double offsetX = 50;
+                double offsetY = 0;
+                if ((geometricData != null) && (geometricData.offset != null)) {
+                        offsetX = geometricData.offset.x;
+                        offsetY = geometricData.offset.y;
+                }
+                mxGeometry geometry = edge.getGeometry();
+                if (geometry == null) {
+                        continue;
+                }
+                mxICell source = edge.getTerminal(true);
+                mxICell target = edge.getTerminal(false);
+                if (source == null) {
+                        if (target == null) {
+                                continue;
+                        }
+                        mxGeometry vertexGeometry = target.getGeometry();
+                        geometry.setSourcePoint(
+                                        new mxPoint(
+                                        vertexGeometry.getCenterX() + offsetX,
+                                        vertexGeometry.getCenterY() + offsetY));
+                } else if (target == null) {
+                        mxGeometry vertexGeometry = source.getGeometry();
+                        geometry.setTargetPoint(
+                                        new mxPoint(
+                                        vertexGeometry.getCenterX() + offsetX,
+                                        vertexGeometry.getCenterY() + offsetY));
+                }
+        }  // End for (Object object : objects)
+        SingleVertexEdgesLayout singleVertexEdgesLayout = new SingleVertexEdgesLayout(this.graph);
+        singleVertexEdgesLayout.execute(this.graph.getDefaultParent());
         
         /*Object[] allCell=graph.getChildCells(this.graph.getDefaultParent());
         for(Object cell:allCell){

@@ -28,6 +28,7 @@ import com.mxgraph.layout.hierarchical.model.mxGraphHierarchyEdge;
 import com.mxgraph.layout.hierarchical.model.mxGraphHierarchyModel;
 import com.mxgraph.layout.hierarchical.model.mxGraphHierarchyNode;
 import com.mxgraph.layout.hierarchical.model.mxGraphHierarchyRank;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
@@ -1466,12 +1467,20 @@ public class mxCoordinateAssignment implements mxHierarchicalLayoutStage
 			int maxRank = edge.maxRank;
 			int minRank = edge.minRank;
 			
+                        
 			if (maxRank == minRank)
 			{
 				maxRank = edge.source.maxRank;
 				minRank = edge.target.minRank;
 			}
-
+                        mxCell a=(mxCell)edge.source.cell;
+                        mxCell b=(mxCell)edge.target.cell;
+                                        
+                       // System.out.println("check: "+a.getId()+"-"+b.getId()+" rank: "+maxRank+" "+minRank);
+                       // if(minRank<0) minRank=0;
+                       // if(maxRank<0) maxRank=0;
+                        if(minRank<0 || maxRank<0) return;
+                        
 			Iterator<Object> parallelEdges = edge.edges.iterator();
 			int parallelEdgeCount = 0;
 			double[] jettys = jettyPositions.get(edge);
@@ -1623,7 +1632,14 @@ public class mxCoordinateAssignment implements mxHierarchicalLayoutStage
 		Object realCell = node.cell;
 		double positionX = node.x[0] - node.width / 2;
 		double positionY = node.y[0] - node.height / 2;
-
+                
+                //mxCell a=(mxCell)node.cell;
+                //System.out.println("check: "+a.getValue()+" rank: "+cell.maxRank+" "+cell.minRank);
+                       
+                //System.out.println("minRank"+cell.minRank);
+                //if(cell.minRank<0) cell.minRank=0;
+                if(cell.minRank<0) return;
+                
 		rankTopY[cell.minRank] = Math.min(rankTopY[cell.minRank], positionY);
 		rankBottomY[cell.minRank] = Math.max(rankBottomY[cell.minRank],
 				positionY + node.height);

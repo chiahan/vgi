@@ -19,14 +19,14 @@ import javax.swing.JOptionPane;
 import com.mxgraph.swing.mxGraphOutline;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
+import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.*;
 import vgi.FsmXmlInterface.FsmXmlException;
 
 /*
@@ -284,8 +284,10 @@ public class VGI extends javax.swing.JFrame {
 
 		mxGraphOutline graphOutline = frame.getGraphOutline();
 		graphOutline.setMinimumSize(new Dimension(298, 284));
+                frame.setLocation(0, 0);
+                
 		infoSplitPane.setBottomComponent(graphOutline);
-
+                
 		this.validate();
 	}
 
@@ -315,16 +317,16 @@ public class VGI extends javax.swing.JFrame {
 		initComponents();
 		this.editMenu.setVisible(false);
 		this.viewMenu.setVisible(false);
-                //this.routeAllEdges2008MenuItem.setVisible(false);
+                this.routeAllEdges2008MenuItem.setVisible(false);
                 //this.routeAllEdgesBranchingMenuItem.setVisible(false);
-                //this.planarizeMenuItem.setVisible(false);
-                //this.buildDualGraphMenuItem.setVisible(false);
-                //this.buildWeightedVisibilityGraphMenuItem.setVisible(false);
-                //this.testShortestPathsMenuItem.setVisible(false);
-                //this.showWeightedVisibilityGraphMenuItem.setVisible(false);
-                //this.edgeCostSettingsMenuItem.setVisible(false);
+                this.planarizeMenuItem.setVisible(false);
+                this.buildDualGraphMenuItem.setVisible(false);
+                this.buildWeightedVisibilityGraphMenuItem.setVisible(false);
+                this.testShortestPathsMenuItem.setVisible(false);
+                this.showWeightedVisibilityGraphMenuItem.setVisible(false);
+                this.edgeCostSettingsMenuItem.setVisible(false);
+                this.singleVertexEdgesLayoutMenuItem.setVisible(false);
                 
-
 		Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
 		String string = preferences.get("TAF-Kit Path", defaultFolderPath);
 		try {
@@ -397,10 +399,12 @@ public class VGI extends javax.swing.JFrame {
         showPropertiesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showStatusBarCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         layoutMenu = new javax.swing.JMenu();
-        routeEdgeWhileAddingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         circleMenuItem = new javax.swing.JMenuItem();
+        linearLayoutMenuItem = new javax.swing.JMenuItem();
         hierarchicalMenuItem = new javax.swing.JMenuItem();
         featureMenuItem = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        routeEdgeWhileAddingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         routeAllEdges2008MenuItem = new javax.swing.JMenuItem();
         routeAllEdgesBranchingMenuItem = new javax.swing.JMenuItem();
         planarizeMenuItem = new javax.swing.JMenuItem();
@@ -410,7 +414,6 @@ public class VGI extends javax.swing.JFrame {
         singleVertexEdgesLayoutMenuItem = new javax.swing.JMenuItem();
         showWeightedVisibilityGraphMenuItem = new javax.swing.JMenuItem();
         edgeCostSettingsMenuItem = new javax.swing.JMenuItem();
-        linearLayoutMenuItem = new javax.swing.JMenuItem();
         algorithmsMenu = new javax.swing.JMenu();
         setTAFKitPathMenuItem = new javax.swing.JMenuItem();
         currentSettingMenuItem = new javax.swing.JMenuItem();
@@ -421,6 +424,9 @@ public class VGI extends javax.swing.JFrame {
         removeEpsilonTransitionsMenuItem = new javax.swing.JMenuItem();
         productMenuItem = new javax.swing.JMenuItem();
         algorithmsMenuSeparator2 = new javax.swing.JPopupMenu.Separator();
+        windowMenu = new javax.swing.JMenu();
+        minimizeAllMenuItem = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
         helpMenu = new javax.swing.JMenu();
         aboutMenuItem = new javax.swing.JMenuItem();
 
@@ -663,14 +669,6 @@ public class VGI extends javax.swing.JFrame {
         layoutMenu.setMnemonic('L');
         layoutMenu.setText("Layout");
 
-        routeEdgeWhileAddingCheckBoxMenuItem.setText("Route Edge While Adding");
-        routeEdgeWhileAddingCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                routeEdgeWhileAddingCheckBoxMenuItemActionPerformed(evt);
-            }
-        });
-        layoutMenu.add(routeEdgeWhileAddingCheckBoxMenuItem);
-
         circleMenuItem.setText("Circle");
         circleMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -678,6 +676,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         layoutMenu.add(circleMenuItem);
+
+        linearLayoutMenuItem.setText("Linear");
+        linearLayoutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                linearLayoutMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(linearLayoutMenuItem);
 
         hierarchicalMenuItem.setText("Hierarchical");
         hierarchicalMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -694,6 +700,15 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         layoutMenu.add(featureMenuItem);
+        layoutMenu.add(jSeparator1);
+
+        routeEdgeWhileAddingCheckBoxMenuItem.setText("Route Edge While Adding");
+        routeEdgeWhileAddingCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                routeEdgeWhileAddingCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        layoutMenu.add(routeEdgeWhileAddingCheckBoxMenuItem);
 
         routeAllEdges2008MenuItem.setText("Route All Edges (2008)");
         routeAllEdges2008MenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -767,14 +782,6 @@ public class VGI extends javax.swing.JFrame {
         });
         layoutMenu.add(edgeCostSettingsMenuItem);
 
-        linearLayoutMenuItem.setText("Linear");
-        linearLayoutMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                linearLayoutMenuItemActionPerformed(evt);
-            }
-        });
-        layoutMenu.add(linearLayoutMenuItem);
-
         menuBar.add(layoutMenu);
 
         algorithmsMenu.setMnemonic('A');
@@ -844,6 +851,28 @@ public class VGI extends javax.swing.JFrame {
         algorithmsMenu.add(algorithmsMenuSeparator2);
 
         menuBar.add(algorithmsMenu);
+
+        windowMenu.setText("Window");
+        windowMenu.addMenuListener(new javax.swing.event.MenuListener() {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                windowMenuMenuSelected(evt);
+            }
+            public void menuDeselected(javax.swing.event.MenuEvent evt) {
+            }
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            }
+        });
+
+        minimizeAllMenuItem.setText("Minimize All");
+        minimizeAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                minimizeAllMenuItemActionPerformed(evt);
+            }
+        });
+        windowMenu.add(minimizeAllMenuItem);
+        windowMenu.add(jSeparator2);
+
+        menuBar.add(windowMenu);
 
         helpMenu.setMnemonic('H');
         helpMenu.setText("Help");
@@ -1438,6 +1467,61 @@ public class VGI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_routeEdgeWhileAddingCheckBoxMenuItemActionPerformed
 
+    private void windowMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_windowMenuMenuSelected
+        // update current windows
+        JInternalFrame allframe[]= mainDesktopPane.getAllFrames();
+        
+        int size=windowMenu.getItemCount();
+        if(size>1){
+        for(int i=2;i<size;i++){
+            this.windowMenu.remove(windowMenu.getItemCount()-1);
+           // JMenuItem item=this.windowMenu.getItem(i);
+           // System.out.println(i+"  "+item.getText());
+        }
+        }
+        for(final JInternalFrame internalframe: allframe){
+            String title=internalframe.getTitle();
+            
+            if(internalframe.isSelected()) title=" ◆ "+title;
+            else title="    "+title;
+            
+            JMenuItem menuItem = new JMenuItem(title);
+	    ActionListener actionListener = new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent ae) {
+                    showInternalFrame((JgraphXInternalFrame)internalframe);
+                 }
+            };
+                    
+            menuItem.addActionListener(actionListener);
+            this.windowMenu.add(menuItem);
+	
+           
+        }
+        
+    }//GEN-LAST:event_windowMenuMenuSelected
+
+    private void minimizeAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minimizeAllMenuItemActionPerformed
+       
+        DesktopManager manager=mainDesktopPane.getDesktopManager();
+        JInternalFrame allframe[]= mainDesktopPane.getAllFrames();
+        for(JInternalFrame internalframe: allframe){
+            //manager.minimizeFrame(internalframe);
+            manager.iconifyFrame(internalframe);
+        }
+    }//GEN-LAST:event_minimizeAllMenuItemActionPerformed
+
+    void showInternalFrame(JgraphXInternalFrame frame){
+        try {
+                DesktopManager manager=mainDesktopPane.getDesktopManager();
+                //manager.deiconifyFrame(frame);
+                manager.openFrame(frame);
+                frame.setSelected(true);
+            
+        } catch (PropertyVetoException ex) {
+            Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 	void closeSelectedFrame() {
 		this.closeMenuItemActionPerformed(null);
 	}
@@ -1676,6 +1760,8 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem hierarchicalMenuItem;
     private javax.swing.JPanel infoPanel;
     private javax.swing.JSplitPane infoSplitPane;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JMenu layoutMenu;
     private javax.swing.JMenuItem linearLayoutMenuItem;
     private javax.swing.JDesktopPane mainDesktopPane;
@@ -1683,6 +1769,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JSplitPane mainSplitPane;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem mergeSimilarTransitionsMenuItem;
+    private javax.swing.JMenuItem minimizeAllMenuItem;
     private javax.swing.JMenuItem newMenuItem;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JPanel outlinePanel;
@@ -1709,6 +1796,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JButton undoButton;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JPopupMenu.Separator viewMenuSeparator1;
+    private javax.swing.JMenu windowMenu;
     private javax.swing.JButton zoomInButton;
     private javax.swing.JMenuItem zoomInMenuItem;
     private javax.swing.JButton zoomOutButton;

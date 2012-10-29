@@ -89,7 +89,7 @@ public class LinearLayout extends mxGraphLayout{
                            // mxCell source=(mxCell)edge.getSource();
                             mxCell target=(mxCell)edge.getTarget();
                             // System.out.println("s: "+cell.getId()+"-> t: "+target.getId());
-                            if(cell!=target){
+                            if(cell!=target && target!=null){
                                 
                                 Integer sourceWeight=vertexList.get(cell);
                                 Integer targetWeight=vertexList.get(target);
@@ -112,10 +112,10 @@ public class LinearLayout extends mxGraphLayout{
                                     int sourceEdgeCount=inComingEdges.length;
                                     for(int k=0;k<sourceEdgeCount;++k){
                                         mxCell source=(mxCell) ((mxCell)inComingEdges[k]).getSource();
-                                        
+                                        if(source!=null){
                                         int oldWeight=vertexList.get(source);
                                         vertexList.put(source,(oldWeight-sourceWeight)+targetWeight+1);
-                                                
+                                        }
                                     }
                                    
                                 }
@@ -164,7 +164,7 @@ public class LinearLayout extends mxGraphLayout{
                         mxCell edge=(mxCell)outGoingEdges[j];
                         mxCell target=(mxCell)edge.getTarget();
                         
-                        if(target!=cell){
+                        if(target!=cell && target!=null){
                             if(edgeGoUp(edge)){
                                 // set control point to top
 
@@ -218,8 +218,8 @@ public class LinearLayout extends mxGraphLayout{
             for(int i = 0; i < vertexNum; i++){
                
                         mxCell cell=vertexMapList.get(i);
-                        Object[] edges=graph.getOutgoingEdges(cell);
-                       
+                       // Object[] edges=graph.getOutgoingEdges(cell);
+                        Object[] edges=graph.getEdges(cell);
                         
                         ArrayList<mxCell> edgeList=new ArrayList<mxCell>();
                         int len=edges.length;
@@ -253,7 +253,8 @@ public class LinearLayout extends mxGraphLayout{
                             mxCell source=(mxCell)edge.getSource();
                             mxCell target=(mxCell)edge.getTarget();
                         
-                             
+                           //System.out.println(source.getId()+" "+target.getId());
+                               
                             if(target==source){
                                 ArrayList<mxPoint> points = new ArrayList<mxPoint>();
                                 mxPoint loopCtrlPt=new mxPoint();
@@ -262,7 +263,10 @@ public class LinearLayout extends mxGraphLayout{
                                 points.add(loopCtrlPt);
 
                                 edge.getGeometry().setPoints(points);
-                            }else{
+                                
+                                System.out.println("loop"+loopCtrlPt);
+                                
+                            }else if(source==cell && target!=null){
                                 int sourceIndex=vertexMapList.indexOf(source);
                                 int targetIndex=vertexMapList.indexOf(target);
                                 //System.out.println("arc test of "+sourceIndex+" -> "+targetIndex);
@@ -400,7 +404,14 @@ public class LinearLayout extends mxGraphLayout{
         
         List<mxPoint> points=edge.getGeometry().getPoints();
         mxPoint controlPoint=points.get(0);
+        if(sourceInd==targetInd){  
             
+          //  controlPoint.setY(height+edge.getSource().getGeometry().getHeight()*0.8);                    
+            controlPoint.setX(edge.getSource().getGeometry().getCenterX());
+            controlPoint.setY(edge.getSource().getGeometry().getCenterY()+edge.getSource().getGeometry().getHeight());
+            System.out.println("loop"+controlPoint);
+        
+        }else{
          if(Math.abs(sourceInd-targetInd)==1){
              controlPoint.setY(lineY);
          }else{
@@ -483,9 +494,11 @@ public class LinearLayout extends mxGraphLayout{
         
        }
          
+     }        
             points.clear();
             points.add(controlPoint);
             edge.getGeometry().setPoints(points);
     }
+    
     
 }

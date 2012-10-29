@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.view.mxGraph;
 
 /**
@@ -673,7 +674,10 @@ public class mxGraphHierarchyModel
 							.add(cell);
 					node.maxRank = node.temp[0];
 					node.minRank = node.temp[0];
-
+                                        
+                                        mxCell a=(mxCell)cell.cell;
+                                        System.out.println("node: "+a.getValue()+" rank "+node.maxRank+" "+node.minRank);
+                                        
 					// Set temp[0] to the nodes position in the rank
 					node.temp[0] = rankList[node.maxRank].size() - 1;
 				}

@@ -239,35 +239,38 @@ public class CircleLayout extends mxGraphLayout
 			}
 
 			int vertexCount = vertices.size();
-			double r = Math.max(vertexCount * max / Math.PI, radius);
+                        if(vertexCount>0){ 
+                        
+                            double r = Math.max(vertexCount * max / Math.PI, radius);
 
-			// Moves the circle to the specified origin
-			if (moveCircle)
-			{
-				top = x0;
-				left = y0;
-			}
-                        marked  = new boolean[vertexCount];
-                        onStack = new boolean[vertexCount];
-                        edgeTo  = new int[vertexCount];
-                        
-                        
-                        for (int v = 0; v < vertexCount; v++){
-                            marked[v] = false;
-                            onStack[v]= false;
-                            featureNode.put(vertices.get(v),v);
+                            // Moves the circle to the specified origin
+                            if (moveCircle)
+                            {
+                                    top = x0;
+                                    left = y0;
+                            }
+                            marked  = new boolean[vertexCount];
+                            onStack = new boolean[vertexCount];
+                            edgeTo  = new int[vertexCount];
+
+
+                            for (int v = 0; v < vertexCount; v++){
+                                marked[v] = false;
+                                onStack[v]= false;
+                                featureNode.put(vertices.get(v),v);
+                            }
+
+
+                            dfs(graph, parent, 0);
+
+                            int x = DFSCount;
+
+
+                            for(int i = 0 ; i< vertexCount ; i++){
+                                x = edgeTo[x];
+                            }
+                            circle(vertices.toArray(), r, left.doubleValue(), top.doubleValue());
                         }
-                        
-                        
-                        dfs(graph, parent, 0);
-                        
-                        int x = DFSCount;
-                        
-                        
-                        for(int i = 0 ; i< vertexCount ; i++){
-                            x = edgeTo[x];
-                        }
-                 	circle(vertices.toArray(), r, left.doubleValue(), top.doubleValue());
 		}
 		finally
 		{
@@ -310,6 +313,8 @@ public class CircleLayout extends mxGraphLayout
         
         
         private void dfs(mxGraph graph, Object parent, int v) {
+        
+            
         
         onStack[v] = true;
         marked[v] = true;
