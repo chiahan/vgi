@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package vgi;
+package vgi.layout.edgerouting;
 
+import vgi.layout.edgerouting.EdgeCostSettingsDialog;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.util.mxPoint;
@@ -11,7 +12,9 @@ import com.mxgraph.view.mxGraph;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.prefs.Preferences;
-import vgi.SingleVertexEdgesLayout.Vector2DComparator;
+import vgi.layout.edgerouting.SingleVertexEdgesLayout.Vector2DComparator;
+import vgi.display.VGI;
+import vgi.geometrictools.Vector2D;
 
 /**
  *

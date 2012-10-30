@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package vgi;
+package vgi.geometrictools;
 
 import java.awt.geom.Point2D;
 import java.text.NumberFormat;

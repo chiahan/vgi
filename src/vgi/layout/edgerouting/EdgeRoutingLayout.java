@@ -1,4 +1,4 @@
-package vgi;
+package vgi.layout.edgerouting;
 
 
 import java.util.ArrayList;

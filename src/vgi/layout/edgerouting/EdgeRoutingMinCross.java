@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package vgi;
+package vgi.layout.edgerouting;
 
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.model.mxCell;
@@ -18,8 +18,10 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.*;
-import vgi.WeightedVisibilityGraph.LineSegment;
-import vgi.WeightedVisibilityGraph.Vertex;
+import vgi.geometrictools.Vector2D;
+import vgi.automata.WeightedRegularExpression;
+import vgi.layout.edgerouting.WeightedVisibilityGraph.LineSegment;
+import vgi.layout.edgerouting.WeightedVisibilityGraph.Vertex;
 
 /**
  *

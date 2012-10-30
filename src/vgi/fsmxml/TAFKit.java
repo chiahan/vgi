@@ -1,5 +1,8 @@
-package vgi;
+package vgi.fsmxml;
 
+import vgi.fsmxml.FsmXml;
+import vgi.automata.AutomataInterface;
+import vgi.automata.Automata;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -7,7 +10,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import vgi.FsmXmlInterface.FsmXmlException;
+import vgi.fsmxml.FsmXmlInterface.FsmXmlException;
 
 /**
  *

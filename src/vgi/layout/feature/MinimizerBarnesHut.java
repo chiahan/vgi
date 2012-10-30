@@ -1,4 +1,4 @@
-package vgi;
+package vgi.layout.feature;
 
 //Copyright (C) 2008 Andreas Noack
 //
@@ -17,6 +17,8 @@ package vgi;
 //Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA 
 
 import java.util.*;
+import vgi.layout.edgerouting.Edge;
+import vgi.layout.edgerouting.Node;
 
 /**
  * Minimizer for the LinLog energy model and its generalizations,

@@ -1,5 +1,9 @@
-package vgi;
+package vgi.display;
 
+import vgi.layout.edgerouting.EdgePropertiesPanel;
+import vgi.automata.Transition;
+import vgi.automata.State;
+import vgi.automata.Automata;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.view.mxGraph;
 import java.util.Hashtable;

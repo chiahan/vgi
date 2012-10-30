@@ -1,5 +1,6 @@
-package vgi;
+package vgi.fsmxml;
 
+import vgi.automata.Automata;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -18,8 +19,8 @@ public interface TAFKitInterface {
 
 				AUTOMATON, BOOLEAN, INTEGER, REGULAR_EXPRESSION, TEXT, WEIGHT, WORD, UNKNOWN
 			}  // End public enum Type
-			Type type;
-			String context;
+			public Type type;
+			public String context;
 		}  // End public class InputOutput
 		public String name;
 		public List<IoInfo> inputsInfo;

@@ -1,4 +1,4 @@
-package vgi;
+package vgi.layout.feature;
 
 
 import java.util.ArrayList;
@@ -16,6 +16,9 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import com.mxgraph.model.mxCell;
+import vgi.layout.edgerouting.Edge;
+import vgi.layout.edgerouting.Node;
+import vgi.layout.edgerouting.OptimizerModularity;
 
 public  class ClusterPreProcess
 {

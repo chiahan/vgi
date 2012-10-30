@@ -2,8 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package vgi;
+package vgi.display;
 
+import vgi.automata.Transition;
+import vgi.automata.State;
+import vgi.automata.Automata;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.util.mxPoint;
@@ -13,6 +16,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.Hashtable;
+import vgi.automata.WeightedRegularExpression;
 
 /**
  *

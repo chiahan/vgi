@@ -1,4 +1,4 @@
-package vgi;
+package vgi.layout.feature;
 
 
 import java.util.ArrayList;
@@ -12,6 +12,11 @@ import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxCell;
 import java.io.*;
 import java.util.*;
+import vgi.layout.edgerouting.Edge;
+import vgi.layout.edgerouting.Node;
+import vgi.layout.edgerouting.OptimizerModularity;
+import vgi.geometrictools.RotationAngle;
+import vgi.geometrictools.RotationInnerAngle;
 
 public class ClusteringLayout extends mxGraphLayout
 {

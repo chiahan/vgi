@@ -1,6 +1,8 @@
-package vgi;
+package vgi.display;
 
 
+import vgi.fsmxml.TAFKitInterface;
+import vgi.automata.AutomataInterface;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
@@ -12,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 import javax.swing.text.Highlighter;
+import vgi.automata.WeightedRegularExpression;
 
 /*
  * To change this template, choose Tools | Templates

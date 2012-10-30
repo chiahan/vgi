@@ -1,6 +1,9 @@
-package vgi;
+package vgi.automata;
 
 
+import vgi.fsmxml.TAFKitInterface;
+import vgi.automata.AutomataInterface;
+import vgi.automata.Automata;
 import java.io.Serializable;
 import java.text.NumberFormat;
 

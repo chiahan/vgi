@@ -1,4 +1,4 @@
-package vgi;
+package vgi.geometrictools;
 
 
 import java.util.ArrayList;

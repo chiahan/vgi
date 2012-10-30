@@ -1,4 +1,4 @@
-package vgi;
+package vgi.automata;
 
 /*
  * To change this template, choose Tools | Templates and open the template in

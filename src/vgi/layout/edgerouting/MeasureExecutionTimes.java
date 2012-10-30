@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package vgi;
+package vgi.layout.edgerouting;
 
+import vgi.layout.edgerouting.EdgeRoutingMinCross;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.view.mxGraph;
 import java.io.File;
@@ -11,6 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
+import vgi.display.JgraphXInternalFrame;
+import vgi.display.VGI;
 
 /**
  *

@@ -2,8 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package vgi;
+package vgi.automata;
 
+import vgi.automata.Transition;
+import vgi.automata.TransitionInterface;
+import vgi.automata.StateInterface;
+import vgi.automata.State;
+import vgi.automata.Automata;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;

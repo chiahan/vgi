@@ -1,4 +1,4 @@
-package vgi;
+package vgi.layout.edgerouting;
 
 //Copyright (C) 2008 Andreas Noack
 //

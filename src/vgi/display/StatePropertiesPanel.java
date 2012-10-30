@@ -1,5 +1,10 @@
-package vgi;
+package vgi.display;
 
+import vgi.fsmxml.TAFKitInterface;
+import vgi.automata.InitialFinalWeight;
+import vgi.automata.Transition;
+import vgi.automata.State;
+import vgi.automata.Automata;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxICell;

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package vgi;
+package vgi.automata;
 
 import java.awt.geom.Point2D;
 import java.io.Serializable;

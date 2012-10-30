@@ -2,11 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package vgi;
+package vgi.layout.edgerouting;
 
 import java.awt.event.WindowEvent;
 import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
+import vgi.display.VGI;
 
 /**
  *

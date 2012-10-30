@@ -1,5 +1,18 @@
-package vgi;
+package vgi.display;
 
+import vgi.display.JgraphXInternalFrame;
+import vgi.display.CreateAutomataDialog;
+import vgi.automata.AutomataHistory;
+import vgi.automata.Layout;
+import vgi.fsmxml.TAFKitInterface;
+import vgi.fsmxml.TAFKit;
+import vgi.fsmxml.FsmXml;
+import vgi.layout.edgerouting.SingleVertexEdgesLayout;
+import vgi.layout.edgerouting.WeightedVisibilityGraph;
+import vgi.layout.edgerouting.EdgeCostSettingsDialog;
+import vgi.layout.edgerouting.EdgeRoutingMinCross;
+import vgi.automata.AutomataInterface;
+import vgi.automata.Automata;
 import com.mxgraph.model.mxICell;
 import com.mxgraph.swing.mxGraphComponent;
 import java.awt.event.ActionEvent;
@@ -27,7 +40,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
-import vgi.FsmXmlInterface.FsmXmlException;
+import vgi.fsmxml.FsmXmlInterface;
+import vgi.fsmxml.FsmXmlInterface.FsmXmlException;
 
 /*
  * To change this template, choose Tools | Templates and open the template in
@@ -298,7 +312,7 @@ public class VGI extends javax.swing.JFrame {
 		createInternalFrame(frame);
 	}
 
-	private void createInternalFrame(Automata automata, String filename) {
+	public void createInternalFrame(Automata automata, String filename) {
 		JgraphXInternalFrame frame =
 				new JgraphXInternalFrame(infoSplitPane, new mxGraph(),
 				automata, filename,this);
@@ -1522,15 +1536,15 @@ public class VGI extends javax.swing.JFrame {
             Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-	void closeSelectedFrame() {
+	public void closeSelectedFrame() {
 		this.closeMenuItemActionPerformed(null);
 	}
 
-	void exitProgram() {
+	public void exitProgram() {
 		this.exitMenuItemActionPerformed(null);
 	}
 
-	JgraphXInternalFrame getSelectedFrame() {
+	public JgraphXInternalFrame getSelectedFrame() {
 		JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
 		if (frame instanceof JgraphXInternalFrame) {
 			return (JgraphXInternalFrame) frame;
@@ -1655,83 +1669,83 @@ public class VGI extends javax.swing.JFrame {
 	/**
 	 * @param args the command line arguments
 	 */
-	public static void main(final String args[]) {
-		/*
-		 * Set the Nimbus look and feel
-		 */
-		//<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /*
-		 * If Nimbus (introduced in Java SE 6) is not available, stay with the
-		 * default look and feel. For details see
-		 * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-		 */
-		try {
-			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
-					javax.swing.UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-		} catch (ClassNotFoundException ex) {
-			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (InstantiationException ex) {
-			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (IllegalAccessException ex) {
-			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
-			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		}
-		//</editor-fold>
-
-		/*
-		 * Create and display the form
-		 */
-               // FsmXml fsmXml = new FsmXml();
-               // fsmXml.read(System.in);
-                //final String[] filename=args;
-		java.awt.EventQueue.invokeLater(new Runnable() {
-
-			public void run() {
-                                VGI vgi=new VGI();
-                                boolean standardInputError=false;
-                                String errorString=null;
-                                    
-                                if(args.length>0){
-                                    String filename=args[0];
-                                    if(filename!=null){
-                                        if(filename.charAt(0)=='-'){
-                                            FsmXml fsmXml=new FsmXml();
-                                            List<Automata> automataList = null;
-           
-                                            try{
-                                                        automataList=fsmXml.read(System.in);
-                                                        //System.out.println(System.in.toString());
-                                                    
-                                            }catch(FsmXmlException ex){
-                                                Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
-                                                standardInputError=true;
-                                                errorString=ex.getMessage();
-                                            }
-                                            
-                                            if ((automataList != null) && (automataList.size() > 0)) {
-       
-                                                Automata automata = automataList.get(0);
-//                                                vgi.pmAutomataType = new TAFKitInterface.AutomataType(automata);
-//                                                vgi.updateAlgorithmMenuItems();
-                                                vgi.createInternalFrame(automata, "");
-                                            }
-                                            
-                                        }else{
-                                            vgi.openFile(filename);
-                                        }
-                                    }
-                                }
-				vgi.setVisible(true);
-                                if(standardInputError) vgi.showErrorDialog(errorString);
-                                
-			}
-		});
-	}
+//	public static void main(final String args[]) {
+//		/*
+//		 * Set the Nimbus look and feel
+//		 */
+//		//<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /*
+//		 * If Nimbus (introduced in Java SE 6) is not available, stay with the
+//		 * default look and feel. For details see
+//		 * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
+//		 */
+//		try {
+//			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//				if ("Nimbus".equals(info.getName())) {
+//					javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//					break;
+//				}
+//			}
+//		} catch (ClassNotFoundException ex) {
+//			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//		} catch (InstantiationException ex) {
+//			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//		} catch (IllegalAccessException ex) {
+//			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//			java.util.logging.Logger.getLogger(VGI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//		}
+//		//</editor-fold>
+//
+//		/*
+//		 * Create and display the form
+//		 */
+//               // FsmXml fsmXml = new FsmXml();
+//               // fsmXml.read(System.in);
+//                //final String[] filename=args;
+//		java.awt.EventQueue.invokeLater(new Runnable() {
+//
+//			public void run() {
+//                                VGI vgi=new VGI();
+//                                boolean standardInputError=false;
+//                                String errorString=null;
+//                                    
+//                                if(args.length>0){
+//                                    String filename=args[0];
+//                                    if(filename!=null){
+//                                        if(filename.charAt(0)=='-'){
+//                                            FsmXml fsmXml=new FsmXml();
+//                                            List<Automata> automataList = null;
+//           
+//                                            try{
+//                                                        automataList=fsmXml.read(System.in);
+//                                                        //System.out.println(System.in.toString());
+//                                                    
+//                                            }catch(FsmXmlException ex){
+//                                                Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
+//                                                standardInputError=true;
+//                                                errorString=ex.getMessage();
+//                                            }
+//                                            
+//                                            if ((automataList != null) && (automataList.size() > 0)) {
+//       
+//                                                Automata automata = automataList.get(0);
+////                                                vgi.pmAutomataType = new TAFKitInterface.AutomataType(automata);
+////                                                vgi.updateAlgorithmMenuItems();
+//                                                vgi.createInternalFrame(automata, "");
+//                                            }
+//                                            
+//                                        }else{
+//                                            vgi.openFile(filename);
+//                                        }
+//                                    }
+//                                }
+//				vgi.setVisible(true);
+//                                if(standardInputError) vgi.showErrorDialog(errorString);
+//                                
+//			}
+//		});
+//	}*/
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JMenuItem accessibleMenuItem;

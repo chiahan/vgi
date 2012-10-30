@@ -1,8 +1,11 @@
-package vgi;
+package vgi.automata;
 
+import vgi.automata.Transition;
+import vgi.automata.State;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import vgi.fsmxml.TAFKitInterface;
 
 /**
  *

@@ -1,4 +1,4 @@
-package vgi;
+package vgi.automata;
 
 /*
  * To change this template, choose Tools | Templates and open the template in
@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import vgi.fsmxml.TAFKitInterface;
 
 public class Automata implements AutomataInterface {
 

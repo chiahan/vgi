@@ -1,6 +1,7 @@
-package vgi;
+package vgi.fsmxml;
 
 
+import vgi.automata.Automata;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

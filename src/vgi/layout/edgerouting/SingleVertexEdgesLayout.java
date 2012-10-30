@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package vgi;
+package vgi.layout.edgerouting;
 
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.model.mxGeometry;
@@ -10,6 +10,7 @@ import com.mxgraph.model.mxICell;
 import com.mxgraph.util.mxPoint;
 import com.mxgraph.view.mxGraph;
 import java.util.*;
+import vgi.geometrictools.Vector2D;
 
 /**
  *

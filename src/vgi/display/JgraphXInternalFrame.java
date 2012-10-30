@@ -1,5 +1,22 @@
-package vgi;
+package vgi.display;
 
+import vgi.layout.feature.PreProcess;
+import vgi.layout.circular.CircleLayout;
+import vgi.layout.linear.LinearLayout;
+import vgi.layout.edgerouting.SingleVertexEdgesLayout;
+import vgi.layout.edgerouting.WeightedVisibilityGraph;
+import vgi.layout.edgerouting.EdgeRoutingBranchingLayout;
+import vgi.layout.edgerouting.EdgePropertiesPanel;
+import vgi.layout.edgerouting.EdgeRoutingMinCross;
+import vgi.layout.edgerouting.EdgeRoutingLayout;
+import vgi.layout.feature.ClusterPreProcess;
+import vgi.layout.feature.TreeLayout;
+import vgi.layout.feature.ClusteringLayout;
+import vgi.automata.InitialFinalWeight;
+import vgi.automata.Transition;
+import vgi.automata.StateInterface;
+import vgi.automata.State;
+import vgi.automata.Automata;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxParallelEdgeLayout;
@@ -33,7 +50,9 @@ import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import vgi.TransitionInterface.GeometricData;
+import vgi.automata.WeightedRegularExpression;
+import vgi.automata.*;
+import vgi.automata.TransitionInterface.GeometricData;
 
 /*
  * To change this template, choose Tools | Templates and open the template in
@@ -1907,9 +1926,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     private static final int xOffset = 30, yOffset = 30;
     private mxGraphComponent graphComponent = null;
     private mxGraphOutline graphOutline;
-    final mxGraph graph;
+    public final mxGraph graph;
     protected WeightedVisibilityGraph visibilityGraph;
-    protected boolean modified = false;
+    public boolean modified = false;
     protected boolean isPopupTrigger;
     protected mxRubberband rubberband;
     protected mxKeyboardHandler keyboardHandler;
@@ -2055,21 +2074,21 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         graphPopupMenu.add(routeEdgeWVGMenuItem);
 
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
-            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
-                formInternalFrameClosed(evt);
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameClosing(evt);
             }
-            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosed(evt);
             }
             public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
             }
-            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
         });
         addMouseWheelListener(new java.awt.event.MouseWheelListener() {

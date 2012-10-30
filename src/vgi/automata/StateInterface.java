@@ -1,6 +1,7 @@
-package vgi;
+package vgi.automata;
 
 
+import vgi.automata.State;
 import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.util.List;
@@ -13,9 +14,9 @@ public interface StateInterface {
 
 	public class GeometricData {
 
-		Point2D location;
-		Point2D size;
-                String shape;
+		public Point2D location;
+		public Point2D size;
+                public String shape;
 
 		public GeometricData() {
 			this.location = null;
@@ -27,9 +28,9 @@ public interface StateInterface {
         
         public class DrawingData{
             
-               String fillColor;
-               String strokeColor;
-               float strokeWidth;
+               public String fillColor;
+               public String strokeColor;
+               public float strokeWidth;
                
                public DrawingData(){
                    this.fillColor=null;

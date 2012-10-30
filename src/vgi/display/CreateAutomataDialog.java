@@ -1,6 +1,8 @@
-package vgi;
+package vgi.display;
 
 
+import vgi.fsmxml.TAFKitInterface;
+import vgi.automata.AutomataInterface;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 

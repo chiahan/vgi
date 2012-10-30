@@ -1,5 +1,12 @@
-package vgi;
+package vgi.fsmxml;
 
+import vgi.automata.AutomataInterface;
+import vgi.automata.InitialFinalWeight;
+import vgi.automata.Transition;
+import vgi.automata.TransitionInterface;
+import vgi.automata.StateInterface;
+import vgi.automata.State;
+import vgi.automata.Automata;
 import java.awt.geom.Point2D;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,6 +37,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import vgi.automata.WeightedRegularExpression;
 
 /**
  *

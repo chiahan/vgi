@@ -1,4 +1,6 @@
-package vgi;
+package vgi.automata;
+
+import vgi.automata.State;
 
 /*
  * To change this template, choose Tools | Templates

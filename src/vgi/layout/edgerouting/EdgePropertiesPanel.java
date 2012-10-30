@@ -1,5 +1,7 @@
-package vgi;
+package vgi.layout.edgerouting;
 
+import vgi.automata.Transition;
+import vgi.automata.Automata;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.util.mxPoint;
@@ -17,6 +19,10 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
+import vgi.display.DisplayUtil;
+import vgi.display.ExpressionEditor;
+import vgi.display.JgraphXInternalFrame;
+import vgi.automata.WeightedRegularExpression;
 
 /*
  * edge_properties.java

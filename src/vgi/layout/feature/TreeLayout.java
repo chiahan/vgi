@@ -1,4 +1,4 @@
-package vgi;
+package vgi.layout.feature;
 
 import com.mxgraph.layout.mxGraphLayout;
 import java.util.HashSet;
