@@ -23,6 +23,7 @@ import com.mxgraph.layout.hierarchical.stage.mxCoordinateAssignment;
 import com.mxgraph.layout.hierarchical.stage.mxHierarchicalLayoutStage;
 import com.mxgraph.layout.hierarchical.stage.mxMedianHybridCrossingReduction;
 import com.mxgraph.layout.hierarchical.stage.mxMinimumCycleRemover;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.view.mxGraph;
 
@@ -188,7 +189,7 @@ JGraphLayout.Stoppable*/
 
 		this.roots = roots;
 		mxIGraphModel model = graph.getModel();
-
+                
 		model.beginUpdate();
 		try
 		{
@@ -227,9 +228,12 @@ JGraphLayout.Stoppable*/
 			rootLocations = new ArrayList<Point2D>();
 			affectedEdges = new ArrayList<Set<Object>>();
 		}
-
+                
+                
 		for (int i = 0; i < roots.size(); i++)
 		{
+                        System.out.println("root: "+((mxCell)roots.get(i)).getValue());
+                    
 			// First check if this root appears in any of the previous vertex
 			// sets
 			boolean newHierarchy = true;
@@ -281,6 +285,7 @@ JGraphLayout.Stoppable*/
 						{
 							if (!vertexSet.contains(cells[j]))
 							{
+                                                            System.out.println("--push "+((mxCell)cells[j]).getValue());
 								cellsStack.push(cells[j]);
 							}
 						}

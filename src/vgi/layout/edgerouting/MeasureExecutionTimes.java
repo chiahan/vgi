@@ -64,7 +64,7 @@ public class MeasureExecutionTimes {
 			throw new IllegalStateException("Missing source or target vertex.");
 		}
 		if (inAddTransition) {
-			frame.addTransition(source, target);
+			//frame.addTransition(source, target);
 		}
 		mxCell edgeToRoute = null;
 		objects = graph.getChildEdges(parent);

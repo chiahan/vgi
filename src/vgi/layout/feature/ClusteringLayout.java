@@ -185,10 +185,11 @@ public class ClusteringLayout extends mxGraphLayout
                 
                 for (int i = 0; i < childCount; i++)
 		{
-                    Object child = new Object();
-                    child = graph.getModel().getChildAt(graph.getDefaultParent(), i);
-                       
-                    if(((mxCell)child).isEdge())
+                    mxCell child = null;//new Object();
+                    child = (mxCell)graph.getModel().getChildAt(graph.getDefaultParent(), i);
+                    
+                    //if(((mxCell)child).isEdge())
+                    if(child.isEdge() && child.getTerminal(true)!=null && child.getTerminal(false)!=null)
                         {
                             String source = ((mxCell)child).getTerminal(true).getId();
                             String target = ((mxCell)child).getTerminal(false).getId();

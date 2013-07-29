@@ -1,58 +1,44 @@
 package vgi.display;
 
-import vgi.layout.feature.PreProcess;
-import vgi.layout.circular.CircleLayout;
-import vgi.layout.linear.LinearLayout;
-import vgi.layout.edgerouting.SingleVertexEdgesLayout;
-import vgi.layout.edgerouting.WeightedVisibilityGraph;
-import vgi.layout.edgerouting.EdgeRoutingBranchingLayout;
-import vgi.layout.edgerouting.EdgePropertiesPanel;
-import vgi.layout.edgerouting.EdgeRoutingMinCross;
-import vgi.layout.edgerouting.EdgeRoutingLayout;
-import vgi.layout.feature.ClusterPreProcess;
-import vgi.layout.feature.TreeLayout;
-import vgi.layout.feature.ClusteringLayout;
-import vgi.automata.InitialFinalWeight;
-import vgi.automata.Transition;
-import vgi.automata.StateInterface;
-import vgi.automata.State;
-import vgi.automata.Automata;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.layout.mxCircleLayout;
-import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.model.mxGeometry;
-import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxICell;
-import com.mxgraph.swing.handler.mxCellHandler;
 import com.mxgraph.swing.handler.mxEdgeHandler;
 import com.mxgraph.swing.handler.mxKeyboardHandler;
 import com.mxgraph.swing.handler.mxRubberband;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.swing.mxGraphOutline;
-import com.mxgraph.util.*;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
+import com.mxgraph.util.*;
 import com.mxgraph.view.mxGraph;
-import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
-import java.beans.PropertyVetoException;
+import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Stack;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import vgi.automata.WeightedRegularExpression;
 import vgi.automata.*;
-import vgi.automata.TransitionInterface.GeometricData;
+import vgi.geometrictools.Vector2D;
+import vgi.layout.circular.CircularLayoutAutomata;
+import vgi.layout.edgerouting.*;
+import vgi.layout.feature.FeatureLayout;
+import vgi.layout.helperclass.GroupReplacedAutomata;
+import vgi.layout.linear.LinearLayoutAutomata;
 
 /*
  * To change this template, choose Tools | Templates and open the template in
@@ -70,28 +56,31 @@ import vgi.automata.TransitionInterface.GeometricData;
  */
 public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
-    protected static class StateValue {
+//    protected static class StateValue {
+//
+//        public String name;
+//        public List<State> history;
+//
+//        @Override
+//        public String toString() {
+//            return this.name;
+//        }
+//    }  // End protected static class StateValue
+//
+//    protected static class TransitionValue {
+//
+//        public WeightedRegularExpression label;
+//        public List<Transition> history;
+//
+//        @Override
+//        public String toString() {
+//            return this.label.toString();
+//        }
+//    }  // End protected static class TransitionValue
 
-        public String name;
-        public List<State> history;
-
-        @Override
-        public String toString() {
-            return this.name;
-        }
-    }  // End protected static class StateValue
-
-    protected static class TransitionValue {
-
-        public WeightedRegularExpression label;
-        public List<Transition> history;
-
-        @Override
-        public String toString() {
-            return this.label.toString();
-        }
-    }  // End protected static class TransitionValue
-
+    //static private StateDrawingData defaultDrawingData;//=new StateDrawingData("#FFFFFF","#000000",1);
+    
+    
     /**
      * Creates new form JgraphXInternalFrame
      */
@@ -108,9 +97,13 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         initComponents();
 
         this.infoSplitPane = infoSplitPane;
-        this.graph = graph;
+        //this.graph = graph;
         this.visibilityGraph = null;//new WeightedVisibilityGraph();
         this.automata = automata;
+        
+        this.graph=automata.jgraphAutomata.graph;
+        this.graphComponent=automata.jgraphAutomata.graphComponent;
+        
         //currentFile=file;
         setTitle(filename);
         
@@ -127,19 +120,21 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         setupUndoRedo();
         vgi = vgi_;
 
+        
+        
     }
 
     private void initGraph() {
-        graph.setDisconnectOnMove(false);
-        graph.setSplitEnabled(false);
-        graph.setCellsDisconnectable(false);
-        graph.setGridEnabled(false);
-        //graph.setResetEdgesOnMove(true);
+//        graph.setDisconnectOnMove(false);
+//        graph.setSplitEnabled(false);
+//        graph.setCellsDisconnectable(false);
+//        graph.setGridEnabled(false);
+//        //graph.setResetEdgesOnMove(true);
+//        
+//        graphComponent = getGraphComponent();
+//        graphComponent.setConnectable(false);
+//        graphComponent.getViewport().setBackground(Color.WHITE);
         
-        graphComponent = getGraphComponent();
-        graphComponent.setConnectable(false);
-        graphComponent.getViewport().setBackground(Color.WHITE);
-
         graphOutline = new mxGraphOutline(graphComponent);
 
         if ((topPanel != null) && (bottomPanel != null)) {
@@ -152,36 +147,44 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         this.getContentPane().add(graphComponent, java.awt.BorderLayout.CENTER);
 
         //cellTable = new Hashtable<Integer, mxCell>();
-        cellTable = new Hashtable<mxCell, Object>();
+        //cellTable = new Hashtable<mxCell, Object>();
     }
 
     private void initAutomata() {
-        setupStates();
+                setupStates();
 
-		Iterator<mxCell> iterateCells = this.cellTable.keySet().iterator();
-		while (iterateCells.hasNext()) {
-			mxICell cell = iterateCells.next();
-			if (!(cell.isVertex())) {
-				continue;
-			}
-			if (this.visibilityGraph != null) {
-				this.visibilityGraph.addRoadblock(cell);
+//             
+//		Iterator<mxCell> iterateCells = this.cellTable.keySet().iterator();
+//		while (iterateCells.hasNext()) {
+//			mxICell cell = iterateCells.next();
+//			if (!(cell.isVertex())) {
+//				continue;
+//			}
+//			if (this.visibilityGraph != null) {
+//				this.visibilityGraph.addRoadblock(cell);
+//			}
+//		}  // End while (iterateCells.hasNext())
+                Object[] edges = this.graph.getChildEdges(graph.getDefaultParent());
+		for (int index = 0; index < edges.length; index++) {
+                    if (this.visibilityGraph != null) {
+				this.visibilityGraph.addRoadblock((mxCell)edges[index]);
 			}
 		}  // End while (iterateCells.hasNext())
 
-		setupTranitions();
+		//setupTranitions();
 
-		Object[] edges = this.graph.getChildEdges(graph.getDefaultParent());
-        for (int index = 0; index < edges.length; index++) {
-            mxCell edge=(mxCell)edges[index];
-            List<mxPoint> ptList=edge.getGeometry().getPoints();
-            if ((ptList == null) || (ptList.isEmpty())) {
-                resetControlPoint((mxCell)edges[index]);
-            }
-        }
+		//Object[] edges = this.graph.getChildEdges(graph.getDefaultParent());
+//        for (int index = 0; index < edges.length; index++) {
+//            mxCell edge=(mxCell)edges[index];
+//            List<mxPoint> ptList=edge.getGeometry().getPoints();
+//            if ((ptList == null) || (ptList.isEmpty())) {
+//               // resetControlPoint(cellToTransition((mxCell)edges[index]));
+//            }
+//        }
         
-        setupInitialFinal();
+//        setupInitialFinal();
         if (!(this.hasGeometricData)) {
+            System.out.println("The file has no geometric data, use circular layout!");
             this.doCircleLayout();
         }
         this.graph.refresh();
@@ -228,13 +231,33 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
             public void invoke(Object sender, mxEventObject evt) {
                 Object[] cells = (Object[]) evt.getProperty("cells");
+                //mxCell[] cells = (mxCell[])evt.getProperty("cells");
+                
                 Double dx = (Double) evt.getProperty("dx");
                 Double dy = (Double) evt.getProperty("dy");
 
                 //System.out.println("Cells moved: " + evt.getProperties());
-                updateInitialFinal(cells, new Point2D.Double(dx, dy));
-                updateControlPoint(cells,new Point2D.Double(dx,dy));
-                setModified(true);
+                //updateInitialFinal(cells, new Point2D.Double(dx, dy));
+                //updateControlPoint(cells,new Point2D.Double(dx,dy));
+                //setModified(true);
+                System.out.println("move cells");
+                int length = cells.length;
+                mxCell vertex;
+                if(length==1){
+                    vertex = (mxCell)cells[0];
+                    Point2D pt=new Point2D.Double(vertex.getGeometry().getCenterX(),vertex.getGeometry().getCenterY());
+                    Point2D loc=automata.getProjection().getGeoFromLoc(pt);
+                    if(vertex.isVertex()) automata.moveState((State)automata.cellToState(vertex),loc);
+                }else{
+                    List<State> states=new ArrayList<State>();
+                    for(Object cell:cells){
+                        vertex=(mxCell)cell;
+                        if(vertex.isVertex()) states.add((State)automata.cellToState(vertex));
+                    }
+                    Vector2D offset=automata.getProjection().getGeoVecFromLocVec(new Vector2D(dx,dy));
+                    automata.moveStates(states,new Point2D.Double(offset.getX(),offset.getY()));
+                }
+                
                 
             }
         });
@@ -286,9 +309,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 boolean controlPointSelected = false;
                 
                 boolean isloop=false;
-                
+                boolean isIni=false;
                 if (selected) {
-                    DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
+                    DisplayUtil display = new DisplayUtil(graph, automata);
 
                     edgeSelected = selectedCell.isEdge();
                     if (edgeSelected) {
@@ -312,15 +335,47 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         mxCell target=(mxCell)selectedCell.getTarget();
                         if(source==target) isloop=true;
                         
+                        if(source==null) isIni=true;
+                        
+                        //\/\/\/\/\/\/\/\/\/\/\/\\
+                        // update contorl point
+                        //\/\/\/\/\/\/\/\/\/\/\/\\
+                        mxCell edge=(mxCell)selectedCell;
+                        mxGeometry geo=edge.getGeometry();
+                        List<mxPoint> points=geo.getPoints();
+
+                        Transition transition=(Transition)automata.cellToState(edge);
+                        if(transition==null){ // for initial or final
+                           
+                           mxPoint termpoint_=(isIni)?geo.getTerminalPoint(true):geo.getTerminalPoint(false);
+                           Point2D termpoint=automata.getProjection().getGeoFromLoc(new Point2D.Double(termpoint_.getX(),termpoint_.getY()));
+                           
+                           State state=(isIni)?(State)automata.cellToState((mxCell)edge.getTarget()):(State)automata.cellToState((mxCell)edge.getSource());
+                           automata.updateIniFinGeometricData(state, termpoint, isIni);
+                           
+                           return;
+                        }
+                        // for transitions
+                        List<Point2D> newcpt=new ArrayList<Point2D>();
+                        for(mxPoint pt:points){
+                            Point2D loc=automata.getProjection().getGeoFromLoc(new Point2D.Double(pt.getX(),pt.getY()));
+                            newcpt.add(loc);
+                        }
+                        automata.updateTransitionControlPoint(transition, newcpt);
+                        
                     }
 
                     vertexSelected = selectedCell.isVertex();
                     if (vertexSelected) {
+//                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+//                                new StatePropertiesPanel(selectedCell,
+//                                JgraphXInternalFrame.this.cellToState(selectedCell),
+//                                display, JgraphXInternalFrame.this));
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new StatePropertiesPanel(selectedCell,
-                                JgraphXInternalFrame.this.cellToState(selectedCell),
+                                cellToState(selectedCell),
                                 display, JgraphXInternalFrame.this));
-
+                        
                         addTransitionFromMenuItem.setVisible(
                                 (transitionFrom == null) ? true : false);
                         addTransitionToMenuItem.setVisible(
@@ -329,7 +384,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 } else {
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                             new AutomataPropertiesPanel(
-                            new DisplayUtil(graph, automata, cellTable), JgraphXInternalFrame.this));
+                            new DisplayUtil(graph, automata), JgraphXInternalFrame.this));
                     addTransitionFromMenuItem.setVisible(false);
                     addTransitionToMenuItem.setVisible(false);
                     graph.setSelectionCell(null);
@@ -343,9 +398,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 routeEdgeWVGMenuItem.setVisible(false);
 
                 cancelMenuItem.setVisible((transitionFrom == null) ? false : true);
-
-
-
+                
+                applyLinearLayoutMenuItem.setVisible(selected);
+                groupMenuItem.setVisible(selected);
+                copyMenuItem.setVisible(selected);
 
                 JgraphXInternalFrame.this.validate();
 
@@ -382,41 +438,41 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
 
         // Installs a mouse motion listener to display the mouse location
-        getGraphComponent().getGraphControl().addMouseMotionListener(
-                new MouseMotionListener() {
-
-                    @Override
-                    public void mouseDragged(MouseEvent e) {
-                        mouseLocationChanged(e);
-                        boolean selected = !graph.isSelectionEmpty();
-                        mxCell selectedCell = (mxCell) graph.getSelectionCell();
-
-                        boolean vertexSelected = false;
-
-                        if (selected) {
-                            vertexSelected = selectedCell.isVertex();
-                            if (vertexSelected) {
-                                //update position
-                               /*
-                                 * State selectedState =
-                                 * cellToState(selectedCell);
-                                 * if(selectedState!=null){ State.GeometricData
-                                 * geo=new State.GeometricData();
-                                 * geo.location=new
-                                 * Point2D.Double(e.getX(),e.getY());
-                                 * selectedState.setGeometricData(geo);
-                                 * System.out.println("update location");
-                                 * setModified(true); }
-                                 */
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void mouseMoved(MouseEvent e) {
-//                        mouseDragged(e);
-                    }
-                });
+//        getGraphComponent().getGraphControl().addMouseMotionListener(
+//                new MouseMotionListener() {
+//
+//                    @Override
+//                    public void mouseDragged(MouseEvent e) {
+//                        mouseLocationChanged(e);
+//                        boolean selected = !graph.isSelectionEmpty();
+//                        mxCell selectedCell = (mxCell) graph.getSelectionCell();
+//
+//                        boolean vertexSelected = false;
+//
+//                        if (selected) {
+//                            vertexSelected = selectedCell.isVertex();
+//                            if (vertexSelected) {
+//                                //update position
+//                               /*
+//                                 * State selectedState =
+//                                 * cellToState(selectedCell);
+//                                 * if(selectedState!=null){ State.GeometricData
+//                                 * geo=new State.GeometricData();
+//                                 * geo.location=new
+//                                 * Point2D.Double(e.getX(),e.getY());
+//                                 * selectedState.setGeometricData(geo);
+//                                 * System.out.println("update location");
+//                                 * setModified(true); }
+//                                 */
+//                            }
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void mouseMoved(MouseEvent e) {
+////                        mouseDragged(e);
+//                    }
+//                });
     }
 
     public void installInternalFrameListeners() {
@@ -426,13 +482,14 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             public void internalFrameActivated(InternalFrameEvent e) {
 				JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
 						new AutomataPropertiesPanel(
-						new DisplayUtil(graph, automata, cellTable), JgraphXInternalFrame.this));
+						new DisplayUtil(graph, automata), JgraphXInternalFrame.this));
 
 				JgraphXInternalFrame.this.infoSplitPane.setBottomComponent(
 						graphOutline);
 				JgraphXInternalFrame.this.graph.clearSelection();
             }
 
+            @Override
             public void internalFrameClosing(InternalFrameEvent e) {
                 JgraphXInternalFrame.this.infoSplitPane.setTopComponent(topPanel);
                 JgraphXInternalFrame.this.infoSplitPane.setBottomComponent(bottomPanel);
@@ -453,298 +510,308 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }
 
     private void setupTranitions() {
-        Iterator<Transition> iterator = this.automata.getAllTransitions().iterator();
-        while (iterator.hasNext()) {
-            Transition transition = iterator.next();
-            this.addTransition(transition);
-        }  // End while (transitionIterator.hasNext())
+//        Iterator<Transition> iterator = this.automata.getAllTransitions().iterator();
+//        while (iterator.hasNext()) {
+//            Transition transition = iterator.next();
+//            this.addTransition(transition);
+//        }  // End while (transitionIterator.hasNext())
     }
 
     private void setupInitialFinal() {
-        DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
-
-        Object parent = this.graph.getDefaultParent();
-        Iterator<mxCell> cellIterator = this.initialFinalCells.iterator();
-        while (cellIterator.hasNext()) {
-            mxCell vertex = cellIterator.next();
-            mxGeometry geometry = vertex.getGeometry();
-            if (geometry == null) {
-                continue;
-            }
-
-            State state = this.cellToState(vertex);
-
-            InitialFinalWeight initialFinalWeight = state.getInitialWeight();
-            if (initialFinalWeight != null) {
-                InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
-                if (geometricData == null) {
-                    display.showInitialFinal(parent, initialFinalWeight, vertex, false);
-                } else {  // End if (geometricData == null)
-                    if (geometricData.offset == null) {
-                        display.showInitialFinal(parent, initialFinalWeight, vertex, false);
-                    } else {  // End if (geometricData.offset == null)
-                        double x = geometry.getCenterX() + geometricData.offset.getX();
-                        double y = geometry.getCenterY() + geometricData.offset.getY();
-                        mxPoint point = new mxPoint(x, y);
-                        mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, null, vertex);
-                        Object[] cells = {edge};
-                        this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
-        this.graph.setCellStyles("fontSize", String.valueOf(JgraphXInternalFrame.defaultFontSize), cells);
-        this.graph.setCellStyles("textShape","default", cells);
-                        mxGeometry edgeGeometry = edge.getGeometry();
-                        if (edgeGeometry != null) {
-                            edgeGeometry.setSourcePoint(point);
-                            if (geometricData.labelPosAndDist == null) {
-                                edgeGeometry.setY(DEFAULT_LABEL_DISTANCE);
-                            } else {
-                                edgeGeometry.setX(geometricData.labelPosAndDist.getX());
-                                edgeGeometry.setY(geometricData.labelPosAndDist.getY());
-                            }
-                            if (geometricData.labelOffset == null) {
-                                edgeGeometry.setOffset(null);
-                            } else {
-                                edgeGeometry.setOffset(new mxPoint(geometricData.labelOffset));
-                            }
-                        }  // End if (edgeGeometry != null)
-                    }  // End else part of if (geometricData.offset == null)
-                }  // End else part of if (geometricData == null)
-            }  // End if (initialFinalWeight != null)
-
-            initialFinalWeight = state.getFinalWeight();
-            if (initialFinalWeight != null) {
-                InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
-                if (geometricData == null) {
-                    display.showInitialFinal(parent, initialFinalWeight, vertex, true);
-                } else {  // End if (geometricData == null)
-                    if (geometricData.offset == null) {
-                        display.showInitialFinal(parent, initialFinalWeight, vertex, true);
-                    } else {  // End if (geometricData.offset == null)
-                        double x = geometry.getCenterX() + geometricData.offset.getX();
-                        double y = geometry.getCenterY() + geometricData.offset.getY();
-                        mxPoint point = new mxPoint(x, y);
-                        mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, vertex, null);
-                        Object[] cells = {edge};
-                        this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
-        this.graph.setCellStyles("fontSize", String.valueOf(JgraphXInternalFrame.defaultFontSize), cells);
-        this.graph.setCellStyles("textShape","default", cells);
-                        mxGeometry edgeGeometry = edge.getGeometry();
-                        if (edgeGeometry != null) {
-                            edgeGeometry.setTargetPoint(point);
-                            if (geometricData.labelPosAndDist == null) {
-                                edgeGeometry.setY(DEFAULT_LABEL_DISTANCE);
-                            } else {
-                                edgeGeometry.setX(geometricData.labelPosAndDist.getX());
-                                edgeGeometry.setY(geometricData.labelPosAndDist.getY());
-                            }
-                            if (geometricData.labelOffset == null) {
-                                edgeGeometry.setOffset(null);
-                            } else {
-                                edgeGeometry.setOffset(new mxPoint(geometricData.labelOffset));
-                            }
-                        }  // End if (edgeGeometry != null)
-                    }  // End else part of if (geometricData.offset == null)
-                }  // End else part of if (geometricData == null)
-            }  // End if (initialFinalWeight != null)
-        }  // End while (cellIterator.hasNext())
+//        DisplayUtil display = new DisplayUtil(graph, automata);
+//
+//        Object parent = this.graph.getDefaultParent();
+//        Iterator<mxCell> cellIterator = this.initialFinalCells.iterator();
+//        while (cellIterator.hasNext()) {
+//            mxCell vertex = cellIterator.next();
+//            mxGeometry geometry = vertex.getGeometry();
+//            if (geometry == null) {
+//                continue;
+//            }
+//
+//            State state = this.cellToState(vertex);
+//
+//            InitialFinalWeight initialFinalWeight = state.getInitialWeight();
+//            if (initialFinalWeight != null) {
+//                InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
+//                if (geometricData == null) {
+//                    display.showInitialFinal(parent, initialFinalWeight, vertex, false);
+//                } else {  // End if (geometricData == null)
+//                    if (geometricData.offset == null) {
+//                        display.showInitialFinal(parent, initialFinalWeight, vertex, false);
+//                    } else {  // End if (geometricData.offset == null)
+//                        double x = geometry.getCenterX() + geometricData.offset.getX();
+//                        double y = geometry.getCenterY() + geometricData.offset.getY();
+//                        mxPoint point = new mxPoint(x, y);
+//                        mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, null, vertex);
+//                        Object[] cells = {edge};
+//                        this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+//        this.graph.setCellStyles("fontSize", String.valueOf(JgraphXInternalFrame.defaultFontSize), cells);
+//        this.graph.setCellStyles("textShape","default", cells);
+//                        mxGeometry edgeGeometry = edge.getGeometry();
+//                        if (edgeGeometry != null) {
+//                            edgeGeometry.setSourcePoint(point);
+//                            if (geometricData.labelPosAndDist == null) {
+//                                edgeGeometry.setY(DEFAULT_LABEL_DISTANCE);
+//                            } else {
+//                                edgeGeometry.setX(geometricData.labelPosAndDist.getX());
+//                                edgeGeometry.setY(geometricData.labelPosAndDist.getY());
+//                            }
+//                            if (geometricData.labelOffset == null) {
+//                                edgeGeometry.setOffset(null);
+//                            } else {
+//                                edgeGeometry.setOffset(new mxPoint(geometricData.labelOffset));
+//                            }
+//                        }  // End if (edgeGeometry != null)
+//                    }  // End else part of if (geometricData.offset == null)
+//                }  // End else part of if (geometricData == null)
+//            }  // End if (initialFinalWeight != null)
+//
+//            initialFinalWeight = state.getFinalWeight();
+//            if (initialFinalWeight != null) {
+//                InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
+//                if (geometricData == null) {
+//                    display.showInitialFinal(parent, initialFinalWeight, vertex, true);
+//                } else {  // End if (geometricData == null)
+//                    if (geometricData.offset == null) {
+//                        display.showInitialFinal(parent, initialFinalWeight, vertex, true);
+//                    } else {  // End if (geometricData.offset == null)
+//                        double x = geometry.getCenterX() + geometricData.offset.getX();
+//                        double y = geometry.getCenterY() + geometricData.offset.getY();
+//                        mxPoint point = new mxPoint(x, y);
+//                        mxCell edge = (mxCell) this.graph.insertEdge(parent, null, initialFinalWeight, vertex, null);
+//                        Object[] cells = {edge};
+//                        this.graph.setCellStyles("strokeColor", mxUtils.hexString(Color.RED), cells);
+//        this.graph.setCellStyles("fontSize", String.valueOf(JgraphXInternalFrame.defaultFontSize), cells);
+//        this.graph.setCellStyles("textShape","default", cells);
+//                        mxGeometry edgeGeometry = edge.getGeometry();
+//                        if (edgeGeometry != null) {
+//                            edgeGeometry.setTargetPoint(point);
+//                            if (geometricData.labelPosAndDist == null) {
+//                                edgeGeometry.setY(DEFAULT_LABEL_DISTANCE);
+//                            } else {
+//                                edgeGeometry.setX(geometricData.labelPosAndDist.getX());
+//                                edgeGeometry.setY(geometricData.labelPosAndDist.getY());
+//                            }
+//                            if (geometricData.labelOffset == null) {
+//                                edgeGeometry.setOffset(null);
+//                            } else {
+//                                edgeGeometry.setOffset(new mxPoint(geometricData.labelOffset));
+//                            }
+//                        }  // End if (edgeGeometry != null)
+//                    }  // End else part of if (geometricData.offset == null)
+//                }  // End else part of if (geometricData == null)
+//            }  // End if (initialFinalWeight != null)
+//        }  // End while (cellIterator.hasNext())
     }
 
     private void updateInitialFinal(Object[] cells, Point2D offset) {
-        DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
-        int length = cells.length;
-        mxCell vertex, edge;
-        for (int i = 0; i < length; i++) {
-            vertex = (mxCell) cells[i];
-            Object edges[] = graph.getEdges(vertex);
-            int count = edges.length;
-            for (int j = 0; j < count; j++) {
-                edge = (mxCell) edges[j];
-                if (edge.getTerminal(true) == null) {
-                    /*display.showInitialFinal(graph.getDefaultParent(), edge.getValue(), graph.getSelectionCell(), false);
-                    Object removeEdge[] = {edge};
-                    graph.removeCells(removeEdge);*/
-                    
-                    
-                    double dx=offset.getX();
-                    double dy=offset.getY();
-                    /*List<mxPoint> ptlist=edge.getGeometry().getPoints();
-                    for(mxPoint pt:ptlist){
-                           pt.setX(pt.getX()+dx);
-                           pt.setY(pt.getY()+dy);
-                    }
-                    edge.getGeometry().setPoints(ptlist);*/
-                    mxPoint tpt=edge.getGeometry().getTerminalPoint(true);
-                    tpt.setX(tpt.getX()+dx);
-                    tpt.setY(tpt.getY()+dy);
-                    edge.getGeometry().setTerminalPoint(tpt, true);
-                    
-                } else if (edge.getTerminal(false) == null) {
-                    /*display.showInitialFinal(graph.getDefaultParent(), edge.getValue(), graph.getSelectionCell(), true);
-                    Object removeEdge[] = {edge};
-                    graph.removeCells(removeEdge);*/
-                    double dx=offset.getX();
-                    double dy=offset.getY();
-                    mxPoint tpt=edge.getGeometry().getTerminalPoint(false);
-                    tpt.setX(tpt.getX()+dx);
-                    tpt.setY(tpt.getY()+dy);
-                    edge.getGeometry().setTerminalPoint(tpt, false);
-                    
-                    
-                }
-            }
-        }
+//        DisplayUtil display = new DisplayUtil(graph, automata);
+//        int length = cells.length;
+//        mxCell vertex, edge;
+//        for (int i = 0; i < length; i++) {
+//            vertex = (mxCell) cells[i];
+//            Object edges[] = graph.getEdges(vertex);
+//            int count = edges.length;
+//            for (int j = 0; j < count; j++) {
+//                edge = (mxCell) edges[j];
+//                if (edge.getTerminal(true) == null) {
+//                    /*display.showInitialFinal(graph.getDefaultParent(), edge.getValue(), graph.getSelectionCell(), false);
+//                    Object removeEdge[] = {edge};
+//                    graph.removeCells(removeEdge);*/
+//                    
+//                    
+//                    double dx=offset.getX();
+//                    double dy=offset.getY();
+//                    /*List<mxPoint> ptlist=edge.getGeometry().getPoints();
+//                    for(mxPoint pt:ptlist){
+//                           pt.setX(pt.getX()+dx);
+//                           pt.setY(pt.getY()+dy);
+//                    }
+//                    edge.getGeometry().setPoints(ptlist);*/
+//                    mxPoint tpt=edge.getGeometry().getTerminalPoint(true);
+//                    tpt.setX(tpt.getX()+dx);
+//                    tpt.setY(tpt.getY()+dy);
+//                    edge.getGeometry().setTerminalPoint(tpt, true);
+//                    
+//                } else if (edge.getTerminal(false) == null) {
+//                    /*display.showInitialFinal(graph.getDefaultParent(), edge.getValue(), graph.getSelectionCell(), true);
+//                    Object removeEdge[] = {edge};
+//                    graph.removeCells(removeEdge);*/
+//                    double dx=offset.getX();
+//                    double dy=offset.getY();
+//                    mxPoint tpt=edge.getGeometry().getTerminalPoint(false);
+//                    tpt.setX(tpt.getX()+dx);
+//                    tpt.setY(tpt.getY()+dy);
+//                    edge.getGeometry().setTerminalPoint(tpt, false);
+//                    
+//                    
+//                }
+//            }
+//        }
     }
     
- 
+ /*  cells contain states already moved by the vector offset
+  * 
+  */
     private void updateControlPoint(Object[] cells, Point2D offset) {
-        int length = cells.length;
-        mxCell vertex, edge;
-        double dx=offset.getX();
-        double dy=offset.getY();
-                    
-        for (int i = 0; i < length; i++) {
-        
-            vertex = (mxCell) cells[i];
+//        int length = cells.length;
+//        mxCell vertex, edge;
+//        double dx=offset.getX();
+//        double dy=offset.getY();
+//                    
+//        for (int i = 0; i < length; i++) {
+//        
+//            vertex = (mxCell)cells[i];
+//            Point2D pt=new Point2D.Double(vertex.getGeometry().getCenterX(),vertex.getGeometry().getCenterY());
+//            if(vertex.isVertex()) automata.moveState((State)automata.cellToState(vertex),pt);
+//            
             
-            mxPoint oldVertexPoint=new mxPoint();
-            oldVertexPoint.setX(vertex.getGeometry().getCenterX()-dx);
-            oldVertexPoint.setY(vertex.getGeometry().getCenterY()-dy);
-                
-            
-            mxPoint newVertexPoint=new mxPoint();
-            newVertexPoint.setX(vertex.getGeometry().getCenterX());
-            newVertexPoint.setY(vertex.getGeometry().getCenterY());
-            
-            Object edges[] = graph.getEdges(vertex);
-            int count = edges.length;
-            
-            
-            for (int j = 0; j < count; j++) {
-                edge = (mxCell) edges[j];
-                
-                mxCell source=(mxCell)edge.getSource();
-                mxCell target=(mxCell)edge.getTarget();
-                
-                mxPoint targetPoint;
-                if(target==vertex) 
-                    targetPoint=new mxPoint(source.getGeometry().getCenterX(),source.getGeometry().getCenterY());
-                else  targetPoint=new mxPoint(target.getGeometry().getCenterX(),target.getGeometry().getCenterY());
-                
-               // if(source==target){ // only loop
-                    mxGeometry geo=edge.getGeometry();
-                    if (geo != null){
-                            // Resets the control points
-                            List<mxPoint> points = geo.getPoints();
-                            
-                            if (points != null && !points.isEmpty()){
-
-                                    List<mxPoint> ptlist=geo.getPoints();
-                                    for(mxPoint pt:ptlist){
-                                        
-                                       /* double deltaX=targetPoint.getX()-oldVertexPoint.getX();
-                                        double deltaY=targetPoint.getY()-oldVertexPoint.getY();
-                                        System.out.println("deltaX "+deltaX+" deltaY "+deltaY);
-                                        double newX,newY;
-                                        if(Math.abs(deltaX)>0.01){
-                                            newX=newVertexPoint.getX()+(targetPoint.getX()-newVertexPoint.getX())*(pt.getX()-oldVertexPoint.getX())/deltaX;
-                                            System.out.println((targetPoint.getX()-newVertexPoint.getX())+" * "+(pt.getX()-oldVertexPoint.getX())+" / "+deltaX);
-                                        
-                                        }else
-                                            newX=newVertexPoint.getX()+(targetPoint.getX()-newVertexPoint.getX())*(pt.getY()-oldVertexPoint.getY())/deltaY;
-                                        
-                                        if(Math.abs(deltaY)>0.001){
-                                            newY=newVertexPoint.getY()+(targetPoint.getY()-newVertexPoint.getY())*(pt.getY()-oldVertexPoint.getY())/deltaY;
-                                            System.out.println((targetPoint.getY()-newVertexPoint.getY())+" * "+(pt.getY()-oldVertexPoint.getY())+" / "+deltaY);
-                                        
-                                        }else
-                                            newY=newVertexPoint.getY()+(targetPoint.getY()-newVertexPoint.getY())*(pt.getX()-oldVertexPoint.getX())/deltaX;
-                                        
-                                        pt.setX(newX);
-                                        pt.setY(newY);
-                                        */
-                                        
-                                        double a=targetPoint.getX()-oldVertexPoint.getX();
-                                        double b=targetPoint.getY()-oldVertexPoint.getY();
-                                        
-                                        double theta=-Math.atan2(b, a);
-                                        //theta=Math.toDegrees(theta);
-                                        
-                                        double len=Math.sqrt(a*a+b*b);
-                                                
-                                        double c1=pt.getX()-oldVertexPoint.getX();
-                                        double c2=pt.getY()-oldVertexPoint.getY();
-                                        
-                                        double rc1=Math.cos(theta)*c1-Math.sin(theta)*c2;
-                                        double rc2=Math.sin(theta)*c1+Math.cos(theta)*c2;
-                                        
-                                        double area=len*rc2;
-                                     //   System.out.println("\narea: "+area+"\n theta: "+Math.toDegrees(theta) +" len: "+len+" c: "+rc1+" , "+rc2);
-                                       
-                                        double xc1=Math.cos(theta)*a-Math.sin(theta)*b;
-                                     //   System.out.println(" X: "+xc1);
-                                        double newa=targetPoint.getX()-newVertexPoint.getX();
-                                        double newb=targetPoint.getY()-newVertexPoint.getY();
-                                        
-                                        
-                                        double newtheta=-Math.atan2(newb, newa);
-                                        
-                                        double newlen=Math.sqrt(newa*newa+newb*newb);
-                                        
-                                        double newxc1=Math.cos(newtheta)*newa-Math.sin(newtheta)*newb;
-                                       // System.out.println(" newX: "+newxc1);
-                                        double newrc2=rc2;
-                                        /*if(newlen>len)
-                                            newrc2=area/(newlen*0.8);
-                                        else
-                                            newrc2=rc2/len*(newlen*1.2);*/
-                                        double newrc1=rc1/xc1*newxc1;
-                                       // System.out.println("new theta: "+Math.toDegrees(newtheta) +" len: "+newlen+" c: "+newrc1+" , "+newrc2);
-                                        
-                                        double newc1=Math.cos(-newtheta)*newrc1-Math.sin(-newtheta)*newrc2;
-                                        double newc2=Math.sin(-newtheta)*newrc1+Math.cos(-newtheta)*newrc2;
-                                        
-                                        newc1=newc1+newVertexPoint.getX();
-                                        newc2=newc2+newVertexPoint.getY();
-                                        
-                                        pt.setX(newc1);
-                                        pt.setY(newc2);
-                                        System.out.println("update control pt: "+pt);
-                                    }
-                                    
-                                    edge.getGeometry().setPoints(ptlist);
-                            }
-                    }
-               // }
-            }
-        }
-        setModified(true);
-        undoStack.push(STATUS_CHANGE);
-    
+            // edges contains all transitions connected to vertex
+//            Object edges[] = graph.getEdges(vertex);
+//            int count = edges.length;
+//            
+//            
+//            for (int j = 0; j < count; j++) {
+//                edge = (mxCell) edges[j];
+//                
+//                mxCell source=(mxCell)edge.getSource();
+//                mxCell target=(mxCell)edge.getTarget();
+//                
+//                // initial and final are processed seperately
+//                if(source==null || target==null) continue;
+//                // process loops
+//                if(source==target){
+//                    mxGeometry geo=edge.getGeometry();
+//                    List<mxPoint> points = geo.getPoints();
+//                    for(mxPoint pt:points){
+//                                pt.setX(pt.getX()+dx);
+//                                pt.setY(pt.getY()+dy);
+//                    }
+//                    edge.getGeometry().setPoints(points);
+//                }else{
+//            
+//                    // oldVertexPoint is the center of vertex before translation
+//                    Point2D oldVertexPoint=new Point2D.Double(vertex.getGeometry().getCenterX()-dx,
+//                                                        vertex.getGeometry().getCenterY()-dy);
+//            
+//                    // newVertexPoint is the center of vertex
+//                    Point2D newVertexPoint=new Point2D.Double(vertex.getGeometry().getCenterX(),
+//                                                       vertex.getGeometry().getCenterY());
+//          
+//                    // endPoint is the center of the other end of transition
+//                    Point2D endPoint;
+//                    if(target==vertex) 
+//                        endPoint=new Point2D.Double(source.getGeometry().getCenterX(),source.getGeometry().getCenterY());
+//                    else  endPoint=new Point2D.Double(target.getGeometry().getCenterX(),target.getGeometry().getCenterY());
+//
+//                    mxGeometry geo=edge.getGeometry();
+//                    if (geo != null){
+//                            // Resets the control points
+//                            List<mxPoint> points = geo.getPoints();
+//                            
+//                            if (points != null && !points.isEmpty()){
+//
+//                                    List<mxPoint> ptlist=geo.getPoints();
+//                                    for(mxPoint pt:ptlist){
+//                                        
+//                                        Point2D point=new Point2D.Double(pt.getX(),pt.getY());
+//                                        Point2D newpt=moveControlPointWithTwoEnd(point,oldVertexPoint,newVertexPoint,endPoint);
+//                                        
+//                                        pt.setX(newpt.getX());
+//                                        pt.setY(newpt.getY());
+//                                      //  System.out.println("update control pt: "+pt);
+//                                    }
+//                                    
+//                                    edge.getGeometry().setPoints(ptlist);
+//                            }
+//                    }
+//                }
+////            }
+//        }
+//        setModified(true);
+//        undoStack.push(STATUS_CHANGE);
+//    
     }   
-    
-    public void updateStateSize(Object[] cells){
+ 
+                
+    public void updateAllGDData(){
+        automata.refresh();
+        graph.refresh();
+    }
+  
+    public void resetAllStatesDrawingData(){
+        
         
         
     }
-
-    public void addState(double x, double y) {
-        State newState = new State();
-        State.GeometricData geo = new State.GeometricData();
-        geo.location = new Point2D.Double(x, y);
-        geo.shape="ellipse";
-        geo.size=new Point2D.Double(vertexWidth,vertexWidth);
-        newState.setGeometricData(geo);
+    
+//    public void applyStateDrawingData(mxCell cell, StateDrawingData drawingdata){
+//        
+//        mxCell[] cells=new mxCell[]{cell};
+//        
+//        graph.setCellStyles("fillColor", drawingdata.getFillColor(),cells);
+//        graph.setCellStyles("strokeColor", drawingdata.getStrokeColor(),cells);
+//        graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.getStrokeWidth()),cells);
+//
+//    }
+//    public void applyStateGeometricData(mxCell cell, StateGeometricData gd){
+//        
+//        mxCell[] cells=new mxCell[]{cell};
+//        
+//        graph.setCellStyles("shape", gd.getShape(),cells);
+//        mxGeometry geo=cell.getGeometry();
+//        geo.setWidth(gd.getWidth());
+//        geo.setHeight(gd.getHeight());
+//        
+//        // TODO: location is not yet synchronized in StateGeometricData while moving
+//        //geo.setX(gd.getX());
+//        //geo.setY(gd.getY());
+//        cell.setGeometry(geo);
+//        
+//    }
+//    public void applyTransitionDrawingData(mxCell cell,TransitionDrawingData dd){
+//        mxCell[] cells=new mxCell[]{cell};
+//        
+//        graph.setCellStyles("strokeColor", dd.getStrokeColor(),cells);
+//        graph.setCellStyles("strokeWidth", String.valueOf(dd.getStrokeWidth()),cells);
+//        graph.setCellStyles("startArrow", dd.getStartArrow(),cells);
+//        graph.setCellStyles("endArrow", dd.getEndArrow(),cells);
+//        
+//
+//    }
+    public void updateStateDrawingData(State state,StateDrawingData drawingdata){
+//        State state=cellToState(cell);
+        StateDrawingData sdd=state.getDrawingData();
         
-        automata.addState(newState);
-        mxCell vertex = createVertex(x, y, newState.getName(),vertexWidth,vertexWidth,null);
-        cellTable.put(vertex, newState);
-
-        DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
+        if(drawingdata.getFillColor()!=null) sdd.setFillColor(drawingdata.getFillColor());
+        if(drawingdata.getStrokeColor()!=null) sdd.setStrokeColor(drawingdata.getStrokeColor());
+        if(drawingdata.getStrokeWidth()>0) sdd.setStrokeWidth(drawingdata.getStrokeWidth());
+        
+//        state.setDrawingData(sdd);
+//        applyStateDrawingData(cell,automata.getStateDrawingData(state));
+        automata.setStateDrawingData(state, sdd);
+    }
+    
+    /*
+     *  add states at left mouse click
+     */
+    public void addState(double x, double y) {
+        
+        Point2D loc=automata.getProjection().getGeoFromLoc(new Point2D.Double(x,y));
+        State newState=automata.addState(loc);
+        
+//        mxCell vertex = createVertex(newState);
+        mxCell vertex=automata.stateToCell(newState);
+//        cellTable.put(vertex, newState);
+//
+        DisplayUtil display = new DisplayUtil(graph, automata);
         infoSplitPane.setTopComponent(
                 new StatePropertiesPanel((mxCell) vertex, newState, display, JgraphXInternalFrame.this));
-
-//        System.out.println("add state at" + x + "," + y);
-//        System.out.println("total states:" + automata.getAllStates().size());
-
+//
+////        System.out.println("add state at" + x + "," + y);
+////        System.out.println("total states:" + automata.getAllStates().size());
+//
         setModified(true);
         undoStack.push(STATUS_ADD);
 
@@ -752,42 +819,19 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 			this.visibilityGraph.addRoadblock(vertex);
 		}
     }
-
+    /*
+     *  add states when reading automata from files
+     */
     public void addState(State state) {
-        StateInterface.GeometricData geometricData = state.getGeometricData();
-        double x = 0;
-        double y = 0;
-        double w=0;
-        double h=0;
-        String shape=null;
-        if ((geometricData == null) || (geometricData.location == null)) {
+        StateGeometricData geometricData = state.getGeometricData();
+        if ((geometricData == null) || (geometricData.getLocation() == null)) {
             this.hasGeometricData = false;
-        } else {
-            x = geometricData.location.getX();
-            y = geometricData.location.getY();
-            
-            if(geometricData.size!=null){
-                w=geometricData.size.getX();
-                h=geometricData.size.getY();
-//                System.out.println("get size:"+geometricData.size.toString());
-            }
-            shape=geometricData.shape;
         }
-
-        mxCell vertex = createVertex(x, y, state.getName(),w,h,shape);
-        cellTable.put(vertex, state);
-
-
-        StateInterface.DrawingData drawingdata = state.getDrawingData();
-        if (drawingdata != null) {
-            graph.setCellStyles("fillColor", drawingdata.fillColor);
-            graph.setCellStyles("strokeColor", drawingdata.strokeColor);
-            graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.strokeWidth));
-
-        }
-
-
-        if ((state.getInitialWeight() != null) || (state.getFinalWeight() != null)) {
+//        mxCell vertex = createVertex(state);
+//        cellTable.put(vertex, state);
+ 
+        mxCell vertex=automata.stateToCell(state);
+        if ((state.getInitial() != null) || (state.getFinal() != null)) {
             this.initialFinalCells.add(vertex);
         }
 
@@ -796,187 +840,183 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 //                new StatePropertiesPanel((mxCell) vertex, 
 //                JgraphXInternalFrame.this.cellToState(vertex), display));
 //        System.out.println("add state at (" + x + "," + y + ").");
+        
     }  // End public void addState(State state)
 
-    private mxCell createVertex(double x, double y, String name,double w,double h,String shape) {
-        Object parent = graph.getDefaultParent();
-        int id = cellTable.size();
 
-        if(w<=0) w=vertexWidth;
-        if(h<=0) h=vertexWidth;
-        if(shape==null) shape="ellipse";
+//    private mxCell createVertex(State state) {
+//        
+//        StateGeometricData geodata=automata.getStateGeometricData(state);
+//        StateDrawingData drawingdata=automata.getStateDrawingData(state);
+//       
+//        Object parent = graph.getDefaultParent();
+//        int id = cellTable.size();
+//
+//        double w=geodata.getWidth();
+//        double h=geodata.getHeight();
+//        String shape=geodata.getShape();
+//        
+//        if(w<=0) w=vertexWidth;
+//        if(h<=0) h=vertexWidth;
+//        if(shape==null) shape="ellipse";
+//        
+//        Object vertex = graph.insertVertex(parent, Integer.toString(id), state.getName(),
+//                geodata.getX() - w / 2, geodata.getY() - h / 2, w, h, "shape="+shape+";perimeter="+shape+"Perimeter;fontSize="+defaultFontSize+";");
+//        
+//        graph.setSelectionCell(vertex);
+//        
+//        graph.setCellStyles("fillColor", drawingdata.getFillColor());
+//        graph.setCellStyles("strokeColor", drawingdata.getStrokeColor());
+//        graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.getStrokeWidth()));
+//
+//        ((mxCell) vertex).setConnectable(false);
+//
+//        return (mxCell) vertex;
+//    }
+    /*
+     * add transitions at right mouse click
+     */
+    public void addTransition(State source, State target) {
+
+        Transition transition=automata.addTransition(source,target);
         
-        //Object vertex = graph.insertVertex(parent, Integer.toString(id), name,
-        //        x - w / 2, y - h / 2, w, h, "shape=ellipse;perimeter=ellipsePerimeter;");
-        Object vertex = graph.insertVertex(parent, Integer.toString(id), name,
-                x - w / 2, y - h / 2, w, h, "shape="+shape+";perimeter="+shape+"Perimeter;fontSize="+defaultFontSize+";");
-        
-        graph.setSelectionCell(vertex);
-        ((mxCell) vertex).setConnectable(false);
-
-        return (mxCell) vertex;
-    }
-
-    public void addTransition(mxCell source, mxCell target) {
-        //Object parent = graph.getDefaultParent();
-        WeightedRegularExpression.Atomic expression =
-                WeightedRegularExpression.Atomic.createAtomic(automata);
-        expression.setSymbol(expression.getAlphabet().allSymbols.get(0));
-       
-        /*Object e = graph.insertEdge(parent, null, expression, source, target, "shape=curve");
-        ArrayList<mxPoint> points = new ArrayList<mxPoint>();
-        ((mxCell) e).getGeometry().setPoints(points);
-        ((mxCell) e).getGeometry().setY(DEFAULT_LABEL_DISTANCE);
-        */
-        Transition newTrans = new Transition();
-       // cellTable.put((mxCell) e, newTrans);
-        newTrans.setSourceState(cellToState(source));
-        newTrans.setTargetState(cellToState(target));
-        newTrans.setLabel(expression);
-        
-        if(source==target){
-            TransitionInterface.GeometricData geometricData = newTrans.getGeometricData();
-            geometricData.controlPoints.add(new Point2D.Double(source.getGeometry().getCenterX()+source.getGeometry().getWidth(),
-                                 source.getGeometry().getCenterY()));
-            
-        }
-        automata.addTransition(newTrans);
-
-        mxCell edge = addTransition(newTrans);
+//        mxCell edge=createEdge(transition);
+//        cellTable.put(edge, transition);
+        mxCell edge=automata.transitionToCell(transition);
         
 //        System.out.println("total trans:" + automata.getAllTransitions().size());
-		if (this.vgi.getRouteEdgeWhileAdding()) {
-			EdgeRoutingMinCross edgeRoutingMinCross = new EdgeRoutingMinCross(this.graph);
-			edgeRoutingMinCross.route(edge);
-		}
+        if (this.vgi.getRouteEdgeWhileAdding()) {
+                EdgeRoutingMinCross edgeRoutingMinCross = new EdgeRoutingMinCross(this.graph);
+                edgeRoutingMinCross.route(edge);
+        }
         setModified(true);
         undoStack.push(STATUS_ADD);
     }
-
+    /*
+     * add transitions when reading automata from file
+     */
     public mxCell addTransition(Transition transition) {
-        mxCell source = null, target = null;
-        Enumeration keys = cellTable.keys();
-        while (keys.hasMoreElements()) {
-            mxCell keyCell = (mxCell) keys.nextElement();
-            if (cellTable.get(keyCell) == transition.getSourceState()) {
-                source = keyCell;
-            }
-
-            if (cellTable.get(keyCell) == transition.getTargetState()) {
-                target = keyCell;
-            }
-
-            if ((source != null) && (target != null)) {
-                break;
-            }
-        }
-
-        mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(),
-                null, transition.getLabel(), source, target,
-                "shape=curve;fontSize="+defaultFontSize+";textShape=default;"));
-        cellTable.put(edge, transition);
-        mxGeometry geometry = edge.getGeometry();
-        if (geometry == null) {
-            geometry = new mxGeometry();
-           // ArrayList<mxPoint> points = new ArrayList<mxPoint>();
-           // geometry.setPoints(points);
-            edge.setGeometry(geometry);
-            
-        }
-        
-        
-        
-        TransitionInterface.GeometricData geometricData = transition.getGeometricData();
-        if (geometricData == null) {
-            geometricData = new TransitionInterface.GeometricData();
-        }
-        if (geometricData.labelPosAndDist == null) {
-            geometry.setX(0);
-            geometry.setY(DEFAULT_LABEL_DISTANCE);
-        } else {
-            geometry.setX(geometricData.labelPosAndDist.getX());
-            geometry.setY(geometricData.labelPosAndDist.getY());
-        }
-        if (geometricData.labelOffset == null) {
-            geometry.setOffset(null);
-        } else {
-            geometry.setOffset(new mxPoint(geometricData.labelOffset));
-        }
-        if ((geometricData.controlPoints == null)
-                || (geometricData.controlPoints.isEmpty())) {
-            geometry.setPoints(new ArrayList<mxPoint>());
-        } else {
-            List<mxPoint> points = new ArrayList<mxPoint>();
-            Iterator<Point2D> iterateControlPoints = geometricData.controlPoints.iterator();
-            while (iterateControlPoints.hasNext()) {
-                Point2D controlPoint = iterateControlPoints.next();
-                points.add(new mxPoint(controlPoint));
-            }  // End while (iterateControlPoints.hasNext())
-            geometry.setPoints(points);
-        }
-
-        /*if(source==target){
-            addControlPoint(edge,source.getGeometry().getCenterX()+source.getGeometry().getWidth(),
-                                 source.getGeometry().getCenterY());
-        }
-        */
-        graph.setSelectionCell(edge);
-        TransitionInterface.DrawingData drawingdata = transition.getDrawingData();
-        if (drawingdata != null) {
-            graph.setCellStyles("strokeColor", drawingdata.strokeColor);
-            graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.strokeWidth));
-            graph.setCellStyles("startArrow", drawingdata.startArrow);
-            graph.setCellStyles("endArrow", drawingdata.endArrow);
-
-        }
        
-		if (this.visibilityGraph != null) {
-			this.visibilityGraph.addHindrance(edge);
-		}
-		return edge;
+        
+//        mxCell edge=createEdge(transition);
+//        cellTable.put(edge, transition);
+//        
+//        return edge;
+        return null;
+        
     }  // End public mxCell addTransition(Transition transition)
 
+    
+//    public mxCell createEdge(Transition transition){
+//        mxCell source = null, target = null;
+//        Enumeration keys = cellTable.keys();
+//        State sourceState=transition.getSourceState();
+//        State targetState=transition.getTargetState();
+////        while (keys.hasMoreElements()) {
+////            mxCell keyCell = (mxCell) keys.nextElement();
+////            if (cellTable.get(keyCell) == sourceState) source = keyCell;
+////            if (cellTable.get(keyCell) == targetState) target = keyCell;
+////            
+////            if ((source != null) && (target != null)) break;
+////        }
+//        source=automata.stateToCell(sourceState);
+//        target=automata.stateToCell(targetState);
+//        mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(),
+//                                null, transition.getLabel(), source, target,
+//                                "shape=curve;fontSize="+defaultFontSize+";textShape=default;"));
+//        //cellTable.put(edge, transition);
+//        
+//        mxGeometry geometry = edge.getGeometry();
+//        if (geometry == null) {
+//            geometry = new mxGeometry();
+//            edge.setGeometry(geometry);
+//            
+//        }
+//        
+//        
+//        
+//        TransitionGeometricData geometricData = transition.getGeometricData();
+//        if (geometricData == null) {
+//            geometricData = new TransitionGeometricData();
+//        }
+//        if (geometricData.labelPosAndDist == null) {
+//            geometry.setX(0);
+//            geometry.setY(DEFAULT_LABEL_DISTANCE);
+//        } else {
+//            geometry.setX(geometricData.labelPosAndDist.getX());
+//            geometry.setY(geometricData.labelPosAndDist.getY());
+//        }
+//        if (geometricData.labelOffset == null) {
+//            geometry.setOffset(null);
+//        } else {
+//            geometry.setOffset(new mxPoint(geometricData.labelOffset));
+//        }
+//        if ((geometricData.controlPoints == null)
+//                || (geometricData.controlPoints.isEmpty())) {
+//            geometry.setPoints(new ArrayList<mxPoint>());
+//        } else {
+//            List<mxPoint> points = new ArrayList<mxPoint>();
+//            Iterator<Point2D> iterateControlPoints = geometricData.controlPoints.iterator();
+//            while (iterateControlPoints.hasNext()) {
+//                Point2D controlPoint = iterateControlPoints.next();
+//                points.add(new mxPoint(controlPoint));
+//            }  // End while (iterateControlPoints.hasNext())
+//            geometry.setPoints(points);
+//        }
+//
+//        /*if(source==target){
+//            addControlPoint(edge,source.getGeometry().getCenterX()+source.getGeometry().getWidth(),
+//                                 source.getGeometry().getCenterY());
+//        }
+//        */
+//        graph.setSelectionCell(edge);
+//        TransitionDrawingData drawingdata = automata.getTransitionDrawingData(transition);
+//        if (drawingdata != null) {
+//            graph.setCellStyles("strokeColor", drawingdata.getStrokeColor());
+//            graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.getStrokeWidth()));
+//            graph.setCellStyles("startArrow", drawingdata.getStartArrow());
+//            graph.setCellStyles("endArrow", drawingdata.getEndArrow());
+//
+//        }
+//       
+//        if (this.visibilityGraph != null) {
+//                this.visibilityGraph.addHindrance(edge);
+//        }
+//        
+//        return edge;
+//        
+//    }
+    
     public void addControlPoint() {
-        addControlPoint((mxCell) getGraphComponent().getCellAt((int) popMouseX, (int) popMouseY),
+        
+        Point2D loc=automata.getProjection().getGeoFromLoc(new Point2D.Double(popMouseX,popMouseY));
+        
+        addControlPoint((Transition)automata.getStateAt(loc),
                 popPoint.getX(), popPoint.getY());
         setModified(true);
         undoStack.push(STATUS_CHANGE);
     
     }
 
-    public void addControlPoint(mxCell cell, double x, double y) {
-//        System.out.println("add Ctrl pt at" + x + "," + y);
-        List<mxPoint> points = cell.getGeometry().getPoints();
-        if(points==null) points=new ArrayList<mxPoint>();
-        points.add(new mxPoint(x, y));
-
-        //to sort
-        if (points.size() > 1) {
-            Collections.sort(points, new CompareCtrlPoint());
-            if (cell.getSource().getGeometry().getX()
-                    > cell.getTarget().getGeometry().getX()) {
-                Collections.reverse(points);
-            }
-        }
-
-
-        cell.getGeometry().setPoints(points);
-        getGraphComponent().refresh();
+    private void addControlPoint(Transition transition, double x, double y) {
+        Point2D loc=automata.getProjection().getGeoFromLoc(new Point2D.Double(x,y));
+        automata.addTransitionControlPoint(transition, loc);
 
     }
 
     public void deleteControlPoint() {
-        deleteControlPoint((mxCell) getGraphComponent().getCellAt((int) popMouseX, (int) popMouseY),
+        Point2D loc=automata.getProjection().getGeoFromLoc(new Point2D.Double(popMouseX,popMouseY));
+        deleteControlPoint((Transition)automata.getStateAt(loc),
                 selectedHandlerIndex);
     }
 
-    public void deleteControlPoint(mxCell cell, int index) {
+    private void deleteControlPoint(Transition transition, int index) {
         
-//        System.out.println("delete Ctrl pt at" + index);
-        List<mxPoint> points = cell.getGeometry().getPoints();
-        points.remove(index - 1);
-
-        cell.getGeometry().setPoints(points);
+        // TODO: change to deleteControlPoint(mxCell cell,Point2D point), not depending on jgraph
+        
+        mxPoint mxpoint=automata.transitionToCell(transition).getGeometry().getPoints().get(index-1);
+        automata.deleteTransitionControlPoint(transition, new Point2D.Double(mxpoint.getX(),mxpoint.getY()));
+        
         getGraphComponent().refresh();
 
         setModified(true);
@@ -985,48 +1025,20 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }
 
     public void resetControlPoint() {
-
-        resetControlPoint((mxCell) getGraphComponent().getCellAt((int) popMouseX, (int) popMouseY));
+        Point2D loc=automata.getProjection().getGeoFromLoc(new Point2D.Double(popMouseX,popMouseY));
+        resetControlPoint((Transition)automata.getStateAt(loc));
         setModified(true);
         undoStack.push(STATUS_CHANGE);
     }
 
-    public void resetControlPoint(mxCell cell) {
-        
-        mxCell source=(mxCell)cell.getSource();
-        mxCell target=(mxCell)cell.getTarget();
-        
-        List<mxPoint> points = cell.getGeometry().getPoints();
-        if (points == null) {
-            points = new ArrayList<mxPoint>();
-        } else {
-            points.clear();
-        }
+    private void resetControlPoint(Transition transition) {
+        automata.resetTransitionControlPoint(transition);
 
-        if(source==target){ //loop
-            mxPoint loopCtrlPt=new mxPoint();
-            loopCtrlPt.setX(source.getGeometry().getCenterX()+source.getGeometry().getWidth());
-            loopCtrlPt.setY(source.getGeometry().getCenterY());
-            points.add(loopCtrlPt);
-            
-            
-        }
-            cell.getGeometry().setPoints(points);
-            getGraphComponent().refresh();
-
-         
-        
     }
-
-    public void doCircleLayout() {
-        mxCircleLayout layout = new mxCircleLayout(this.graph);
-        layout.setResetEdges(true);
-        layout.setMoveCircle(true);
-        layout.setX0(100);
-        layout.setY0(100);
-        Object parent = this.graph.getDefaultParent();
-        layout.execute(this.graph.getDefaultParent());
-        Object objects[] = this.graph.getChildEdges(parent);
+    
+    // TODO: 
+    private void handleInitialFinal(){
+        Object objects[] = this.graph.getChildEdges(this.graph.getDefaultParent());
         for (Object object : objects) {
                 if (!(object instanceof mxICell)) {
                         continue;
@@ -1070,8 +1082,58 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                                         vertexGeometry.getCenterY() + offsetY));
                 }
         }  // End for (Object object : objects)
-        SingleVertexEdgesLayout singleVertexEdgesLayout = new SingleVertexEdgesLayout(this.graph);
-        singleVertexEdgesLayout.execute(this.graph.getDefaultParent());
+    }
+    /*
+     * TODO: layout should be called with parameter "automata"
+     *       something like CircleLayout.execute(automata)
+     *       and handle geometric/drawing data of automata structure, as well as of jgraphautomata
+     */
+    public void doCircleLayout() {
+//        mxCircleLayout layout = new mxCircleLayout(this.graph);
+//        layout.setResetEdges(true);
+//        layout.setMoveCircle(true);
+//        layout.setX0(100);
+//        layout.setY0(100);
+//        Object parent = this.graph.getDefaultParent();
+//        layout.execute(this.graph.getDefaultParent());
+//        
+////        handleInitialFinal();
+//        
+//        SingleVertexEdgesLayout singleVertexEdgesLayout = new SingleVertexEdgesLayout(this.graph);
+//        singleVertexEdgesLayout.execute(this.graph.getDefaultParent());
+//        
+//        automata.refresh();
+        
+        long startTime = System.nanoTime();
+        
+        if(automata.getSelectedStates().isEmpty()) automata.selectAllStates();
+        
+        CircularLayoutAutomata layout=new CircularLayoutAutomata();
+        
+        automata.getGroupList();
+        if(automata.selectedStatesContainVertexGroup()){
+            GroupReplacedAutomata replaceAutomata=new GroupReplacedAutomata(automata);
+//            Automata reautomata=replaceAutomata.createReplaceAutomata();
+//            reautomata.selectAllStates();
+            layout.doLayout(automata,replaceAutomata);
+            //System.out.println("finish circular layout!");
+//            automata=reautomata;
+            //replaceAutomata.expandStatesToVertexGroups();
+        }
+        else{
+            if(automata.getSelectedStates().isEmpty()) automata.selectAllStates();
+            layout.doLayout(automata);
+        }
+//        System.out.println("finish circular layout!"); 
+        automata.refresh();
+        this.graph.clearSelection();
+        
+        long endTime = System.nanoTime();
+        long duration = endTime - startTime;
+        System.out.println("+++++++++    circular layout time = "+duration+" ns "+
+                 " #s= "+automata.getAllStates().size()+"#t= "+automata.getAllTransitions().size()+"+++++++++++++++");
+        
+        
     }  // End public void doCircleLayout()
 
     public void doHierarchicalLayout() {
@@ -1081,9 +1143,12 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         layout.setDisableEdgeStyle(false);
         layout.execute(this.graph.getDefaultParent());
         
-        EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
+        handleInitialFinal();
+        handleLoop();
+        //handleEdgeControlPoint();
+        /*EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
         edgeRoute.execute(this.graph.getDefaultParent());
-        
+        */
         EdgeRoutingBranchingLayout layout2 = new EdgeRoutingBranchingLayout(this.graph);
         layout2.execute(this.graph.getDefaultParent());
         
@@ -1092,174 +1157,14 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     public void doFeatureLayout() {
 
-      this.graph.getModel().beginUpdate();
-		try {
-	
-                    ClusterPreProcess clusterDetector = new ClusterPreProcess(this.graph);
-                
-                Map<mxCell, List<mxCell>> ClusterFeatureNode = new HashMap<mxCell, List<mxCell>>();
-                Map<mxCell, List<mxCell>> CycleFeatureNode = new HashMap<mxCell, List<mxCell>>();
-               
-                // create a edges cell list of a graph used for check in clusteringlayout
-                int childCount = this.graph.getModel().getChildCount(this.graph.getDefaultParent());
-
-	            
-                ClusterFeatureNode = clusterDetector.getFeatureNodeList();
-                        
-                List<mxCell> childs = new ArrayList<mxCell>();
-                      
-                // group the nodes in the same cluster : 
-                        
-                        Collection collection = ClusterFeatureNode.keySet();
-                        Iterator iterator = collection.iterator();
-                        while(iterator.hasNext()) {
-                            mxCell FeatureNode = (mxCell)iterator.next();
-                            childs = ClusterFeatureNode.get(FeatureNode);
-                            for(mxCell child : childs){
-                       //         System.out.print("\n Child ID : "+child.getId()+"\n");
-                                (FeatureNode).insert(child);
-                            }
-                        }
-                        
-                        iterator = collection.iterator();
-                        
-                        // if there's no feature node detect by clustering, then detect the cycle 
-                        Iterator cycleIterator;
-                        Collection cycleCollection;
-                       
-                        boolean isTreeOrHierarchical = true;
-                        if(!iterator.hasNext()){
-                                             
-                           PreProcess cycleFilter = new PreProcess(this.graph);
-                            CycleFeatureNode = cycleFilter.getFeatureNodeList();
-                            cycleCollection = CycleFeatureNode.keySet();
-                            cycleIterator = cycleCollection.iterator();
-                            
-                      
-                            childs = new ArrayList<mxCell>();
-                            
-                            if(!cycleIterator.hasNext())
-                                isTreeOrHierarchical = false;
-                            
-                            while(cycleIterator.hasNext()){
-                           
-                                    mxCell FeatureNode = (mxCell)cycleIterator.next();
-                                    childs = CycleFeatureNode.get(FeatureNode);
-                                    
-                                    for(mxCell child : childs){
-                                        (FeatureNode).insert(child);
-                                    }
-                             } // end of  (cycleIterator.hasNext())
-                          
-                        }
-                   
-              
-                // execute the TreeLayout and ClusteringLayout : 
-                if(isTreeOrHierarchical== true){        
-                        TreeLayout treelayout = new TreeLayout(this.graph); 
-                        treelayout.execute(graph.getDefaultParent());  
-                       // treelayout.execute(cellTable.get("0"));
-                }
-                else if(isTreeOrHierarchical== false){
-                        this.doHierarchicalLayout();
-                }
-             
-                        
-                        
-                        iterator = collection.iterator();
-                        
-                          while(iterator.hasNext()) {
-                              
-                            ClusteringLayout clusterlayout = new ClusteringLayout(this.graph);
-                            
-                            mxCell FeatureNode = (mxCell)iterator.next();
-                            
-                            clusterlayout.setMoveCircle(true);
-                            clusterlayout.setX0(FeatureNode.getGeometry().getX());
-                            clusterlayout.setY0(FeatureNode.getGeometry().getY());
-//                            System.out.print("\n X0 : "+FeatureNode.getGeometry().getX());
-//                            System.out.print("\n Y0 : "+FeatureNode.getGeometry().getY());
-                            clusterlayout.execute(FeatureNode);
-                            
-                        }
-                          
-                        
-                        iterator = collection.iterator();
-                        if(!iterator.hasNext()){
-                           
-                           cycleCollection = CycleFeatureNode.keySet();
-                           cycleIterator = cycleCollection.iterator();
-                            
-                          while(cycleIterator.hasNext()) {
-                              
-                            CircleLayout circleLayout = new CircleLayout(this.graph);
-
-                            mxCell FeatureNode = (mxCell)cycleIterator.next();
-                            
-                            circleLayout.setMoveCircle(true);
-                            circleLayout.setX0(FeatureNode.getGeometry().getY());
-                            circleLayout.setY0(FeatureNode.getGeometry().getX());
-                     
-                            circleLayout.setRadius(40);
-                            circleLayout.execute(FeatureNode);
-                        
-                          }
-                          
-                          cycleIterator = cycleCollection.iterator();
-                        
-                          while(cycleIterator.hasNext()) {
-                            mxCell FeatureNode = (mxCell)cycleIterator.next();
-                            this.graph.ungroupCells(new Object[]{FeatureNode});
-                          }
-                        }
-                      
-                        
-                // ungroup the cluster :        
-                          
-                        iterator = collection.iterator();
-                        while(iterator.hasNext()) {
-                            mxCell FeatureNode = (mxCell)iterator.next();
-                            this.graph.ungroupCells(new Object[]{FeatureNode});
-                        }
-                     
-                 for(int i = 0; i < childCount-1; ++i){
-               
-                       Object child = graph.getModel().getChildAt(this.graph.getDefaultParent(), i);
-                       if(((mxCell)child).isVertex()){
-                            mxCell cell=(mxCell)child;
-                            Object[] edges=graph.getEdges(cell);
-                            
-                            for(int j=0;j<edges.length;++j){
-                                mxCell edge=(mxCell)edges[j];
-                                mxCell source=(mxCell)edge.getSource();
-                                mxCell target=(mxCell)edge.getTarget();
-                
-                                if(target==source){
-                                    ArrayList<mxPoint> points = new ArrayList<mxPoint>();
-                                    mxPoint loopCtrlPt=new mxPoint();
-                                    loopCtrlPt.setX(source.getGeometry().getCenterX());
-                                    loopCtrlPt.setY(source.getGeometry().getCenterY()+source.getGeometry().getHeight());
-                                    points.add(loopCtrlPt);
-
-                                    edge.getGeometry().setPoints(points);
-                                }
-                                
-                            }
-                        }
-                 }       
-                        
-                        
-                        //EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
-                        //edgeRoute.execute(this.graph.getDefaultParent());
+                 FeatureLayout featurelayout=new FeatureLayout(this.graph);
+                 featurelayout.execute(this.graph.getDefaultParent());
+                 
+                 handleInitialFinal();
+                 handleLoop();
+        
                  EdgeRoutingBranchingLayout layout = new EdgeRoutingBranchingLayout(this.graph);
-                 layout.execute(this.graph.getDefaultParent());
-        
-               } finally {
-			this.graph.getModel().endUpdate();
-		}
-                
-        
-        
+                 layout.execute(this.graph.getDefaultParent());       
     }
 
     public void routeAllEdges2008() {
@@ -1278,272 +1183,283 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     
     public void doLinearLayout(){
+//        
+//        LinearLayout layout=new LinearLayout(this.graph);
+//        layout.execute(this.graph.getDefaultParent());
+//        automata.getGroupList();
+        long startTime = System.nanoTime();
         
-        LinearLayout layout=new LinearLayout(this.graph);
-        layout.execute(this.graph.getDefaultParent());
-        graph.refresh();
+        if(automata.getSelectedStates().isEmpty()) automata.selectAllStates();
         
-        Object objects[] = this.graph.getChildEdges(graph.getDefaultParent());
-        for (Object object : objects) {
-                if (!(object instanceof mxICell)) {
-                        continue;
-                }
-                mxICell edge = (mxICell) object;
-                if (!(edge.isEdge())) {
-                        continue;
-                }
-                Object value = edge.getValue();
-                if (!(value instanceof InitialFinalWeight)) {
-                        continue;
-                }
-                InitialFinalWeight initialFinalWeight = (InitialFinalWeight) value;
-                InitialFinalWeight.GeometricData geometricData = initialFinalWeight.getGeometricData();
-                double offsetX = 50;
-                double offsetY = 0;
-                if ((geometricData != null) && (geometricData.offset != null)) {
-                        offsetX = geometricData.offset.x;
-                        offsetY = geometricData.offset.y;
-                }
-                mxGeometry geometry = edge.getGeometry();
-                if (geometry == null) {
-                        continue;
-                }
-                mxICell source = edge.getTerminal(true);
-                mxICell target = edge.getTerminal(false);
-                if (source == null) {
-                        if (target == null) {
-                                continue;
-                        }
-                        mxGeometry vertexGeometry = target.getGeometry();
-                        geometry.setSourcePoint(
-                                        new mxPoint(
-                                        vertexGeometry.getCenterX() + offsetX,
-                                        vertexGeometry.getCenterY() + offsetY));
-                } else if (target == null) {
-                        mxGeometry vertexGeometry = source.getGeometry();
-                        geometry.setTargetPoint(
-                                        new mxPoint(
-                                        vertexGeometry.getCenterX() + offsetX,
-                                        vertexGeometry.getCenterY() + offsetY));
-                }
-        }  // End for (Object object : objects)
-        SingleVertexEdgesLayout singleVertexEdgesLayout = new SingleVertexEdgesLayout(this.graph);
-        singleVertexEdgesLayout.execute(this.graph.getDefaultParent());
+        LinearLayoutAutomata layout=new LinearLayoutAutomata();
         
-        /*Object[] allCell=graph.getChildCells(this.graph.getDefaultParent());
-        for(Object cell:allCell){
-            mxCell edge=(mxCell)cell;
-            if(edge.isEdge()){
-                System.out.println(edge.getGeometry().getPoints());
-            }
-            
-        }*/
-        //routeAllEdgesBranching();
+        automata.getGroupList();
+        if(automata.selectedStatesContainVertexGroup()){
+            GroupReplacedAutomata replaceAutomata=new GroupReplacedAutomata(automata);
+//            Automata reautomata=replaceAutomata.createReplaceAutomata();
+//            reautomata.selectAllStates();
+            layout.doLayout(automata,replaceAutomata);
+//            automata=reautomata;
+            //replaceAutomata.expandStatesToVertexGroups();
+        }
+        else{
+            if(automata.getSelectedStates().isEmpty()) automata.selectAllStates();
+            layout.doLayout(automata);
+        }
+          
+        automata.refresh();
+        this.graph.clearSelection();
+        
+        long endTime = System.nanoTime();
+        long duration = endTime - startTime;
+        System.out.println("+++++++++    layout time = "+duration+" ns "+
+                " #s= "+automata.getAllStates().size()+"#t= "+automata.getAllTransitions().size()+"+++++++++++++++");
+        //SingleVertexEdgesLayout singleVertexEdgesLayout = new SingleVertexEdgesLayout(this.graph);
+        //singleVertexEdgesLayout.execute(this.graph.getDefaultParent());
+        
     }
-    
-    
+    private void handleLoop(){
+        
+        Object objects[] = this.graph.getChildEdges(this.graph.getDefaultParent());
+        for(Object object:objects){
+            mxCell cell=(mxCell)object;
+            if(cell.getTarget()==cell.getSource()){
+                this.graph.resetEdge(cell);
+//                System.out.println("reset edge: "+cell.getSource().getId()+"->"+cell.getTarget().getId());
+            }
+        }
+        this.graph.refresh();
+    }
+    /*
+     * TODO: this is for temporary use after hierachical layout
+     */
+    private void handleEdgeControlPoint(){
+//        Object objects[] = this.graph.getChildEdges(this.graph.getDefaultParent());
+//        for(Object object:objects){
+//            mxCell cell=(mxCell)object;
+//            this.graph.resetEdge(cell);
+//            
+//        }
+//        this.graph.refresh();
+    }
+    /*
+     *  TODO: this is used for now to get an automata synchronized to the one on graph (when saving files),
+     *        since not all modifications on graph are synchronized to Automata structure
+     */
     public Automata getAutomata() {
-
-        Automata automata = new Automata();
-        automata.setName(this.automata.getName());
-        automata.setWritingData(this.automata.getWritingData());
-        automata.setWeight(this.automata.getWeight());
-        automata.setAlphabet(this.automata.getAlphabet());
-        automata.setOutputAlphabet(this.automata.getOutputAlphabet());
-        HashMap<mxCell, State> cellToStateMap = new HashMap<mxCell, State>();
-
-        Object[] vertices = this.graph.getChildVertices(graph.getDefaultParent());
-
-        for (int index = 0; index < vertices.length; index++) {
-
-            if (!(vertices[index] instanceof mxCell)) {
-                continue;
-            }
-
-            mxCell vertex = (mxCell) vertices[index];
-            State state = new State();
-            mxGeometry geometry = vertex.getGeometry();
-            Point2D point2d = new Point2D.Double();
-            point2d.setLocation(geometry.getCenterX(), geometry.getCenterY());
-            StateInterface.GeometricData geometricData = new StateInterface.GeometricData();
-            geometricData.location = point2d;
-            
-            Point2D sizepoint2d = new Point2D.Double();
-            sizepoint2d.setLocation(geometry.getWidth(),geometry.getHeight());
-            geometricData.size=sizepoint2d;
-            state.setGeometricData(geometricData);
-            
-            Map<String, Object> styleList = graph.getCellStyle(vertex);
-            state.setShape((String)styleList.get("shape"));
-            
-            StateInterface.DrawingData drawingData = new StateInterface.DrawingData();
-            drawingData.fillColor = (String) styleList.get("fillColor");
-            drawingData.strokeColor = (String) styleList.get("strokeColor");
-            String width = (String) styleList.get("strokeWidth");
-            if (width != null) {
-                drawingData.strokeWidth = Float.valueOf(width);
-            }
-
-            //System.out.println("style:"+drawingData.fillColor+" "+drawingData.strokeColor+" "+drawingData.strokeWidth);
-
-            state.setDrawingData(drawingData);
-
-            automata.addState(state);
-            cellToStateMap.put(vertex, state);
-            Object object = vertex.getValue();
-            if (object instanceof String) {
-                state.setName((String) object);
-            }
-
-
-        }  // End for (int index = 0; index < vertices.length; index++)
-
-        Object[] edges = this.graph.getChildEdges(graph.getDefaultParent());
-
-        for (int index = 0; index < edges.length; index++) {
-
-            if (!(edges[index] instanceof mxCell)) {
-                continue;
-            }
-
-            mxCell edge = (mxCell) edges[index];
-            mxCell sourceVertex = null;
-            mxCell targetVertex = null;
-            Object object = edge.getSource();
-            if (object instanceof mxCell) {
-                sourceVertex = (mxCell) object;
-            }
-            object = edge.getTarget();
-            if (object instanceof mxCell) {
-                targetVertex = (mxCell) object;
-            }
-
-            if (sourceVertex == null) {
-                if (targetVertex == null) {
-                    throw new IllegalArgumentException("An edge can not have null for both source and target!  " + edge.toString());
-                } else {
-                    /*
-                     * This edge is an arrow pointing to an initial state.
-                     */
-                    State state = cellToStateMap.get(targetVertex);
-                    object = edge.getValue();
-                    if (object instanceof InitialFinalWeight) {
-                        InitialFinalWeight initialFinalWeight = (InitialFinalWeight) object;
-                        mxGeometry edgeGeometry = edge.getGeometry();
-                        if (edgeGeometry != null) {
-                            InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
-                            mxPoint point = edgeGeometry.getSourcePoint();
-                            mxGeometry vertexGeometry = targetVertex.getGeometry();
-                            if ((point != null) && (vertexGeometry != null)) {
-                                geometricData.offset = new Point2D.Double(point.getX() - vertexGeometry.getCenterX(), point.getY() - vertexGeometry.getCenterY());
-                            }
-                            if ((edgeGeometry.getX() != 0) || (edgeGeometry.getY() != DEFAULT_LABEL_DISTANCE)) {
-                                geometricData.labelPosAndDist = new Point2D.Double(edgeGeometry.getX(), edgeGeometry.getY());
-                            }
-                            mxPoint labelOffset = edgeGeometry.getOffset();
-                            if (labelOffset != null) {
-                                geometricData.labelOffset = new Point2D.Double(labelOffset.getX(), labelOffset.getY());
-                            }
-                            if ((geometricData.offset != null)
-                                    || (geometricData.labelPosAndDist != null)
-                                    || (geometricData.labelOffset != null)) {
-                                initialFinalWeight.setGeometricData(geometricData);
-                            }
-                            geometricData = null;  // InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
-                        }  // End if (edgeGeometry != null)
-                        state.setInitialWeight(initialFinalWeight);
-                    } else {
-                        state.setInitialWeight(new InitialFinalWeight(true));
-                    }
-                    continue;
-                }
-            } else {
-                if (targetVertex == null) {
-                    /*
-                     * This edge is an arrow pointing from a final state.
-                     */
-                    State state = cellToStateMap.get(sourceVertex);
-                    object = edge.getValue();
-                    if (object instanceof InitialFinalWeight) {
-                        InitialFinalWeight initialFinalWeight = (InitialFinalWeight) object;
-                        mxGeometry edgeGeometry = edge.getGeometry();
-                        if (edgeGeometry != null) {
-                            InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
-                            mxPoint point = edgeGeometry.getTargetPoint();
-                            mxGeometry vertexGeometry = sourceVertex.getGeometry();
-                            if ((point != null) && (vertexGeometry != null)) {
-                                geometricData.offset = new Point2D.Double(point.getX() - vertexGeometry.getCenterX(), point.getY() - vertexGeometry.getCenterY());
-                            }
-                            if ((edgeGeometry.getX() != 0) || (edgeGeometry.getY() != DEFAULT_LABEL_DISTANCE)) {
-                                geometricData.labelPosAndDist = new Point2D.Double(edgeGeometry.getX(), edgeGeometry.getY());
-                            }
-                            mxPoint labelOffset = edgeGeometry.getOffset();
-                            if (labelOffset != null) {
-                                geometricData.labelOffset = new Point2D.Double(labelOffset.getX(), labelOffset.getY());
-                            }
-                            if ((geometricData.offset != null)
-                                    || (geometricData.labelPosAndDist != null)
-                                    || (geometricData.labelOffset != null)) {
-                                initialFinalWeight.setGeometricData(geometricData);
-                            }
-                            geometricData = null;  // InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
-                        }  // End if (edgeGeometry != null)
-                        state.setFinalWeight(initialFinalWeight);
-                    } else {
-                        state.setFinalWeight(new InitialFinalWeight(true));
-                    }
-                    continue;
-                }
-            }
-
-            Transition transition = new Transition();
-            transition.setSourceState(cellToStateMap.get(sourceVertex));
-            transition.setTargetState(cellToStateMap.get(targetVertex));
-            object = edge.getValue();
-            if (object instanceof WeightedRegularExpression) {
-                transition.setLabel((WeightedRegularExpression) object);
-            }
-            mxGeometry geometry = edge.getGeometry();
-            if (geometry != null) {
-                TransitionInterface.GeometricData geometricData = new TransitionInterface.GeometricData();
-                if ((geometry.getX() != 0) || (geometry.getY() != DEFAULT_LABEL_DISTANCE)) {
-                    geometricData.labelPosAndDist = new Point2D.Double(geometry.getX(), geometry.getY());
-                }
-                mxPoint offset = geometry.getOffset();
-                if (offset != null) {
-                    geometricData.labelOffset = new Point2D.Double(offset.getX(), offset.getY());
-                }
-                List<mxPoint> points = geometry.getPoints();
-                if ((points != null) && (!points.isEmpty())) {
-                    Iterator<mxPoint> iteratePoints = points.iterator();
-                    while (iteratePoints.hasNext()) {
-                        mxPoint point = iteratePoints.next();
-                        geometricData.controlPoints.add(new Point2D.Double(point.getX(), point.getY()));
-                    }  // End while (iteratePoints.hasNext())
-                }  // End if ((points != null) && (!points.isEmpty()))
-                transition.setGeometricData(geometricData);
-            }  // End if (geometry != null)
-
-            TransitionInterface.DrawingData drawingData = new TransitionInterface.DrawingData();
-            Map<String, Object> styleList = graph.getCellStyle(edge);
-            drawingData.strokeColor = (String) styleList.get("strokeColor");
-            String width = (String) styleList.get("strokeWidth");
-            if (width != null) {
-                drawingData.strokeWidth = Float.valueOf(width);
-            }
-
-            drawingData.startArrow = (String) styleList.get("startArrow");
-            drawingData.endArrow = (String) styleList.get("endArrow");
-//            System.out.println("style:" + drawingData.strokeColor + " " + drawingData.strokeWidth + " " + drawingData.startArrow + " " + drawingData.endArrow);
-
-            transition.setDrawingData(drawingData);
-
-
-            automata.addTransition(transition);
-
-        }  // End for (int index = 0; index < edges.length; index++)
-
-        return automata;
+            return automata;
+//        Automata automata = new Automata();
+//        automata.setName(this.automata.getName());
+//        automata.setWritingData(this.automata.getWritingData());
+//        automata.setWeight(this.automata.getWeight());
+//        automata.setAlphabet(this.automata.getAlphabet());
+//        automata.setOutputAlphabet(this.automata.getOutputAlphabet());
+//        HashMap<mxCell, State> cellToStateMap = new HashMap<mxCell, State>();
+//
+//        Object[] vertices = this.graph.getChildVertices(graph.getDefaultParent());
+//
+//        for (int index = 0; index < vertices.length; index++) {
+//
+//            if (!(vertices[index] instanceof mxCell)) {
+//                continue;
+//            }
+//
+//            mxCell vertex = (mxCell) vertices[index];
+//            State state = new State();
+//            mxGeometry geometry = vertex.getGeometry();
+//            Point2D point2d = new Point2D.Double();
+//            point2d.setLocation(geometry.getCenterX(), geometry.getCenterY());
+//            StateGeometricData geometricData = new StateGeometricData();
+//            geometricData.setLocation(point2d);
+//            
+//            Point2D sizepoint2d = new Point2D.Double();
+//            sizepoint2d.setLocation(geometry.getWidth(),geometry.getHeight());
+//            geometricData.setSize(sizepoint2d);
+//            state.setGeometricData(geometricData);
+//            
+//            Map<String, Object> styleList = graph.getCellStyle(vertex);
+//            state.setShape((String)styleList.get("shape"));
+//            
+//            //StateInterface.DrawingData drawingData = new StateInterface.DrawingData();
+//            //drawingData.fillColor = (String) styleList.get("fillColor");
+//            //drawingData.strokeColor = (String) styleList.get("strokeColor");
+////            String width = (String) styleList.get("strokeWidth");
+////            if (width != null) {
+////                drawingData.strokeWidth = Float.valueOf(width);
+////            }
+//            StateDrawingData drawingData=new StateDrawingData();
+//            drawingData.setFillColor((String) styleList.get("fillColor"));
+//            drawingData.setStrokeColor((String) styleList.get("strokeColor"));
+//            String width = (String) styleList.get("strokeWidth");
+//            if (width != null) {
+//                drawingData.setStrokeWidth(Float.valueOf(width));
+//            }
+//            
+//            
+//            //System.out.println("style:"+drawingData.fillColor+" "+drawingData.strokeColor+" "+drawingData.strokeWidth);
+//
+//            state.setDrawingData(drawingData);
+//
+//            automata.addState(state);
+//            cellToStateMap.put(vertex, state);
+//            Object object = vertex.getValue();
+//            if (object instanceof String) {
+//                state.setName((String) object);
+//            }
+//
+//
+//        }  // End for (int index = 0; index < vertices.length; index++)
+//
+//        Object[] edges = this.graph.getChildEdges(graph.getDefaultParent());
+//
+//        for (int index = 0; index < edges.length; index++) {
+//
+//            if (!(edges[index] instanceof mxCell)) {
+//                System.out.println("not an edge!");
+//                continue;
+//            }
+//
+//            mxCell edge = (mxCell) edges[index];
+//            mxCell sourceVertex = null;
+//            mxCell targetVertex = null;
+//            Object object = edge.getSource();
+//            if (object instanceof mxCell) {
+//                sourceVertex = (mxCell) object;
+//            }
+//            object = edge.getTarget();
+//            if (object instanceof mxCell) {
+//                targetVertex = (mxCell) object;
+//            }
+//
+//            if (sourceVertex == null) {
+//                if (targetVertex == null) {
+//                    throw new IllegalArgumentException("An edge can not have null for both source and target!  " + edge.toString());
+//                } else {
+//                    /*
+//                     * This edge is an arrow pointing to an initial state.
+//                     */
+//                    State state = cellToStateMap.get(targetVertex);
+//                    object = edge.getValue();
+//                    if (object instanceof InitialFinalWeight) {
+//                        InitialFinalWeight initialFinalWeight = (InitialFinalWeight) object;
+//                        mxGeometry edgeGeometry = edge.getGeometry();
+//                        if (edgeGeometry != null) {
+//                            InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
+//                            mxPoint point = edgeGeometry.getSourcePoint();
+//                            mxGeometry vertexGeometry = targetVertex.getGeometry();
+//                            if ((point != null) && (vertexGeometry != null)) {
+//                                geometricData.offset = new Point2D.Double(point.getX() - vertexGeometry.getCenterX(), point.getY() - vertexGeometry.getCenterY());
+//                            }
+//                            if ((edgeGeometry.getX() != 0) || (edgeGeometry.getY() != DEFAULT_LABEL_DISTANCE)) {
+//                                geometricData.labelPosAndDist = new Point2D.Double(edgeGeometry.getX(), edgeGeometry.getY());
+//                            }
+//                            mxPoint labelOffset = edgeGeometry.getOffset();
+//                            if (labelOffset != null) {
+//                                geometricData.labelOffset = new Point2D.Double(labelOffset.getX(), labelOffset.getY());
+//                            }
+//                            if ((geometricData.offset != null)
+//                                    || (geometricData.labelPosAndDist != null)
+//                                    || (geometricData.labelOffset != null)) {
+//                                initialFinalWeight.setGeometricData(geometricData);
+//                            }
+//                            geometricData = null;  // InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
+//                        }  // End if (edgeGeometry != null)
+//                        state.setInitialWeight(initialFinalWeight);
+//                        
+//                    } else {
+//                        state.setInitialWeight(new InitialFinalWeight(true));
+//                    }
+//                    continue;
+//                }
+//            } else {
+//                if (targetVertex == null) {
+//                    /*
+//                     * This edge is an arrow pointing from a final state.
+//                     */
+//                    State state = cellToStateMap.get(sourceVertex);
+//                    object = edge.getValue();
+//                    if (object instanceof InitialFinalWeight) {
+//                        InitialFinalWeight initialFinalWeight = (InitialFinalWeight) object;
+//                        mxGeometry edgeGeometry = edge.getGeometry();
+//                        if (edgeGeometry != null) {
+//                            InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
+//                            mxPoint point = edgeGeometry.getTargetPoint();
+//                            mxGeometry vertexGeometry = sourceVertex.getGeometry();
+//                            if ((point != null) && (vertexGeometry != null)) {
+//                                geometricData.offset = new Point2D.Double(point.getX() - vertexGeometry.getCenterX(), point.getY() - vertexGeometry.getCenterY());
+//                            }
+//                            if ((edgeGeometry.getX() != 0) || (edgeGeometry.getY() != DEFAULT_LABEL_DISTANCE)) {
+//                                geometricData.labelPosAndDist = new Point2D.Double(edgeGeometry.getX(), edgeGeometry.getY());
+//                            }
+//                            mxPoint labelOffset = edgeGeometry.getOffset();
+//                            if (labelOffset != null) {
+//                                geometricData.labelOffset = new Point2D.Double(labelOffset.getX(), labelOffset.getY());
+//                            }
+//                            if ((geometricData.offset != null)
+//                                    || (geometricData.labelPosAndDist != null)
+//                                    || (geometricData.labelOffset != null)) {
+//                                initialFinalWeight.setGeometricData(geometricData);
+//                            }
+//                            geometricData = null;  // InitialFinalWeight.GeometricData geometricData = new InitialFinalWeight.GeometricData();
+//                        }  // End if (edgeGeometry != null)
+//                        state.setFinalWeight(initialFinalWeight);
+//                    } else {
+//                        state.setFinalWeight(new InitialFinalWeight(true));
+//                    }
+//                    continue;
+//                }
+//            }
+//
+//            Transition transition = new Transition();
+//            transition.setSourceState(cellToStateMap.get(sourceVertex));
+//            transition.setTargetState(cellToStateMap.get(targetVertex));
+//            object = edge.getValue();
+//            if (object instanceof WeightedRegularExpression) {
+//                transition.setLabel((WeightedRegularExpression) object);
+//            }
+//            mxGeometry geometry = edge.getGeometry();
+//            if (geometry != null) {
+//                TransitionGeometricData geometricData = new TransitionGeometricData();
+//                if ((geometry.getX() != 0) || (geometry.getY() != DEFAULT_LABEL_DISTANCE)) {
+//                    geometricData.labelPosAndDist = new Point2D.Double(geometry.getX(), geometry.getY());
+//                }
+//                mxPoint offset = geometry.getOffset();
+//                if (offset != null) {
+//                    geometricData.labelOffset = new Point2D.Double(offset.getX(), offset.getY());
+//                }
+//                List<mxPoint> points = geometry.getPoints();
+//                if ((points != null) && (!points.isEmpty())) {
+//                    Iterator<mxPoint> iteratePoints = points.iterator();
+//                    while (iteratePoints.hasNext()) {
+//                        mxPoint point = iteratePoints.next();
+//                        geometricData.controlPoints.add(new Point2D.Double(point.getX(), point.getY()));
+//                        
+//                    }  // End while (iteratePoints.hasNext())
+//                }  // End if ((points != null) && (!points.isEmpty()))
+//                transition.setGeometricData(geometricData);
+//            }  // End if (geometry != null)
+//
+//            TransitionDrawingData drawingData = new TransitionDrawingData();
+//            Map<String, Object> styleList = graph.getCellStyle(edge);
+//            drawingData.setStrokeColor((String) styleList.get("strokeColor"));
+//            String width = (String) styleList.get("strokeWidth");
+//            if (width != null) {
+//                drawingData.setStrokeWidth(Float.valueOf(width));
+//            }
+//
+//            drawingData.setStartArrow ((String) styleList.get("startArrow"));
+//            drawingData.setEndArrow((String) styleList.get("endArrow"));
+////            System.out.println("style:" + drawingData.strokeColor + " " + drawingData.strokeWidth + " " + drawingData.startArrow + " " + drawingData.endArrow);
+//
+//            transition.setDrawingData(drawingData);
+//
+//            //System.out.println("add transition: "+transition.getSourceState().getName()+" -> "+transition.getTargetState().getName());
+//            automata.addTransition(transition);
+//
+//        }  // End for (int index = 0; index < edges.length; index++)
+//        
+//        
+//        return automata;
     }  // End public Automata getAutomata()
 
     /**
@@ -1608,24 +1524,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         return graphPopupMenu;
     }
 
-    public class CompareCtrlPoint implements Comparator {
-
-        @Override
-        public int compare(Object t, Object t1) {
-            Integer tX = (int) ((mxPoint) t).getX();
-            Integer tY = (int) ((mxPoint) t).getY();
-            Integer t1X = (int) ((mxPoint) t1).getX();
-            Integer t1Y = (int) ((mxPoint) t1).getY();
-
-            int flag = tX.compareTo(t1X);
-            if (flag == 0) {
-                return tY.compareTo(t1Y);
-            } else {
-                return flag;
-            }
-        }
-    }
-
+    
     public void deleteSelectedCell() {
         mxCell selectedCell = (mxCell) graph.getSelectionCell();
         deleteCell(selectedCell);
@@ -1640,49 +1539,55 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
             //remove state in automata
             if (cell.isVertex()) {
-
-                State state = cellToState(cell);
-
-                List<Transition> relatedTrans = state.getTransitions();
-                for (Transition trans : relatedTrans) {
-                    List<Transition> transList = automata.getAllTransitions();
-                    transList.remove(trans);
-                    automata.setAllTransitions(transList);
-                }
-
-
-                List<State> stateList = automata.getAllStates();
-                stateList.remove(state);
-                automata.setAllStates(stateList);
-                //System.out.println("state list size: "+automata.getAllStates().size());
-                //related transitions?
-
-
-
-            } else if (cell.isEdge()) {
-                Transition trans = cellToTransition(cell);
-                if (trans == null) {
-//                    System.out.println("can't find trans");
-                }
-                List<Transition> transList = automata.getAllTransitions();
-                transList.remove(trans);
-                automata.setAllTransitions(transList);
-//                System.out.println("trans list size: " + automata.getAllTransitions().size());
-
-
+                    automata.deleteState(cellToState(cell));
+            }else{
+                automata.deleteTransition(cellToTransition(cell));
             }
-
-
-            cellTable.remove(cell);
-            mxCell[] cells = {cell};
-            graph.removeCells(cells);
-
-//            System.out.println("cell table size: " + cellTable.size());
-
-
-        } else {
-//            System.out.println("Cell is empty");
         }
+        
+       
+//                State state = cellToState(cell);
+//
+//                List<Transition> relatedTrans = state.getTransitions();
+//                for (Transition trans : relatedTrans) {
+//                    List<Transition> transList = automata.getAllTransitions();
+//                    transList.remove(trans);
+//                    automata.setAllTransitions(transList);
+//                }
+//
+//
+//                List<State> stateList = automata.getAllStates();
+//                stateList.remove(state);
+//                automata.setAllStates(stateList);
+//                //System.out.println("state list size: "+automata.getAllStates().size());
+//                //related transitions?
+//
+//
+//
+//            } else if (cell.isEdge()) {
+//                Transition trans = cellToTransition(cell);
+//                if (trans == null) {
+////                    System.out.println("can't find trans");
+//                }
+//                List<Transition> transList = automata.getAllTransitions();
+//                transList.remove(trans);
+//                automata.setAllTransitions(transList);
+////                System.out.println("trans list size: " + automata.getAllTransitions().size());
+//
+//
+//            }
+//
+//
+//            //cellTable.remove(cell);
+//            mxCell[] cells = {cell};
+//            graph.removeCells(cells);
+//
+////            System.out.println("cell table size: " + cellTable.size());
+//
+//
+//        } else {
+////            System.out.println("Cell is empty");
+//        }
         graph.refresh();
 
     }
@@ -1710,207 +1615,236 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }
 
     private State cellToState(mxCell cell) {
-        return (State) cellTable.get(cell);
+        //return (State) cellTable.get(cell);
+        return (State)automata.cellToState(cell);
     }
 
     private Transition cellToTransition(mxCell cell) {
-        return (Transition) cellTable.get(cell);
+        return (Transition)automata.cellToState(cell);
     }
 
     public void undo() {
 
         undoManager.undo();
-        updateUndoChangedCell();
+        //updateUndoChangedCell();
 
     }
 
     public void redo() {
 
         undoManager.redo();
-        updateRedoChangedCell();
+        //updateRedoChangedCell();
 
     }
 
-    public void updateUndoChangedCell() {
-
-        //update cells in changedCell[]
-        if (!undoStack.isEmpty()) {
-            int stat = undoStack.pop();
-            redoStack.push(stat);
-
-//            System.out.println("stack pop:" + stat);
-
-            for (Object cel : changedCell) {
-
-                mxCell cell = (mxCell) cel;
-
-                switch (stat) {
-                    case STATUS_ADD: //so remove it!
-
-                        deleteCell(cell);
-                        break;
-
-                    case STATUS_DELETE: //so add it again!
-                        if (cell.isVertex()) {
-
-                            State state = new State();
-                            state.setName(cell.getValue().toString());
-                            State.GeometricData geo = new State.GeometricData();
-                            geo.location = new Point2D.Double(
-                                    cell.getGeometry().getX(),
-                                    cell.getGeometry().getY());
-                            state.setGeometricData(geo);
-
-                            cellTable.put(cell, state);
-                            automata.addState(state);
-                            //related transitions
-
-                        } else {
-                            Transition trans = new Transition();
-                            List<mxPoint> jpt = cell.getGeometry().getPoints();
-                            ArrayList<Point2D> apt = new ArrayList<Point2D>();
-                            for (mxPoint pt : jpt) {
-                                apt.add(new Point2D.Double(pt.getX(), pt.getY()));
-                            }
-                            Transition.GeometricData geo = new GeometricData();
-                            geo.controlPoints = apt;
-                            trans.setGeometricData(geo);
-
-                            trans.setLabel((WeightedRegularExpression) cell.getValue());
-                            trans.setSourceState(cellToState((mxCell) cell.getSource()));
-                            trans.setTargetState(cellToState((mxCell) cell.getTarget()));
-
-
-                            automata.addTransition(trans);
-                            cellTable.put(cell, trans);
-                        }
-                        break;
-
-                    case STATUS_CHANGE:
-
-                        if (((mxCell) cell).isVertex()) {
-                            State state = cellToState(cell);
-                            State.GeometricData geo = new State.GeometricData();
-                            geo.location = new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY());
-                            state.setGeometricData(geo);
-                            state.setName((String) cell.getValue());
-
-                        } else {
-
-                            Transition trans = cellToTransition(cell);
-                            List<mxPoint> jpt = cell.getGeometry().getPoints();
-                            ArrayList<Point2D> apt = new ArrayList<Point2D>();
-                            for (mxPoint pt : jpt) {
-                                apt.add(new Point2D.Double(pt.getX(), pt.getY()));
-                            }
-
-                            trans.getGeometricData().controlPoints = apt;
-
-                            trans.setLabel((WeightedRegularExpression) cell.getValue());
-                        }
-                        break;
-                    default:
-                        break;
-
-                }
-            }
-        }
-    }
-
-    public void updateRedoChangedCell() {
-
-        if (!redoStack.isEmpty()) {
-            int stat = redoStack.pop();
-            undoStack.push(stat);
-
-//            System.out.println("stack pop:" + stat);
-
-            for (Object cel : changedCell) {
-
-                mxCell cell = (mxCell) cel;
-
-                switch (stat) {
-                    case STATUS_DELETE: //so remove it!
-
-                        deleteCell(cell);
-
-                        break;
-
-                    case STATUS_ADD: //so add it again!
-                        if (cell.isVertex()) {
-
-                            State state = new State();
-                            state.setName(cell.getValue().toString());
-                            State.GeometricData geo = new State.GeometricData();
-                            geo.location = new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY());
-                            state.setGeometricData(geo);
-
-                            cellTable.put(cell, state);
-                            automata.addState(state);
-                            //related transitions
-
-
-
-                        } else {
-                            Transition trans = new Transition();
-                            List<mxPoint> jpt = cell.getGeometry().getPoints();
-                            ArrayList<Point2D> apt = new ArrayList<Point2D>();
-                            for (mxPoint pt : jpt) {
-                                apt.add(new Point2D.Double(pt.getX(), pt.getY()));
-                            }
-                            Transition.GeometricData geo = new GeometricData();
-                            geo.controlPoints = apt;
-                            trans.setGeometricData(geo);
-
-                            trans.setLabel((WeightedRegularExpression) cell.getValue());
-                            trans.setSourceState(cellToState((mxCell) cell.getSource()));
-                            trans.setTargetState(cellToState((mxCell) cell.getTarget()));
-
-
-                            automata.addTransition(trans);
-                            cellTable.put(cell, trans);
-                        }
-
-                        //undoStack.push(STATUS_ADD);
-                        break;
-
-                    case STATUS_CHANGE:
-
-                        if (((mxCell) cell).isVertex()) {
-                            State state = cellToState(cell);
-                            State.GeometricData geo = new State.GeometricData();
-                            geo.location = new Point2D.Double(
-                                    cell.getGeometry().getX(),
-                                    cell.getGeometry().getY());
-                            state.setGeometricData(geo);
-
-                            state.setName((String) cell.getValue());
-
-                        } else {
-
-                            Transition trans = cellToTransition(cell);
-                            List<mxPoint> jpt = cell.getGeometry().getPoints();
-                            ArrayList<Point2D> apt = new ArrayList<Point2D>();
-                            for (mxPoint pt : jpt) {
-                                apt.add(new Point2D.Double(pt.getX(), pt.getY()));
-                            }
-
-                            trans.getGeometricData().controlPoints = apt;
-                            trans.setLabel((WeightedRegularExpression) cell.getValue());
-                        }
-                        //undoStack.push(STATUS_CHANGE);
-                        break;
-                    default:
-                        break;
-
-                }
-
-
-            }
-        }
-
-
-    }
+//    public void updateUndoChangedCell() {
+//
+//        //update cells in changedCell[]
+//        if (!undoStack.isEmpty()) {
+//            int stat = undoStack.pop();
+//            redoStack.push(stat);
+//
+////            System.out.println("stack pop:" + stat);
+//
+//            for (Object cel : changedCell) {
+//
+//                mxCell cell = (mxCell) cel;
+//
+//                switch (stat) {
+//                    case STATUS_ADD: //so remove it!
+//
+//                        deleteCell(cell);
+//                        break;
+//
+//                    case STATUS_DELETE: //so add it again!
+//                        if (cell.isVertex()) {
+//
+//                            State state = new State();
+//                            state.setName(cell.getValue().toString());
+//                            StateGeometricData geo = new StateGeometricData();
+//                            geo.setLocation(new Point2D.Double(
+//                                    cell.getGeometry().getX(),
+//                                    cell.getGeometry().getY()));
+//                            state.setGeometricData(geo);
+//
+//                            cellTable.put(cell, state);
+//                            automata.addState(state);
+//                            //related transitions
+//
+//                        } else {
+//                            Transition trans = new Transition();
+//                            List<mxPoint> jpt = cell.getGeometry().getPoints();
+//                            ArrayList<Point2D> apt = new ArrayList<Point2D>();
+//                            for (mxPoint pt : jpt) {
+//                                apt.add(new Point2D.Double(pt.getX(), pt.getY()));
+//                            }
+//                            TransitionGeometricData geo = new TransitionGeometricData();
+//                            geo.controlPoints = apt;
+//                            trans.setGeometricData(geo);
+//
+//                            trans.setLabel((WeightedRegularExpression) cell.getValue());
+//                            trans.setSourceState(cellToState((mxCell) cell.getSource()));
+//                            trans.setTargetState(cellToState((mxCell) cell.getTarget()));
+//
+//
+//                            automata.addTransition(trans);
+//                            cellTable.put(cell, trans);
+//                        }
+//                        break;
+//
+//                    case STATUS_CHANGE:
+//
+//                        if (((mxCell) cell).isVertex()) {
+//                            State state = cellToState(cell);
+//                            
+//                            Point2D newgeo=state.getGeometricData().getLocation();
+//                            
+//                            StateGeometricData geo = new StateGeometricData();
+//                            
+//                            
+//                            geo.setLocation(new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY()));
+//                            state.setGeometricData(geo);
+//                            state.setName((String) cell.getValue());
+//                            
+//                            
+//                            // update control pts of edges, loops, initial/finals
+//                            Point2D offset=new Point2D.Double(newgeo.getX()-geo.getX(),
+//                                                       newgeo.getY()-geo.getY());
+//                            updateControlPoint(new mxCell[]{cell},offset);
+//                            
+//                            
+//                        } else {
+//
+//                            Transition trans = cellToTransition(cell);
+//                            mxGeometry geo=cell.getGeometry();
+//                            if(geo!=null){
+//                                List<mxPoint> jpt = geo.getPoints();
+//                                if(!jpt.isEmpty()){
+//                                    ArrayList<Point2D> apt = new ArrayList<Point2D>();
+//                                
+//                                    for (mxPoint pt : jpt) {
+//                                        apt.add(new Point2D.Double(pt.getX(), pt.getY()));
+//                                    }
+//                                
+//                                    trans.getGeometricData().controlPoints = apt;
+//                                }
+//                            }
+//                            trans.setLabel((WeightedRegularExpression) cell.getValue());
+//                        }
+//                        break;
+//                    default:
+//                        break;
+//
+//                }
+//            }
+//        }
+//    }
+//
+//    public void updateRedoChangedCell() {
+//
+//        if (!redoStack.isEmpty()) {
+//            int stat = redoStack.pop();
+//            undoStack.push(stat);
+//
+////            System.out.println("stack pop:" + stat);
+//
+//            for (Object cel : changedCell) {
+//
+//                mxCell cell = (mxCell) cel;
+//
+//                switch (stat) {
+//                    case STATUS_DELETE: //so remove it!
+//
+//                        deleteCell(cell);
+//
+//                        break;
+//
+//                    case STATUS_ADD: //so add it again!
+//                        if (cell.isVertex()) {
+//
+//                            State state = new State();
+//                            state.setName(cell.getValue().toString());
+//                            StateGeometricData geo = new StateGeometricData();
+//                            geo.setLocation(new Point2D.Double(cell.getGeometry().getX(), cell.getGeometry().getY()));
+//                            state.setGeometricData(geo);
+//
+//                            cellTable.put(cell, state);
+//                            automata.addState(state);
+//                            //related transitions
+//
+//
+//
+//                        } else {
+//                            Transition trans = new Transition();
+//                            List<mxPoint> jpt = cell.getGeometry().getPoints();
+//                            ArrayList<Point2D> apt = new ArrayList<Point2D>();
+//                            for (mxPoint pt : jpt) {
+//                                apt.add(new Point2D.Double(pt.getX(), pt.getY()));
+//                            }
+//                            TransitionGeometricData geo = new TransitionGeometricData();
+//                            geo.controlPoints = apt;
+//                            trans.setGeometricData(geo);
+//
+//                            trans.setLabel((WeightedRegularExpression) cell.getValue());
+//                            trans.setSourceState(cellToState((mxCell) cell.getSource()));
+//                            trans.setTargetState(cellToState((mxCell) cell.getTarget()));
+//
+//
+//                            automata.addTransition(trans);
+//                            cellTable.put(cell, trans);
+//                        }
+//
+//                        //undoStack.push(STATUS_ADD);
+//                        break;
+//
+//                    case STATUS_CHANGE:
+//
+//                        if (((mxCell) cell).isVertex()) {
+//                            State state = cellToState(cell);
+//                            
+//                            Point2D newgeo=state.getGeometricData().getLocation();
+//                           
+//                            StateGeometricData geo = new StateGeometricData();
+//                            
+//                            
+//                            geo.setLocation (new Point2D.Double(
+//                                    cell.getGeometry().getX(),
+//                                    cell.getGeometry().getY()));
+//                            state.setGeometricData(geo);
+//
+//                            state.setName((String) cell.getValue());
+//
+//                             // update control pts of edges, loops, initial/finals
+//                            //Point2D offset=new Point2D.Double(newgeo.getX()-geo.location.getX(),
+//                            //                           newgeo.getY()-geo.location.getY());
+//                            //updateControlPoint(new Object[]{cell},offset);
+//                            
+//                            
+//                        } else {
+//
+//                            Transition trans = cellToTransition(cell);
+//                            List<mxPoint> jpt = cell.getGeometry().getPoints();
+//                            ArrayList<Point2D> apt = new ArrayList<Point2D>();
+//                            for (mxPoint pt : jpt) {
+//                                apt.add(new Point2D.Double(pt.getX(), pt.getY()));
+//                            }
+//
+//                            trans.getGeometricData().controlPoints = apt;
+//                            trans.setLabel((WeightedRegularExpression) cell.getValue());
+//                        }
+//                        //undoStack.push(STATUS_CHANGE);
+//                        break;
+//                    default:
+//                        break;
+//
+//                }
+//
+//
+//            }
+//        }
+//
+//
+//    }
     
     
     public void setCurrentFile(File file){
@@ -1933,8 +1867,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     protected mxRubberband rubberband;
     protected mxKeyboardHandler keyboardHandler;
     //protected Hashtable<Integer, mxCell> cellTable;
-    protected Hashtable<mxCell, Object> cellTable;
-    protected mxCell transitionFrom, transitionTo;
+    //protected Hashtable<mxCell, Object> cellTable;
+    //protected mxCell transitionFrom, transitionTo;
+    protected State transitionFrom,transitionTo;
     protected double popMouseX, popMouseY;
     protected mxPoint popPoint;
     
@@ -1961,7 +1896,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     ///
     static final float defaultFontSize=13;
     ////
-    VGI vgi;
+    static public VGI vgi;
     ////
     int selectedHandlerIndex = 0;
     int vertexWidth = 50;
@@ -1987,6 +1922,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         resetControlPointMenuItem = new javax.swing.JMenuItem();
         routeEdgeMenuItem = new javax.swing.JMenuItem();
         routeEdgeWVGMenuItem = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        applyLinearLayoutMenuItem = new javax.swing.JMenuItem();
+        groupMenuItem = new javax.swing.JMenuItem();
+        copyMenuItem = new javax.swing.JMenuItem();
 
         addStateMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/addstate.png"))); // NOI18N
         addStateMenuItem.setText("Add State");
@@ -2072,6 +2011,31 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             }
         });
         graphPopupMenu.add(routeEdgeWVGMenuItem);
+        graphPopupMenu.add(jSeparator1);
+
+        applyLinearLayoutMenuItem.setText("Apply Linear Layout");
+        applyLinearLayoutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                applyLinearLayoutMenuItemActionPerformed(evt);
+            }
+        });
+        graphPopupMenu.add(applyLinearLayoutMenuItem);
+
+        groupMenuItem.setText("Fixed Group Layout");
+        groupMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                groupMenuItemActionPerformed(evt);
+            }
+        });
+        graphPopupMenu.add(groupMenuItem);
+
+        copyMenuItem.setText("copy");
+        copyMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copyMenuItemActionPerformed(evt);
+            }
+        });
+        graphPopupMenu.add(copyMenuItem);
 
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
             public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
@@ -2122,31 +2086,52 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     private void addTransitionFromMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTransitionFromMenuItemActionPerformed
         // TODO add your handling code here:
-        Object cell = getGraphComponent().getCellAt((int) popMouseX, (int) popMouseY);
-        if (cell != null) {
-            if (((mxCell) cell).isVertex()) {
-                transitionFrom = (mxCell) cell;
-               // System.out.println("add transition from :"+((mxCell)cell).getId());
+//        Object cell = getGraphComponent().getCellAt((int) popMouseX, (int) popMouseY);
+//   
+//        if (cell != null) {
+//            if (((mxCell) cell).isVertex()) {
+//                transitionFrom = (mxCell) cell;
+//               // System.out.println("add transition from :"+((mxCell)cell).getId());
+//            }
+//        }
+        Point2D loc=automata.getProjection().getGeoFromLoc(new Point2D.Double(popMouseX,popMouseY));
+        Object source=automata.getStateAt(loc);
+        if(source!=null){
+            if(source instanceof State){
+                transitionFrom=(State)source;
             }
         }
     }//GEN-LAST:event_addTransitionFromMenuItemActionPerformed
 
     private void addTransitionToMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTransitionToMenuItemActionPerformed
         // TODO add your handling code here:
-        Object cell = getGraphComponent().getCellAt((int) popMouseX, (int) popMouseY);
-        
-        if (cell != null) {
-            if (((mxCell) cell).isVertex()) {
-                //System.out.println("add transition");
-                if (transitionFrom != null) {
-                    transitionTo = (mxCell) cell;
-                    addTransition(transitionFrom, transitionTo);
-                    // System.out.println("add transition to :"+((mxCell)cell).getId());
-                    transitionFrom = null;
-                    transitionTo = null;
+//        Object cell = getGraphComponent().getCellAt((int) popMouseX, (int) popMouseY);
+//        
+//        if (cell != null) {
+//            if (((mxCell) cell).isVertex()) {
+//                //System.out.println("add transition");
+//                if (transitionFrom != null) {
+//                    transitionTo = (mxCell) cell;
+//                    addTransition(transitionFrom, transitionTo);
+//                    // System.out.println("add transition to :"+((mxCell)cell).getId());
+//                    transitionFrom = null;
+//                    transitionTo = null;
+//                }
+//            }
+//        }
+        Point2D loc=automata.getProjection().getGeoFromLoc(new Point2D.Double(popMouseX,popMouseY));
+        Object target=automata.getStateAt(loc);
+        if(target!=null){
+            if(target instanceof State){
+                if(transitionFrom!=null){
+                    transitionTo=(State)target;
+                    addTransition(transitionFrom,transitionTo);
+                    transitionFrom=transitionTo=null;
+                    
                 }
             }
         }
+        
     }//GEN-LAST:event_addTransitionToMenuItemActionPerformed
 
     private void addControlPointMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addControlPointMenuItemActionPerformed
@@ -2217,17 +2202,70 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             EdgeRoutingMinCross layout = new EdgeRoutingMinCross(this.graph);
             layout.routeByWeightedVisibilityGraph(cell);
 	}//GEN-LAST:event_routeEdgeWVGMenuItemActionPerformed
+
+    private void applyLinearLayoutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyLinearLayoutMenuItemActionPerformed
+        if(automata.getSelectedStates().size()>1){
+            this.doLinearLayout();
+            automata.setSelectedStates(automata.getSelectedStates());
+        }
+    }//GEN-LAST:event_applyLinearLayoutMenuItemActionPerformed
+
+    private void copyMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyMenuItemActionPerformed
+        
+        List<State> selectedStates=automata.getSelectedStates();
+        List<State> savethem=new ArrayList<State>();
+        for(State st:selectedStates){
+            savethem.add(st);
+        }
+        automata.copyStates(savethem);
+    }//GEN-LAST:event_copyMenuItemActionPerformed
+
+    private void groupMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_groupMenuItemActionPerformed
+        if(automata.getSelectedStates().size()>1){
+//            automata.setSelectedStates(automata.getSelectedStates());
+            automata.groupVertices(automata.getSelectedStates());
+//            this.graph.clearSelection();
+//            automata.setSelectedStates(automata.getSelectedStates());
+
+//           System.out.println("goup menu Item Action Performed!!");
+        }
+        
+    }//GEN-LAST:event_groupMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addControlPointMenuItem;
     private javax.swing.JMenuItem addStateMenuItem;
     private javax.swing.JMenuItem addTransitionFromMenuItem;
     private javax.swing.JMenuItem addTransitionToMenuItem;
+    private javax.swing.JMenuItem applyLinearLayoutMenuItem;
     private javax.swing.JMenuItem cancelMenuItem;
+    private javax.swing.JMenuItem copyMenuItem;
     private javax.swing.JMenuItem deleteControlPointMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JPopupMenu graphPopupMenu;
+    private javax.swing.JMenuItem groupMenuItem;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JMenuItem resetControlPointMenuItem;
     private javax.swing.JMenuItem routeEdgeMenuItem;
     private javax.swing.JMenuItem routeEdgeWVGMenuItem;
     // End of variables declaration//GEN-END:variables
+
+    void randomGenerateStates() {
+        automata.randomGenerateStates(10);
+    }
+
+    void exportImage() throws IOException {
+        
+        Dimension d = graphComponent.getGraphControl().getSize();
+        BufferedImage image = new BufferedImage(d.width, d.height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = image.createGraphics();
+        
+        graphComponent.getGraphControl().paint(g);
+        
+        //java.util.Date now = new java.util.Date(); 
+        
+        final File outputfile = new File("result_image/test_"+System.nanoTime()+".png");
+        ImageIO.write(image, "png", outputfile);
+        
+    }
 }

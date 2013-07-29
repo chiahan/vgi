@@ -291,8 +291,8 @@ public class mxEdgeStyle
 			if (perimeterPoint == null) {
 				perimeterPoint = new mxPoint(centerX, centerY);
 			}
-			centerX = perimeterPoint.getX();
-			centerY = perimeterPoint.getY();
+//			centerX = perimeterPoint.getX();
+//			centerY = perimeterPoint.getY();
 			double offsetX = controlPoint.getX() - centerX;
 			double offsetY = controlPoint.getY() - centerY;
 			/*
@@ -302,16 +302,38 @@ public class mxEdgeStyle
 			double dx = offsetY / 5;
 			double dy = -offsetX / 5;
 
-			result.add(perimeterPoint);
-			result.add(new mxPoint(centerX + offsetX * 0.7 + dx * 0.9, centerY + offsetY * 0.7 + dy * 0.9));
-			result.add(new mxPoint(centerX + offsetX * 0.8 + dx, centerY + offsetY * 0.8 + dy));
-			result.add(new mxPoint(centerX + offsetX * 0.9 + dx * 0.9, centerY + offsetY * 0.9 + dy * 0.9));
-			result.add(new mxPoint(controlPoint.getX() + dx * 0.3, controlPoint.getY() + dy * 0.3));
-			result.add(new mxPoint(controlPoint.getX() - dx * 0.3, controlPoint.getY() - dy * 0.3));
-			result.add(new mxPoint(centerX + offsetX * 0.9 - dx * 0.9, centerY + offsetY * 0.9 - dy * 0.9));
-			result.add(new mxPoint(centerX + offsetX * 0.8 - dx, centerY + offsetY * 0.8 - dy));
-			result.add(new mxPoint(centerX + offsetX * 0.7 - dx * 0.9, centerY + offsetY * 0.7 - dy * 0.9));
-			result.add(perimeterPoint);
+                        
+                        double theta=Math.PI/6;
+                        double innertheta=theta;
+                        double distX=perimeterPoint.getX()-centerX;
+                        double distY=perimeterPoint.getY()-centerY;
+//                        double dist=distX*distX+distY*distY;
+                        
+                        offsetX*=0.9;
+                        offsetY*=0.9;
+                        
+                        result.add(new mxPoint(centerX+distX*Math.cos(theta/2)-distY*Math.sin(theta/2),
+                                               centerY+distX*Math.sin(theta/2)+distY*Math.cos(theta/2)));
+                        result.add(new mxPoint(centerX+offsetX*Math.cos(innertheta/2)-offsetY*Math.sin(innertheta/2),
+                                               centerY+offsetX*Math.sin(innertheta/2)+offsetY*Math.cos(innertheta/2)));
+                        
+                        result.add(controlPoint);
+                        result.add(new mxPoint(centerX+offsetX*Math.cos(-innertheta/2)-offsetY*Math.sin(-innertheta/2),
+                                               centerY+offsetX*Math.sin(-innertheta/2)+offsetY*Math.cos(-innertheta/2)));
+                        
+                        result.add(new mxPoint(centerX+distX*Math.cos(-theta/2)-distY*Math.sin(-theta/2),
+                                               centerY+distX*Math.sin(-theta/2)+distY*Math.cos(-theta/2)));
+                        
+//			result.add(perimeterPoint);
+//                      result.add(new mxPoint(centerX + offsetX * 0.7 + dx * 0.9, centerY + offsetY * 0.7 + dy * 0.9));
+//			result.add(new mxPoint(centerX + offsetX * 0.8 + dx, centerY + offsetY * 0.8 + dy));
+//			result.add(new mxPoint(centerX + offsetX * 0.9 + dx * 0.9, centerY + offsetY * 0.9 + dy * 0.9));
+//			result.add(new mxPoint(controlPoint.getX() + dx * 0.3, controlPoint.getY() + dy * 0.3));
+//			result.add(new mxPoint(controlPoint.getX() - dx * 0.3, controlPoint.getY() - dy * 0.3));
+//			result.add(new mxPoint(centerX + offsetX * 0.9 - dx * 0.9, centerY + offsetY * 0.9 - dy * 0.9));
+//			result.add(new mxPoint(centerX + offsetX * 0.8 - dx, centerY + offsetY * 0.8 - dy));
+//			result.add(new mxPoint(centerX + offsetX * 0.7 - dx * 0.9, centerY + offsetY * 0.7 - dy * 0.9));			
+//                      result.add(perimeterPoint);
 		}
 	};
 

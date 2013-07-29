@@ -72,7 +72,7 @@ public class RotationInnerAngle
                 Object[] in = Graph.getIncomingEdges(model.getCell(sub));
                 
                         for(int i = 0; i< in.length;i++){
-                    
+                            if(((mxCell)in[i]).getTerminal(true)!=null){
                             String sourceID =  ((mxCell)in[i]).getTerminal(true).getId();
                     
                             if(nodeID.contains(sourceID)){
@@ -89,6 +89,7 @@ public class RotationInnerAngle
                                    sourceNode = source;
                                    targetNode = node;
                                 }
+                            }
                             }
                         }
                      

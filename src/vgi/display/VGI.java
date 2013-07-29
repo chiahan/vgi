@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import vgi.automata.*;
 import vgi.fsmxml.FsmXmlInterface;
 import vgi.fsmxml.FsmXmlInterface.FsmXmlException;
 
@@ -64,7 +65,15 @@ public class VGI extends javax.swing.JFrame {
 	private File pmLastFolderForSaveFile;
 	private TAFKit pmTAFKit;
 	private TAFKitInterface.AutomataType pmAutomataType;
-
+        
+        static public StateDrawingData defaultStateDrawingData;
+        static public StateGeometricData defaultStateGeometricData;
+        static public TransitionDrawingData defaultTransitionDrawingData;
+        static public TransitionGeometricData defaultTransitionGeometricData;
+        static public IniFinGeometricData defaultInitialGeometricData;
+        static public IniFinGeometricData defaultFinalGeometricData;
+        
+        
 	private class AlgorithmMenuItemActionListener implements java.awt.event.ActionListener {
 
 		public TAFKitInterface.VcsnAlgorithm vcsnAlgorithm;
@@ -358,8 +367,7 @@ public class VGI extends javax.swing.JFrame {
                 setSize(screenSize.width, screenSize.height);
                 
                 
-                
-                
+                updateAllDefaultDGData();
                 
 	}  // End public VGI()
         
@@ -383,6 +391,8 @@ public class VGI extends javax.swing.JFrame {
         toolBarSeparator2 = new javax.swing.JToolBar.Separator();
         undoButton = new javax.swing.JButton();
         redoButton = new javax.swing.JButton();
+        toolBarSeparator3 = new javax.swing.JToolBar.Separator();
+        randomButton = new javax.swing.JButton();
         mainSplitPane = new javax.swing.JSplitPane();
         infoSplitPane = new javax.swing.JSplitPane();
         infoPanel = new javax.swing.JPanel();
@@ -397,6 +407,7 @@ public class VGI extends javax.swing.JFrame {
         closeMenuItem = new javax.swing.JMenuItem();
         saveMenuItem = new javax.swing.JMenuItem();
         saveAsMenuItem = new javax.swing.JMenuItem();
+        exportMenuItem = new javax.swing.JMenuItem();
         fileMenuSeparator1 = new javax.swing.JPopupMenu.Separator();
         exitMenuItem = new javax.swing.JMenuItem();
         editMenu = new javax.swing.JMenu();
@@ -443,6 +454,7 @@ public class VGI extends javax.swing.JFrame {
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         helpMenu = new javax.swing.JMenu();
         aboutMenuItem = new javax.swing.JMenuItem();
+        preferenceStyleMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("VGI");
@@ -497,6 +509,7 @@ public class VGI extends javax.swing.JFrame {
         toolBar.add(toolBarSeparator2);
 
         undoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/undo-32.png"))); // NOI18N
+        undoButton.setEnabled(false);
         undoButton.setFocusable(false);
         undoButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         undoButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -508,6 +521,7 @@ public class VGI extends javax.swing.JFrame {
         toolBar.add(undoButton);
 
         redoButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/redo-32.png"))); // NOI18N
+        redoButton.setEnabled(false);
         redoButton.setFocusable(false);
         redoButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         redoButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -517,6 +531,25 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         toolBar.add(redoButton);
+        toolBar.add(toolBarSeparator3);
+
+        randomButton.setBackground(new java.awt.Color(51, 51, 51));
+        randomButton.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
+        randomButton.setForeground(new java.awt.Color(255, 255, 255));
+        randomButton.setText("R");
+        randomButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        randomButton.setFocusable(false);
+        randomButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        randomButton.setMaximumSize(new java.awt.Dimension(44, 36));
+        randomButton.setMinimumSize(new java.awt.Dimension(35, 35));
+        randomButton.setPreferredSize(new java.awt.Dimension(36, 36));
+        randomButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        randomButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                randomButtonActionPerformed(evt);
+            }
+        });
+        toolBar.add(randomButton);
 
         getContentPane().add(toolBar, java.awt.BorderLayout.NORTH);
 
@@ -601,6 +634,14 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         fileMenu.add(saveAsMenuItem);
+
+        exportMenuItem.setText("Export Image");
+        exportMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(exportMenuItem);
         fileMenu.add(fileMenuSeparator1);
 
         exitMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/Standby.png"))); // NOI18N
@@ -628,12 +669,10 @@ public class VGI extends javax.swing.JFrame {
         editMenu.add(deleteMenuItem);
         editMenu.add(editMenuSeparator1);
 
-        setAsInitialStateMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/object_07.png"))); // NOI18N
         setAsInitialStateMenuItem.setText("Set As Initial State");
         setAsInitialStateMenuItem.setEnabled(false);
         editMenu.add(setAsInitialStateMenuItem);
 
-        setAsFinalStateMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/icons/yellow/18/object_06.png"))); // NOI18N
         setAsFinalStateMenuItem.setText("Set As Final State");
         setAsFinalStateMenuItem.setEnabled(false);
         editMenu.add(setAsFinalStateMenuItem);
@@ -683,7 +722,7 @@ public class VGI extends javax.swing.JFrame {
         layoutMenu.setMnemonic('L');
         layoutMenu.setText("Layout");
 
-        circleMenuItem.setText("Circle");
+        circleMenuItem.setText("Circular");
         circleMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 circleMenuItemActionPerformed(evt);
@@ -707,7 +746,7 @@ public class VGI extends javax.swing.JFrame {
         });
         layoutMenu.add(hierarchicalMenuItem);
 
-        featureMenuItem.setText("feature");
+        featureMenuItem.setText("Feature-based");
         featureMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 featureMenuItemActionPerformed(evt);
@@ -900,6 +939,14 @@ public class VGI extends javax.swing.JFrame {
         });
         helpMenu.add(aboutMenuItem);
 
+        preferenceStyleMenuItem.setText("Style Preference");
+        preferenceStyleMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                preferenceStyleMenuItemActionPerformed(evt);
+            }
+        });
+        helpMenu.add(preferenceStyleMenuItem);
+
         menuBar.add(helpMenu);
 
         setJMenuBar(menuBar);
@@ -989,7 +1036,7 @@ public class VGI extends javax.swing.JFrame {
 			automataList = fsmXml.read(fileChooser.getSelectedFile());
 
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
                         int returnValue_ = JOptionPane.showConfirmDialog(
 						this,
 						e.getMessage(),
@@ -1525,6 +1572,96 @@ public class VGI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_minimizeAllMenuItemActionPerformed
 
+    private void preferenceStyleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_preferenceStyleMenuItemActionPerformed
+        PreferenceStyleDialog styleDialog=new PreferenceStyleDialog(this,true);
+        styleDialog.setVisible(true);
+        if(styleDialog.isCreated()){
+            
+           
+           JInternalFrame allframe[]= mainDesktopPane.getAllFrames();
+           for(JInternalFrame frame: allframe){
+               if (frame instanceof JgraphXInternalFrame){
+                    JgraphXInternalFrame jgraphXframe=(JgraphXInternalFrame)frame;
+                    //jgraphXframe.updateDefaultStateDrawingData();
+                    jgraphXframe.graph.repaint();
+               }
+           }
+           
+        }
+        
+    }//GEN-LAST:event_preferenceStyleMenuItemActionPerformed
+
+    private void randomButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_randomButtonActionPerformed
+         JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+		    JgraphXInternalFrame jgraphXframe=(JgraphXInternalFrame)frame;
+                    jgraphXframe.randomGenerateStates();
+                    
+               }
+           
+    }//GEN-LAST:event_randomButtonActionPerformed
+
+    private void exportMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportMenuItemActionPerformed
+        JInternalFrame frame = this.mainDesktopPane.getSelectedFrame();
+		if (frame instanceof JgraphXInternalFrame) {
+	           JgraphXInternalFrame jgraphXframe=(JgraphXInternalFrame)frame;
+                try {
+                    jgraphXframe.exportImage();
+                } catch (IOException ex) {
+                    Logger.getLogger(VGI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                    
+               }
+          
+    }//GEN-LAST:event_exportMenuItemActionPerformed
+    /*
+     * update default state & transition drawing & geometric data when preferences are modified
+     */
+    public void updateAllDefaultDGData(){
+        try {
+            PreferenceStyleXml psx=new PreferenceStyleXml();
+            Object[] data=psx.readAllData(new File("defaultStyle.xml"));
+            defaultStateDrawingData=(StateDrawingData)data[0];
+            defaultStateGeometricData=(StateGeometricData)data[1];
+            defaultTransitionDrawingData=(TransitionDrawingData)data[2];
+            defaultInitialGeometricData=(IniFinGeometricData)data[3];
+            defaultFinalGeometricData=(IniFinGeometricData)data[4];
+           
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(JgraphXInternalFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FsmXmlException ex) {
+            Logger.getLogger(JgraphXInternalFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        JInternalFrame allframe[]= mainDesktopPane.getAllFrames();
+           for(JInternalFrame frame: allframe){
+               if (frame instanceof JgraphXInternalFrame){
+                    JgraphXInternalFrame jgraphXframe=(JgraphXInternalFrame)frame;
+                    jgraphXframe.updateAllGDData();
+                    
+               }
+           }
+    }
+//    /* update default state drawing data when default style is modified
+//     * 
+//     */
+//    static private void updateDefaultStateDrawingData(){
+//        StateDrawingData sdd=null;
+//        try {
+//            PreferenceStyleXml psx=new PreferenceStyleXml();
+//            sdd=psx.read(new File("defaultStyle.xml"));
+//            
+//        } catch (FileNotFoundException ex) {
+//            Logger.getLogger(JgraphXInternalFrame.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (FsmXmlException ex) {
+//            Logger.getLogger(JgraphXInternalFrame.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        
+//        defaultStateDrawingData=sdd;
+//        //updateAllStatesDrawingData();
+//    }
+        
+        
     void showInternalFrame(JgraphXInternalFrame frame){
         try {
                 DesktopManager manager=mainDesktopPane.getDesktopManager();
@@ -1765,6 +1902,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenu editMenu;
     private javax.swing.JPopupMenu.Separator editMenuSeparator1;
     private javax.swing.JMenuItem exitMenuItem;
+    private javax.swing.JMenuItem exportMenuItem;
     private javax.swing.JMenuItem featureMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JPopupMenu.Separator fileMenuSeparator1;
@@ -1788,7 +1926,9 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JPanel outlinePanel;
     private javax.swing.JMenuItem planarizeMenuItem;
+    private javax.swing.JMenuItem preferenceStyleMenuItem;
     private javax.swing.JMenuItem productMenuItem;
+    private javax.swing.JButton randomButton;
     private javax.swing.JButton redoButton;
     private javax.swing.JMenuItem removeEpsilonTransitionsMenuItem;
     private javax.swing.JMenuItem routeAllEdges2008MenuItem;
@@ -1807,6 +1947,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem testShortestPathsMenuItem;
     private javax.swing.JToolBar toolBar;
     private javax.swing.JToolBar.Separator toolBarSeparator2;
+    private javax.swing.JToolBar.Separator toolBarSeparator3;
     private javax.swing.JButton undoButton;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JPopupMenu.Separator viewMenuSeparator1;

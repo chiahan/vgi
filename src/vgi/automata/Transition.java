@@ -64,7 +64,7 @@ public class Transition implements TransitionInterface {
 	 * @return the geometricData
 	 */
 	@Override
-	public GeometricData getGeometricData() {
+	public TransitionGeometricData getGeometricData() {
 		return this.pmGeometricData;
 	}
 
@@ -72,7 +72,7 @@ public class Transition implements TransitionInterface {
 	 * @param geometricData the geometricData to set
 	 */
 	@Override
-	public void setGeometricData(GeometricData geometricData) {
+	public void setGeometricData(TransitionGeometricData geometricData) {
 		this.pmGeometricData = geometricData;
 	}
     
@@ -84,23 +84,28 @@ public class Transition implements TransitionInterface {
 	private State pmSourceState;
 	private State pmTargetState;
 	private WeightedRegularExpression pmLabel;
-	private GeometricData pmGeometricData;
-        private DrawingData pmDrawingData;
-
+	//private GeometricData pmGeometricData;
+        //private DrawingData pmDrawingData;
+        private TransitionDrawingData pmDrawingData;
+        private TransitionGeometricData pmGeometricData;
 	public Transition() {
 		this.pmSourceState = null;
 		this.pmTargetState = null;
 		this.pmLabel = null;
-		this.pmGeometricData = new GeometricData();
+                this.pmDrawingData=new TransitionDrawingData();
+		this.pmGeometricData = new TransitionGeometricData();
 	}
 
     @Override
-    public DrawingData getDrawingData() {
+    public TransitionDrawingData getDrawingData() {
         return pmDrawingData;
     }
 
+   
     @Override
-    public void setDrawingData(DrawingData drawingData) {
+    public void setDrawingData(TransitionDrawingData drawingData) {
         pmDrawingData=drawingData;
     }
+
+    
 }  // End public class Transition implements TransitionInterface

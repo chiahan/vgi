@@ -1,0 +1,218 @@
+<fsmxml xmlns="http://vaucanson.lrde.epita.fr" version="1.0">
+  <automaton>
+    <valueType>
+      <writingData closePar=")" openPar="(" plusSym="+" spacesSym=" " starSym="*" timesSym="." weightClosing="}" weightOpening="{" zeroSym="0"/>
+      <semiring operations="classical" set="B" type="numerical"/>
+      <monoid genDescrip="enum" genKind="simple" genSort="letters" type="free">
+        <writingData identitySym="1"/>
+        <monGen value="a"/>
+        <monGen value="b"/>
+      </monoid>
+    </valueType>
+    <automatonStruct>
+      <states>
+        <state id="s0" name="s0">
+          <geometricData x="142.0" y="110.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s1" name="s1">
+          <geometricData x="279.0" y="106.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s2" name="s2">
+          <geometricData x="269.0" y="230.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s3" name="s3">
+          <geometricData x="410.0" y="100.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s4" name="s4">
+          <geometricData x="407.0" y="165.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s5" name="s5">
+          <geometricData x="390.0" y="242.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s6" name="s6">
+          <geometricData x="386.0" y="313.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s7" name="s7">
+          <geometricData x="539.0" y="97.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s8" name="s8">
+          <geometricData x="501.0" y="205.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s9" name="s9">
+          <geometricData x="511.0" y="310.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s10" name="s10">
+          <geometricData x="605.0" y="95.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s11" name="s11">
+          <geometricData x="602.0" y="189.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+        <state id="s12" name="s12">
+          <geometricData x="604.0" y="305.0" width="50.0" height="50.0" shape="ellipse"/>
+          <drawingData fillColor="#FFCCCC" strokeColor="#6482B9" strokeWidth="1.0"/>
+        </state>
+      </states>
+      <transitions>
+        <transition source="s0" target="s2">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s0" target="s1">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s1" target="s3">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s1" target="s4">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s2" target="s5">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s2" target="s6">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s5" target="s8">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s6" target="s8">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s3" target="s7">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s4" target="s7">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s3" target="s3">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s9" target="s12">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s12" target="s11">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s8" target="s11">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s10" target="s11">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s7" target="s10">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s8" target="s9">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s7" target="s8">
+          <drawingData strokeColor="#6482B9" strokeWidth="1.0" endArrow="classic"/>
+          <label>
+            <monElmt>
+              <monGen value="a"/>
+            </monElmt>
+          </label>
+        </transition>
+        <initial state="s0">
+          <geometricData x="0.0" y="-50.0"/>
+        </initial>
+      </transitions>
+    </automatonStruct>
+  </automaton>
+</fsmxml>

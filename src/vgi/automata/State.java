@@ -32,48 +32,48 @@ public class State implements StateInterface {
 	/**
 	 * @return the initial weight
 	 */
-	@Override
-	public InitialFinalWeight getInitialWeight() {
-		return this.pmInitialWeight;
-	}
-
-	/**
-	 * @param initialFlag the initial weight to set
-	 */
-	@Override
-	public void setInitialWeight(InitialFinalWeight initialWeight) {
-		this.pmInitialWeight = initialWeight;
-	}
-
-	/**
-	 * @return the final weight
-	 */
-	@Override
-	public InitialFinalWeight getFinalWeight() {
-		return this.pmFinalWeight;
-	}
-
-	/**
-	 * @param finalFlag the finalFlag to set
-	 */
-	@Override
-	public void setFinalWeight(InitialFinalWeight finalWeight) {
-		this.pmFinalWeight = finalWeight;
-	}
+//	@Override
+//	public InitialFinalWeight getInitialWeight() {
+//		return this.pmInitialWeight;
+//	}
+//
+//	/**
+//	 * @param initialFlag the initial weight to set
+//	 */
+//	@Override
+//	public void setInitialWeight(InitialFinalWeight initialWeight) {
+//		this.pmInitialWeight = initialWeight;
+//	}
+//
+//	/**
+//	 * @return the final weight
+//	 */
+//	@Override
+//	public InitialFinalWeight getFinalWeight() {
+//		return this.pmFinalWeight;
+//	}
+//
+//	/**
+//	 * @param finalFlag the finalFlag to set
+//	 */
+//	@Override
+//	public void setFinalWeight(InitialFinalWeight finalWeight) {
+//		this.pmFinalWeight = finalWeight;
+//	}
 
 	/**
 	 * @return the geometricData
 	 */
 	@Override
-	public GeometricData getGeometricData() {
+	public StateGeometricData getGeometricData() {
 		return this.pmGeometricData;
 	}
 
 	/**
-	 * @param geometricData the geometriData to set
+	 * @param egeometricData the geometriData to set
 	 */
 	@Override
-	public void setGeometricData(GeometricData geometricData) {
+	public void setGeometricData(StateGeometricData geometricData) {
 		this.pmGeometricData = geometricData;
 	}
 
@@ -146,42 +146,83 @@ public class State implements StateInterface {
 		return pmName;
 	}
 	private String pmName;
-	private InitialFinalWeight pmInitialWeight;
-	private InitialFinalWeight pmFinalWeight;
+	//private InitialFinalWeight pmInitialWeight;
+	//private InitialFinalWeight pmFinalWeight;
 	private List<Transition> pmIncomingTransitions;
 	private List<Transition> pmLoopTransitions;
 	private List<Transition> pmOutgoingTransitions;
-	private GeometricData pmGeometricData;
+	//private GeometricData pmGeometricData;
 	private List<State> pmHistoryStates;
-        private DrawingData pmDrawingData;
+       // private DrawingData pmDrawingData;
+        private StateDrawingData pmDrawingData;
+        private StateGeometricData pmGeometricData;
+        
+        private Initial initial;
+        private Final finall;
+        
+        private int pmGroupID;
         
 	public State() {
 		this.pmName = null;
-		this.pmInitialWeight = null;
-		this.pmFinalWeight = null;
+		//this.pmInitialWeight = null;
+		//this.pmFinalWeight = null;
 		this.pmIncomingTransitions = new ArrayList<Transition>();
 		this.pmLoopTransitions = new ArrayList<Transition>();
 		this.pmOutgoingTransitions = new ArrayList<Transition>();
-		this.pmGeometricData = new GeometricData();
+		this.pmGeometricData = new StateGeometricData();
+                this.pmDrawingData=new StateDrawingData();
+                
+                this.initial=null;  // null if state has no initial
+                this.finall=null; 
+                this.pmGroupID=-1;
+                
 	}
 
     @Override
-    public DrawingData getDrawingData() {
+    public StateDrawingData getDrawingData() {
         return pmDrawingData;
     }
 
     @Override
-    public void setDrawingData(DrawingData drawingData) {
+    public void setDrawingData(StateDrawingData drawingData) {
         pmDrawingData=drawingData;
     }
 
     @Override
     public String getShape() {
-        return pmGeometricData.shape;
+        return pmGeometricData.getShape();
     }
 
     @Override
     public void setShape(String shape_) {
-        pmGeometricData.shape=shape_;
+        pmGeometricData.setShape(shape_);
+    }
+    
+    public Initial getInitial(){
+        return initial;
+    }
+    public void setInitial(Initial ini){
+        initial=ini;
+    }
+    public Final getFinal(){
+        return finall;
+    }
+    public void setFinal(Final fin){
+        finall=fin;
+    }
+    
+    @Override
+    public boolean removeTransition(Transition transition){
+        if(!pmIncomingTransitions.remove(transition))
+            if(!pmOutgoingTransitions.remove(transition))
+                return pmLoopTransitions.remove(transition);
+        return true;
+    }
+        
+    public int getGroupID(){
+        return pmGroupID;
+    }
+    public void setGroupID(int i){
+        pmGroupID=i;
     }
 }  // End public class State implements StateInterface

@@ -52,11 +52,11 @@ public interface TransitionInterface {
 
 	public void setLabel(WeightedRegularExpression label);
 
-	public GeometricData getGeometricData();
+	public TransitionGeometricData getGeometricData();
 
-	public void setGeometricData(GeometricData geometricData);
+	public void setGeometricData(TransitionGeometricData geometricData);
         
-        public DrawingData getDrawingData();
+        public TransitionDrawingData getDrawingData();
         
-        public void setDrawingData(DrawingData drawingData);
+        public void setDrawingData(TransitionDrawingData drawingData);
 }  // End public interface TransitionInterface

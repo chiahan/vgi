@@ -41,7 +41,7 @@ public class mxCurveShape extends mxConnectorShape
 
 	/**
 	 * 
-	 */
+//	 */
 	public mxCurve getCurve()
 	{
 		return curve;

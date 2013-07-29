@@ -7256,8 +7256,7 @@ public class mxGraph extends mxEventSource
 				roots.add(best);
 			}
 		}
-
-		return roots;
+                return roots;
 	}
 
 	/**

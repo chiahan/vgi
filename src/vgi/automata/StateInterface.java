@@ -44,17 +44,21 @@ public interface StateInterface {
 
 	public void setName(String name);
 
-	public InitialFinalWeight getInitialWeight();
+//	public InitialFinalWeight getInitialWeight();
+//
+//	public void setInitialWeight(InitialFinalWeight initialWeight);
+//
+//	public InitialFinalWeight getFinalWeight();
+//
+//	public void setFinalWeight(InitialFinalWeight finalWeight);
 
-	public void setInitialWeight(InitialFinalWeight initialWeight);
+	//public GeometricData getGeometricData();
 
-	public InitialFinalWeight getFinalWeight();
+	//public void setGeometricData(GeometricData geometricData);
+        
+        public StateGeometricData getGeometricData();
 
-	public void setFinalWeight(InitialFinalWeight finalWeight);
-
-	public GeometricData getGeometricData();
-
-	public void setGeometricData(GeometricData geometricData);
+	public void setGeometricData(StateGeometricData geometricData);
 
 	public List<Transition> getTransitions();
 
@@ -76,12 +80,19 @@ public interface StateInterface {
 
 	public void setHistory(List<State> states);
         
-        public DrawingData getDrawingData();
+        //public DrawingData getDrawingData();
         
-        public void setDrawingData(DrawingData drawingData);
+        //public void setDrawingData(DrawingData drawingData);
+        
+        public StateDrawingData getDrawingData();
+        
+        public void setDrawingData(StateDrawingData drawingData);
         
         public String getShape();
         
         public void setShape(String shape);
+        
+        
+        public boolean removeTransition(Transition transition);
         
 }  // End public interface StateInterface

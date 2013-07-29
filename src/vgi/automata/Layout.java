@@ -46,8 +46,8 @@ public class Layout {
 			State state = iterateStates.next();
 			State outState = new State();
 			outState.setName(state.getName());
-			outState.setInitialWeight(state.getInitialWeight());
-			outState.setFinalWeight(state.getFinalWeight());
+			outState.setInitial(state.getInitial());
+			outState.setFinal(state.getFinal());
 			List<State> oldStatesList = history.newToOldStatesMap.get(state);
 			if ((oldStatesList != null) && !(oldStatesList.isEmpty())) {
 				State oldState = oldStatesList.get(0);
@@ -111,27 +111,29 @@ public class Layout {
 			State state = iterateStates.next();
 			State outState = new State();
 			outState.setName(state.getName());
-			outState.setInitialWeight(state.getInitialWeight());
-			outState.setFinalWeight(state.getFinalWeight());
+//			outState.setInitialWeight(state.getInitialWeight());
+//			outState.setFinalWeight(state.getFinalWeight());
+                        outState.setInitial(state.getInitial());
+			outState.setFinal(state.getFinal());
 			List<State> oldStatesList = history.newToOldStatesMap.get(state);
 			if ((oldStatesList == null) || (oldStatesList.size() < 2)) {
 				throw new IllegalArgumentException("Automata history is missing data for this state, " + state.toString());
 			}
 			State oldState = oldStatesList.get(0);
-			StateInterface.GeometricData geometricData = oldState.getGeometricData();
-			if ((geometricData == null) || (geometricData.location == null)) {
+			StateGeometricData geometricData = oldState.getGeometricData();
+			if ((geometricData == null) || (geometricData.getLocation() == null)) {
 				throw new IllegalArgumentException("A state from the first input automaton is missing geometric data.");
 			}
 			Point2D.Double location = new Point2D.Double();
-			location.x = geometricData.location.getX();
+			location.x = geometricData.getLocation().getX();
 			oldState = oldStatesList.get(1);
 			geometricData = oldState.getGeometricData();
-			if ((geometricData == null) || (geometricData.location == null)) {
+			if ((geometricData == null) || (geometricData.getLocation() == null)) {
 				throw new IllegalArgumentException("A state from the second input automaton is missing geometric data.");
 			}
-			location.y = geometricData.location.getY();
-			geometricData = new StateInterface.GeometricData();
-			geometricData.location = location;
+			location.y = geometricData.getLocation().getY();
+			geometricData = new StateGeometricData();
+			geometricData.setLocation(location);
 			outState.setGeometricData(geometricData);
 			geometricData = null;  // geometricData = new StateInterface.GeometricData();
 			location = null;  // Point2D.Double location = new Point2D.Double();
@@ -172,15 +174,15 @@ public class Layout {
 				// Vertical or loop transitions
 				//
 				oldTransition = oldTransitionsList.get(0);
-				oldToNewOffsetX = outTransition.getSourceState().getGeometricData().location.getX() - oldSourceStates.get(0).getGeometricData().location.getX();
-				oldToNewOffsetY = outTransition.getSourceState().getGeometricData().location.getY() - oldSourceStates.get(0).getGeometricData().location.getY();
+				oldToNewOffsetX = outTransition.getSourceState().getGeometricData().getLocation().getX() - oldSourceStates.get(0).getGeometricData().getLocation().getX();
+				oldToNewOffsetY = outTransition.getSourceState().getGeometricData().getLocation().getY() - oldSourceStates.get(0).getGeometricData().getLocation().getY();
 			} else if (oldSourceStates.get(0) == oldTargetStates.get(0)) {
 				//
 				// Horizontal transitions
 				//
 				oldTransition = oldTransitionsList.get(1);
-				oldToNewOffsetX = outTransition.getSourceState().getGeometricData().location.getX() - oldSourceStates.get(1).getGeometricData().location.getX();
-				oldToNewOffsetY = outTransition.getSourceState().getGeometricData().location.getY() - oldSourceStates.get(1).getGeometricData().location.getY();
+				oldToNewOffsetX = outTransition.getSourceState().getGeometricData().getLocation().getX() - oldSourceStates.get(1).getGeometricData().getLocation().getX();
+				oldToNewOffsetY = outTransition.getSourceState().getGeometricData().getLocation().getY() - oldSourceStates.get(1).getGeometricData().getLocation().getY();
 			} else {
 				//
 				// Diagonal transitions
@@ -189,8 +191,8 @@ public class Layout {
 				continue;
 			}
 
-			TransitionInterface.GeometricData oldGeometricData = oldTransition.getGeometricData();
-			TransitionInterface.GeometricData geometricData = new TransitionInterface.GeometricData();
+			TransitionGeometricData oldGeometricData = oldTransition.getGeometricData();
+			TransitionGeometricData geometricData = new TransitionGeometricData();
 			geometricData.labelPosAndDist = oldGeometricData.labelPosAndDist;
 			geometricData.labelOffset = oldGeometricData.labelOffset;
 			geometricData.controlPoints = new ArrayList<Point2D>();

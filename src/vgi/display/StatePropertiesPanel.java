@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Map;
 import javax.swing.*;
+import vgi.automata.*;
 
 /*
  * To change this template, choose Tools | Templates
@@ -39,7 +40,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     public StatePropertiesPanel(mxCell cell, State state, DisplayUtil display,JgraphXInternalFrame jif) {
         initComponents();
         
-        this.cell = cell;
+        //this.cell = cell;
         this.state = state;
         this.graph = display.getGraph();
         this.automata = display.getAutomata();
@@ -48,9 +49,11 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         
         style = cell.getStyle();
 
-		this.initialEdge = (mxCell) this.display.getInitialEdge(cell);
-		this.finalEdge = (mxCell) this.display.getFinalEdge(cell);
-
+		//this.initialEdge = (mxCell) this.display.getInitialEdge(cell);
+		//this.finalEdge = (mxCell) this.display.getFinalEdge(cell);
+                this.initial=state.getInitial();
+                this.finall=state.getFinal();
+                
 		if ((this.automata.getWeight().semiring == TAFKitInterface.AutomataType.Semiring.B_BOOLEAN)
 				|| (this.automata.getWeight().semiring == TAFKitInterface.AutomataType.Semiring.F2_TWO_ELEMENT_FIELD)) {
 			this.initialWeightTextField.setVisible(false);
@@ -72,7 +75,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     
     
     private void showName() {
-        this.nameTextField.setText(cell.getValue().toString());
+//        if(cell.getValue()!=null) this.nameTextField.setText(cell.getValue().toString());
+        if(state.getName()!=null) this.nameTextField.setText(state.getName());
     }
     
     private void showTransition() {
@@ -85,47 +89,59 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     }
 
     private void showInitialWeight() {
-        if (state.getInitialWeight() != null) {
+//        if (state.getInitialWeight() != null) {
+//            initialCheckBox.setSelected(true);
+//            initialWeightTextField.setText(state.getInitialWeight().toString());
+//        }
+        if (state.getInitial() != null) {
             initialCheckBox.setSelected(true);
-            initialWeightTextField.setText(state.getInitialWeight().toString());
+            initialWeightTextField.setText(state.getInitial().getWeight().toString());
         }
     }
     
     private void showFinalWeight() {
-        if (state.getFinalWeight() != null) {
+//        if (state.getFinalWeight() != null) {
+//            finalCheckBox.setSelected(true);
+//            finalWeightTextField.setText(state.getFinalWeight().toString());
+//        }
+        if (state.getFinal() != null) {
             finalCheckBox.setSelected(true);
-            finalWeightTextField.setText(state.getFinalWeight().toString());
+            finalWeightTextField.setText(state.getFinal().getWeight().toString());
         }
     }
     private void showGeometricDataAndDrawingData(){
-        Map<String, Object> styles = graph.getCellStyle(cell);
-        String color = (String) styles.get("strokeColor");
+//        Map<String, Object> styles = graph.getCellStyle(cell);
+        
+        
+        sdd=automata.getStateDrawingData(state);
+        
+        String color = sdd.getStrokeColor();
         strokeColor = Color.decode(color);
         strokeColorButton.setBackground(strokeColor);
 
-        fillColor = Color.decode((String) styles.get("fillColor"));
+        fillColor = Color.decode(sdd.getFillColor());
         colorButton.setBackground(fillColor);
 
-        strokeWidth = (String) styles.get("strokeWidth");
+        strokeWidth = Double.valueOf(sdd.getStrokeWidth());
         //System.out.println(strokeWidth);
         if (strokeWidth != null) {
-            float width = Float.parseFloat(strokeWidth);
-            int ind = (int) width;
+//            float width = Float.parseFloat(strokeWidth);
+            int ind = strokeWidth.intValue();
             strokeWidthBox.setSelectedIndex(ind - 1);
         }
         
-        
-        shape=(String)styles.get("shape");
+        sgd=automata.getStateGeometricData(state);
+        shape=sgd.getShape();
         styleComboBox.setSelectedItem(shape.toUpperCase());
         
-        mxGeometry geo=cell.getGeometry();
-        width=geo.getWidth();
-        height=geo.getHeight();
+//        mxGeometry geo=cell.getGeometry();
+        width=sgd.getWidth();
+        height=sgd.getHeight();
         widthTextField.setText(String.valueOf(width));
         heightTextField.setText(String.valueOf(height));
         
-        posX=geo.getCenterX();
-        posY=geo.getCenterY();
+        posX=sgd.getX();
+        posY=sgd.getY();
         posXTextField.setText(String.valueOf(posX));
         posYTextField.setText(String.valueOf(posY));
         
@@ -154,67 +170,76 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 	}  // End public InitialFinalWeight getDefaultWeightValue()
 
     private void setFinalState(boolean isSet) {
-        if (isSet) {
-            if (this.finalEdge == null) {
-                InitialFinalWeight initialFinalWeight = getDefaultWeightValue();
-                state.setFinalWeight(initialFinalWeight);
-                setInitialFinal(false, initialFinalWeight);
-                this.finalEdge = (mxCell) this.display.getFinalEdge(this.cell);
-            }
-        }else {
-            Object[] edges = graph.getEdges(cell);
-
-            for (int i=0; i<edges.length; i++) {
-                if (((mxCell)edges[i]).getTarget() == null) {
-                    Object[] cell = {edges[i]};
-                    graph.removeCells(cell);
-                    break;
-                }
-            }
-
-            this.finalEdge = null;
-            finalWeightTextField.setText("");
-            state.setFinalWeight(null);
-        }
+        if(isSet) automata.setFinalWeight(state,getDefaultWeightValue());
+        else automata.removeFinal(state);
+        
+//        if (isSet) {
+//            if (this.finalEdge == null) {
+//                InitialFinalWeight initialFinalWeight = getDefaultWeightValue();
+//                state.setFinalWeight(initialFinalWeight);
+//                setInitialFinal(false, initialFinalWeight);
+//                this.finalEdge = (mxCell) this.display.getFinalEdge(this.cell);
+//            }
+//        }else {
+//            Object[] edges = graph.getEdges(cell);
+//
+//            for (int i=0; i<edges.length; i++) {
+//                if (((mxCell)edges[i]).getTarget() == null) {
+//                    Object[] cell = {edges[i]};
+//                    graph.removeCells(cell);
+//                    break;
+//                }
+//            }
+//
+//            this.finalEdge = null;
+//            finalWeightTextField.setText("");
+//            state.setFinalWeight(null);
+//        }
     }
     
     private void setInitialState(boolean isSet) {
-        if (isSet) {
-            Object edge = display.getInitialEdge(cell);
-            if (this.initialEdge == null) {
-                InitialFinalWeight initialFinalWeight = getDefaultWeightValue();
-                state.setInitialWeight(initialFinalWeight);
-                setInitialFinal(true, initialFinalWeight);
-                this.initialEdge = (mxCell) this.display.getInitialEdge(this.cell);
-            }
-        }else {
-            Object[] edges = graph.getEdges(cell);
-
-            for (int i=0; i<edges.length; i++) {
-                if (((mxCell)edges[i]).getSource() == null) {
-                    Object[] cell = {edges[i]};
-                    graph.removeCells(cell);
-                    break;
-                }
-            }
-
-            this.initialEdge = null;
-            initialWeightTextField.setText("");
-            state.setInitialWeight(null);
-        }
+        if(isSet) automata.setInitialWeight(state, getDefaultWeightValue());
+        else automata.removeInitial(state);
+//        if (isSet) {
+//            Object edge = display.getInitialEdge(cell);
+//            if (this.initialEdge == null) {
+//                InitialFinalWeight initialFinalWeight = getDefaultWeightValue();
+//                state.setInitialWeight(initialFinalWeight);
+//                setInitialFinal(true, initialFinalWeight);
+//                this.initialEdge = (mxCell) this.display.getInitialEdge(this.cell);
+//            }
+//        }else {
+//            Object[] edges = graph.getEdges(cell);
+//
+//            for (int i=0; i<edges.length; i++) {
+//                if (((mxCell)edges[i]).getSource() == null) {
+//                    Object[] cell = {edges[i]};
+//                    graph.removeCells(cell);
+//                    break;
+//                }
+//            }
+//
+//            this.initialEdge = null;
+//            initialWeightTextField.setText("");
+//            state.setInitialWeight(null);
+//        }
     }
     
     private void setInitialFinal(boolean isInitial, Object expression) {
         if (isInitial) {
             initialWeightTextField.setText(expression.toString());
             // JgraphXInternalFram . setupInitialFinal(Object parent, Object weight, Object vertex, boolean vertexIsSource)
-        } else {
+            automata.setInitialWeight(state, expression.toString());
+    
+        }else{
             finalWeightTextField.setText(expression.toString());
             // JgraphXInternalFram . setupInitialFinal(Object parent, Object weight, Object vertex, boolean vertexIsSource)
-        }
-        display.showInitialFinal(graph.getDefaultParent(), expression, cell, !isInitial);
-    }
+            automata.setFinalWeight(state, expression.toString());
     
+        }
+        //display.showInitialFinal(graph.getDefaultParent(), expression, cell, !isInitial);
+        
+    }
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -230,10 +255,11 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         nameTextField = new javax.swing.JTextField();
         initialWeightTextField = new javax.swing.JTextField();
         finalWeightTextField = new javax.swing.JTextField();
-        styleComboBox = new javax.swing.JComboBox();
         transitionComboBox = new javax.swing.JComboBox();
         initialCheckBox = new javax.swing.JCheckBox();
         finalCheckBox = new javax.swing.JCheckBox();
+        stylePanel = new javax.swing.JPanel();
+        styleComboBox = new javax.swing.JComboBox();
         styleLabel1 = new javax.swing.JLabel();
         colorLabel = new javax.swing.JLabel();
         colorButton = new javax.swing.JButton();
@@ -250,7 +276,9 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         hLabel = new javax.swing.JLabel();
         heightTextField = new javax.swing.JTextField();
 
-        setLayout(new java.awt.GridBagLayout());
+        java.awt.GridBagLayout layout = new java.awt.GridBagLayout();
+        layout.rowHeights = new int[] {25, 25, 25, 25, 25, 25, 25, 25, 25, 25};
+        setLayout(layout);
 
         nameLabel.setText("Name :");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -314,19 +342,6 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 0.1;
         add(finalWeightTextField, gridBagConstraints);
 
-        styleComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ELLIPSE", "RECTANGLE", "RHOMBUS", "HEXAGON" }));
-        styleComboBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                styleComboBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 0.1;
-        add(styleComboBox, gridBagConstraints);
-
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -358,19 +373,37 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(finalCheckBox, gridBagConstraints);
 
+        stylePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Style", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Lucida Grande", 1, 13))); // NOI18N
+        stylePanel.setToolTipText("Style");
+        stylePanel.setName("Style");
+        stylePanel.setLayout(new java.awt.GridBagLayout());
+
+        styleComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ELLIPSE", "RECTANGLE", "RHOMBUS", "HEXAGON" }));
+        styleComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                styleComboBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.1;
+        stylePanel.add(styleComboBox, gridBagConstraints);
+
         styleLabel1.setText("Style :");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(styleLabel1, gridBagConstraints);
+        stylePanel.add(styleLabel1, gridBagConstraints);
 
         colorLabel.setText("FillColor :");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(colorLabel, gridBagConstraints);
+        stylePanel.add(colorLabel, gridBagConstraints);
 
         colorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -381,13 +414,13 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        add(colorButton, gridBagConstraints);
+        stylePanel.add(colorButton, gridBagConstraints);
 
         jLabel1.setText("Stroke:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 7;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(jLabel1, gridBagConstraints);
+        stylePanel.add(jLabel1, gridBagConstraints);
 
         strokeWidthBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" }));
         strokeWidthBox.addActionListener(new java.awt.event.ActionListener() {
@@ -398,7 +431,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 7;
-        add(strokeWidthBox, gridBagConstraints);
+        stylePanel.add(strokeWidthBox, gridBagConstraints);
 
         strokeColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -409,7 +442,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 7;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        add(strokeColorButton, gridBagConstraints);
+        stylePanel.add(strokeColorButton, gridBagConstraints);
         strokeColorButton.getAccessibleContext().setAccessibleName("strokeColorButton");
 
         transformPanel.setLayout(new java.awt.GridLayout(2, 2));
@@ -467,10 +500,18 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 8;
         gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipady = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(transformPanel, gridBagConstraints);
+        stylePanel.add(transformPanel, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        add(stylePanel, gridBagConstraints);
+        stylePanel.getAccessibleContext().setAccessibleName("");
     }// </editor-fold>//GEN-END:initComponents
 
     private void nameTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_nameTextFieldKeyPressed
@@ -478,72 +519,82 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
             String name = ((JTextField)evt.getSource()).getText();
             if (name.compareTo("") == 0)
                 name = null;
-            cell.setValue(name);
             state.setName(name);
+            automata.stateToCell(state).setValue(name);
+            
         }
         graph.refresh();
     }//GEN-LAST:event_nameTextFieldKeyPressed
 
 	private void initialWeightTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_initialWeightTextFieldActionPerformed
-		if (this.initialEdge == null) {
+		if (this.initial == null) {
 			return;
 		}
-		InitialFinalWeight initialFinalWeight = new InitialFinalWeight();
-		switch (automata.getWeight().semiring) {
+//		InitialFinalWeight initialFinalWeight = new InitialFinalWeight();
+		Object value=null;
+                switch (automata.getWeight().semiring) {
 			case Z_INTEGER:
 			case ZMIN_MIN_TROPICAL:
 			case ZMAX_MAX_TROPICAL:
-				initialFinalWeight.setValue(Integer.valueOf(this.initialWeightTextField.getText()));
+//				initialFinalWeight.setValue(Integer.valueOf(this.initialWeightTextField.getText()));
+				value=(Integer.valueOf(this.initialWeightTextField.getText()));
 				break;
 			case Q_RATIONAL:
 			case R_REAL:
-				initialFinalWeight.setValue(Double.valueOf(this.initialWeightTextField.getText()));
+//				initialFinalWeight.setValue(Double.valueOf(this.initialWeightTextField.getText()));
+				value=(Double.valueOf(this.initialWeightTextField.getText()));
 				break;
 			case B_BOOLEAN:
 			case F2_TWO_ELEMENT_FIELD:
-				initialFinalWeight.setValue(true);
+//				initialFinalWeight.setValue(true);
+				value=true;
 				break;
 			default:
 				return;
 		}  // End switch (automata.getWeight().semiring)
-		this.initialEdge.setValue(initialFinalWeight);
-		this.state.setInitialWeight(initialFinalWeight);
-                
+		//this.initialEdge.setValue(initialFinalWeight);
+		//this.state.setInitialWeight(initialFinalWeight);
+                automata.setInitialWeight(state,value);
                
 	}//GEN-LAST:event_initialWeightTextFieldActionPerformed
 
 	private void finalWeightTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_finalWeightTextFieldActionPerformed
-		if (this.finalEdge == null) {
+		if (this.finall == null) {
 			return;
 		}
-		InitialFinalWeight initialFinalWeight = new InitialFinalWeight();
+//		InitialFinalWeight initialFinalWeight = new InitialFinalWeight();
+                Object value=null;
 		switch (automata.getWeight().semiring) {
 			case Z_INTEGER:
 			case ZMIN_MIN_TROPICAL:
 			case ZMAX_MAX_TROPICAL:
-				initialFinalWeight.setValue(Integer.valueOf(this.finalWeightTextField.getText()));
+//				initialFinalWeight.setValue(Integer.valueOf(this.finalWeightTextField.getText()));
+				value=(Integer.valueOf(this.finalWeightTextField.getText()));
 				break;
 			case Q_RATIONAL:
 			case R_REAL:
-				initialFinalWeight.setValue(Double.valueOf(this.finalWeightTextField.getText()));
+//				initialFinalWeight.setValue(Double.valueOf(this.finalWeightTextField.getText()));
+				value=(Double.valueOf(this.finalWeightTextField.getText()));
 				break;
 			case B_BOOLEAN:
 			case F2_TWO_ELEMENT_FIELD:
-				initialFinalWeight.setValue(new Boolean(true));
+//				initialFinalWeight.setValue(new Boolean(true));
+				value=(new Boolean(true));
 				break;
 			default:
 				return;
 		}  // End switch (automata.getWeight().semiring)
-		this.finalEdge.setValue(initialFinalWeight);
-		this.state.setFinalWeight(initialFinalWeight);
-                
+		//this.finalEdge.setValue(initialFinalWeight);
+		//this.state.setFinalWeight(initialFinalWeight);
+                automata.setFinalWeight(state, value);
+               
                
 	}//GEN-LAST:event_finalWeightTextFieldActionPerformed
 
 	private void initialWeightTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_initialWeightTextFieldKeyPressed
 		if ((evt.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE)
-				&& (this.initialEdge != null)){
-			this.initialWeightTextField.setText(this.initialEdge.getValue().toString());
+				&& (this.initial != null)){
+			this.initialWeightTextField.setText(this.initial.getWeight().toString());
 		}
                 
                 jInternalFrame.setModified(true);
@@ -551,8 +602,8 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 
 	private void finalWeightTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_finalWeightTextFieldKeyPressed
 		if ((evt.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE)
-				&& (this.finalEdge != null)){
-			this.finalWeightTextField.setText(this.finalEdge.getValue().toString());
+				&& (this.finall != null)){
+			this.finalWeightTextField.setText(this.finall.getWeight().toString());
 		}
                 
                 
@@ -680,6 +731,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     private javax.swing.JComboBox strokeWidthBox;
     private javax.swing.JComboBox styleComboBox;
     private javax.swing.JLabel styleLabel1;
+    private javax.swing.JPanel stylePanel;
     private javax.swing.JPanel transformPanel;
     private javax.swing.JComboBox transitionComboBox;
     private javax.swing.JLabel transitionLabel;
@@ -690,46 +742,68 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
     private String style;
-    private mxCell cell;
-	protected mxCell initialEdge;
-	protected mxCell finalEdge;
+    //private mxCell cell;
+	//protected mxCell initialEdge;
+	//protected mxCell finalEdge;
+    private Initial initial;
+    private Final finall;
     private mxGraph graph;
     private State state;
     private Automata automata;
     DisplayUtil display;
     private Color fillColor = Color.white;
     private Color strokeColor = Color.white;
-    private String strokeWidth = null;
+    private Double strokeWidth = null;
     private String shape=null;
     private double width,height;
     private double posX,posY;
+    
+    private StateGeometricData sgd;
+    private StateDrawingData sdd;
     
     JgraphXInternalFrame jInternalFrame;
     
     
     public void setFillColor(mxGraph graph,Color color){
-        Object[] objects = new Object[1];
-        objects[0]=cell;
+//        Object[] objects = new Object[1];
+//        objects[0]=cell;
         if(color!=null){
-            graph.setCellStyles("fillColor", mxUtils.hexString(color),objects);
+            //graph.setCellStyles("fillColor", mxUtils.hexString(color),objects);
+            
+            StateDrawingData sdd=new StateDrawingData(mxUtils.hexString(color),null,-1);
+            jInternalFrame.updateStateDrawingData(state, sdd);
+            
             jInternalFrame.setModified(true);
         }
         
     }
     public void setStrokeColor(mxGraph graph,Color color){
-        Object[] objects = new Object[1];
-        objects[0]=cell;
+//        Object[] objects = new Object[1];
+//        objects[0]=cell;
         if(color!=null){
-            graph.setCellStyles("strokeColor", mxUtils.hexString(color),objects);
+            //graph.setCellStyles("strokeColor", mxUtils.hexString(color),objects);
+            
+            StateDrawingData sdd=new StateDrawingData();
+            sdd.setStrokeColor(mxUtils.hexString(color));
+            jInternalFrame.updateStateDrawingData(state, sdd);
+            
             jInternalFrame.setModified(true);
         }
     }
     public void setStrokeWidth(mxGraph graph,float width){
-        Object[] objects = new Object[1];
-        objects[0]=cell;
+//        Object[] objects = new Object[1];
+//        objects[0]=cell;
         String wid=String.valueOf(width);
-        graph.setCellStyles("strokeWidth",wid,objects);
-        if(jInternalFrame!=null) jInternalFrame.setModified(true);
+        //graph.setCellStyles("strokeWidth",wid,objects);
+        
+        if(jInternalFrame!=null){
+            StateDrawingData sdd=new StateDrawingData();
+            sdd.setStrokeWidth(width);
+            jInternalFrame.updateStateDrawingData(state, sdd);
+            
+            
+            jInternalFrame.setModified(true);
+        }
     }
     
     //fill cell with gradient color
@@ -737,94 +811,109 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     //direction: 1-north 2-south 3-east 4-west
     public void setGradientColor(mxGraph graph,Color fromColor, Color toColor,int direction)
     {
-        Object[] objects = new Object[1];
-        objects[0]=cell;
-        graph.setCellStyles("fillColor", mxUtils.hexString(fromColor),objects);
-        graph.setCellStyles("gradientColor", mxUtils.hexString(toColor),objects);
-        switch(direction){
-            case 1:
-                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_NORTH,objects);
-                break;
-            case 2:
-                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_SOUTH,objects);
-                break;
-            case 3:
-                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_EAST,objects);
-                break;
-            case 4:
-                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_WEST,objects);
-                break;
-                
-        }
+//        Object[] objects = new Object[1];
+//        objects[0]=cell;
+//        graph.setCellStyles("fillColor", mxUtils.hexString(fromColor),objects);
+//        graph.setCellStyles("gradientColor", mxUtils.hexString(toColor),objects);
+//        switch(direction){
+//            case 1:
+//                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_NORTH,objects);
+//                break;
+//            case 2:
+//                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_SOUTH,objects);
+//                break;
+//            case 3:
+//                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_EAST,objects);
+//                break;
+//            case 4:
+//                graph.setCellStyles("gradientDirection",mxConstants.DIRECTION_WEST,objects);
+//                break;
+//                
+//        }
         
     }
     
     public void setShadow(mxGraph graph,boolean hasShadow)
     {
-        Object[] objects = new Object[1];
-        objects[0]=cell;
-        if(hasShadow)
-            graph.setCellStyles("shadow", "true",objects);
-        else
-            graph.setCellStyles("shadow", "false",objects);
+//        Object[] objects = new Object[1];
+//        objects[0]=cell;
+//        if(hasShadow)
+//            graph.setCellStyles("shadow", "true",objects);
+//        else
+//            graph.setCellStyles("shadow", "false",objects);
     }
     
     //Global
     public void setShadowColor(Color color)
     {
-        mxSwingConstants.SHADOW_COLOR = color;
+//        mxSwingConstants.SHADOW_COLOR = color;
     }
     public void setShadowOffset(int offsetx,int offsety)
     {
       
-        mxConstants.SHADOW_OFFSETX=offsetx;
-        mxConstants.SHADOW_OFFSETY=offsety;
+//        mxConstants.SHADOW_OFFSETX=offsetx;
+//        mxConstants.SHADOW_OFFSETY=offsety;
         
     }
     public void setShape(String string){
         
-        graph.setCellStyles("shape",string,new Object[]{cell});
-        graph.setCellStyles("perimeter",string+"Perimeter",new Object[]{cell});
+//        graph.setCellStyles("shape",string,new Object[]{cell});
+//        graph.setCellStyles("perimeter",string+"Perimeter",new Object[]{cell});
+        sgd.setShape(string);
+        automata.setStateGeometricData(state,sgd);
         
         if(jInternalFrame!=null) jInternalFrame.setModified(true);
     }
     public void setWidth(String w){
-        mxGeometry geo=cell.getGeometry();
+//        mxGeometry geo=cell.getGeometry();
+        
         Double w_=Double.valueOf(w);
         if(w_!=null){
-            geo.setWidth(w_);
-            cell.setGeometry(geo);
+//            geo.setWidth(w_);
+//            cell.setGeometry(geo);
+            sgd.setWidth(w_);
+            automata.setStateGeometricData(state, sgd);
+            
             jInternalFrame.setModified(true);
             width=w_;
         }
     }
     public void setHeight(String h){
-        mxGeometry geo=cell.getGeometry();
+//        mxGeometry geo=cell.getGeometry();
         Double h_=Double.valueOf(h);
         if(h_!=null){
-            geo.setHeight(h_);
-            cell.setGeometry(geo);
+//            geo.setHeight(h_);
+//            cell.setGeometry(geo);
+            sgd.setHeight(h_);
+            automata.setStateGeometricData(state,sgd);
+            
             jInternalFrame.setModified(true);
             height=h_;
         }
     }
     public void setPosX(String x){
-        mxGeometry geo=cell.getGeometry();
+//        mxGeometry geo=cell.getGeometry();
         Double x_=Double.valueOf(x);
         if(x_!=null){
-            geo.setX(x_-width/2);
-            cell.setGeometry(geo);
+//            geo.setX(x_-width/2);
+//            cell.setGeometry(geo);
+            sgd.setX(x_);
+            automata.setStateGeometricData(state,sgd);
+            
             jInternalFrame.setModified(true);
             posX=x_;
         }
     }
     
     public void setPosY(String y){
-        mxGeometry geo=cell.getGeometry();
+//        mxGeometry geo=cell.getGeometry();
         Double y_=Double.valueOf(y);
         if(y_!=null){
-            geo.setY(y_-height/2);
-            cell.setGeometry(geo);
+//            geo.setY(y_-height/2);
+//            cell.setGeometry(geo);
+            sgd.setY(y_);
+            automata.setStateGeometricData(state,sgd);
+            
             jInternalFrame.setModified(true);
             posY=y_;
         }

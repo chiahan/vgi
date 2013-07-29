@@ -4,6 +4,7 @@
  */
 package com.mxgraph.view;
 
+import com.mxgraph.model.mxCell;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -13,15 +14,8 @@ import java.util.Map;
 import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.model.mxIGraphModel;
-import com.mxgraph.util.mxConstants;
-import com.mxgraph.util.mxEvent;
-import com.mxgraph.util.mxEventObject;
-import com.mxgraph.util.mxEventSource;
-import com.mxgraph.util.mxPoint;
-import com.mxgraph.util.mxRectangle;
-import com.mxgraph.util.mxUndoableEdit;
+import com.mxgraph.util.*;
 import com.mxgraph.util.mxUndoableEdit.mxUndoableChange;
-import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxEdgeStyle.mxEdgeStyleFunction;
 import com.mxgraph.view.mxPerimeter.mxPerimeterFunction;
 
@@ -1384,7 +1378,7 @@ public class mxGraphView extends mxEventSource
 	public void updateEdgeBounds(mxCellState state)
 	{
 		List<mxPoint> points = state.getAbsolutePoints();
-
+                
 		if (points != null && points.size() > 0)
 		{
 			mxPoint p0 = points.get(0);
@@ -1440,8 +1434,8 @@ public class mxGraphView extends mxEventSource
 						maxY = Math.max(pt.getY(), maxY);
 					}
 				}
-
-				state.setLength(length);
+                               
+                                state.setLength(length);
 				state.setSegments(segments);
 				double markerSize = 1; // TODO: include marker size
 

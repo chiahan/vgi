@@ -77,23 +77,23 @@ public class SingleVertexEdgesLayout extends mxGraphLayout {
 			mxICell target = edge.getTerminal(false);
 			boolean isEdgeMovable = false;
 			mxPoint point = null;
-			if (source == null) {
+			if (source == null) { //final edge
 				if (target == null) {
 					throw new IllegalStateException("The 'edge' variable has null source and target vertices.");
 				}
 				isEdgeMovable = true;
-			} else if (target == null) {
+			} else if (target == null) {  //initial edge
 				isEdgeMovable = true;
-			} else if (source == target) {
+			} else if (source == target) {  //loop
 				isEdgeMovable = true;
 			} else if (source == vertex) {
-				if ((points == null) || (points.isEmpty())) {
+				if ((points == null) || (points.isEmpty())) {  // a straight line -> point = target location
 					mxGeometry targetGeometry = target.getGeometry();
 					if (targetGeometry == null) {
 						throw new IllegalStateException("The 'target' variable has null geometry.");
 					}
 					point = new mxPoint(targetGeometry.getCenterX(), targetGeometry.getCenterY());
-				} else {
+				} else { // a curve -> point = first control point
 					point = points.get(0);
 				}
 			} else if (target == vertex) {

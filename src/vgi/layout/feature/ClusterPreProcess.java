@@ -203,13 +203,13 @@ public  class ClusterPreProcess
 
 		for (int i = 0; i < childCount; i++)
 		{
-			Object child = model.getChildAt(graph.getDefaultParent(), i);
+			mxCell child = (mxCell)model.getChildAt(graph.getDefaultParent(), i);
 
                         int cluster1 = 0;
                         int cluster2 = 0;
                         
                         
-			if(((mxCell)child).isEdge()){
+			if(((mxCell)child).isEdge() && child.getTerminal(true)!=null && child.getTerminal(false)!=null){
                             
                             String source = ((mxCell)child).getTerminal(true).getId();
                             String target = ((mxCell)child).getTerminal(false).getId();
@@ -308,7 +308,7 @@ public  class ClusterPreProcess
                         Object[] in = graph.getIncomingEdges(model.getCell(sub));
                 
                         for(int i = 0; i< in.length;i++){
-                    
+                            if(((mxCell)in[i]).getTerminal(true)!=null){
                             String sourceID =  ((mxCell)in[i]).getTerminal(true).getId();
                         /**
                          *  insert edges from all the source to nodes in cycle 
@@ -316,6 +316,7 @@ public  class ClusterPreProcess
                             if(!ClusterNodes.get(cluster).contains(sourceID)){
                                 Object source = model.getCell(sourceID);
                                 graph.insertEdge(parent, null, "", source, newv, "");
+                            }
                             }
                         }
                         

@@ -135,7 +135,7 @@ public  class PreProcess
                         Object[] out = graph.getOutgoingEdges(model.getCell(sub));
                         
                         for(int i = 0; i< out.length;i++){
-                        
+                            if((((mxCell)out[i]).getTerminal(false))!=null){
                             String targetID =  ((mxCell)out[i]).getTerminal(false).getId();
                         
                         /**
@@ -144,6 +144,7 @@ public  class PreProcess
                             if(!subCycle.contains(targetID)){
                                 Object target = graph.getModel().getChildAt(parent, Integer.parseInt(targetID)-2);
                                 graph.insertEdge(parent, null, "", newv, target, "");
+                            }
                             }
                         }
                //            ((mxCell)newv).insert((mxCell)graph.getModel().getChildAt(parent, Integer.parseInt(sub)-2));

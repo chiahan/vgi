@@ -92,4 +92,17 @@ public interface AutomataInterface {
 	public void setAllTransitions(List<Transition> allTransitions);
 
 	public void addTransition(Transition transition);
+        
+        public StateDrawingData getAutomataStateDrawingData();
+        
+        public void setAutomataStateDrawingData(StateDrawingData drawingData);
+        
+        public StateGeometricData getAutomataStateGeometricData();
+        
+        public void setAutomataStateGeometircData(StateGeometricData geoData);
+        
+        public TransitionDrawingData getAutomataTransitionDrawingData();
+        
+        public void setAutomataTransitionDrawingData(TransitionDrawingData drawingData);
+        
 }  // End public interface AutomataInterface

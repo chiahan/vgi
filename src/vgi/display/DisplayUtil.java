@@ -25,21 +25,27 @@ import vgi.automata.WeightedRegularExpression;
 public class DisplayUtil {
     private mxGraph graph;
     private Automata automata;
-    private Hashtable<mxCell, Object> cellTable;
+    //private Hashtable<mxCell, Object> cellTable;
     
-    public DisplayUtil(mxGraph graph, Automata automata, 
-                      Hashtable<mxCell, Object> cellTable) {
+//    public DisplayUtil(mxGraph graph, Automata automata, 
+//                      Hashtable<mxCell, Object> cellTable) {
+//        this.graph = graph;
+//        this.automata = automata;
+//        this.cellTable = cellTable;
+//    }
+    public DisplayUtil(mxGraph graph, Automata automata) {
         this.graph = graph;
         this.automata = automata;
-        this.cellTable = cellTable;
     }
     
     public State cellToState(mxCell cell) {
-        return (State) getCellTable().get(cell);
+       // return (State) getCellTable().get(cell);
+        return (State)automata.cellToState(cell);
     }
 
     public Transition cellToTransition(mxCell cell) {
-        return (Transition) getCellTable().get(cell);
+        //return (Transition) getCellTable().get(cell);
+        return (Transition)automata.cellToState(cell);
     }
     
     public Object getInitialEdge(Object vertex) {
@@ -69,7 +75,7 @@ public class DisplayUtil {
     }
     
     private void updateInitialFinal(Object[] cells, Point2D offset) {
-        DisplayUtil display = new DisplayUtil(graph, automata, cellTable);
+        DisplayUtil display = new DisplayUtil(graph, automata);
         mxCell vertex, edge;
         Object parent = graph.getDefaultParent();
         
@@ -124,7 +130,8 @@ public class DisplayUtil {
         getGraph().getCellGeometry(edge).setTerminalPoint(terminalPoint, !vertexIsSource);
         ((mxCell) edge).getGeometry().setY(JgraphXInternalFrame.DEFAULT_LABEL_DISTANCE);
 
-        getCellTable().put((mxCell) edge, newTrans);
+        //getCellTable().put((mxCell) edge, newTrans);
+        automata.addTransition(newTrans,(mxCell)edge);
         graph.refresh();
     }
     
@@ -244,7 +251,7 @@ public class DisplayUtil {
     /**
      * @return the cellTable
      */
-    public Hashtable<mxCell, Object> getCellTable() {
-        return cellTable;
-    }
+//    public Hashtable<mxCell, Object> getCellTable() {
+//        return cellTable;
+//    }
 }

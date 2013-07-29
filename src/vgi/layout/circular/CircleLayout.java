@@ -338,7 +338,7 @@ public class CircleLayout extends mxGraphLayout
         System.out.print(" source ID :"+((mxCell)preNode).getId()+"\n");
         */
         for(int outgoing = 0; outgoing< out.length;outgoing++){
-            
+            if(((mxCell)out[outgoing]).getTerminal(false)!=null){
             String targetID =  ((mxCell)out[outgoing]).getTerminal(false).getId();
            
             Object target = new Object();
@@ -367,6 +367,7 @@ public class CircleLayout extends mxGraphLayout
                     }
                     break;
                 }
+            }
             }
        }
         onStack[v] = false;
