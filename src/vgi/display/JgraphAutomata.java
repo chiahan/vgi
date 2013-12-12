@@ -278,12 +278,24 @@ public class JgraphAutomata {
                                             mxCell target=(mxCell)cell.getTarget();
                                             
                                             if(source!=null && target!=null){
+//                                            ExpressionEditor editor =
+//                                                    new ExpressionEditor(
+//                                                    new JFrame(), true,
+//                                                    (WeightedRegularExpression) ((mxCell) cell).getValue());
+//                                            
+//                                            editor.setVisible(true);
+//                                            ((mxCell) cell).setValue(editor.getExpression());
+                                            
                                             ExpressionEditor editor =
                                                     new ExpressionEditor(
                                                     new JFrame(), true,
-                                                    (WeightedRegularExpression) ((mxCell) cell).getValue());
+                                                    ((Transition)automata.cellToState(cell)).getLabel());
                                             editor.setVisible(true);
-                                            ((mxCell) cell).setValue(editor.getExpression());
+                                            //((mxCell) cell).setValue(editor.getExpression());
+                                            
+                                            // set weight in automata!!
+                                            automata.setTransitionLabel((Transition)automata.cellToState(cell), editor.getExpression());
+                                            
                                             }
                                         }
                                     }
