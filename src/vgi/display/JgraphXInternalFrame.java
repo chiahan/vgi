@@ -1138,7 +1138,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     public void doHierarchicalLayout() {
         mxHierarchicalLayout layout = new mxHierarchicalLayout(this.graph);
-        layout.setOrientation(SwingConstants.WEST);
+        layout.setOrientation(SwingConstants.NORTH);
         layout.setFineTuning(false);
         layout.setDisableEdgeStyle(false);
         layout.execute(this.graph.getDefaultParent());
@@ -1150,7 +1150,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         edgeRoute.execute(this.graph.getDefaultParent());
         */
         EdgeRoutingBranchingLayout layout2 = new EdgeRoutingBranchingLayout(this.graph);
-        layout2.execute(this.graph.getDefaultParent());
+        //layout2.execute(this.graph.getDefaultParent());
         
         
     }  // End public void doHierarchicalLayout()
@@ -1473,48 +1473,57 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
      * @return the graphComponent
      */
     public mxGraphComponent getGraphComponent() {
-        if (graphComponent == null) {
-            graphComponent = new mxGraphComponent(graph) {
+//        if (graphComponent == null) {
+//            graphComponent = new mxGraphComponent(graph) {
+//
+//                @Override
+//                protected void installDoubleClickHandler() {
+//                    graphControl.addMouseListener(new MouseAdapter() {
+//
+//                        public void mouseReleased(MouseEvent e) {
+//                            if (isEnabled()) {
+//                                if (!e.isConsumed() && isEditEvent(e)) {
+//                                    mxCell cell = (mxCell)getCellAt(e.getX(), e.getY(), false);
+//
+//                                    if (cell != null && getGraph().isCellEditable(cell)) {
+//                                        if (((mxCell) cell).isVertex()) {
+//                                            startEditingAtCell(cell, e);
+//                                        } else {
+//                                            mxCell source=(mxCell)cell.getSource();
+//                                            mxCell target=(mxCell)cell.getTarget();
+//                                            
+//                                            if(source!=null && target!=null){
+////                                            ExpressionEditor editor =
+////                                                    new ExpressionEditor(
+////                                                    new JFrame(), true,
+////                                                    (WeightedRegularExpression) ((mxCell) cell).getValue());
+//                                            ExpressionEditor editor =
+//                                                    new ExpressionEditor(
+//                                                    new JFrame(), true,
+//                                                    ((Transition)automata.cellToState(cell)).getLabel());
+//                                            editor.setVisible(true);
+//                                            //((mxCell) cell).setValue(editor.getExpression());
+//                                            
+//                                            // set weight in automata!!
+//                                            automata.setTransitionLabel((Transition)automata.cellToState(cell), editor.getExpression());
+//                                            
+//                                            
+//                                            }
+//                                        }
+//                                    }
+//                                } else {
+//                                    // Other languages use focus traversal here, in Java
+//                                    // we explicitely stop editing after a click elsewhere
+//                                    stopEditing(!invokesStopCellEditing);
+//                                }
+//                            }
+//                        }
+//                    });
+//                }
+//            };
+//        }
 
-                @Override
-                protected void installDoubleClickHandler() {
-                    graphControl.addMouseListener(new MouseAdapter() {
-
-                        public void mouseReleased(MouseEvent e) {
-                            if (isEnabled()) {
-                                if (!e.isConsumed() && isEditEvent(e)) {
-                                    mxCell cell = (mxCell)getCellAt(e.getX(), e.getY(), false);
-
-                                    if (cell != null && getGraph().isCellEditable(cell)) {
-                                        if (((mxCell) cell).isVertex()) {
-                                            startEditingAtCell(cell, e);
-                                        } else {
-                                            mxCell source=(mxCell)cell.getSource();
-                                            mxCell target=(mxCell)cell.getTarget();
-                                            
-                                            if(source!=null && target!=null){
-                                            ExpressionEditor editor =
-                                                    new ExpressionEditor(
-                                                    new JFrame(), true,
-                                                    (WeightedRegularExpression) ((mxCell) cell).getValue());
-                                            editor.setVisible(true);
-                                            ((mxCell) cell).setValue(editor.getExpression());
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    // Other languages use focus traversal here, in Java
-                                    // we explicitely stop editing after a click elsewhere
-                                    stopEditing(!invokesStopCellEditing);
-                                }
-                            }
-                        }
-                    });
-                }
-            };
-        }
-
-        return graphComponent;
+        return automata.jgraphAutomata.graphComponent;
     }
 
     /**
