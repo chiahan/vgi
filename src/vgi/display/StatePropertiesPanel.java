@@ -362,6 +362,11 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 0.1;
         add(finalWeightTextField, gridBagConstraints);
 
+        transitionComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                transitionComboBoxActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -732,6 +737,13 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         }
         graph.refresh();
     }//GEN-LAST:event_posYTextFieldKeyPressed
+
+    private void transitionComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transitionComboBoxActionPerformed
+        if(jInternalFrame!=null){
+            Transition selectedItem = (Transition)((JComboBox)evt.getSource()).getSelectedItem();
+            graph.setSelectionCell(automata.transitionToCell(selectedItem));
+        }
+    }//GEN-LAST:event_transitionComboBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton colorButton;
