@@ -147,28 +147,48 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         
     }
     
-    public InitialFinalWeight getDefaultWeightValue() {
-		InitialFinalWeight initialFinalWeight = new InitialFinalWeight();
-		switch (automata.getWeight().semiring) {
-			case Z_INTEGER:
-			case ZMIN_MIN_TROPICAL:
-			case ZMAX_MAX_TROPICAL:
-				initialFinalWeight.setValue(new Integer(1));
-				break;
-			case Q_RATIONAL:
-			case R_REAL:
-				initialFinalWeight.setValue(new Double(1));
-				break;
-			case B_BOOLEAN:
-			case F2_TWO_ELEMENT_FIELD:
-				initialFinalWeight.setValue(true);
-				break;
-			default:
-				return null;
-		}  // End switch (automata.getWeight().semiring)
-		return initialFinalWeight;
-	}  // End public InitialFinalWeight getDefaultWeightValue()
-
+//    public InitialFinalWeight getDefaultWeightValue() {
+//		InitialFinalWeight initialFinalWeight = new InitialFinalWeight();
+//		switch (automata.getWeight().semiring) {
+//			case Z_INTEGER:
+//			case ZMIN_MIN_TROPICAL:
+//			case ZMAX_MAX_TROPICAL:
+//				initialFinalWeight.setValue(new Integer(1));
+//				break;
+//			case Q_RATIONAL:
+//			case R_REAL:
+//				initialFinalWeight.setValue(new Double(1));
+//				break;
+//			case B_BOOLEAN:
+//			case F2_TWO_ELEMENT_FIELD:
+//				initialFinalWeight.setValue(true);
+//				break;
+//			default:
+//				return null;
+//		}  // End switch (automata.getWeight().semiring)
+//		return initialFinalWeight;
+//	}  // End public InitialFinalWeight getDefaultWeightValue()
+    public Object getDefaultWeightValue(){
+        Object label;
+        switch (automata.getWeight().semiring) {
+            case Z_INTEGER:
+            case ZMIN_MIN_TROPICAL:
+            case ZMAX_MAX_TROPICAL:
+                    label=new Integer(1);
+                    break;
+            case Q_RATIONAL:
+            case R_REAL:
+                    label=new Double(1);
+                    break;
+            case B_BOOLEAN:
+            case F2_TWO_ELEMENT_FIELD:
+                    label=true;
+                    break;
+            default:
+                    return null;
+        }
+        return label;
+    }
     private void setFinalState(boolean isSet) {
         if(isSet) automata.setFinalWeight(state,getDefaultWeightValue());
         else automata.removeFinal(state);

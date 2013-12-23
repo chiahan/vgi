@@ -44,9 +44,12 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             if(cell.getSource()==null){
                 target=(State)automata.cellToState((mxCell)cell.getTarget());
                 initial=target.getInitial();
+                System.out.println("Initial!"+initial.getWeight());
             }else if(cell.getTarget()==null){
                 source=(State)automata.cellToState((mxCell)cell.getSource());
                 finall=source.getFinal();
+                
+                System.out.println("Final!"+finall.getWeight());
             }
         }else{
             source=transition.getSourceState();
@@ -65,12 +68,13 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     
     private void showLabel() {
         //labelTextField.setText(cell.getValue().toString());
-        if(transition!=null) 
+       if(transition!=null) 
             if(transition.getLabel()!=null)
                 labelTextField.setText(transition.getLabel().toString());
-        else
-            if(source==null) labelTextField.setText(initial.getWeight().toString());
-            else if(target==null) labelTextField.setText(finall.getWeight().toString());
+       if(initial!=null)
+           labelTextField.setText(String.valueOf(initial.getWeight()));
+       if(finall!=null)
+           labelTextField.setText(String.valueOf(finall.getWeight()));
         
     }
     
@@ -154,8 +158,10 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
 
                 double length=automata.getIniFinGeometricData(target, true).lengthRatio;
                 lengthTextField.setText(formatter.format(length));
-            
-            
+                
+                
+                tdd=automata.getIniFinDrawingData(target,true);
+                
             }else if(target==null){
 //            mxPoint term=cell.getGeometry().getTerminalPoint(false);
 //            mxPoint center=new mxPoint(source.getGeometry().getCenterX(),source.getGeometry().getCenterY());
@@ -179,6 +185,8 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
 
                 double length=automata.getIniFinGeometricData(source, false).lengthRatio;
                 lengthTextField.setText(formatter.format(length));
+                
+                tdd=automata.getIniFinDrawingData(source, false);
             }
             
         }
@@ -246,11 +254,11 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     private void setStartEndArrow(JComboBox comboBox, Boolean startEnd) {
         String arrowDir = (startEnd) ? "startArrow" : "endArrow";
         String arrowType = ((String)comboBox.getSelectedItem()).toLowerCase();
-//        Object[] edge = {cell};
-        
-//        graph.setCellStyles(arrowDir, arrowType, edge);
+
         tdd.setStartArrow(arrowType);
-        automata.setTransitionDrawingData(transition, tdd);
+        if(transition!=null) automata.setTransitionDrawingData(transition, tdd);
+        else if(initial!=null) automata.setIniFinDrawingData(target, tdd, true);
+        else if(finall!=null) automata.setIniFinDrawingData(source, tdd, false);
         
         if(jInternalFrame!=null) jInternalFrame.setModified(true);
     }
@@ -260,7 +268,9 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
 //        graph.setCellStyles("strokeColor", mxUtils.hexString(color), edge);
         if(color!=null){
         tdd.setStrokeColor(mxUtils.hexString(color));
-        automata.setTransitionDrawingData(transition, tdd);
+        if(transition!=null) automata.setTransitionDrawingData(transition, tdd);
+        else if(initial!=null) automata.setIniFinDrawingData(target, tdd, true);
+        else if(finall!=null) automata.setIniFinDrawingData(source, tdd, false);
         
         if(jInternalFrame!=null)jInternalFrame.setModified(true);
         }
@@ -272,8 +282,14 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
 //        graph.setCellStyles("strokeWidth", wid, edge);
         
         tdd.setStrokeWidth(width);
-        automata.setTransitionDrawingData(transition, tdd);
-        
+        if (transition != null) {
+            automata.setTransitionDrawingData(transition, tdd);
+        } else if (initial != null) {
+            automata.setIniFinDrawingData(target, tdd, true);
+        } else if (finall != null) {
+            automata.setIniFinDrawingData(source, tdd, false);
+        }
+
         if(jInternalFrame!=null) jInternalFrame.setModified(true);
     }
 
@@ -462,13 +478,27 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
 //                new JFrame(), 
 //                true, 
 //                (WeightedRegularExpression) ((mxCell) cell).getValue());
-        ExpressionEditor editor = new ExpressionEditor(
+        Object label=null;
+        if(transition!=null){
+            label=transition.getLabel();
+            ExpressionEditor editor = new ExpressionEditor(
                 new JFrame(), 
                 true, 
-                (WeightedRegularExpression) transition.getLabel());
-        editor.setVisible(true);
-//        ((mxCell) cell).setValue(editor.getExpression());
-        transition.setLabel(editor.getExpression());
+                (WeightedRegularExpression)label);
+            editor.setVisible(true);
+            //transition.setLabel(editor.getExpression());
+            automata.setTransitionLabel(transition, editor.getExpression());
+        }else if(initial!=null){
+            String str = ((JTextField)evt.getSource()).getText();
+            automata.setInitialWeight(target,str );
+            
+        }else if(finall!=null){ 
+            label=finall.getWeight();
+             String str = ((JTextField)evt.getSource()).getText();
+             automata.setFinalWeight(source,str );
+        
+        }
+      
         
     }//GEN-LAST:event_labelTextFieldMouseClicked
 

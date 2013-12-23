@@ -563,6 +563,7 @@ public class JgraphAutomata {
                 } 
             } 
        }
+        graph.refresh();
     }
     public void setIniFinGeometricData(mxCell vertex, IniFinGeometricData geodata,boolean isInitial) {
        
@@ -630,6 +631,39 @@ public class JgraphAutomata {
        }
     }
     
+    public void setIniFinDrawingData(mxCell vertex, TransitionDrawingData drawingdata, boolean isInitial) {
+        if(isInitial){
+            Object[] edges = graph.getEdges(vertex);
+            int length = edges.length;
+            mxCell edge;
+            for (int j = 0; j < length; j++) {
+                edge = (mxCell) edges[j];
+                if (edge.getTerminal(true) == null) {
+                    graph.setSelectionCell(edge);
+                    graph.setCellStyles("strokeColor", drawingdata.getStrokeColor());
+                    graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.getStrokeWidth()));
+                    graph.setCellStyles("startArrow", drawingdata.getStartArrow());
+                    graph.setCellStyles("endArrow", drawingdata.getEndArrow());      
+                } 
+            } 
+       }else{
+           Object[] edges = graph.getEdges(vertex);
+            int length = edges.length;
+            mxCell edge;
+            for (int j = 0; j < length; j++) {
+                edge = (mxCell) edges[j];
+                if (edge.getTerminal(false) == null) {
+                    graph.setSelectionCell(edge);
+                    graph.setCellStyles("strokeColor", drawingdata.getStrokeColor());
+                    graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.getStrokeWidth()));
+                    graph.setCellStyles("startArrow", drawingdata.getStartArrow());
+                    graph.setCellStyles("endArrow", drawingdata.getEndArrow());      
+                } 
+            } 
+       }
+        graph.refresh();
+    }
+    
     public void setSelectedCells(Object[] cells){
         graph.setSelectionCells(cells);
     }
@@ -644,5 +678,6 @@ public class JgraphAutomata {
         
 //        graph.setCellStyles("strokeWidth","1",cells);
     }
+
     
 }

@@ -337,32 +337,32 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         
                         if(source==null) isIni=true;
                         
-                        //\/\/\/\/\/\/\/\/\/\/\/\\
-                        // update contorl point
-                        //\/\/\/\/\/\/\/\/\/\/\/\\
-                        mxCell edge=(mxCell)selectedCell;
-                        mxGeometry geo=edge.getGeometry();
-                        List<mxPoint> points=geo.getPoints();
-
-                        Transition transition=(Transition)automata.cellToState(edge);
-                        if(transition==null){ // for initial or final
-                           
-                           mxPoint termpoint_=(isIni)?geo.getTerminalPoint(true):geo.getTerminalPoint(false);
-                           Point2D termpoint=automata.getProjection().getGeoFromLoc(new Point2D.Double(termpoint_.getX(),termpoint_.getY()));
-                           
-                           State state=(isIni)?(State)automata.cellToState((mxCell)edge.getTarget()):(State)automata.cellToState((mxCell)edge.getSource());
-                           automata.updateIniFinGeometricData(state, termpoint, isIni);
-                           
-                           return;
-                        }
-                        // for transitions
-                        List<Point2D> newcpt=new ArrayList<Point2D>();
-                        for(mxPoint pt:points){
-                            Point2D loc=automata.getProjection().getGeoFromLoc(new Point2D.Double(pt.getX(),pt.getY()));
-                            newcpt.add(loc);
-                        }
-                        automata.updateTransitionControlPoint(transition, newcpt);
-                        
+//                        //\/\/\/\/\/\/\/\/\/\/\/\\
+//                        // update contorl point
+//                        //\/\/\/\/\/\/\/\/\/\/\/\\
+//                        mxCell edge=(mxCell)selectedCell;
+//                        mxGeometry geo=edge.getGeometry();
+//                        List<mxPoint> points=geo.getPoints();
+//
+//                        Transition transition=(Transition)automata.cellToState(edge);
+//                        if(transition==null){ // for initial or final
+//                           
+//                           mxPoint termpoint_=(isIni)?geo.getTerminalPoint(true):geo.getTerminalPoint(false);
+//                           Point2D termpoint=automata.getProjection().getGeoFromLoc(new Point2D.Double(termpoint_.getX(),termpoint_.getY()));
+//                           
+//                           State state=(isIni)?(State)automata.cellToState((mxCell)edge.getTarget()):(State)automata.cellToState((mxCell)edge.getSource());
+//                           automata.updateIniFinGeometricData(state, termpoint, isIni);
+//                           
+//                           return;
+//                        }
+//                        // for transitions
+//                        List<Point2D> newcpt=new ArrayList<Point2D>();
+//                        for(mxPoint pt:points){
+//                            Point2D loc=automata.getProjection().getGeoFromLoc(new Point2D.Double(pt.getX(),pt.getY()));
+//                            newcpt.add(loc);
+//                        }
+//                        automata.updateTransitionControlPoint(transition, newcpt);
+//                        
                     }
 
                     vertexSelected = selectedCell.isVertex();

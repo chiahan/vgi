@@ -1988,6 +1988,12 @@ public class Automata implements AutomataInterface {
             jgraphAutomata.setIniFinGeometricData(stateToCell(state),getIniFinGeometricData(state,isIni),isIni);
             
         }
+        public void setIniFinDrawingData(State state,TransitionDrawingData tdd,boolean isIni){
+            if(isIni) state.getInitial().drawdata=tdd;
+            else state.getFinal().drawdata=tdd;
+            
+            jgraphAutomata.setIniFinDrawingData(stateToCell(state),tdd,isIni);
+        }
         public void updateIniFinGeometricData(State state,Point2D termpoint,boolean isIni){
             StateGeometricData sgd=getStateGeometricData(state);
             IniFinGeometricData ifgd=(isIni)?state.getInitial().geodata:state.getFinal().geodata;
@@ -2079,8 +2085,58 @@ public class Automata implements AutomataInterface {
             return fgd;
            
         }
-        
-        
+        public TransitionDrawingData getIniFinDrawingData(State state, boolean isIni){
+            
+            if(isIni){
+                
+                if(state.getInitial()==null) return null;
+
+                TransitionDrawingData tdd=state.getInitial().drawdata;
+                TransitionDrawingData atdd=getAutomataIniFinDrawingData(true);
+            
+                String strokeColor=tdd.getStrokeColor();
+                if(strokeColor==null) strokeColor=atdd.getStrokeColor();
+
+                float strokeWidth=tdd.getStrokeWidth();
+                if(strokeWidth<0) strokeWidth=atdd.getStrokeWidth();
+
+                String startArrow=tdd.getStartArrow();
+                if(startArrow==null) startArrow=atdd.getStartArrow();
+
+                String endArrow=tdd.getEndArrow();
+                if(endArrow==null) endArrow=atdd.getEndArrow();
+
+                return new TransitionDrawingData(strokeColor,strokeWidth,startArrow,endArrow);
+              
+            }else{
+                
+                if(state.getFinal()==null) return null;
+                 
+                TransitionDrawingData tdd=state.getInitial().drawdata;
+                TransitionDrawingData atdd=getAutomataIniFinDrawingData(false);
+            
+                String strokeColor=tdd.getStrokeColor();
+                if(strokeColor==null) strokeColor=atdd.getStrokeColor();
+
+                float strokeWidth=tdd.getStrokeWidth();
+                if(strokeWidth<0) strokeWidth=atdd.getStrokeWidth();
+
+                String startArrow=tdd.getStartArrow();
+                if(startArrow==null) startArrow=atdd.getStartArrow();
+
+                String endArrow=tdd.getEndArrow();
+                if(endArrow==null) endArrow=atdd.getEndArrow();
+
+                return new TransitionDrawingData(strokeColor,strokeWidth,startArrow,endArrow);
+            }
+        }
+        public TransitionDrawingData getAutomataIniFinDrawingData(boolean isIni){
+            if(isIni)
+                return new TransitionDrawingData("#FF0000",2,"none","open");
+            else
+                return new TransitionDrawingData("#FF0000",2,"open","none");
+            
+        }
         public Rectangle computeBox(List<State> states){
             
             if(states.isEmpty()) return null;
