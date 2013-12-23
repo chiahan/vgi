@@ -1336,7 +1336,7 @@ public class Automata implements AutomataInterface {
     }
     public void setTransitionLabel(Transition transition,WeightedRegularExpression label){
         transition.setLabel(label);
-            jgraphAutomata.setEdgeLabel(transitionToCell(transition),label.toString());
+        jgraphAutomata.setEdgeLabel(transitionToCell(transition),label.toString());
     }
     
     
@@ -1388,13 +1388,24 @@ public class Automata implements AutomataInterface {
         // 3. move connecting transitions' control points
         List<Transition> transitions=state.getTransitions();
         for(Transition trans:transitions){
-            List<Point2D> points=trans.getGeometricData().controlPoints;
             List<Point2D> newpoints=new ArrayList<Point2D>();
-            for(Point2D pt:points){
-                State source=trans.getSourceState();
-                if(source==state) source=trans.getTargetState();
-                Point2D newpt=computeControlPointAfterMoving(pt,point,oldpoint,source.getGeometricData().getLocation());
-                newpoints.add(newpt);
+            List<Point2D> points=trans.getGeometricData().controlPoints;
+                
+            if(trans.getSourceState()==trans.getTargetState()){
+                // if is loop, simply translate control points 
+                for(Point2D pt:points){
+                    Point2D newpt=new Point2D.Double(pt.getX()-oldpoint.getX()+point.getX(),
+                                                        pt.getY()-oldpoint.getY()+point.getY());
+                    newpoints.add(newpt);
+                }
+            }else{
+                for(Point2D pt:points){
+                    State source=trans.getSourceState();
+                    if(source==state) source=trans.getTargetState();
+                    Point2D newpt=computeControlPointAfterMoving(pt,point,oldpoint,source.getGeometricData().getLocation());
+                    newpoints.add(newpt);
+
+                }
             }
             trans.getGeometricData().controlPoints=newpoints;
             // 4. move connecting transitions' control point in JgraphAutomata
