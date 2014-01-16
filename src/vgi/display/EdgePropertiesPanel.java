@@ -60,7 +60,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         showGeoAndDrawingData();
         
         
-        
+      
         jInternalFrame=jif;
         
         
@@ -344,6 +344,11 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
                 labelTextFieldMouseClicked(evt);
             }
         });
+        labelTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                labelTextFieldActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -357,6 +362,11 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(angleLabel, gridBagConstraints);
 
+        angleTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                angleTextFieldActionPerformed(evt);
+            }
+        });
         angleTextField.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 angleTextFieldKeyPressed(evt);
@@ -373,6 +383,11 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         add(lengthLabel, gridBagConstraints);
 
+        lengthTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lengthTextFieldActionPerformed(evt);
+            }
+        });
         lengthTextField.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 lengthTextFieldKeyPressed(evt);
@@ -554,6 +569,19 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
             if(jInternalFrame!=null) setCurveLabel(false);
         }
     }//GEN-LAST:event_curveLabelCheckBoxItemStateChanged
+
+    private void labelTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_labelTextFieldActionPerformed
+        // TODO add your handling code here:
+        System.out.println("do nothing");
+    }//GEN-LAST:event_labelTextFieldActionPerformed
+
+    private void angleTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_angleTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_angleTextFieldActionPerformed
+
+    private void lengthTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lengthTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_lengthTextFieldActionPerformed
 
     private void setAngle(String str){
 //        mxGeometry geo=cell.getGeometry();

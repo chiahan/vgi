@@ -1971,7 +1971,8 @@ public class Automata implements AutomataInterface {
             
                 // deal with jGraph
                 jgraphAutomata.addFinal(stateToCell(state), f,getIniFinGeometricData(state,false));
-            }else{
+            }
+            else{
                 f.setWeight(expression);
                 jgraphAutomata.setIniFinLabe(stateToCell(state), expression, false);
             }

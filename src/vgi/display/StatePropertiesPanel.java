@@ -296,6 +296,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         hLabel = new javax.swing.JLabel();
         heightTextField = new javax.swing.JTextField();
 
+        setMinimumSize(new java.awt.Dimension(295, 218));
         java.awt.GridBagLayout layout = new java.awt.GridBagLayout();
         layout.rowHeights = new int[] {25, 25, 25, 25, 25, 25, 25, 25, 25, 25};
         setLayout(layout);
@@ -380,6 +381,11 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
                 initialCheckBoxItemStateChanged(evt);
             }
         });
+        initialCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                initialCheckBoxActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -400,7 +406,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 
         stylePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Style", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Lucida Grande", 1, 13))); // NOI18N
         stylePanel.setToolTipText("Style");
-        stylePanel.setName("Style");
+        stylePanel.setName("Style"); // NOI18N
         stylePanel.setLayout(new java.awt.GridBagLayout());
 
         styleComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ELLIPSE", "RECTANGLE", "RHOMBUS", "HEXAGON" }));
@@ -745,6 +751,10 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_transitionComboBoxActionPerformed
 
+    private void initialCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_initialCheckBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_initialCheckBoxActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton colorButton;
     private javax.swing.JLabel colorLabel;
@@ -892,7 +902,13 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 //        graph.setCellStyles("shape",string,new Object[]{cell});
 //        graph.setCellStyles("perimeter",string+"Perimeter",new Object[]{cell});
         sgd.setShape(string);
+        System.out.println(string);
         automata.setStateGeometricData(state,sgd);
+        
+         //sdd.setStrokeColor(mxUtils.hexString(color));
+         //jInternalFrame.updateStateDrawingData(state, sdd);
+            
+       
         
         if(jInternalFrame!=null) jInternalFrame.setModified(true);
     }

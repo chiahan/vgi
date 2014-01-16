@@ -315,10 +315,12 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
                     edgeSelected = selectedCell.isEdge();
                     if (edgeSelected) {
+                        System.out.println("push edge");
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new EdgePropertiesPanel(selectedCell,
                                 display.cellToTransition(selectedCell),
                                 display, JgraphXInternalFrame.this));
+                       
 
                         mxEdgeHandler hand = (mxEdgeHandler) graphComponent.getSelectionCellsHandler().getHandler(selectedCell);
                         selectedHandlerIndex = hand.getIndex();
@@ -367,10 +369,14 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
                     vertexSelected = selectedCell.isVertex();
                     if (vertexSelected) {
+                        System.out.println("push vertex");
 //                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
 //                                new StatePropertiesPanel(selectedCell,
 //                                JgraphXInternalFrame.this.cellToState(selectedCell),
 //                                display, JgraphXInternalFrame.this));
+                       
+                        
+                   
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new StatePropertiesPanel(selectedCell,
                                 cellToState(selectedCell),
@@ -493,6 +499,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             public void internalFrameClosing(InternalFrameEvent e) {
                 JgraphXInternalFrame.this.infoSplitPane.setTopComponent(topPanel);
                 JgraphXInternalFrame.this.infoSplitPane.setBottomComponent(bottomPanel);
+             
             }
         });
     }
