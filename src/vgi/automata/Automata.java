@@ -1382,7 +1382,7 @@ public class Automata implements AutomataInterface {
         state.getGeometricData().setLocation(point);
         // 2. move state in JgraphAutomata
         StateGeometricData geodata=getStateGeometricData(state);
-        Point2D leftTopPoint=new Point2D.Double(point.getX()-geodata.getWidth()/2,point.getY()-geodata.getHeight()/2);
+        Point2D leftTopPoint=new Point2D.Double(point.getX()-geodata.getWidth()/2,point.getY()+geodata.getHeight()/2);
         jgraphAutomata.moveCell(stateToCell(state), leftTopPoint);
        
         // 3. move connecting transitions' control points
@@ -1446,7 +1446,7 @@ public class Automata implements AutomataInterface {
             state.getGeometricData().setLocation(newPos);
             // 2. move state in JgraphAutomata
             StateGeometricData geodata=getStateGeometricData(state);
-            Point2D leftTopPoint=new Point2D.Double(newPos.getX()-geodata.getWidth()/2,newPos.getY()-geodata.getHeight()/2);
+            Point2D leftTopPoint=new Point2D.Double(newPos.getX()-geodata.getWidth()/2,newPos.getY()+geodata.getHeight()/2);
             jgraphAutomata.moveCell(stateToCell(state), leftTopPoint);
         
             // 3. update initial/final in JgraphAutomata
