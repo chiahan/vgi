@@ -252,10 +252,17 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         
     }
     private void setStartEndArrow(JComboBox comboBox, Boolean startEnd) {
-        String arrowDir = (startEnd) ? "startArrow" : "endArrow";
+        //String arrowDir = (startEnd) ? "startArrow" : "endArrow";
         String arrowType = ((String)comboBox.getSelectedItem()).toLowerCase();
-
-        tdd.setStartArrow(arrowType);
+        
+        if(startEnd == true)
+        {
+            tdd.setStartArrow(arrowType);
+        }
+        else
+        {
+            tdd.setEndArrow(arrowType);
+        }
         if(transition!=null) automata.setTransitionDrawingData(transition, tdd);
         else if(initial!=null) automata.setIniFinDrawingData(target, tdd, true);
         else if(finall!=null) automata.setIniFinDrawingData(source, tdd, false);
@@ -386,7 +393,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         stylePanel.add(startStyleLabel, gridBagConstraints);
 
-        startStyleComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "classic", "block", "open", "oval", "diamond" }));
+        startStyleComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "none", "classic", "block", "open", "oval", "diamond" }));
         startStyleComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 startStyleComboBoxActionPerformed(evt);
@@ -406,7 +413,7 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         stylePanel.add(ednStyleLabel, gridBagConstraints);
 
-        endStyleComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "classic", "block", "open", "oval", "diamond" }));
+        endStyleComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "none", "classic", "block", "open", "oval", "diamond" }));
         endStyleComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 endStyleComboBoxActionPerformed(evt);
