@@ -1644,6 +1644,36 @@ public class Automata implements AutomataInterface {
                     copytarget.addTransition(copytran);
                 }
             }
+            
+            // handle the self loop
+            List<Transition> loopTransitions = source.getLoopTransitions();
+
+            for (Transition tran : loopTransitions) {
+                
+                State target = tran.getTargetState();
+
+                if(states.contains(target)){
+                    
+                    Transition copytran = new Transition();
+                    
+                    State copysource = copyStates.get(i);
+                    State copytarget = copyStates.get(states.indexOf(target));
+                    
+                    copytran.setSourceState(copysource);
+                    copytran.setTargetState(copytarget);
+                    System.out.println("copy transition: "+copysource.getName()+"->"+copytarget.getName());
+                    
+                    copytran.setDrawingData(tran.getDrawingData());
+                    copytran.setGeometricData(tran.getGeometricData());
+                    
+                    copytran.setLabel(tran.getLabel());
+                    
+                    this.addTransition(copytran);
+                    
+                    copysource.addTransition(copytran);
+                    copytarget.addTransition(copytran);
+                }
+            }
         }
         
         moveStates(copyStates,new Point2D.Double(50,50));
