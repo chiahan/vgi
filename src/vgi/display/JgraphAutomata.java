@@ -73,11 +73,13 @@ public class JgraphAutomata {
                     //System.out.println("Selection in graph component");
                     if(sender instanceof mxGraphSelectionModel){
 //                        System.out.println("---invoke!");
-                        automata.resetSelectedStates();
+                        //automata.resetSelectedStates();
+                        automata.resetSelectedObjs();
                         for(Object cell:((mxGraphSelectionModel)sender).getCells()){
-                            if(((mxCell)cell).isVertex())//{
-                                automata.addSelectedState((State)automata.cellToState((mxCell)cell));
-                            else if(((mxCell)cell).isEdge()){
+                            automata.addSelectedObj(automata.cellToObj((mxCell)cell));
+                            //if(((mxCell)cell).isVertex())//{
+                               // automata.addSelectedState((State)automata.cellToState((mxCell)cell));
+                            //else if(((mxCell)cell).isEdge()){
 //                                System.out.println("change of edge");
                                 
                                 // once an edge is selected update control points!
@@ -95,11 +97,14 @@ public class JgraphAutomata {
 //                                }
 //                                automata.updateTransitionControlPoint(transition, newcpt);
                             }
+                            if (!automata.selectionEquivalenceChecking(((mxGraphSelectionModel)sender).getCells())) {
+                                automata.updateSelectionJGraphAutomata();
+                            }
                         }
                     }
             }
             
-        });
+        );
         
         graph.addListener(mxEvent.RESIZE_CELLS, new mxIEventListener() {
             @Override
@@ -520,7 +525,7 @@ public class JgraphAutomata {
         edge.setValue(label);
     }
 
-    public void addInitial(mxCell vertex,Initial initial,IniFinGeometricData geodata){
+    public mxCell addInitial(mxCell vertex,Initial initial,IniFinGeometricData geodata){
         // add a initial to the vertex with info. of lengthratio && direction
        System.out.println("setInitial in jGraph!"+vertex.getValue()); 
        mxCell ini = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(),
@@ -529,9 +534,10 @@ public class JgraphAutomata {
        ini.getGeometry().setY(JgraphXInternalFrame.DEFAULT_LABEL_DISTANCE);
 
        setIniFinGeometricData(vertex,geodata,true);
+       return ini;
        
     }
-    public void addFinal(mxCell vertex,Final finall,IniFinGeometricData geodata){
+    public mxCell addFinal(mxCell vertex,Final finall,IniFinGeometricData geodata){
         
        mxCell fin = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(),
                                 null, finall.getWeight().toString(), vertex, null,
@@ -539,7 +545,7 @@ public class JgraphAutomata {
        fin.getGeometry().setY(JgraphXInternalFrame.DEFAULT_LABEL_DISTANCE);
 
        setIniFinGeometricData(vertex,geodata,false);
-       
+       return fin;
     }
     public void setIniFinLabe(mxCell vertex,Object label,boolean isInitial){
         if(isInitial){

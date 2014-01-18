@@ -248,6 +248,10 @@ public class Automata implements AutomataInterface {
 		}  // End while (iterateStates.hasNext())
 		return arrayList;
 	}
+        
+        /*
+           method about celltable
+         */
         public mxCell stateToCell(State state){
             return cellTable.get(state);
         }
@@ -255,13 +259,15 @@ public class Automata implements AutomataInterface {
             
             return cellTable.get(transition);
         }
-        /*
-         * return state or transition or null
-         */
-        public Object cellToState(mxCell cell){
+        public mxCell objToCell(Object obj) {
             
+            return cellTable.get(obj);
+        }
+        public void addToCellTable(Object obj, mxCell cell) {
+            cellTable.put(obj, cell);
+        }
+        public Object cellToObj(mxCell cell){
             Enumeration em=cellTable.keys();
-
             while(em.hasMoreElements()){
                 Object key=em.nextElement();
                 mxCell nextCell=cellTable.get(key);
@@ -269,10 +275,17 @@ public class Automata implements AutomataInterface {
                     return key;
                 }
             }
-            System.out.println("cellToState: not found!"+cell.getValue()+" id="+cell.getId());
-            
-            return null;
+            System.out.println("cellToState: not found!"+cell.getValue()+" id="+cell.getId());  
+            return null;          
         }
+        /*
+         * return state or transition or null
+         */
+        public Object cellToState(mxCell cell){
+            return cellToObj(cell);
+        }
+        
+        
 	private String pmName;
 	private WritingData pmWritingData;
 	private Weight pmWeight;
@@ -303,7 +316,9 @@ public class Automata implements AutomataInterface {
         
         List<VertexGroup> groupList;
         
-        
+        //selected objects and grouping 
+        List<Object> selectedObjs;
+        Group group;
         
 	public Automata() {
 		this.pmName = null;
@@ -324,9 +339,9 @@ public class Automata implements AutomataInterface {
                 this.pmFinalGeometricData=new IniFinGeometricData();
                 
                 
-                
-                
-                
+                group = new Group();
+                selectedObjs = null;
+                        
                 jgraphXInternalFrame=null;
                 jgraphAutomata=new JgraphAutomata(this);
                 
@@ -1683,33 +1698,114 @@ public class Automata implements AutomataInterface {
 
         
     }
+    
+   /*
+ *  Old selection methods
+ * /
+ */
+    
     public List<State> getSelectedStates(){
+        /*
         System.out.print("\nselected: ");
         for(State state:selectedStates){
             System.out.print(state.getName()+" ");
         }
         System.out.println();
         return selectedStates;
+        */
+        List<State> stateList = new ArrayList<State>();
+        for (Object obj: selectedObjs) {
+            if (obj instanceof State) {
+                stateList.add((State)obj);
+            }
+        }
+        return stateList;
     }
     public void setSelectedStates(List<State> sss){
+        /*
         selectedStates=sss;
         List<mxCell> cells=new ArrayList<mxCell>();
         for(State state:selectedStates){
             cells.add(stateToCell(state));
         }
-        jgraphAutomata.setSelectedCells(cells.toArray());
+        jgraphAutomata.setSelectedCells(cells.toArray());*/
+        resetSelectedObjs();
+        for(State obj: sss){
+           addSelectedObj((Object)obj);
+        }
+        updateSelectionJGraphAutomata();
     } 
     public void addSelectedState(State state){
+        /*
         if(selectedStates==null) selectedStates=new ArrayList<State>();
-        if(state!=null) selectedStates.add(state);
+        if(state!=null) selectedStates.add(state);*/
     }
     public void resetSelectedStates(){
 //        System.out.println("Reset selected States!");
-        if(selectedStates!=null) selectedStates.clear();
+        //if(selectedStates!=null) selectedStates.clear();
     }
     public void selectAllStates(){
+        /*
         System.out.println("Select ALL States!");
-        selectedStates.addAll(this.pmAllStates);
+        selectedStates.addAll(this.pmAllStates);*/
+//        selectedStates=this.pmAllStates;
+        selectAllObjs();
+    }
+    
+/*
+ *  New selection methods
+ * /
+ */
+    public void selectedObjsExistenceChecking() {
+        List<Object> objList = group.retrieveAllSelectedObjs();
+        for (Object obj: objList) {
+            if (objToCell(obj) == null) {
+                group.removeObj(obj);
+            }
+        }
+    }
+    public boolean selectionEquivalenceChecking(Object[] cells) {
+        //the corresponding obj list of cells
+        List<Object> objList = new ArrayList<Object>();
+        for (Object cell:cells){
+            objList.add(cellToObj((mxCell)cell));
+        }
+        //equivalence checking
+        if (!selectedObjs.containsAll(objList)) return false;
+        if (!objList.containsAll(selectedObjs)) return false;
+        return true;
+    }
+    public void updateSelectionJGraphAutomata() {
+        if (selectedObjs == null) return;
+        List<mxCell> cells = new ArrayList<mxCell>();
+        for(Object obj:selectedObjs){
+            cells.add(objToCell(obj));
+        }
+        jgraphAutomata.setSelectedCells(cells.toArray());
+    }
+    public List<Object> getSelectedObjs(){
+        return selectedObjs;
+    }
+    public void setSelectedObjs(List<Object> sss){
+        selectedObjs = group.retrieveSelectedObjs(sss);
+        updateSelectionJGraphAutomata();
+    } 
+    public void addSelectedObj(Object obj){
+        if(selectedObjs==null) selectedObjs=new ArrayList<Object>();
+        if(obj != null && !selectedObjs.contains(obj)) selectedObjs.add(obj);
+        selectedObjs = group.retrieveSelectedObjs(selectedObjs);
+        //updateSelectionJGraphAutomata();
+    }
+    public void resetSelectedObjs(){
+//        System.out.println("Reset selected States!");
+        if(selectedObjs != null) selectedObjs.clear();
+         //updateSelectionJGraphAutomata();
+    }
+    public void selectAllObjs(){
+        System.out.println("Select ALL States!");
+        selectedObjs.addAll(this.pmAllStates);
+        selectedObjs = group.retrieveSelectedObjs(selectedObjs);
+         //updateSelectionJGraphAutomata();
 //        selectedStates=this.pmAllStates;
     }
     
@@ -1977,7 +2073,9 @@ public class Automata implements AutomataInterface {
                 state.setInitial(i);
                 // deal with jGraph
                 i.setWeight(expression);
-                jgraphAutomata.addInitial(stateToCell(state),i,getIniFinGeometricData(state,true));
+                mxCell Ini;
+                Ini = jgraphAutomata.addInitial(stateToCell(state),i,getIniFinGeometricData(state,true));
+                addToCellTable(i, Ini);
             }else{
                 i.setWeight(expression);
                 jgraphAutomata.setIniFinLabe(stateToCell(state), expression, true);
@@ -2000,7 +2098,9 @@ public class Automata implements AutomataInterface {
                 f.setWeight(expression);
             
                 // deal with jGraph
-                jgraphAutomata.addFinal(stateToCell(state), f,getIniFinGeometricData(state,false));
+                mxCell Fin;
+                Fin = jgraphAutomata.addFinal(stateToCell(state), f,getIniFinGeometricData(state,false));
+                addToCellTable(f, Fin);
             }
             else{
                 f.setWeight(expression);
@@ -2198,6 +2298,19 @@ public class Automata implements AutomataInterface {
             return new Rectangle((int)left,(int)top,(int)(right-left),(int)(bottom-top));
         }
         
+        
+       /*
+        * new group methods
+        * 
+        */ 
+        public void groupObjects(List<Object> objs){
+            group.groupObjs(objs);
+            setSelectedObjs(group.retrieveSelectedObjs(objs));
+        }
+        public void unGroupObjects(List<Object> objs){
+            group.unGroupObjs(objs);
+            setSelectedObjs(group.retrieveSelectedObjs(objs));
+        }    
         /*
          * put states into a layout group, 
          * when applying global layouts, local layouts are preserved
@@ -2285,10 +2398,14 @@ public class Automata implements AutomataInterface {
 //            return replaceList;
 //        }
         public boolean selectedStatesContainVertexGroup() {
+           return false;
+           //automatically set to false
+           //2014/1/18
+           
            
 //            if(groupList==null) return false;
 //            else return true;
-            
+            /*
             boolean thereisgroup=false;
             boolean thereisnongroup=false;
             for(State state:selectedStates){
@@ -2299,7 +2416,7 @@ public class Automata implements AutomataInterface {
                 return true;
             
             return false;
-            
+            */
         }
         public List<VertexGroup> getGroupList(){
             if(groupList!=null)

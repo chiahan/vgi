@@ -129,6 +129,17 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="copyMenuItemActionPerformed"/>
           </Events>
         </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="UngroupMenuItem">
+          <Properties>
+            <Property name="label" type="java.lang.String" value="Ungroup"/>
+          </Properties>
+          <AccessibilityProperties>
+            <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Ungroup"/>
+          </AccessibilityProperties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="UngroupMenuItemActionPerformed"/>
+          </Events>
+        </MenuItem>
       </SubComponents>
     </Container>
   </NonVisualComponents>
@@ -136,8 +147,8 @@
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
   </SyntheticProperties>
   <Events>
-    <EventHandler event="internalFrameClosing" listener="javax.swing.event.InternalFrameListener" parameters="javax.swing.event.InternalFrameEvent" handler="formInternalFrameClosing"/>
     <EventHandler event="internalFrameClosed" listener="javax.swing.event.InternalFrameListener" parameters="javax.swing.event.InternalFrameEvent" handler="formInternalFrameClosed"/>
+    <EventHandler event="internalFrameClosing" listener="javax.swing.event.InternalFrameListener" parameters="javax.swing.event.InternalFrameEvent" handler="formInternalFrameClosing"/>
     <EventHandler event="mouseWheelMoved" listener="java.awt.event.MouseWheelListener" parameters="java.awt.event.MouseWheelEvent" handler="formMouseWheelMoved"/>
   </Events>
   <AuxValues>

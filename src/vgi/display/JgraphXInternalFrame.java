@@ -407,6 +407,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 
                 applyLinearLayoutMenuItem.setVisible(selected);
                 groupMenuItem.setVisible(selected);
+                UngroupMenuItem.setVisible(selected);
                 copyMenuItem.setVisible(selected);
 
                 JgraphXInternalFrame.this.validate();
@@ -825,6 +826,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 		if (this.visibilityGraph != null) {
 			this.visibilityGraph.addRoadblock(vertex);
 		}
+       automata.refresh();
     }
     /*
      *  add states when reading automata from files
@@ -847,7 +849,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 //                new StatePropertiesPanel((mxCell) vertex, 
 //                JgraphXInternalFrame.this.cellToState(vertex), display));
 //        System.out.println("add state at (" + x + "," + y + ").");
-        
+        automata.refresh();
     }  // End public void addState(State state)
 
 
@@ -897,6 +899,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 edgeRoutingMinCross.route(edge);
         }
         setModified(true);
+        automata.refresh();
         undoStack.push(STATUS_ADD);
     }
     /*
@@ -1942,6 +1945,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         applyLinearLayoutMenuItem = new javax.swing.JMenuItem();
         groupMenuItem = new javax.swing.JMenuItem();
         copyMenuItem = new javax.swing.JMenuItem();
+        UngroupMenuItem = new javax.swing.JMenuItem();
 
         addStateMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/addstate.png"))); // NOI18N
         addStateMenuItem.setText("Add State");
@@ -2053,22 +2057,31 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         });
         graphPopupMenu.add(copyMenuItem);
 
-        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
-            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+        UngroupMenuItem.setLabel("Ungroup");
+        UngroupMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UngroupMenuItemActionPerformed(evt);
             }
-            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
-                formInternalFrameClosing(evt);
+        });
+        graphPopupMenu.add(UngroupMenuItem);
+        UngroupMenuItem.getAccessibleContext().setAccessibleName("Ungroup");
+
+        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameClosed(evt);
             }
-            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosing(evt);
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
             }
-            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
             }
-            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
             }
         });
         addMouseWheelListener(new java.awt.event.MouseWheelListener() {
@@ -2237,6 +2250,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_copyMenuItemActionPerformed
 
     private void groupMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_groupMenuItemActionPerformed
+        automata.groupObjects(automata.getSelectedObjs());
+        /*
         if(automata.getSelectedStates().size()>1){
 //            automata.setSelectedStates(automata.getSelectedStates());
             automata.groupVertices(automata.getSelectedStates());
@@ -2244,11 +2259,16 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 //            automata.setSelectedStates(automata.getSelectedStates());
 
 //           System.out.println("goup menu Item Action Performed!!");
-        }
+        }*/
         
     }//GEN-LAST:event_groupMenuItemActionPerformed
 
+    private void UngroupMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UngroupMenuItemActionPerformed
+        automata.unGroupObjects(automata.getSelectedObjs());
+    }//GEN-LAST:event_UngroupMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem UngroupMenuItem;
     private javax.swing.JMenuItem addControlPointMenuItem;
     private javax.swing.JMenuItem addStateMenuItem;
     private javax.swing.JMenuItem addTransitionFromMenuItem;
@@ -2268,6 +2288,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 
     void randomGenerateStates() {
         automata.randomGenerateStates(10);
+        automata.refresh();
     }
 
     void exportImage() throws IOException {
