@@ -11,8 +11,8 @@ import java.awt.geom.Point2D;
  * @author reng
  */
 public class Projection {
-    Point2D center; //center of the automata in pixels
-    Vector2D ix; // image of (1,0) in pixels
+    static Point2D center; //center of the automata in pixels
+    static Vector2D ix; // image of (1,0) in pixels
     
     public Projection(){
         center=new Point2D.Double(400, 300);

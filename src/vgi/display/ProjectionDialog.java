@@ -56,50 +56,21 @@ public class ProjectionDialog extends javax.swing.JDialog {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        zoomInButton = new javax.swing.JButton();
-        upButton = new javax.swing.JButton();
-        zoomOutButton = new javax.swing.JButton();
+        jTextField1 = new javax.swing.JTextField();
         centerXTextField = new javax.swing.JTextField();
         centerYTextField = new javax.swing.JTextField();
-        downButton = new javax.swing.JButton();
-        leftButton = new javax.swing.JButton();
-        rightButton = new javax.swing.JButton();
+        confirmButton = new javax.swing.JButton();
         ixXTextField = new javax.swing.JTextField();
         ixYTextField = new javax.swing.JTextField();
         centerLabel = new javax.swing.JLabel();
         ixLabel = new javax.swing.JLabel();
 
+        jTextField1.setText("jTextField1");
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(250, 269));
         setPreferredSize(new java.awt.Dimension(250, 269));
         getContentPane().setLayout(new java.awt.GridBagLayout());
-
-        zoomInButton.setText("+");
-        zoomInButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                zoomInButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        getContentPane().add(zoomInButton, gridBagConstraints);
-
-        upButton.setText("↑");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        getContentPane().add(upButton, gridBagConstraints);
-
-        zoomOutButton.setText("-");
-        zoomOutButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                zoomOutButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        getContentPane().add(zoomOutButton, gridBagConstraints);
 
         centerXTextField.setMinimumSize(new java.awt.Dimension(80, 28));
         centerXTextField.setPreferredSize(new java.awt.Dimension(80, 28));
@@ -127,29 +98,17 @@ public class ProjectionDialog extends javax.swing.JDialog {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         getContentPane().add(centerYTextField, gridBagConstraints);
 
-        downButton.setText("↓");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        getContentPane().add(downButton, gridBagConstraints);
-
-        leftButton.setText("←");
-        leftButton.setMaximumSize(new java.awt.Dimension(80, 29));
-        leftButton.setMinimumSize(new java.awt.Dimension(80, 29));
-        leftButton.setPreferredSize(new java.awt.Dimension(80, 29));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        getContentPane().add(leftButton, gridBagConstraints);
-
-        rightButton.setText("→");
+        confirmButton.setText("ok");
+        confirmButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                confirmButtonActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        getContentPane().add(rightButton, gridBagConstraints);
+        getContentPane().add(confirmButton, gridBagConstraints);
 
         ixXTextField.setMinimumSize(new java.awt.Dimension(80, 28));
         ixXTextField.setPreferredSize(new java.awt.Dimension(80, 28));
@@ -197,21 +156,6 @@ public class ProjectionDialog extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void zoomInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInButtonActionPerformed
-         Vector2D ix=projection.getIx();
-         Vector2D i=ix.unitVector();
-         double m=ix.getX()/i.getX();
-         
-         if(m>20) return;
-         
-         ix.setX(ix.getX()*(m+0.1));
-         ix.setY(ix.getY()*(m+0.1));
-         
-         projection.setIx(ix);
-         automata.setProjection(projection);
-         showData();
-    }//GEN-LAST:event_zoomInButtonActionPerformed
 
     private void centerXTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_centerXTextFieldKeyPressed
        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
@@ -281,22 +225,35 @@ public class ProjectionDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_ixYTextFieldKeyPressed
 
-    private void zoomOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOutButtonActionPerformed
-         Vector2D ix=projection.getIx();
-         Vector2D i=ix.unitVector();
-         double m=ix.getX()/i.getX();
-         if(m>2){
-            ix.setX(ix.getX()*(m-1));
-            ix.setY(ix.getY()*(m-1));
-         }else{
-            if(m==0.1) return; 
-            ix.setX(ix.getX()*(m-0.1));
-            ix.setY(ix.getY()*(m-0.1));
-         }
-         projection.setIx(ix);
-         automata.setProjection(projection);
-         showData();
-    }//GEN-LAST:event_zoomOutButtonActionPerformed
+    private void confirmButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_confirmButtonActionPerformed
+        // TODO add your handling code here:
+            String ixX = ixXTextField.getText();
+            String ixY = ixYTextField.getText();
+            String centerX = centerXTextField.getText();
+            String centerY = centerYTextField.getText();
+            
+            if(ixX.compareTo("") == 0)  ixX = null;
+            if(ixY.compareTo("") == 0)  ixY = null;
+            if(centerX.compareTo("") == 0)  centerX = null;
+            if(centerY.compareTo("") == 0)  centerY = null;
+            Double ixX_num=Double.valueOf(ixX);
+            Double ixY_num=Double.valueOf(ixY);
+            Double centerX_num=Double.valueOf(centerX);
+            Double centerY_num=Double.valueOf(centerY);
+            if(ixX_num!=null && ixY_num!=null && centerX_num!=null && centerY_num!=null){
+                Vector2D ix=projection.getIx();
+                Point2D center=projection.getCenter();
+                ix.setX(ixX_num);
+                ix.setY(ixY_num);
+                center.setLocation(centerX_num,centerY_num);
+                
+                projection.setIx(ix);
+                projection.setCenter(center);
+                automata.setProjection(projection);
+            }
+            showData();    
+
+    }//GEN-LAST:event_confirmButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -351,14 +308,10 @@ public class ProjectionDialog extends javax.swing.JDialog {
     private javax.swing.JLabel centerLabel;
     private javax.swing.JTextField centerXTextField;
     private javax.swing.JTextField centerYTextField;
-    private javax.swing.JButton downButton;
+    private javax.swing.JButton confirmButton;
     private javax.swing.JLabel ixLabel;
     private javax.swing.JTextField ixXTextField;
     private javax.swing.JTextField ixYTextField;
-    private javax.swing.JButton leftButton;
-    private javax.swing.JButton rightButton;
-    private javax.swing.JButton upButton;
-    private javax.swing.JButton zoomInButton;
-    private javax.swing.JButton zoomOutButton;
+    private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
 }
