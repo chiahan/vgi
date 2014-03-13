@@ -97,7 +97,6 @@ public class Automata implements AutomataInterface {
 			state.setName("s" + Integer.toString(counter));
 		}
                 counter++;
-//                System.out.println("add state in automata: "+state.getGeometricData().getLocation());
                createJgraphState(state);
                
 	}   

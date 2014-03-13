@@ -71,6 +71,10 @@ public class ExpressionEditor extends javax.swing.JDialog {
 			this.leftMultiplyButton.setVisible(false);
 			this.rightMultiplyButton.setVisible(false);
 		}
+                
+                // create new expressioneditor log (lucas)
+                System.out.println("create new Expression Editor!");
+
 	}  // End public ExpressionEditor(...)
 
 	public ExpressionEditor(
@@ -81,6 +85,9 @@ public class ExpressionEditor extends javax.swing.JDialog {
 		this.expressionRoot = expression;
 		this.expressionDisplay.setText(this.expressionRoot.toString());
 		this.setSelectedExpression(this.expressionRoot.getFirstSelectedExpression());
+                
+                // get old Expression Editor log (lucas)
+                System.out.println("get old Expression Editor!");
 	}
 
 	public WeightedRegularExpression getExpression() {
@@ -573,7 +580,10 @@ public class ExpressionEditor extends javax.swing.JDialog {
 	}//GEN-LAST:event_cancelButtonActionPerformed
 
 	private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
-		Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+
+            System.out.println("ok button perform!");
+            // automata.setTransitionLabel((Transition)automata.cellToState(cell), this.getExpression());
+            Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}//GEN-LAST:event_okButtonActionPerformed
 
 	/**
