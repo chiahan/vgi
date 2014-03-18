@@ -1348,9 +1348,12 @@ public class Automata implements AutomataInterface {
             addTransitionControlPoint(transition,point,transition.getGeometricData().controlPoints.size());
         
     }
-    public void setTransitionLabel(Transition transition,WeightedRegularExpression label){
+    public void setTransitionLabel(Transition transition, WeightedRegularExpression label){
         transition.setLabel(label);
         jgraphAutomata.setEdgeLabel(transitionToCell(transition),label.toString());
+        
+        /* test for expression editor 201403140108*/
+        System.out.println("new edge label is " + label);
     }
     
     

@@ -33,7 +33,6 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     public EdgePropertiesPanel(mxCell cell, Transition transition, DisplayUtil display,JgraphXInternalFrame jif) {
         
         initComponents();
-        //this.cell = cell;
         this.transition = transition;
         
         
@@ -496,32 +495,44 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_endStyleComboBoxActionPerformed
 
     private void labelTextFieldMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelTextFieldMouseClicked
-//        ExpressionEditor editor = new ExpressionEditor(
-//                new JFrame(), 
-//                true, 
-//                (WeightedRegularExpression) ((mxCell) cell).getValue());
-        Object label=null;
-        if(transition!=null){
-            label=transition.getLabel();
+
+        Object label = null;    // initial setup local var label
+
+        if (transition != null){
+
+            /* set label as transition's label */
+            label = transition.getLabel();
+
+            /* create editor as new ExpressionEditor */
             ExpressionEditor editor = new ExpressionEditor(
-                new JFrame(), 
-                true, 
-                (WeightedRegularExpression)label);
+                    new JFrame(),
+                    true,
+                    (WeightedRegularExpression)label);
+
             editor.setVisible(true);
             //transition.setLabel(editor.getExpression());
+
+            // test 201403181207
+            System.out.println("set weight in automata (label click) with " + transition);
+            System.out.println("editor expression from edge panel" + editor.getExpression());
             automata.setTransitionLabel(transition, editor.getExpression());
-        }else if(initial!=null){
-            String str = ((JTextField)evt.getSource()).getText();
-            automata.setInitialWeight(target,str );
             
-        }else if(finall!=null){ 
-            label=finall.getWeight();
-             String str = ((JTextField)evt.getSource()).getText();
-             automata.setFinalWeight(source,str );
-        
+            // test 20140318 whether change view by graph refresh
+            graph.refresh();
+
+        } else if (initial != null) {
+
+            String str = ((JTextField)evt.getSource()).getText();
+            automata.setInitialWeight(target, str);
+            
+        } else if (finall!=null) {
+
+            label = finall.getWeight();
+            String str = ((JTextField)evt.getSource()).getText();
+            automata.setFinalWeight(source, str);
+
         }
-      
-        
+
     }//GEN-LAST:event_labelTextFieldMouseClicked
 
     private void strokeColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeColorButtonActionPerformed

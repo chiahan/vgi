@@ -291,6 +291,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     edgeSelected = selectedCell.isEdge();
                     if (edgeSelected) {
                         System.out.println("push edge");
+                        
+                        // test 20140318
+                        System.out.println("edge properties create");
                         JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new EdgePropertiesPanel(selectedCell,
                                 display.cellToTransition(selectedCell),

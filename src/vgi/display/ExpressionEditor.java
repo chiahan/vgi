@@ -32,38 +32,51 @@ import vgi.automata.WeightedRegularExpression;
  */
 public class ExpressionEditor extends javax.swing.JDialog {
 
-	static final public Color HIGHLIGHT_COLOR = Color.CYAN;
-	private WeightedRegularExpression expressionRoot;
-	private WeightedRegularExpression selectedExpression;
+    static final public Color HIGHLIGHT_COLOR = Color.CYAN;
+    private WeightedRegularExpression expressionRoot;
+    private WeightedRegularExpression selectedExpression;
 
-	/** Creates new form ExpressionEditor */
-	public ExpressionEditor(
-			java.awt.Frame parent,
-			boolean modal,
-			AutomataInterface.Alphabet alphabet,
-			AutomataInterface.Weight weight,
-			AutomataInterface.WritingData writingData) {
-		super(parent, modal);
+    /** Creates new form ExpressionEditor */
+    public ExpressionEditor(
+            java.awt.Frame parent,
+            boolean modal,
+            AutomataInterface.Alphabet alphabet,
+            AutomataInterface.Weight weight,
+            AutomataInterface.WritingData writingData) {
 
-		if ((alphabet == null)
-				|| (weight == null)
-				|| (writingData == null)) {
-			throw new IllegalArgumentException("The expression argument is invalid.");
-		}
+        /* call javax.swing.JDialog's constructor method with
+         * java.awt.Frame parent, boolean model argument
+         */
+        super(parent, modal);
 
-		initComponents();
-		WeightedRegularExpression expression = new WeightedRegularExpression.Zero();
-		expression.setAlphabet(alphabet);
-		expression.setWeight(weight);
-		expression.setWritingData(writingData);
-		this.expressionRoot = expression;
-		this.expressionDisplay.setText(this.expressionRoot.toString());
-		this.setSelectedExpression(this.expressionRoot.getFirstSelectedExpression());
+        /* Makes sure that alphabet, weight, and writingData
+         * is passed in
+         */
+        if ((alphabet == null)
+                || (weight == null)
+                || (writingData == null)) {
 
-		DefaultComboBoxModel model = new DefaultComboBoxModel(this.expressionRoot.getAlphabet().allSymbols.toArray());
-//		model.insertElementAt(alphabet.identitySymbol, 0);
-//		model.setSelectedItem(alphabet.identitySymbol);
-		this.alphabetSymbolComboBox.setModel(model);
+            throw new IllegalArgumentException("The expression argument is invalid.");
+        }
+
+        initComponents();
+
+        /* Creates expression as object WeightedRegularExpression.Zero()*/
+        WeightedRegularExpression expression = 
+                new WeightedRegularExpression.Zero();
+
+        expression.setAlphabet(alphabet);
+        expression.setWeight(weight);
+        expression.setWritingData(writingData);
+
+        this.expressionRoot = expression;
+        this.expressionDisplay.setText(this.expressionRoot.toString());
+        this.setSelectedExpression(this.expressionRoot.getFirstSelectedExpression());
+
+        DefaultComboBoxModel model = 
+                new DefaultComboBoxModel(this.expressionRoot.getAlphabet().allSymbols.toArray());
+
+        this.alphabetSymbolComboBox.setModel(model);
 
 		if (this.expressionRoot.getWeight().semiring == TAFKitInterface.AutomataType.Semiring.B_BOOLEAN) {
 			this.weightLabel.setVisible(false);
@@ -77,22 +90,24 @@ public class ExpressionEditor extends javax.swing.JDialog {
 
 	}  // End public ExpressionEditor(...)
 
-	public ExpressionEditor(
-			java.awt.Frame parent,
-			boolean modal,
-			WeightedRegularExpression expression) {
-		this(parent, modal, expression.getAlphabet(), expression.getWeight(), expression.getWritingData());
-		this.expressionRoot = expression;
-		this.expressionDisplay.setText(this.expressionRoot.toString());
-		this.setSelectedExpression(this.expressionRoot.getFirstSelectedExpression());
-                
-                // get old Expression Editor log (lucas)
-                System.out.println("get old Expression Editor!");
-	}
+    /* constructor with parent, modal, expression */
+    public ExpressionEditor(
+            java.awt.Frame parent,
+            boolean modal,
+            WeightedRegularExpression expression) {
 
-	public WeightedRegularExpression getExpression() {
-		return this.expressionRoot;
-	}
+        this(parent, modal, expression.getAlphabet(), expression.getWeight(), expression.getWritingData());
+        this.expressionRoot = expression;
+        this.expressionDisplay.setText(this.expressionRoot.toString());
+        this.setSelectedExpression(this.expressionRoot.getFirstSelectedExpression());
+
+        // get old Expression Editor log (lucas)
+        System.out.println("get old Expression Editor!");
+    }
+
+    public WeightedRegularExpression getExpression() {
+        return this.expressionRoot;
+    }
     
     public void setWeightedRegularExpression (WeightedRegularExpression expression) {
         this.expressionRoot = expression;
@@ -580,8 +595,7 @@ public class ExpressionEditor extends javax.swing.JDialog {
 	}//GEN-LAST:event_cancelButtonActionPerformed
 
 	private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
-
-            System.out.println("ok button perform!");
+            
             // automata.setTransitionLabel((Transition)automata.cellToState(cell), this.getExpression());
             Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}//GEN-LAST:event_okButtonActionPerformed
