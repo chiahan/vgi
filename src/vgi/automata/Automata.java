@@ -1393,13 +1393,16 @@ public class Automata implements AutomataInterface {
     public void moveState(State state, Point2D point){
         
         Point2D oldpoint=state.getGeometricData().getLocation();
+        StateGeometricData geodata=getStateGeometricData(state);
+        Point2D leftTopPoint=new Point2D.Double(point.getX()-geodata.getWidth()/2,point.getY()+geodata.getHeight()/2);
+
+        Point2D offset = new Point2D.Double(point.getX()-oldpoint.getX(), point.getY()-oldpoint.getY());
         //offset.setLocation(offset.getX()-point.getX(), offset.getY()-point.getY());
         
         // 1. move state
         state.getGeometricData().setLocation(point);
         // 2. move state in JgraphAutomata
-        StateGeometricData geodata=getStateGeometricData(state);
-        Point2D leftTopPoint=new Point2D.Double(point.getX()-geodata.getWidth()/2,point.getY()+geodata.getHeight()/2);
+        
         jgraphAutomata.moveCell(stateToCell(state), leftTopPoint);
        
         // 3. move connecting transitions' control points
@@ -1410,11 +1413,16 @@ public class Automata implements AutomataInterface {
                 
             if(trans.getSourceState()==trans.getTargetState()){
                 // if is loop, simply translate control points 
+                jgraphAutomata.EdgeControlPointShift(transitionToCell(trans), offset);
+                /*
                 for(Point2D pt:points){
                     Point2D newpt=new Point2D.Double(pt.getX()-oldpoint.getX()+point.getX(),
                                                         pt.getY()-oldpoint.getY()+point.getY());
                     newpoints.add(newpt);
                 }
+                */
+                continue;
+                
             }else{
                 for(Point2D pt:points){
                     State source=trans.getSourceState();
@@ -1455,7 +1463,6 @@ public class Automata implements AutomataInterface {
         //                of outer transitions should be changed
         List<Transition> innerTransitions=new ArrayList<Transition>();
         List<Transition> outerTransitions=new ArrayList<Transition>();
-        
         for(State state:states){
             Point2D newPos=state.getGeometricData().getLocation();
             newPos.setLocation(newPos.getX()+offset.getX(),newPos.getY()+offset.getY());
@@ -1492,7 +1499,15 @@ public class Automata implements AutomataInterface {
         
         // 5. update innerTransitions
         for(Transition trans:innerTransitions){
+  
             
+            if(trans.getSourceState()==trans.getTargetState()){
+                // if is loop, simply translate control points 
+                //Point2D oldpoint = trans.getSourceState().getGeometricData().getLocation();
+                Point2D offset_ = new Point2D.Double(offset.getX(), offset.getY());
+                jgraphAutomata.EdgeControlPointShift(transitionToCell(trans), offset_);
+                continue; 
+            }
 //            System.out.println("update inner transition: "+trans.getSourceState()+"->"+trans.getTargetState());
             
             List<Point2D> points=trans.getGeometricData().controlPoints;
@@ -1922,6 +1937,8 @@ public class Automata implements AutomataInterface {
         for(Transition tran:pmAllTransitions){
 //            System.out.println("update: "+tran.getSourceState()+"->"+tran.getTargetState());
             jgraphAutomata.updateEdgeDrawingData(transitionToCell(tran), getTransitionDrawingData(tran));
+            if (tran.getSourceState()==tran.getTargetState()) continue;
+            
             jgraphAutomata.updateEdgeGeometricData(transitionToCell(tran), getTransitionGeometricData(tran));
         }
         jgraphAutomata.graph.refresh();

@@ -468,6 +468,21 @@ public class JgraphAutomata {
         graph.refresh();
     }
     
+    public void EdgeControlPointShift(mxCell edge,Point2D point){
+        List<mxPoint> points_=new ArrayList<mxPoint>();
+        List<mxPoint> points = edge.getGeometry().getPoints();
+        Vector2D myvec = new Vector2D(point.getX(),point.getY());
+        myvec = projection.getLocVecFromGeoVec(myvec); 
+        Point2D loc = new Point2D.Double(myvec.getX(), myvec.getY());
+        for(mxPoint pt:points){
+            //\/\/\/\/ use the projection to get coordinate for screen          
+            loc.setLocation(loc.getX()+pt.getX(), loc.getY()+pt.getY());
+            points_.add(new mxPoint(loc));
+        }
+        edge.getGeometry().setPoints(points_);
+        //System.out.println("setPoints: "+points_);
+        graph.refresh();
+    }
     
     public void resetControlPoint(mxCell cell) {
         
@@ -559,7 +574,7 @@ public class JgraphAutomata {
    }
 
     public void updateEdgeGeometricData(mxCell edge, TransitionGeometricData geodata) {
-        
+        //
         setEdgeControlPoint(edge,geodata.controlPoints);
         
         // TODO: other geodata
