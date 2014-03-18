@@ -48,6 +48,12 @@ public class DisplayUtil {
         return (Transition)automata.cellToState(cell);
     }
     
+    public Transition IniFinToTransition(mxCell cell) {
+        //return (Transition) getCellTable().get(cell);
+        Transition a = null;
+        return a;
+    }
+    
     public Object getInitialEdge(Object vertex) {
         Object[] edges = graph.getEdges(vertex);
         int length = edges.length;

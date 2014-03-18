@@ -309,17 +309,44 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 boolean controlPointSelected = false;
                 
                 boolean isloop=false;
-                boolean isIni=false;
-                if (selected) {
+                boolean isIni = false;
+                boolean isFin = false;
+                
+                if (selected)
+                {
                     DisplayUtil display = new DisplayUtil(graph, automata);
-
+                    mxCell source=(mxCell)selectedCell.getSource();
+                mxCell target=(mxCell)selectedCell.getTarget();
+                if(source==target) isloop=true;
+                        
+                if(source==null) isIni=true;
+                if(target == null) isFin = true;
                     edgeSelected = selectedCell.isEdge();
-                    if (edgeSelected) {
-                        System.out.println("push edge");
-                        JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+                    if (edgeSelected) 
+                    {
+                       // System.out.println("push edge");
+                        if(isIni == true)
+                        {
+                            JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+                                new EdgePropertiesPanel(selectedCell,
+                                display.IniFinToTransition(selectedCell),
+                                display, JgraphXInternalFrame.this));
+                        }
+                        else if(isFin == true)
+                        {
+                            JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
+                                new EdgePropertiesPanel(selectedCell,
+                                display.IniFinToTransition(selectedCell),
+                                display, JgraphXInternalFrame.this));
+                        }
+                        else
+                        {
+                            JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                                 new EdgePropertiesPanel(selectedCell,
                                 display.cellToTransition(selectedCell),
                                 display, JgraphXInternalFrame.this));
+                        }
+                        
                        
 
                         mxEdgeHandler hand = (mxEdgeHandler) graphComponent.getSelectionCellsHandler().getHandler(selectedCell);
@@ -333,11 +360,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         addTransitionFromMenuItem.setVisible(false);
                         addTransitionToMenuItem.setVisible(false);
                         
-                        mxCell source=(mxCell)selectedCell.getSource();
-                        mxCell target=(mxCell)selectedCell.getTarget();
-                        if(source==target) isloop=true;
                         
-                        if(source==null) isIni=true;
                         
 //                        //\/\/\/\/\/\/\/\/\/\/\/\\
 //                        // update contorl point

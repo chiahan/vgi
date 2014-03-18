@@ -2243,7 +2243,7 @@ public class Automata implements AutomataInterface {
                 
                 if(state.getFinal()==null) return null;
                  
-                TransitionDrawingData tdd=state.getInitial().drawdata;
+                TransitionDrawingData tdd=state.getFinal().drawdata;
                 TransitionDrawingData atdd=getAutomataIniFinDrawingData(false);
             
                 String strokeColor=tdd.getStrokeColor();
