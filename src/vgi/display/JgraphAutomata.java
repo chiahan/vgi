@@ -29,9 +29,7 @@ import vgi.geometrictools.Vector2D;
  * @author reng
  */
 public class JgraphAutomata {
-    
-    public static final double DEFAULT_LABEL_DISTANCE = 15;
-    static final float defaultFontSize=13;
+
     
     public mxGraph graph;
     public mxGraphComponent graphComponent;
@@ -40,18 +38,40 @@ public class JgraphAutomata {
     Projection projection;
     mxRubberband rubberband;
     
+    /* Class constant setup */
+    public static final double DEFAULT_LABEL_DISTANCE = 15;
+    static final float defaultFontSize = 13;
+
+    /**
+     * This constructor do the following procedure
+     * 1. initial class variable mxGraph graph,
+     * 2. assign class variable graphComponent by calling getGraphComponent()
+     * 3. assign class variable automata with passed in automata
+     * 4. call initGraph() method
+     * @param automata_ 
+     */
     public JgraphAutomata(Automata automata_) {
-        graph=new mxGraph();
-        graphComponent=getGraphComponent();
+
+
+        graph = new mxGraph();
+        graphComponent = getGraphComponent();   // if initGraph() setup
+                                                // graphComponent, why not
+                                                // kill this line?
         
-        automata=automata_;
+        automata = automata_;
         
         
         initGraph();
-        projection=automata_.getProjection();
-        if(projection==null) projection=new Projection();
+        
+        
+        projection = automata_.getProjection();
+
+        if (projection == null) {
+            projection = new Projection();
+        }
     }
-    private void initGraph(){
+
+    private void initGraph() {
         
         graph.setDisconnectOnMove(false);
         graph.setSplitEnabled(false);
@@ -60,20 +80,25 @@ public class JgraphAutomata {
         
         //graph.setResetEdgesOnMove(true);
         
-        graphComponent = getGraphComponent();
+        graphComponent = getGraphComponent();    // why call getGraphComponent
+                                                 // again? and what's is it?
+
+        /* graphComponent setup */
         graphComponent.setConnectable(false);
         graphComponent.getViewport().setBackground(Color.WHITE);
         graphComponent.setSwimlaneSelectionEnabled(true);
-        graphComponent.setSize(800, 600);
-        
-        rubberband=new mxRubberband(graphComponent);
-        graph.getSelectionModel().addListener(mxEvent.CHANGE, new mxIEventListener(){
+        graphComponent.setSize(800, 600);  // what's this 800, 600 for?
+
+        rubberband = new mxRubberband(graphComponent);
+
+        graph.getSelectionModel().addListener(mxEvent.CHANGE,
+                new mxIEventListener() {    
+
             @Override
-            public void invoke(Object sender,mxEventObject evt){
-                    //System.out.println("Selection in graph component");
-                    if(sender instanceof mxGraphSelectionModel){
-//                        System.out.println("---invoke!");
-                        //automata.resetSelectedStates();
+            public void invoke(Object sender, mxEventObject evt) {
+
+                    if (sender instanceof mxGraphSelectionModel) {
+
                         automata.resetSelectedObjs();
                         for(Object cell:((mxGraphSelectionModel)sender).getCells()){
                             automata.addSelectedObj(automata.cellToObj((mxCell)cell));
@@ -259,51 +284,69 @@ public class JgraphAutomata {
         return edge;
         
     }
+
     /**
      * @return the graphComponent
      */
     private mxGraphComponent getGraphComponent() {
+
         if (graphComponent == null) {
+
             graphComponent = new mxGraphComponent(graph) {
 
                 @Override
                 protected void installDoubleClickHandler() {
+
                     graphControl.addMouseListener(new MouseAdapter() {
 
                         public void mouseReleased(MouseEvent e) {
+
+                            /* Test for cuurent transition */
+                            // System.out.println(((Transition)automata.cellToState(cell)).getLabel()
+
                             if (isEnabled()) {
+                                
+                                // check first mouse click
+                                System.out.println("mouse release enable (this?)");
+
                                 if (!e.isConsumed() && isEditEvent(e)) {
+
                                     mxCell cell = (mxCell)getCellAt(e.getX(), e.getY(), false);
 
                                     if (cell != null && getGraph().isCellEditable(cell)) {
+
                                         if (((mxCell) cell).isVertex()) {
+
                                             startEditingAtCell(cell, e);
+
                                         } else {
-                                            mxCell source=(mxCell)cell.getSource();
-                                            mxCell target=(mxCell)cell.getTarget();
+
+                                            mxCell source = (mxCell)cell.getSource();
+                                            mxCell target = (mxCell)cell.getTarget();
+
+                                            /* this condition handle the situation
+                                             * while clicking edge double time
+                                             */
+                                            if (source != null && target != null) {
                                             
-                                            if(source!=null && target!=null){
-//                                            ExpressionEditor editor =
-//                                                    new ExpressionEditor(
-//                                                    new JFrame(), true,
-//                                                    (WeightedRegularExpression) ((mxCell) cell).getValue());
-//                                            
-//                                            editor.setVisible(true);
-//                                            ((mxCell) cell).setValue(editor.getExpression());
-                                            
-                                            ExpressionEditor editor =
-                                                    new ExpressionEditor(
-                                                    new JFrame(), true,
-                                                    ((Transition)automata.cellToState(cell)).getLabel());
-                                            editor.setVisible(true);
-                                            //((mxCell) cell).setValue(editor.getExpression());
-                                            
-                                            // set weight in automata!!
-                                            automata.setTransitionLabel((Transition)automata.cellToState(cell), editor.getExpression());
-                                            
+                                                ExpressionEditor editor =
+                                                        new ExpressionEditor(
+                                                                new JFrame(),
+                                                                true,
+                                                                ((Transition)automata.cellToState(cell)).getLabel());
+
+                                                editor.setVisible(true);
+
+                                                // set weight in automata!!
+                                                System.out.println("set weight in automata (edge click) with " + automata.cellToState(cell));
+                                                System.out.println("editor expression from double click" + editor.getExpression());
+                                                automata.setTransitionLabel((Transition)automata.cellToState(cell), editor.getExpression());
+
+
                                             }
                                         }
                                     }
+
                                 } else {
                                     // Other languages use focus traversal here, in Java
                                     // we explicitely stop editing after a click elsewhere
@@ -315,7 +358,9 @@ public class JgraphAutomata {
                 }
             };
         }
-
+        
+        // test 201403181315
+        System.out.println("return graphComponent");
         return graphComponent;
     }
 
@@ -685,5 +730,4 @@ public class JgraphAutomata {
 //        graph.setCellStyles("strokeWidth","1",cells);
     }
 
-    
 }

@@ -27,16 +27,16 @@ public class TransitionGeometricData {
     public void addControlPoint(Point2D point,boolean reverse){
         controlPoints.add(point);
         Collections.sort(controlPoints, new Comparator<Point2D>(){
-                    @Override
-                    public int compare(Point2D t, Point2D t1) {
-                        int flag =Double.compare(t.getX(),t1.getX());
-                        if (flag == 0) {
-                            return Double.compare(t.getY(),t1.getY());
-                        } else {
-                            return flag;
-                        }
-                    }
-                            
+            @Override
+            public int compare(Point2D t, Point2D t1) {
+                int flag =Double.compare(t.getX(),t1.getX());
+                if (flag == 0) {
+                    return Double.compare(t.getY(),t1.getY());
+                } else {
+                    return flag;
+                }
+            }
+               
          });
        if(reverse) Collections.reverse(controlPoints);
     }

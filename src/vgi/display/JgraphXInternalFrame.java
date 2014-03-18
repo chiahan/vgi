@@ -55,30 +55,6 @@ import vgi.layout.linear.LinearLayoutAutomata;
  * @author wkren
  */
 public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
-
-//    protected static class StateValue {
-//
-//        public String name;
-//        public List<State> history;
-//
-//        @Override
-//        public String toString() {
-//            return this.name;
-//        }
-//    }  // End protected static class StateValue
-//
-//    protected static class TransitionValue {
-//
-//        public WeightedRegularExpression label;
-//        public List<Transition> history;
-//
-//        @Override
-//        public String toString() {
-//            return this.label.toString();
-//        }
-//    }  // End protected static class TransitionValue
-
-    //static private StateDrawingData defaultDrawingData;//=new StateDrawingData("#FFFFFF","#000000",1);
     
     
     /**
@@ -97,17 +73,15 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         initComponents();
 
         this.infoSplitPane = infoSplitPane;
-        //this.graph = graph;
         this.visibilityGraph = null;//new WeightedVisibilityGraph();
         this.automata = automata;
         
         this.graph=automata.jgraphAutomata.graph;
         this.graphComponent=automata.jgraphAutomata.graphComponent;
         
-        //currentFile=file;
+
         setTitle(filename);
-        
-//        System.out.println("title:"+title);
+
         initGraph();
         installRepaintListener();
         installListeners();
@@ -294,6 +268,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 if (graphComponent.getCellEditor() != null) {
                     graphComponent.getCellEditor().stopEditing(true);
                 }
+                // graph.refresh();
             }
 
             /**
@@ -314,6 +289,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 
                 if (selected)
                 {
+
                     DisplayUtil display = new DisplayUtil(graph, automata);
                     mxCell source=(mxCell)selectedCell.getSource();
                 mxCell target=(mxCell)selectedCell.getTarget();
