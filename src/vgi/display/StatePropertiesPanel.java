@@ -40,7 +40,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     public StatePropertiesPanel(mxCell cell, State state, DisplayUtil display,JgraphXInternalFrame jif) {
         initComponents();
         
-        //this.cell = cell;
+        this.cell = cell;
         this.state = state;
         this.graph = display.getGraph();
         this.automata = display.getAutomata();
@@ -641,6 +641,14 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
 	}//GEN-LAST:event_finalWeightTextFieldKeyPressed
 
     private void styleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_styleComboBoxActionPerformed
+        //JComboBox cb = (JComboBox)evt.getSource();
+        //Style = "shape=" + ((String)cb.getSelectedItem()).toLowerCase();
+ //       Object[] objects = {cell};
+//        System.out.print(style);
+       // graph.setCellStyles("shape", ((String) cb.getSelectedItem()).toLowerCase(), objects);
+        //jInternalFrame.setModified(true);
+        //if(jInternalFrame!=null) setShape(((String) cb.getSelectedItem()).toLowerCase());
+        
         JComboBox cb = (JComboBox)evt.getSource();
         //Style = "shape=" + ((String)cb.getSelectedItem()).toLowerCase();
  //       Object[] objects = {cell};
@@ -784,7 +792,7 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
     private String style;
-    //private mxCell cell;
+    private mxCell cell;
 	//protected mxCell initialEdge;
 	//protected mxCell finalEdge;
     private Initial initial;
@@ -909,8 +917,12 @@ public class StatePropertiesPanel extends javax.swing.JPanel {
          //jInternalFrame.updateStateDrawingData(state, sdd);
             
        
+        graph.setCellStyles("shape",string,new Object[]{cell});
+        graph.setCellStyles("perimeter",string+"Perimeter",new Object[]{cell});
         
         if(jInternalFrame!=null) jInternalFrame.setModified(true);
+        
+        //if(jInternalFrame!=null) jInternalFrame.setModified(true);
     }
     public void setWidth(String w){
 //        mxGeometry geo=cell.getGeometry();

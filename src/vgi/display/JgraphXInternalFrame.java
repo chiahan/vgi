@@ -163,7 +163,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         }
         this.graph.refresh();
     }
-
+    
+    
     private void setupUndoRedo() {
         undoManager = new mxUndoManager();
 
