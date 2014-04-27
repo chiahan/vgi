@@ -38,6 +38,7 @@ import vgi.layout.circular.CircularLayoutAutomata;
 import vgi.layout.edgerouting.*;
 import vgi.layout.feature.FeatureLayout;
 import vgi.layout.helperclass.GroupReplacedAutomata;
+import vgi.layout.hierarchical.HierarchicalLayoutAutomata;
 import vgi.layout.linear.LinearLayoutAutomata;
 
 /*
@@ -1147,6 +1148,11 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     }  // End public void doCircleLayout()
 
     public void doHierarchicalLayout() {
+        
+        HierarchicalLayoutAutomata layout = new HierarchicalLayoutAutomata();
+        layout.doLayout(automata);
+        this.graph.refresh();
+        /*
         mxHierarchicalLayout layout = new mxHierarchicalLayout(this.graph);
         layout.setOrientation(SwingConstants.NORTH);
         layout.setFineTuning(false);
@@ -1155,11 +1161,12 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         
         handleInitialFinal();
         handleLoop();
+        * */
         //handleEdgeControlPoint();
         /*EdgeRoutingLayout edgeRoute = new EdgeRoutingLayout(this.graph);
         edgeRoute.execute(this.graph.getDefaultParent());
         */
-        EdgeRoutingBranchingLayout layout2 = new EdgeRoutingBranchingLayout(this.graph);
+        //EdgeRoutingBranchingLayout layout2 = new EdgeRoutingBranchingLayout(this.graph);
         //layout2.execute(this.graph.getDefaultParent());
         
         
