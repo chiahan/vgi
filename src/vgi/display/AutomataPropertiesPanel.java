@@ -198,7 +198,7 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
         transitionComboBox = new javax.swing.JComboBox();
         initialComboBox = new javax.swing.JComboBox();
         finalComboBox = new javax.swing.JComboBox();
-        goButton = new javax.swing.JButton();
+        selectButton = new javax.swing.JButton();
         stateStylePanel = new javax.swing.JPanel();
         colorButton = new javax.swing.JButton();
         colorLabel = new javax.swing.JLabel();
@@ -348,17 +348,17 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 0.1;
         add(finalComboBox, gridBagConstraints);
 
-        goButton.setText("Go");
-        goButton.addActionListener(new java.awt.event.ActionListener() {
+        selectButton.setText("Select");
+        selectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                goButtonActionPerformed(evt);
+                selectButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        add(goButton, gridBagConstraints);
+        add(selectButton, gridBagConstraints);
 
         stateStylePanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "State Style", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Lucida Grande", 1, 13))); // NOI18N
         java.awt.GridBagLayout jPanel1Layout = new java.awt.GridBagLayout();
@@ -612,7 +612,7 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
         setSelectionCell(cells, (State)selectedItem, true);        
     }//GEN-LAST:event_finalComboBoxActionPerformed
 
-    private void goButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goButtonActionPerformed
+    private void selectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectButtonActionPerformed
         JSplitPane parent = (JSplitPane) this.getParent();
         if (selectedCell.isVertex()) {
             parent.setTopComponent(
@@ -625,7 +625,7 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
                                        display.cellToTransition(selectedCell),
                                        display,jInternalFrame));
         }
-    }//GEN-LAST:event_goButtonActionPerformed
+    }//GEN-LAST:event_selectButtonActionPerformed
 
     private void colorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorButtonActionPerformed
 
@@ -814,12 +814,12 @@ public class AutomataPropertiesPanel extends javax.swing.JPanel {
     private javax.swing.JComboBox finalComboBox;
     private javax.swing.JLabel finalLabel;
     private javax.swing.JTextField finalTextField;
-    private javax.swing.JButton goButton;
     private javax.swing.JComboBox initialComboBox;
     private javax.swing.JLabel initialLabel;
     private javax.swing.JTextField initialTextField;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JButton projectionButton;
+    private javax.swing.JButton selectButton;
     private javax.swing.JComboBox startArrowComboBox;
     private javax.swing.JLabel startArrowLabel;
     private javax.swing.JComboBox stateComboBox;

@@ -171,12 +171,12 @@
         </Constraint>
       </Constraints>
     </Component>
-    <Component class="javax.swing.JButton" name="goButton">
+    <Component class="javax.swing.JButton" name="selectButton">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Go"/>
+        <Property name="text" type="java.lang.String" value="Select"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="goButtonActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectButtonActionPerformed"/>
       </Events>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -3081,11 +3081,11 @@
         <CodeMethod name="add" class="java.awt.Container" parameterTypes="java.awt.Component, java.lang.Object"/>
       </StatementProvider>
       <Parameters>
-        <CodeExpression id="187_goButton">
-          <CodeVariable name="goButton" type="8194" declaredType="javax.swing.JButton"/>
+        <CodeExpression id="187_selectButton">
+          <CodeVariable name="selectButton" type="8194" declaredType="javax.swing.JButton"/>
           <ExpressionOrigin>
             <ExpressionProvider type="ComponentRef">
-              <ComponentRef name="goButton"/>
+              <ComponentRef name="selectButton"/>
             </ExpressionProvider>
           </ExpressionOrigin>
         </CodeExpression>
