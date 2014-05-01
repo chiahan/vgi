@@ -68,6 +68,7 @@ public class LinearLayoutAutomata {
             
             SccDfs sccdfs=new SccDfs(allVertexList);
             vertexMapList=sccdfs.getExpandedListWithSCC();
+            //System.out.println("!!!!!"+vertexMapList);
                     
             //vertexMapList=this.sortVertices(automata_);
             setSortedVerticesLocation();
@@ -476,7 +477,8 @@ public class LinearLayoutAutomata {
         
     }
     
-    private void setEdgesCurveHeight(boolean ignoreStateInGroups){
+    private void setEdgesCurveHeight(boolean ignoreStateInGroups)
+    {
         
         Collections.sort(addedTopEdge, new Comparator<Transition>(){
                     @Override
@@ -579,11 +581,14 @@ public class LinearLayoutAutomata {
         List<Point2D> points=new ArrayList<Point2D>();
         Point2D controlPoint1=null;
         Point2D controlPoint2=null;
+        Point2D NewCP_R = null;
+        Point2D NewCP_L = null;
         
         if(sourceInd==-1 || targetInd==-1) return;
         //controlPoint.setX((vertexMapList.get(sourceInd).getGeometry().getCenterX()+vertexMapList.get(targetInd).getGeometry().getCenterX())/2);
         
-        if(sourceInd==targetInd){  //loop
+        if(sourceInd==targetInd)
+        {  //loop
             controlPoint1=new Point2D.Double();
 //            controlPoint1.setX((vertexMapList.get(sourceInd).getGeometricData().getX()+vertexMapList.get(targetInd).getGeometricData().getX())/2);
 //            controlPoint1.setY(edge.getSource().getGeometry().getCenterY()+edge.getSource().getGeometry().getHeight());
@@ -601,26 +606,71 @@ public class LinearLayoutAutomata {
                     edge.getSourceState().getGeometricData().getY()+edge.getSourceState().getGeometricData().getHeight());
             
             System.out.println("loop"+controlPoint1);
+            
+            points.clear();
+           
+            if(controlPoint1 != null){
+                points.add(controlPoint1);
+                if(controlPoint1.getY()>upboundY) upboundY=controlPoint1.getY();
+                
+                if(controlPoint2!=null){
+                    points.add(controlPoint2);
+                    if(controlPoint2.getY()>upboundY) upboundY=controlPoint2.getY();
+                }
+//                System.out.println(controlPoint1);
+
+                //edge.getGeometry().setPoints(points);
+                TransitionGeometricData tgd=automata.getTransitionGeometricData(edge);
+                tgd.controlPoints=points;
+                automata.setTransitionGeometricData(edge, tgd);
+            }
         
-        }else{
-         if(Math.abs(sourceInd-targetInd)==1){
+        
+        }
+        else
+        {
+         if(Math.abs(sourceInd-targetInd)==1)//next to
+         {
              
              
              // if there is edge from target-source
-             if(automata.hasBackwardTransition(edge)){
+             if(automata.hasBackwardTransition(edge))
+             {
                 controlPoint1=new Point2D.Double();
              
 //                 controlPoint1.setLocation((automata.getStateGeometricData(vertexMapList.get(sourceInd)).getX()+automata.getStateGeometricData(vertexMapList.get(targetInd)).getX())/2,
 //                                        lineY+((sourceInd<targetInd)?5:-5));
                  controlPoint1.setLocation((edge.getSourceState().getGeometricData().getX()+edge.getTargetState().getGeometricData().getX())/2,
                                         lineY+((sourceInd<targetInd)?5:-5));
+                 
+               
              
              }
 //             else
 //                controlPoint1.setLocation((automata.getStateGeometricData(vertexMapList.get(sourceInd)).getX()+automata.getStateGeometricData(vertexMapList.get(targetInd)).getX())/2,
 //                                        lineY);
-             
-         }else{
+             points.clear();
+           
+            if(controlPoint1 != null){
+                points.add(controlPoint1);
+                if(controlPoint1.getY()>upboundY) upboundY=controlPoint1.getY();
+                
+                if(controlPoint2!=null){
+                    points.add(controlPoint2);
+                    if(controlPoint2.getY()>upboundY) upboundY=controlPoint2.getY();
+                }
+//                System.out.println(controlPoint1);
+
+                //edge.getGeometry().setPoints(points);
+                TransitionGeometricData tgd=automata.getTransitionGeometricData(edge);
+                tgd.controlPoints=points;
+                automata.setTransitionGeometricData(edge, tgd);
+            }
+           
+            
+         }
+         else
+         {
              
             controlPoint1=new Point2D.Double();
             //controlPoint2=new Point2D.Double();
@@ -635,6 +685,30 @@ public class LinearLayoutAutomata {
             
             int a=sourceInd;
             int b=targetInd;
+            int middleInd=(int)((float)(a+b)/2);
+            
+            double sin_deg = Math.sin(30.0/180.0*Math.PI);  //sin 30度
+            double cos_deg = Math.cos(30.0/180.0*Math.PI);  //cos 30度
+            double Radius = 0.0;
+            double CenterX = 0.0;
+            double CenterY = 0.0;
+            double Newx = 0.0;
+            double Newy = 0.0;
+            double ellipseA = 0.0;
+            double ellipseB = 0.0;
+            Radius = Math.abs((phaseList.get(sourceInd).getGeometricData().getX()-phaseList.get(targetInd).getGeometricData().getX())/2);
+            CenterX = Math.abs((phaseList.get(sourceInd).getGeometricData().getX()-phaseList.get(targetInd).getGeometricData().getX())/2)+phaseList.get(sourceInd).getGeometricData().getX();
+            CenterY = phaseList.get(sourceInd).getGeometricData().getY();
+            ellipseA = phaseList.get(targetInd).getGeometricData().getX()-CenterX;
+            ellipseB = lineY-CenterY;
+            NewCP_R = new Point2D.Double();
+            NewCP_L = new Point2D.Double();
+            Newx = CenterX+ellipseA*cos_deg;
+            Newy = CenterY+ellipseB*sin_deg;
+            NewCP_R.setLocation(Newx,Newy);
+            NewCP_L.setLocation(CenterX-ellipseA*cos_deg,Newy);
+            
+            
             if(targetInd>sourceInd){ a=targetInd; b=sourceInd;}
 
             if(isTopEdge){
@@ -645,7 +719,7 @@ public class LinearLayoutAutomata {
                 //double height=lineY;
                 
                 // find the one has largest height between source and target
-                int middleInd=(int)((float)(a+b)/2);
+                
                 double middleHeight=lineY;
                 for(int i=b+1;i<a;++i){
 //                    double tmpHeight=vertexMapList.get(i).getGeometricData().getY();
@@ -740,7 +814,7 @@ public class LinearLayoutAutomata {
                 
                 //if(hh>lineY+bound.height*4)hh=lineY+bound.height*4;
                 
-                controlPoint1.setLocation(controlPoint1.getX(),hh);                    
+                                    
                 
                 
                 //else 
@@ -749,7 +823,100 @@ public class LinearLayoutAutomata {
                 
                 System.out.println("higher "+higher+" "+controlPoint1.getY());
                 
-            }else{
+                double tmpt = phaseList.get(targetInd).getGeometricData().getX();
+                double tmps = phaseList.get(sourceInd).getGeometricData().getX();
+                if(phaseList.get(targetInd).getGeometricData().getX() < phaseList.get(sourceInd).getGeometricData().getX())
+                {
+                    double tmp = 0.0;
+                    tmp = tmpt;
+                    tmpt = tmps;
+                    tmps = tmp;
+                }
+                
+                CenterX = Math.abs((tmps-tmpt)/2)+tmps;
+                CenterY = phaseList.get(sourceInd).getGeometricData().getY();
+                ellipseA = tmpt-CenterX;
+                ellipseB = hh - CenterY;
+                NewCP_R = new Point2D.Double();
+                NewCP_L = new Point2D.Double();
+                Newx = CenterX+Radius*cos_deg;
+                Newy = CenterY+Radius*sin_deg;
+                NewCP_R.setLocation(Newx,Newy);
+                NewCP_L.setLocation(CenterX-Radius*cos_deg,Newy);
+                
+                /*final hh*/
+                hh = Math.abs((tmps-tmpt)/2);
+                controlPoint1.setLocation(controlPoint1.getX(),CenterY+Radius);
+                
+                points.clear();
+                
+                if(phaseList.get(targetInd).getGeometricData().getX() < phaseList.get(sourceInd).getGeometricData().getX())
+                {
+                    if(NewCP_R != null)
+                    {
+                        points.add(NewCP_R);
+                        //System.out.println("NewCP");
+                    }
+                    
+                    if(controlPoint1 != null){
+                        points.add(controlPoint1);
+                        if(controlPoint1.getY()>upboundY) upboundY=controlPoint1.getY();
+
+                        if(controlPoint2!=null){
+                            points.add(controlPoint2);
+                            if(controlPoint2.getY()>upboundY) upboundY=controlPoint2.getY();
+                        }
+        //                System.out.println(controlPoint1);
+
+                        //edge.getGeometry().setPoints(points);
+                        TransitionGeometricData tgd=automata.getTransitionGeometricData(edge);
+                        tgd.controlPoints=points;
+                        automata.setTransitionGeometricData(edge, tgd);
+                    }
+                   
+        //             placeLableToBound(edge);
+                    if(NewCP_L != null)
+                    {
+                        points.add(NewCP_L);
+
+                    }
+
+                }
+                else
+                {
+                    
+                    if(NewCP_L != null)
+                    {
+                        points.add(NewCP_L);
+
+                    }
+                    if(controlPoint1 != null){
+                        points.add(controlPoint1);
+                        if(controlPoint1.getY()>upboundY) upboundY=controlPoint1.getY();
+
+                        if(controlPoint2!=null){
+                            points.add(controlPoint2);
+                            if(controlPoint2.getY()>upboundY) upboundY=controlPoint2.getY();
+                        }
+        //                System.out.println(controlPoint1);
+
+                        //edge.getGeometry().setPoints(points);
+                        TransitionGeometricData tgd=automata.getTransitionGeometricData(edge);
+                        tgd.controlPoints=points;
+                        automata.setTransitionGeometricData(edge, tgd);
+                    }
+                    if(NewCP_R != null)
+                    {
+                        points.add(NewCP_R);
+                        //System.out.println("NewCP");
+                    }
+        //             placeLableToBound(edge);
+
+                }
+                System.out.println("!!!tophh= "+hh);
+            }
+            else //not top edge = buttom edge
+            {
                 int index=addedBottomEdge.indexOf(edge);
                 int len=addedBottomEdge.size();
 
@@ -758,7 +925,7 @@ public class LinearLayoutAutomata {
                 //double middleHeight=vertexMapList.get(middleInd).getGeometry().getHeight();
                 
                 // find the one has largest height between source and target
-                int middleInd=(int)((float)(a+b)/2);
+                middleInd=(int)((float)(a+b)/2);
                 double middleHeight=lineY;
                 for(int i=b+1;i<a;++i){
 //                    double tmpHeight=vertexMapList.get(i).getGeometricData().getY();
@@ -846,7 +1013,94 @@ public class LinearLayoutAutomata {
                 else hh=h_*Math.pow(A_/a_,1.1);                    
                 
                 //if(hh<lineY-bound.height*4) hh=lineY-bound.height*4;
-                controlPoint1.setLocation(controlPoint1.getX(), hh);
+                /* sure target X value > source X value*/
+                double tmpt = phaseList.get(targetInd).getGeometricData().getX();
+                double tmps = phaseList.get(sourceInd).getGeometricData().getX();
+                if(phaseList.get(targetInd).getGeometricData().getX() < phaseList.get(sourceInd).getGeometricData().getX())
+                {
+                    double tmp = 0.0;
+                    tmp = tmpt;
+                    tmpt = tmps;
+                    tmps = tmp;
+                }
+                
+                CenterX = Math.abs((tmps-tmpt)/2)+tmps;
+                CenterY = phaseList.get(sourceInd).getGeometricData().getY();
+                ellipseA = tmpt-CenterX;
+                ellipseB = hh - CenterY;
+                NewCP_R = new Point2D.Double();
+                NewCP_L = new Point2D.Double();
+                Newx = CenterX+Radius*cos_deg;
+                Newy = CenterY-Radius*sin_deg;
+                NewCP_R.setLocation(Newx,Newy);
+                NewCP_L.setLocation(CenterX-Radius*cos_deg,Newy);
+                
+                controlPoint1.setLocation(controlPoint1.getX(), CenterY-Radius);
+                
+                points.clear();
+                
+                if(phaseList.get(targetInd).getGeometricData().getX() < phaseList.get(sourceInd).getGeometricData().getX())
+                {
+                    if(NewCP_R != null)
+                    {
+                        points.add(NewCP_R);
+                        //System.out.println("NewCP");
+                    }
+                    
+                    if(controlPoint1 != null){
+                        points.add(controlPoint1);
+                        if(controlPoint1.getY()>upboundY) upboundY=controlPoint1.getY();
+
+                        if(controlPoint2!=null){
+                            points.add(controlPoint2);
+                            if(controlPoint2.getY()>upboundY) upboundY=controlPoint2.getY();
+                        }
+        //                System.out.println(controlPoint1);
+
+                        //edge.getGeometry().setPoints(points);
+                        TransitionGeometricData tgd=automata.getTransitionGeometricData(edge);
+                        tgd.controlPoints=points;
+                        automata.setTransitionGeometricData(edge, tgd);
+                    }
+                   
+        //             placeLableToBound(edge);
+                    if(NewCP_L != null)
+                    {
+                        points.add(NewCP_L);
+                    }
+
+                }
+                else
+                {
+                    
+                    if(NewCP_L != null)
+                    {
+                        points.add(NewCP_L);
+                    }
+                    if(controlPoint1 != null){
+                        points.add(controlPoint1);
+                        if(controlPoint1.getY()>upboundY) upboundY=controlPoint1.getY();
+
+                        if(controlPoint2!=null){
+                            points.add(controlPoint2);
+                            if(controlPoint2.getY()>upboundY) upboundY=controlPoint2.getY();
+                        }
+        //                System.out.println(controlPoint1);
+
+                        //edge.getGeometry().setPoints(points);
+                        TransitionGeometricData tgd=automata.getTransitionGeometricData(edge);
+                        tgd.controlPoints=points;
+                        automata.setTransitionGeometricData(edge, tgd);
+                    }
+                    if(NewCP_R != null)
+                    {
+                        points.add(NewCP_R);
+                        //System.out.println("NewCP");
+                    }
+        //             placeLableToBound(edge);
+
+                }
+                System.out.println("!!!bottomhh= "+hh);
                 
             }
               
@@ -854,23 +1108,6 @@ public class LinearLayoutAutomata {
        }
          
      }        
-            points.clear();
-            if(controlPoint1!=null){
-                points.add(controlPoint1);
-                if(controlPoint1.getY()>upboundY) upboundY=controlPoint1.getY();
-                
-                if(controlPoint2!=null){
-                    points.add(controlPoint2);
-                    if(controlPoint2.getY()>upboundY) upboundY=controlPoint2.getY();
-                }
-//                System.out.println(controlPoint1);
-
-                //edge.getGeometry().setPoints(points);
-                TransitionGeometricData tgd=automata.getTransitionGeometricData(edge);
-                tgd.controlPoints=points;
-                automata.setTransitionGeometricData(edge, tgd);
-            }
-//             placeLableToBound(edge);
             
             
             

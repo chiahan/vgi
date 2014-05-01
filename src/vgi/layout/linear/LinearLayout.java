@@ -452,7 +452,8 @@ public class LinearLayout extends mxGraphLayout{
 
                 //System.out.println("higher "+higher+" "+controlPoint.getY());
                 
-            }else{
+            }
+            else{
                 int index=addedBottomEdge.indexOf(edge);
                 int len=addedBottomEdge.size();
 
