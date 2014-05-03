@@ -393,6 +393,8 @@ public class VGI extends javax.swing.JFrame {
         redoButton = new javax.swing.JButton();
         toolBarSeparator3 = new javax.swing.JToolBar.Separator();
         randomButton = new javax.swing.JButton();
+        toolBarSeparator4 = new javax.swing.JToolBar.Separator();
+        addStateButton = new javax.swing.JButton();
         mainSplitPane = new javax.swing.JSplitPane();
         infoSplitPane = new javax.swing.JSplitPane();
         infoPanel = new javax.swing.JPanel();
@@ -550,6 +552,23 @@ public class VGI extends javax.swing.JFrame {
             }
         });
         toolBar.add(randomButton);
+        toolBar.add(toolBarSeparator4);
+
+        addStateButton.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
+        addStateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/newicons/addstate.png"))); // NOI18N
+        addStateButton.setBorder(null);
+        addStateButton.setFocusable(false);
+        addStateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        addStateButton.setMaximumSize(new java.awt.Dimension(44, 36));
+        addStateButton.setMinimumSize(new java.awt.Dimension(44, 36));
+        addStateButton.setPreferredSize(new java.awt.Dimension(36, 36));
+        addStateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        addStateButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addStateButtonActionPerformed(evt);
+            }
+        });
+        toolBar.add(addStateButton);
 
         getContentPane().add(toolBar, java.awt.BorderLayout.NORTH);
 
@@ -576,6 +595,8 @@ public class VGI extends javax.swing.JFrame {
 
         statusLabel.setText("status:");
         mainPanel.add(statusLabel, java.awt.BorderLayout.SOUTH);
+
+        mainDesktopPane.setLayout(null);
         mainPanel.add(mainDesktopPane, java.awt.BorderLayout.CENTER);
 
         mainSplitPane.setRightComponent(mainPanel);
@@ -1614,6 +1635,11 @@ public class VGI extends javax.swing.JFrame {
                }
           
     }//GEN-LAST:event_exportMenuItemActionPerformed
+
+    private void addStateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addStateButtonActionPerformed
+            JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
+            selected.addStateFlag=true;//ellie
+    }//GEN-LAST:event_addStateButtonActionPerformed
     /*
      * update default state & transition drawing & geometric data when preferences are modified
      */
@@ -1888,6 +1914,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JMenuItem accessibleMenuItem;
     private javax.swing.JButton actualSizeButton;
     private javax.swing.JMenuItem actualSizeMenuItem;
+    private javax.swing.JButton addStateButton;
     private javax.swing.JMenu algorithmsMenu;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator1;
     private javax.swing.JPopupMenu.Separator algorithmsMenuSeparator2;
@@ -1948,6 +1975,7 @@ public class VGI extends javax.swing.JFrame {
     private javax.swing.JToolBar toolBar;
     private javax.swing.JToolBar.Separator toolBarSeparator2;
     private javax.swing.JToolBar.Separator toolBarSeparator3;
+    private javax.swing.JToolBar.Separator toolBarSeparator4;
     private javax.swing.JButton undoButton;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JPopupMenu.Separator viewMenuSeparator1;

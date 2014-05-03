@@ -264,8 +264,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         // Installs the popup menu in the graph component
         getGraphComponent().getGraphControl().addMouseListener(new MouseAdapter() {
 
-            @Override
+            //@Override
             public void mousePressed(MouseEvent e) {
+
                 isPopupTrigger = e.isPopupTrigger();
                 if (graphComponent.getCellEditor() != null) {
                     graphComponent.getCellEditor().stopEditing(true);
@@ -388,7 +389,9 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                         addTransitionToMenuItem.setVisible(
                                 (transitionFrom == null) ? false : true);
                     }
+                    
                 } else {
+                    
                     JgraphXInternalFrame.this.infoSplitPane.setTopComponent(
                             new AutomataPropertiesPanel(
                             new DisplayUtil(graph, automata), JgraphXInternalFrame.this));
@@ -397,6 +400,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                     graph.setSelectionCell(null);
                 }
                 addStateMenuItem.setVisible(!selected);
+                //addStateMenuItem.setVisible(false); ellie
                 deleteMenuItem.setVisible(selected);
                 addControlPointMenuItem.setVisible(edgeSelected && !isloop);
                 deleteControlPointMenuItem.setVisible(controlPointSelected && !isloop);
@@ -414,14 +418,13 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                 JgraphXInternalFrame.this.validate();
 
                 maybeShowPopup(e);
-
                 graph.refresh();
             }
 
             private void maybeShowPopup(MouseEvent e) {
                 if (isPopupTrigger || e.isPopupTrigger()) {
                     isPopupTrigger = false;
-
+                    
                     Point pt = e.getPoint();
                     pt.x -= graphComponent.getHorizontalScrollBar().getValue();
                     pt.y -= graphComponent.getVerticalScrollBar().getValue();
@@ -436,8 +439,15 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
                    // System.out.println(e.getPoint().toString() + "pop up:" + pt.toString() + "  " + mxpt.toString());
 
 
-                    getGraphPopupMenu().show(getGraphComponent(), pt.x, pt.y);
+                    getGraphPopupMenu().show(getGraphComponent(), pt.x, pt.y); 
                 }
+                
+                else if(!e.isPopupTrigger() && addStateFlag)//ellie
+                {
+                    addState(e.getX(),e.getY());
+                    addStateFlag = false;
+                }
+
             }
 
             @Override
@@ -2071,24 +2081,23 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
             }
         });
         graphPopupMenu.add(UngroupMenuItem);
-        UngroupMenuItem.getAccessibleContext().setAccessibleName("Ungroup");
 
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
-            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
-                formInternalFrameClosed(evt);
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameClosing(evt);
             }
-            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosed(evt);
             }
             public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
             }
-            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
         });
         addMouseWheelListener(new java.awt.event.MouseWheelListener() {
@@ -2292,7 +2301,7 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
     private javax.swing.JMenuItem routeEdgeMenuItem;
     private javax.swing.JMenuItem routeEdgeWVGMenuItem;
     // End of variables declaration//GEN-END:variables
-
+    public boolean addStateFlag; //ellie
     void randomGenerateStates() {
         automata.randomGenerateStates(10);
         automata.refresh();
