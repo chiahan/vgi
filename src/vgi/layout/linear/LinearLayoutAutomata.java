@@ -532,14 +532,25 @@ public class LinearLayoutAutomata {
                 
                 // if ignore state in groups, only edge with one terminal outside group is considered
                 // and reset edge curve height
-                if(ignoreStateInGroups){
+                if(ignoreStateInGroups)
+                {
                     int sid=edge.getSourceState().getGroupID();
                     int tid=edge.getTargetState().getGroupID();
                 
                     if(sid!=tid || (sid==-1 && tid==-1))
+                    {
                         setEdgeCurveHeight(edge,true);
-                }else{
-                    setEdgeCurveHeight(edge,true);    
+                        System.out.println("!!!There contain loop"+sid+tid);
+                    }
+                    else
+                    {
+                        
+                    }
+                }
+                else
+                {
+                    setEdgeCurveHeight(edge,true);  
+                    
                 }
             }
              
@@ -564,7 +575,8 @@ public class LinearLayoutAutomata {
      * 
      * TODO: keep all given y coordinates > 0
      */
-    private void setEdgeCurveHeight(Transition edge,boolean isTopEdge){
+    private void setEdgeCurveHeight(Transition edge,boolean isTopEdge)
+    {
         
         
         
@@ -586,8 +598,7 @@ public class LinearLayoutAutomata {
         
         if(sourceInd==-1 || targetInd==-1) return;
         //controlPoint.setX((vertexMapList.get(sourceInd).getGeometry().getCenterX()+vertexMapList.get(targetInd).getGeometry().getCenterX())/2);
-        
-        if(sourceInd==targetInd)
+        if(sourceInd == targetInd)
         {  //loop
             controlPoint1=new Point2D.Double();
 //            controlPoint1.setX((vertexMapList.get(sourceInd).getGeometricData().getX()+vertexMapList.get(targetInd).getGeometricData().getX())/2);
@@ -602,18 +613,21 @@ public class LinearLayoutAutomata {
             
 //            controlPoint1.setLocation(automata.getStateGeometricData(vertexMapList.get(sourceInd)).getX(),
 //                    automata.getStateGeometricData(edge.getSourceState()).getY()+automata.getStateGeometricData(edge.getSourceState()).getHeight());
-            controlPoint1.setLocation(edge.getSourceState().getGeometricData().getX(),
-                    edge.getSourceState().getGeometricData().getY()+edge.getSourceState().getGeometricData().getHeight());
             
-            System.out.println("loop"+controlPoint1);
+            //controlPoint1.setLocation(edge.getSourceState().getGeometricData().getX(),
+                    //edge.getSourceState().getGeometricData().getY()+edge.getSourceState().getGeometricData().getHeight());
+            controlPoint1.setLocation(edge.getSourceState().getGeometricData().getX(),edge.getSourceState().getGeometricData().getY());
+            
             
             points.clear();
            
-            if(controlPoint1 != null){
-                points.add(controlPoint1);
+            if(controlPoint1 != null)
+            {
+                //points.add(controlPoint1);
                 if(controlPoint1.getY()>upboundY) upboundY=controlPoint1.getY();
                 
-                if(controlPoint2!=null){
+                if(controlPoint2!=null)
+                {
                     points.add(controlPoint2);
                     if(controlPoint2.getY()>upboundY) upboundY=controlPoint2.getY();
                 }
@@ -652,7 +666,7 @@ public class LinearLayoutAutomata {
              points.clear();
            
             if(controlPoint1 != null){
-                points.add(controlPoint1);
+                //points.add(controlPoint1);
                 if(controlPoint1.getY()>upboundY) upboundY=controlPoint1.getY();
                 
                 if(controlPoint2!=null){
@@ -711,7 +725,8 @@ public class LinearLayoutAutomata {
             
             if(targetInd>sourceInd){ a=targetInd; b=sourceInd;}
 
-            if(isTopEdge){
+            if(isTopEdge)
+            {
 
                 int index=addedTopEdge.indexOf(edge);
                 int len=addedTopEdge.size();
@@ -847,6 +862,33 @@ public class LinearLayoutAutomata {
                 /*final hh*/
                 hh = Math.abs((tmps-tmpt)/2);
                 controlPoint1.setLocation(controlPoint1.getX(),CenterY+Radius);
+                
+                if((phaseList.get(targetInd).getGeometricData().getY()+phaseList.get(targetInd).getGeometricData().getHeight()/2) > Newy)
+                {
+                    //double diff_x = phaseList.get(targetInd).getGeometricData().getX()-CenterX;
+                    double diff_y = (phaseList.get(targetInd).getGeometricData().getY()+phaseList.get(targetInd).getGeometricData().getHeight()/2)-Newy;
+                    //new_Radius = Math.sqrt(diff_x*diff_x+diff_y*diff_y);
+                    controlPoint1.setLocation(controlPoint1.getX(),CenterY+Radius+Math.abs(diff_y));
+                    Newx = CenterX+Radius*cos_deg;
+                    Newy = CenterY+Radius*sin_deg+Math.abs(diff_y);
+                    NewCP_R.setLocation(Newx,Newy);
+                    NewCP_L.setLocation(CenterX-Radius*cos_deg,Newy);
+                    //System.out.println("new_Radius:"+new_Radius+"Radius"+Radius);
+                }
+                //System.out.println("getY():"+phaseList.get(targetInd).getGeometricData().getY()+"getHeight()/2:"+phaseList.get(targetInd).getGeometricData().getHeight()/2+"Newy:"+Newy);
+                //System.out.println("new_Radius:"+new_Radius+"Radius"+Radius);
+                if((phaseList.get(sourceInd).getGeometricData().getY()+phaseList.get(sourceInd).getGeometricData().getHeight()/2) > Newy)
+                {
+                    //double diff_x = phaseList.get(sourceInd).getGeometricData().getX()-CenterX;
+                    double diff_y = (phaseList.get(sourceInd).getGeometricData().getY()+phaseList.get(sourceInd).getGeometricData().getHeight()/2) - Newy;
+                    //new_Radius = Math.sqrt(diff_x*diff_x+diff_y*diff_y);
+                    controlPoint1.setLocation(controlPoint1.getX(),CenterY+Radius+Math.abs(diff_y));
+                    Newx = CenterX+Radius*cos_deg;
+                    Newy = CenterY+Radius*sin_deg+Math.abs(diff_y);
+                    NewCP_R.setLocation(Newx,Newy);
+                    //System.out.println("new_Radius:"+new_Radius+"Radius"+Radius);
+                    NewCP_L.setLocation(CenterX-Radius*cos_deg,Newy);
+                }
                 
                 points.clear();
                 
@@ -1036,6 +1078,71 @@ public class LinearLayoutAutomata {
                 NewCP_L.setLocation(CenterX-Radius*cos_deg,Newy);
                 
                 controlPoint1.setLocation(controlPoint1.getX(), CenterY-Radius);
+                
+                //double new_Radius = 0.0;
+                /*process the state's height*/
+                //target<-source
+                //if(phaseList.get(targetInd).getGeometricData().getX() < phaseList.get(sourceInd).getGeometricData().getX())
+                //{
+                    //sin_deg = Math.sin(60.0/180.0*Math.PI);  //sin 30度
+                    //cos_deg = Math.cos(60.0/180.0*Math.PI);  //cos 30度
+                if((phaseList.get(targetInd).getGeometricData().getY()-phaseList.get(targetInd).getGeometricData().getHeight()/2) < Newy)
+                {
+                    //double diff_x = phaseList.get(targetInd).getGeometricData().getX()-CenterX;
+                    double diff_y = (phaseList.get(targetInd).getGeometricData().getY()-phaseList.get(targetInd).getGeometricData().getHeight()/2) - Newy;
+                    //new_Radius = Math.sqrt(diff_x*diff_x+diff_y*diff_y);
+                    controlPoint1.setLocation(controlPoint1.getX(),CenterY-Radius-Math.abs(diff_y));
+                    Newx = CenterX+Radius*cos_deg;
+                    Newy = CenterY-Radius*sin_deg-Math.abs(diff_y);
+                    NewCP_R.setLocation(Newx,Newy);
+                    NewCP_L.setLocation(CenterX-Radius*cos_deg,Newy);
+                    //System.out.println("new_Radius:"+new_Radius+"Radius"+Radius);
+                }
+                //System.out.println("getY():"+phaseList.get(targetInd).getGeometricData().getY()+"getHeight()/2:"+phaseList.get(targetInd).getGeometricData().getHeight()/2+"Newy:"+Newy);
+                //System.out.println("new_Radius:"+new_Radius+"Radius"+Radius);
+                if((phaseList.get(sourceInd).getGeometricData().getY()-phaseList.get(sourceInd).getGeometricData().getHeight()/2) < Newy)
+                {
+                    //double diff_x = phaseList.get(sourceInd).getGeometricData().getX()-CenterX;
+                    double diff_y = (phaseList.get(sourceInd).getGeometricData().getY()-phaseList.get(sourceInd).getGeometricData().getHeight()/2) - Newy;
+                    //new_Radius = Math.sqrt(diff_x*diff_x+diff_y*diff_y);
+                    controlPoint1.setLocation(controlPoint1.getX(),CenterY-Radius-Math.abs(diff_y));
+                    Newx = CenterX+Radius*cos_deg;
+                    Newy = CenterY-Radius*sin_deg-Math.abs(diff_y);
+                    NewCP_R.setLocation(Newx,Newy);
+                    //System.out.println("new_Radius:"+new_Radius+"Radius"+Radius);
+                    NewCP_L.setLocation(CenterX-Radius*cos_deg,Newy);
+                }
+                //}
+           
+                /*else //source->target
+                {
+                    //sin_deg = Math.sin(60.0/180.0*Math.PI);  //sin 30度
+                    //cos_deg = Math.cos(60.0/180.0*Math.PI);  //cos 30度
+                    if((phaseList.get(targetInd).getGeometricData().getY()-phaseList.get(targetInd).getGeometricData().getHeight()/2) < Newy)
+                    {
+                        double diff_x = phaseList.get(targetInd).getGeometricData().getX()-CenterX;
+                        double diff_y = (phaseList.get(targetInd).getGeometricData().getY()+phaseList.get(targetInd).getGeometricData().getHeight()/2)-CenterY;
+                        new_Radius = Math.sqrt(diff_x*diff_x+diff_y*diff_y);
+                        controlPoint1.setLocation(controlPoint1.getX(),CenterY-new_Radius);
+                        Newx = CenterX+new_Radius*cos_deg;
+                        Newy = CenterY-new_Radius*sin_deg;
+                        NewCP_R.setLocation(Newx,Newy);
+                        //NewCP_L.setLocation(CenterX-Radius*cos_deg,Newy);
+                        System.out.println("new_Radius:"+new_Radius+"Radius"+Radius);
+                    }
+                    if((phaseList.get(sourceInd).getGeometricData().getY()-phaseList.get(sourceInd).getGeometricData().getHeight()/2) < Newy)
+                    {
+                        double diff_x = phaseList.get(sourceInd).getGeometricData().getX()-CenterX;
+                        double diff_y = (phaseList.get(sourceInd).getGeometricData().getY()+phaseList.get(sourceInd).getGeometricData().getHeight()/2)-CenterY;
+                        new_Radius = Math.sqrt(diff_x*diff_x+diff_y*diff_y);
+                        controlPoint1.setLocation(controlPoint1.getX(),CenterY-new_Radius);
+                        Newx = CenterX+new_Radius*cos_deg;
+                        Newy = CenterY-new_Radius*sin_deg;
+                        //NewCP_R.setLocation(Newx,Newy);
+                        NewCP_L.setLocation(CenterX-Radius*cos_deg,Newy);
+                        System.out.println("new_Radius:"+new_Radius+"Radius"+Radius);
+                    }
+                }*/
                 
                 points.clear();
                 
