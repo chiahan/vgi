@@ -1826,6 +1826,20 @@ public class Automata implements AutomataInterface {
 //        selectedStates=this.pmAllStates;
     }
     
+    //return a list of states representing the group containing s 
+    public List<State> getGroup(State s){
+        List<Object> ss= new ArrayList<Object>();
+        ss.add(s);
+        List<Object> sss = group.retrieveSelectedObjs(ss);
+        List<State> stateList = new ArrayList<State>();
+        for (Object obj: sss) {
+            if (obj instanceof State) {
+                stateList.add((State)obj);
+            }
+        }
+        return stateList;    
+    }
+    
       private Point2D computeControlPointAfterMoving(Point2D pt,Point2D newVertexPoint,Point2D oldVertexPoint,Point2D endPoint){
         
         
