@@ -53,10 +53,11 @@ public class LinearLayoutAutomata {
         System.out.println("box: "+bound);
         
         lineY=bound.getCenterY();
-        if(bound.x<0) bound.x=0;
+
         if(allVertexList.size()==automata.getAllStates().size()){
             lineY=0;
             bound.x=-bound.width/2;
+            if(bound.x<0) bound.x=0;
         }
         upboundY=bound.getMaxY(); // ???
         
@@ -138,11 +139,18 @@ public class LinearLayoutAutomata {
     
     private void setSortedVerticesLocation(){
          double x=bound.x;
-         if(x<0) x=0;
+         //if(x<0) x=0;
 //         double distance=bound.getWidth()/vertexNum;
          double distance=0;
-         
-         for(int i = 0; i<vertexNum; ++i){
+         //ellie
+         State first_state = vertexMapList.get(0);
+         StateGeometricData first_geodata = automata.getStateGeometricData(first_state);
+         first_geodata.setLocation(new Point2D.Double(x+first_geodata.getWidth()/2,lineY));
+         automata.setStateGeometricData(first_state, first_geodata);
+         first_geodata=automata.getStateGeometricData(first_state);
+         x=first_geodata.getX()+first_geodata.getWidth()/2;
+         distance=first_geodata.getWidth()/2;//ellie
+         for(int i = 1; i<vertexNum; ++i){
                     //mxCell cell=vertexMapList.get(i);
                     //mxGeometry geo=cell.getGeometry();
                     State state=vertexMapList.get(i);
