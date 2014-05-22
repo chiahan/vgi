@@ -1221,7 +1221,10 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
         LinearLayoutAutomata layout=new LinearLayoutAutomata();
         
         automata.getGroupList();
-        if(automata.selectedStatesContainVertexGroup()){
+        if(automata.selectedStatesContainVertexGroup())//when mouse seleted group
+        {
+    
+            
             GroupReplacedAutomata replaceAutomata=new GroupReplacedAutomata(automata);
 //            Automata reautomata=replaceAutomata.createReplaceAutomata();
 //            reautomata.selectAllStates();
@@ -1229,7 +1232,8 @@ public class JgraphXInternalFrame extends javax.swing.JInternalFrame {
 //            automata=reautomata;
             //replaceAutomata.expandStatesToVertexGroups();
         }
-        else{
+        else
+        {
             if(automata.getSelectedStates().isEmpty()) automata.selectAllStates();
             layout.doLayout(automata);
         }

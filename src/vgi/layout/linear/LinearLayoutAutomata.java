@@ -10,6 +10,7 @@ import java.util.*;
 import vgi.automata.*;
 import vgi.layout.helperclass.GroupReplacedAutomata;
 import vgi.layout.helperclass.SccDfs;
+import vgi.layout.hierarchical.Hvertex;
 
 /**
  *
@@ -24,6 +25,7 @@ public class LinearLayoutAutomata {
     Rectangle bound;
     
     List<State> allVertexList;
+    List<State> ChosenVertexList;
     int vertexNum;
     
     List<State> vertexMapList;
@@ -33,6 +35,8 @@ public class LinearLayoutAutomata {
     List<State> upPhaseList;
     List<State> downPhaseList;
     
+    List<List<State>> groupList;
+    String[][] Group;
     
     ////// if there's fixed vertex groups
     boolean useVertexGroup=false;
@@ -41,11 +45,122 @@ public class LinearLayoutAutomata {
     
     public LinearLayoutAutomata(){}
     
-    public void doLayout(Automata automata_){
-        automata=automata_;
-//        vertexNum=automata.getAllStates().size();
-//        allVertexList=getAllVertices(automata_);
+    public void GroupProcess(Automata automata_)
+    {
+        groupList = new ArrayList<List<State>>();
+        System.out.println("~~~There is group~~~");
+        //retrieve the list of group
+        List<State> StateList = new ArrayList<State>();
+        StateList.addAll(automata_.getAllStates());    
+        while(!StateList.isEmpty()) 
+        {
+            State s = StateList.get(0);
+            List<State> g = automata_.getGroup(s);
+            groupList.add(g);
+            for (State ss: g) 
+            {
+                StateList.remove(ss);
+            }
+        }
+        
+        automata = automata_;
+        allVertexList = getSelectedVertices(automata_);
+        vertexNum = allVertexList.size();
+        bound=automata.computeBox(allVertexList);
+        System.out.println("box: "+bound);
+        System.out.println("allVertexList: "+allVertexList);
+        
+        lineY = bound.getCenterY();
 
+        if(allVertexList.size() == automata.getAllStates().size())
+        {
+            lineY=0;
+            bound.x = -bound.width/2;
+            if(bound.x<0) bound.x = 0;
+        }
+        upboundY = bound.getMaxY(); // ???
+        
+        System.out.println("lineY= "+lineY);
+        
+        //graph.getModel().beginUpdate();
+        //    try{
+        //make the group to one node   
+        ChosenVertexList = getSelectedVertices(automata_);
+        System.out.println("ChosenVertexList:"+ChosenVertexList);
+        
+        int groupSize = 0;
+        for (List<State> state: groupList) 
+        {
+            if(state.size() > 1)//if there is a group
+            {
+               ChosenVertexList.removeAll(state);
+               ChosenVertexList.add(state.get(0));
+               groupSize++;
+               
+            }
+        }
+        int GID = 0;
+        double [][] GroupStructure = new double[groupSize][5];
+        for (List<State> state: groupList) 
+        {
+            if(state.size() > 1)//if there is a group
+            {
+               GroupStructure[GID][0] = (double)GID+1;
+               Rectangle boundtmp;
+               boundtmp = automata.computeBox(state);
+               GroupStructure[GID][1] = boundtmp.getX();
+               GroupStructure[GID][2] = boundtmp.getY();
+               GroupStructure[GID][3] = boundtmp.getWidth();
+               GroupStructure[GID][4] = boundtmp.getHeight();
+               GID++;
+            }
+        }
+        for(int i=0;i<GID;i++)
+        {
+            System.out.println(GroupStructure[i][0]+" "+GroupStructure[i][1]+" "+GroupStructure[i][2]+" "+GroupStructure[i][3]+" "+GroupStructure[i][4]);
+        }
+        System.out.println("groupList.size"+groupList+" "+groupSize);
+        System.out.println("ChosenVertexList:"+ChosenVertexList);
+        /*String allVertexStringWithoutNull[] = new String[allVertexStringIndex];
+        for (int i=0;i<allVertexStringIndex;i++)
+        {
+            //State b = allVertexString[i];
+            allVertexStringWithoutNull[i] = allVertexString[i];
+        }
+        List<String> allVertexListB = Arrays.asList(allVertexStringWithoutNull);  
+    
+        System.out.println("allVertexListB:"+allVertexListB);*/
+    
+        /*for(int i=0;i<index;i++)
+        {
+            for(int j=0;j<Group[i].length;j++)
+            {
+                System.out.println(Group[i][j]);
+            }
+            //System.out.println("\n");
+        }*/
+        
+        SccDfs sccdfs = new SccDfs(ChosenVertexList);
+        vertexMapList = sccdfs.getExpandedListWithSCC();
+        System.out.println("vertexMapList:"+vertexMapList);
+                    
+        /*
+        setSortedVerticesLocation();
+            
+
+          
+        adjustEdgeCurves(true);
+            
+        if(upboundY>bound.getMaxY()) 
+            moveWholeBound();*/
+  
+       System.out.println("~~~There is group~~~");
+        
+    }
+    
+    public void NonGroupProcess(Automata automata_)
+    {
+        automata=automata_;
         allVertexList=getSelectedVertices(automata_);
         vertexNum=allVertexList.size();
         
@@ -84,6 +199,53 @@ public class LinearLayoutAutomata {
        // }finally{
            // graph.getModel().endUpdate();
        // }
+    }
+    
+    public void doLayout(Automata automata_)
+    {
+        automata=automata_;
+//        vertexNum=automata.getAllStates().size();
+//        allVertexList=getAllVertices(automata_);
+        
+        boolean HaveGroup = false;
+        
+        groupList = new ArrayList<List<State>>();
+        
+        //retrieve the list of group
+        List<State> StateList = new ArrayList<State>();
+        StateList.addAll(automata_.getAllStates());    
+        while(!StateList.isEmpty()) 
+        {
+            State s = StateList.get(0);
+            List<State> g = automata_.getGroup(s);
+            groupList.add(g);
+            for (State ss: g) 
+            {
+                StateList.remove(ss);
+            }
+        }
+        //decide whether own group
+        for (List<State> state: groupList) 
+        {
+            if (state.size() == 1) 
+            {
+                HaveGroup = false;
+            }
+            else
+            {
+                HaveGroup = true;
+                break;
+            }
+        }
+
+        if(HaveGroup == true)
+        {
+            GroupProcess(automata);
+        }
+        else
+        {
+            NonGroupProcess(automata);
+        }
     }
     
     // if there is vertexGroup
@@ -137,7 +299,8 @@ public class LinearLayoutAutomata {
     }
 
     
-    private void setSortedVerticesLocation(){
+    private void setSortedVerticesLocation()
+    {
          double x=bound.x;
          //if(x<0) x=0;
 //         double distance=bound.getWidth()/vertexNum;
