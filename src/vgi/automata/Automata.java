@@ -2301,19 +2301,23 @@ public class Automata implements AutomataInterface {
                 return new TransitionDrawingData("#FF0000",2,"open","none");
             
         }
-        public Rectangle computeBox(List<State> states){
+        public Rectangle computeBox(List<State> states)
+        {
             
             if(states.isEmpty()) return null;
             
             double left,top;
             double right=0,bottom=0;
             StateGeometricData sgd=this.getStateGeometricData(states.get(0));
-            left=sgd.getX()-sgd.getWidth()/2; top=sgd.getY()-sgd.getHeight()/2;
-            right=left+sgd.getWidth()/2; bottom=top+sgd.getHeight()/2;
+            left=sgd.getX()-sgd.getWidth()/2; 
+            top=sgd.getY()-sgd.getHeight()/2;
+            right=left+sgd.getWidth()/2; 
+            bottom=top+sgd.getHeight()/2;
 
             int len=states.size();
 
-            for(int i=0;i<len;++i){
+            for(int i=0;i<len;++i)
+            {
                 State state=states.get(i);
                 sgd=this.getStateGeometricData(state);
 

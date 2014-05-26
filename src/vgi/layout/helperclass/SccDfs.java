@@ -94,28 +94,33 @@ public class SccDfs{
     List<SccDfsVertex> sccDfsVertexList;
     List<SccVertex> sccSortedList;
     
-    public SccDfs(List<State> allStates){
+    public SccDfs(List<State> allStates)
+    {
         allVertexList=allStates;
         vertexNum=allVertexList.size();
     }
     
-    public List<State> getExpandedListWithSCC(){
+    public List<State> getExpandedListWithSCC()
+    {
             sccVertexList=new ArrayList<DfsVertex>();
             sccStack=new Stack<State>();
 
-            for(int i=0;i<vertexNum;++i){
+            for(int i=0;i<vertexNum;++i)
+            {
                 sccVertexList.add(new DfsVertex(allVertexList.get(i)));
             }
             sccTime=0;
 
             // find stonely connected components, saved in sccList
-            for(int i=0;i<vertexNum;++i){
+            for(int i=0;i<vertexNum;++i)
+            {
                 DfsVertex dvertex=sccVertexList.get(i);
                 if(dvertex.color==0) sccVisit(dvertex);
             }
 
             // find eges connecting SccVertices and saved in each SccVertex
-            for(SccVertex sccv:sccList){
+            for(SccVertex sccv:sccList)
+            {
                 findSccEdges(sccv);
             }
 
@@ -129,7 +134,8 @@ public class SccDfs{
 
     }
     
-     private void sccVisit(DfsVertex dvertex){
+     private void sccVisit(DfsVertex dvertex)
+     {
         sccTime++;
         dvertex.d=sccTime; 
         dvertex.f=sccTime; 
