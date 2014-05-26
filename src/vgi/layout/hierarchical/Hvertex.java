@@ -7,6 +7,8 @@ package vgi.layout.hierarchical;
 import java.awt.geom.Point2D;
 import java.util.*;
 import vgi.layout.hierarchical.Hedge;
+
+
 /**
  *
  * @author x1213
@@ -39,7 +41,12 @@ public class Hvertex {
         else if (e.target() == this) {
             inAdjList.add(e);
         }
-    } 
+    }
+    
+    /**
+     * Bind current Hvertex with argument Hgraph g
+     * @param g 
+     */
     public void setGraph(Hgraph g) {
         graph = g;
     }     
@@ -115,11 +122,11 @@ public class Hvertex {
    /*///////////////////////////////////////////////
     *    Members
     *///////////////////////////////////////////////   
-    private List<Hedge> outAdjList; //The edges emanating from the vertex.
-    private List<Hedge> inAdjList; //The edges pointing to the vertex.
-    private Hgraph subgraph; // the subgraph represented by the vertex. Default = NULL
-    private Hgraph graph; //the graph that the vertex is located.
-    private double height; // Height
-    private double width; // Width
+    private List<Hedge> outAdjList;     // The edges emanating from the vertex.
+    private List<Hedge> inAdjList;      // The edges pointing to the vertex.
+    private Hgraph subgraph;            // the subgraph represented by the vertex. Default = NULL
+    private Hgraph graph;               // the graph that the vertex is located.
+    private double height;              // Height
+    private double width;               // Width
     private Point2D upleftPoint; // up left
 }

@@ -82,8 +82,8 @@ public class Hedge {
     private List<Hedge> subEdgeList; //The edges in the lower level hierarchy that corresponds to this edge.
     private Hvertex source; // The source vertex.
     private Hvertex target; //The target vertex.
-    //if none of the s,t is representing a group, it records the number of edges between s,t.
-    //Otherwise, it is set to 0.
+    // if none of the s,t is representing a group, it records the number of edges between s,t.
+    // Otherwise, it is set to 0.
     private int multiplicity; 
     // Parent edge. (if u in group A in graph G, v is directly in graph G, then (G,v) is the parent of (u,v))
     // default = null

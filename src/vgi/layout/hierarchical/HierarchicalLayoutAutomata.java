@@ -38,16 +38,16 @@ public class HierarchicalLayoutAutomata {
     public HierarchicalLayoutAutomata(){}
     
     public void preprocessing(Automata automata_) {
-        //table initialization
+        // table initialization
         stateTable = new Hashtable<State, Hvertex>();
         groupTable = new Hashtable<List<State>, Hgraph>();
         EdgeTable = new Hashtable<Transition, Hedge>();
         groupList = new ArrayList<List<State>>();
         
-        //retrieve the list of group
+        // retrieve the list of group
         List<State> StateList = new ArrayList<State>();
         StateList.addAll(automata_.getAllStates());    
-        while(!StateList.isEmpty()) {
+        while (!StateList.isEmpty()) {
             State s = StateList.get(0);
             List<State> g = automata_.getGroup(s);
             groupList.add(g);
@@ -56,11 +56,11 @@ public class HierarchicalLayoutAutomata {
             }
         }
         
-        //add vertices
+        // add vertices
         graph = new Hgraph();
         for (List<State> ls: groupList) {
             Hvertex v = graph.addVertex();
-            if (ls.size() == 1) {
+            if (ls.size() == 1) {    // what does 1 stands for?
                 stateTable.put(ls.get(0), v);
             }
             else {
@@ -73,7 +73,7 @@ public class HierarchicalLayoutAutomata {
             }
         }
         
-        //add edges
+        // add edges
         StateList.addAll(automata_.getAllStates());
         for (State s: StateList) {
             List<Transition> tl = s.getIncomingTransitions();
@@ -87,7 +87,7 @@ public class HierarchicalLayoutAutomata {
             }
         }
         
-        //set up-left point, height, width
+        // set up-left point, height, width
         Rectangle r = automata_.computeBox(StateList);
         graph.setUpleftPoint(new Point2D.Double(r.getMinX(), r.getMaxY()));
         for (List<State> ls: groupList) {
@@ -116,11 +116,34 @@ public class HierarchicalLayoutAutomata {
     
     public void cycleRemoval() {
         graph.naiveCycleRemoval();
-    } 
+    }
+
     public void layerAssignment() {
         layer = graph.layerAssignment_LPG();
-    } 
-     
+    }
+
+    /**
+     * Based on Sugiyama's framework: Run BaryCenter Method
+     */
+    public void vertexOrdering() {
+
+        graph.BaryCenterVertexOrdering(layer);
+    }
+    
+    /**
+     * 
+     */
+    public void xCoordinationAssignment() {
+        
+    }
+    
+    /**
+     * 
+     */
+    public void postProcessing() {
+        
+    }
+
     public void doLayout(Automata automata_){
         automata_.refresh();
         mxGraph _graph = automata_.jgraphAutomata.graph;
@@ -130,6 +153,10 @@ public class HierarchicalLayoutAutomata {
         preprocessing(automata_);
         cycleRemoval();
         layerAssignment();
+        vertexOrdering();
+        
+        automata_.refresh();
+
         int i = 6; //break point for debugging.
     }
 }
