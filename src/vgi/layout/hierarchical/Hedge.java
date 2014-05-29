@@ -63,6 +63,9 @@ public class Hedge {
     public Hvertex target() {
         return target;
     }
+    public Hedge parent() {
+        return parent;
+    }
    /*///////////////////////////////////////////////
     *   Others
     */////////////////////////////////////////////// 

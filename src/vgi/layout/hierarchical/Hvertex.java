@@ -89,7 +89,19 @@ public class Hvertex {
             d += outAdjList.get(i).multiplicity();
         }
         return d;
-    }    
+    } 
+   /*///////////////////////////////////////////////
+    *    Geometry
+    *///////////////////////////////////////////////
+    public double getHeight() {
+        return height;
+    }
+    public double getWidth() {
+        return width;
+    }
+    public Point2D getupleftPoint() {
+        return upleftPoint;
+    } 
    /*///////////////////////////////////////////////
     *    Other
     *///////////////////////////////////////////////    

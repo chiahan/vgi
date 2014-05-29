@@ -173,7 +173,7 @@ public class Hgraph {
      * p.s. the implementation here is extremely simple that the time complexity is greatly sacrificed.
      * @return 
      */
-    public List<List<Hvertex>> layerAssignment_LPG() {
+    public List<List<Hvertex>> layerAssignment_LPA() {
         List<List<Hvertex>> layer = new ArrayList<List<Hvertex>>();
         List<Hvertex> remained = new ArrayList<Hvertex>();
         remained.addAll(vertexList);
@@ -199,6 +199,333 @@ public class Hgraph {
         }
         return layer;
     }
+
+    
+    /*///////////////////////////////////////////////
+     *    Vertex Ordering
+     *///////////////////////////////////////////////
+    
+    /**
+     * VertexOrdering procedure: 
+     * Implementation of "An Efficient Implementation of Sugiyama's Algorithm
+     * for Layered Graph Drawing"
+     * ESK = abbreviations of authors' names
+     * @param layer
+     * @return layer (containing Hvertex and Hedge)
+     */
+    public List<List<Object>> vertexOrdering_ESK(List<List<Hvertex>> layer) {
+        List<List<Object>> new_layer = new ArrayList<List<Object>>();  
+        Map<Hvertex, Integer> layerMap = new HashMap<Hvertex, Integer>();
+
+        //Initialize the new layering and mapping
+        for (int i = 0; i < layer.size(); ++i) {
+            List<Object> row = new ArrayList<Object>();        
+            for (int j = 0; j < layer.get(i).size(); ++j) {
+                row.add(layer.get(i).get(j));
+                layerMap.put(layer.get(i).get(j), i);
+            }
+            new_layer.add(row);
+        }
+        
+        //Add long edges into the layering
+        for (int i = 0; i < inEdgeList.size(); ++i) {
+            Hedge e = inEdgeList.get(i);
+            int l_1 = layerMap.get(e.source());
+            int l_2 = layerMap.get(e.target());
+            if (l_2 <= l_1) {
+                e = null;
+                //program should never reach here
+            }
+            for (int j = l_1 + 1; j < l_2; ++j) {
+                new_layer.get(j).add(e);
+            }
+        }
+        
+        //vertex ordering
+        for (int i = 0; i < new_layer.size()-1; ++i) {
+            List<Object> r = vertexOrdering_ESK_twoLayer(new_layer.get(i), new_layer.get(i+1));
+            new_layer.set(i+1, r);
+        }       
+        
+        //return the new layering
+        return new_layer;
+    }
+
+    /**
+     * Subroutine of vertexOrdering_ESK
+     * Based on sec 3.1 of the paper
+     * @param l1 //upper(previous) layer
+     * @param l2 //current layer
+     * @return the new l2 (original one is destroyed)
+     */
+    public List<Object> vertexOrdering_ESK_twoLayer(List<Object> l1, List<Object> l2) { 
+        Map<Object, Double> measure = new HashMap<Object, Double>();
+        Map<Object, Double> measure2 = new HashMap<Object, Double>();
+        List<Object> newL2 = new ArrayList<Object>();
+        
+        //calculate measure of objects in l1
+        for (int i = 0; i < l1.size(); ++i) {
+            int j = i;
+            while (true) {
+                Object obj = l1.get(j);
+                if (obj instanceof Hedge) {
+                    if (j == 0 || (l1.get(j-1) instanceof Hedge)) {
+                        break;
+                    }
+                    --j;
+                }
+                else {
+                    break;
+                }
+            }
+            double jj = j;
+            measure.put(l1.get(i), jj);
+        }
+        
+        //calculate measure of objects in l2 (by median heuristic)
+        for (int i = 0; i < l2.size(); ++i) {     
+            measure2.put(l2.get(i), median_Cal(l1,l2.get(i),measure));
+        }
+        
+        //ordering l2 according to the measure calculated
+        while (true) {
+            double d_min = 10000000.0;
+            Object obj_min = null;
+            if (!l2.isEmpty()) {
+                //retrieve the object of minimum measure
+                for (int i = 0; i < l2.size(); ++i) {
+                    if (d_min > measure2.get(l2.get(i))) {
+                        d_min = measure2.get(l2.get(i));
+                        obj_min = l2.get(i);
+                    }
+                }
+                l2.remove(obj_min);
+                newL2.add(obj_min);
+            }
+            else {
+                break;
+            }
+        }
+        
+        //return the new l2
+        return newL2;
+    } 
+
+    /**
+     * Calculate measure of obj according to the measure in the previous layer r
+     * according to the median heuristic.
+     * @param r
+     * @param obj
+     * @param measure
+     * @return measure value of obj
+     */
+    public double median_Cal(List<Object> r, Object obj, Map<Object, Double> measure) { 
+        double m = 0.0;
+        if (obj instanceof Hedge) {
+            Hedge e = (Hedge)obj;
+            if (r.contains(obj)) {
+                m = measure.get(obj);
+            }
+            else {
+                m = measure.get(e.source());
+            }
+        }
+        else if (obj instanceof Hvertex) {
+            List<Double> measure_list = new ArrayList<Double>();
+            Hvertex v = (Hvertex)obj;
+            for (int i = 0; i < v.inDeg(); ++i) {
+                if (r.contains(v.inAdj(i))) {
+                    measure_list.add(measure.get(v.inAdj(i))); 
+                }
+                else if (r.contains(v.inEdge(i))) {
+                    measure_list.add(measure.get(v.inEdge(i))); 
+                }
+            }
+            m += measure_list.get((measure_list.size()-1)/2);
+            m += measure_list.get(((measure_list.size())/2));
+            m /= 2;
+        }
+        return m;
+    }
+    
+    /*///////////////////////////////////////////////
+     *   x-coordinate assignment
+     *///////////////////////////////////////////////
+
+     /**
+     * xCoordinateAssignment procedure: 
+     * Implementation of "Fast and Simple Horizontal Coordinate Assignment"
+     * BK = abbreviations of authors' names
+     * @param layer
+     * @return assignment (a map associating each object to an integer)
+     */
+    public Map<Object, Integer> xCoordinateAssignment_BK(List<List<Object>> layer) {
+        Map<Object, Integer> assignment = new HashMap<Object, Integer>();
+        Map<Object, Halignment> alignmentMap = new HashMap<Object, Halignment>();
+        
+        //initialize the alignment of the first layer
+        for (int i = 0; i < layer.get(0).size(); ++i) {
+            Halignment a = new Halignment();
+            a.add_member(layer.get(0).get(i));
+            alignmentMap.put(layer.get(0).get(i), a);
+        }  
+        for (int i = 0; i < layer.get(0).size()-1; ++i) { 
+            alignmentMap.get(layer.get(0).get(i)).add_right(alignmentMap.get(layer.get(0).get(i+1)));
+        }       
+        for (int i = 1; i < layer.get(0).size(); ++i) { 
+            alignmentMap.get(layer.get(0).get(i)).add_left(alignmentMap.get(layer.get(0).get(i-1)));
+        } 
+        //vertical alignment
+        for (int i = 0; i < layer.size()-1; ++i) {
+            verticalAlignment_twoLayer(layer.get(i), layer.get(i+1), alignmentMap);
+        }
+        //horizontal compaction
+        List<Halignment> aList = new ArrayList<Halignment>();
+        aList.addAll(alignmentMap.values());
+        horizontalCompaction_LPA(aList);
+        //set the assignment
+        for (Hvertex v: vertexList) {
+            assignment.put(v, alignmentMap.get(v).getXcoordinate());
+        }
+        for (Hedge e: inEdgeList) {
+            if (alignmentMap.containsKey(e)) {
+                assignment.put(e, alignmentMap.get(e).getXcoordinate()); 
+            }         
+        }
+        return assignment;
+    }
+
+     /**
+     * (Roughly) Alg2 of "Fast and Simple Horizontal Coordinate Assignment"
+     * By default, directions are: up, left
+     * The results are the alignments in the alignmentMap.
+     * @param l1
+     * @param l2 
+     * @param alignmentMap
+     */
+    public void verticalAlignment_twoLayer(List<Object> l1, List<Object> l2, Map<Object, Halignment> alignmentMap) {
+        //vertical alignment
+        int i1 = 0;
+        for (int i2 = 0; i2 < l2.size(); ++i2) {
+            // m = the candidate in l1 that l2[i2] would like to align with.
+            int m = median_index_Cal(l1, l2.get(i2));
+            boolean conflict = false;
+            if (m < i1) continue;
+            else {
+                //check if there is a conflict involving long edge
+                for (int j = i1; j < m; ++j) {
+                    if ((l1.get(j) instanceof Hedge) && l2.contains(l1.get(j))) {
+                        conflict = true;
+                        break;
+                    }
+                }
+            }
+            if (conflict) continue;
+            //if there's no conflict, update alignment
+            Halignment a = alignmentMap.get(l1.get(m));
+            alignmentMap.put(l2.get(i2) , a);
+            a.add_member(l2.get(i2));
+            //update i1
+            i1 = m+1;
+            //if no further alignment can be made
+            if (i1 >= l1.size()) {
+                break;
+            }
+        }
+        //create new alignments for un-aligned objs
+        for (int i2 = 0; i2 < l2.size(); ++i2) {
+            //if l2[i2] has not been aligned
+            if (!alignmentMap.containsKey(l2.get(i2))) {
+                Halignment a = new Halignment();
+                a.add_member(l2.get(i2));
+                alignmentMap.put(l2.get(i2), a);
+            }
+        }
+        //updated left-right linkages of alignments
+        for (int i2 = 0; i2 < l2.size()-1; ++i2) { 
+            alignmentMap.get(l2.get(i2)).add_right(alignmentMap.get(l2.get(i2+1)));
+        }       
+        for (int i2 = 1; i2 < l2.size(); ++i2) { 
+            alignmentMap.get(l2.get(i2)).add_left(alignmentMap.get(l2.get(i2-1)));
+        }    
+    }    
+
+     /**
+     * Return an index of obj in the previous layer
+     * according to the median heuristic.
+     * @param r
+     * @param obj
+     * @return index of obj
+     */   
+    public int median_index_Cal(List<Object> r, Object obj) { 
+        int m = 0;
+        if (obj instanceof Hedge) {
+            Hedge e = (Hedge)obj;
+            if (r.contains(obj)) {
+                m = r.indexOf(obj);
+            }
+            else {
+                m = r.indexOf(e.source());
+            }
+        }
+        else if (obj instanceof Hvertex) {
+            List<Integer> index_list = new ArrayList<Integer>();
+            Hvertex v = (Hvertex)obj;
+            for (int i = 0; i < v.inDeg(); ++i) {
+                if (r.contains(v.inAdj(i))) {
+                    index_list.add(i); 
+                }
+                else if (r.contains(v.inEdge(i))) {
+                    index_list.add(i);
+                }
+            }
+            m = index_list.get((index_list.size()-1)/2);
+        }
+        return m;
+    }
+
+      /**
+     * (Roughly) Alg3 of "Fast and Simple Horizontal Coordinate Assignment"
+     * The algorithm in essence is LPA.
+     * We DO NOT implement the class-wise compaction procedure.
+     * The resulting coordinates are saved in the alignments.
+     * @param aList 
+     */   
+    public void horizontalCompaction_LPA(List<Halignment> aList) {
+        List<Halignment> remainList = new ArrayList<Halignment>();
+        List<Halignment> currentList = new ArrayList<Halignment>();
+        remainList.addAll(aList);
+        //Initial: remainList = all allignments.
+        int x = 0; // x-coordinate
+        while (!remainList.isEmpty()) {
+            currentList.clear();
+            //Construct the currentList (whose members have x-coordinate = x)
+            for (int i = 0; i < remainList.size(); ++i) {
+                boolean allLeftAdjHaveBeenAdded = true;
+                for (int j = 0; j < remainList.size(); ++j) {
+                    if (remainList.get(i).LeftAdjContains(remainList.get(j))) {
+                        allLeftAdjHaveBeenAdded = false;
+                        break;
+                    }
+                }
+                if (allLeftAdjHaveBeenAdded) {
+                    currentList.add(remainList.get(i));
+                }
+            }
+            //set x-coordinate
+            for (int i = 0; i < currentList.size(); ++i) {    
+                currentList.get(i).setXcoordinate(x);
+            }
+            //update remainList
+            remainList.removeAll(currentList);
+            //update x
+            ++x;
+        }
+    }
+    
+    /*///////////////////////////////////////////////
+     *    Unused Vertex Ordering procedures
+     *///////////////////////////////////////////////
     
     /**
      * BaryCenterVertexOrdering separates procedures
@@ -276,38 +603,7 @@ public class Hgraph {
         vertexOrderingPhaseOne(layer, ith);
     }
 
-    /*///////////////////////////////////////////////
-     *    Others
-     *///////////////////////////////////////////////
-    /**
-     * findEdge method based on given source and target vertex to find
-     * corresponding edge.
-     * @param s
-     * @param t
-     * @return 
-     */
-    public Hedge findEdge(Hvertex s, Hvertex t) {
-        for (Hedge e : inEdgeList) {
-            if (e.source() == s && e.target() == t || e.source() == t && e.target() == s) {
-                return e;
-            }
-        }
-        for (Hedge e : outEdgeList) {
-            if (e.source() == s && e.target() == t || e.source() == t && e.target() == s) {
-                return e;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 
-     * @return 
-     */
-    public Hvertex parentVertex() {
-        return parentVertex;
-    }
-    
+  
     public int[][] getInterConMatrix(List<List<Hvertex>> layer, int ith) {
         int[][] M = new int[layer.get(ith).size()][layer.get(ith+1).size()];
         for (Hvertex s: layer.get(ith)) {
@@ -510,7 +806,49 @@ public class Hgraph {
             System.out.println(BCC[i]);
         }
     }
+    
+    /*///////////////////////////////////////////////
+     *    Others
+     *///////////////////////////////////////////////
+    /**
+     * findEdge method based on given source and target vertex to find
+     * corresponding edge.
+     * @param s
+     * @param t
+     * @return 
+     */
+    public Hedge findEdge(Hvertex s, Hvertex t) {
+        for (Hedge e : inEdgeList) {
+            if (e.source() == s && e.target() == t || e.source() == t && e.target() == s) {
+                return e;
+            }
+        }
+        for (Hedge e : outEdgeList) {
+            if (e.source() == s && e.target() == t || e.source() == t && e.target() == s) {
+                return e;
+            }
+        }
+        return null;
+    }
 
+    /**
+     * 
+     * @return 
+     */
+    public Hvertex parentVertex() {
+        return parentVertex;
+    }
+  
+    public int numVertex() {
+        return vertexList.size();
+    }
+    
+    public Hvertex getVertex(int i) {
+        return vertexList.get(i);
+    }
+    public Point2D getUpLeftPoint() {
+        return upleftPoint;
+    } 
     /*///////////////////////////////////////////////
      *    Members
      *///////////////////////////////////////////////   
