@@ -1,0 +1,63 @@
+
+<fsmxml xmlns="http://vaucanson.lrde.epita.fr" version="1.0">
+
+  <automaton>
+    <valueType>
+      <writingData closePar=")" openPar="(" plusSym="+" spacesSym=" " starSym="*" timesSym="." weightClosing="}" weightOpening="{" zeroSym="z"/>
+      <semiring operations="classical" set="Q" type="numerical"/>
+      <monoid genDescrip="enum" genKind="simple" genSort="letters" type="free">
+        <writingData identitySym="e"/>
+        <monGen value="0"/>
+        <monGen value="1"/>
+      </monoid>
+    </valueType>
+    <automatonStruct>
+      <states>
+        <state id="s0"/>
+        <state id="s1"/>
+      </states>
+      <transitions>
+        <transition source="s0" target="s1">
+          <label>
+            <monElmt>
+              <monGen value="1"/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s1" target="s1">
+          <label>
+            <sum>
+              <leftExtMul>
+                <weight value="2"/>
+                <monElmt>
+                  <monGen value="0"/>
+                </monElmt>
+              </leftExtMul>
+              <leftExtMul>
+                <weight value="2"/>
+                <monElmt>
+                  <monGen value="1"/>
+                </monElmt>
+              </leftExtMul>
+            </sum>
+          </label>
+        </transition>
+        <transition source="s0" target="s0">
+          <label>
+            <sum>
+              <monElmt>
+                <monGen value="0"/>
+              </monElmt>
+              <monElmt>
+                <monGen value="1"/>
+              </monElmt>
+            </sum>
+          </label>
+        </transition>
+        <initial state="s0"/>
+        <final state="s1"/>
+      </transitions>
+    </automatonStruct>
+  </automaton>
+
+</fsmxml>

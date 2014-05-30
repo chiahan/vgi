@@ -1,0 +1,36 @@
+<fsmxml xmlns="http://vaucanson.lrde.epita.fr" version="1.0">
+  <automaton>
+    <valueType>
+      <writingData closePar=")" openPar="(" plusSym="+" spacesSym=" " starSym="*" timesSym="." weightClosing="}" weightOpening="{" zeroSym="0"/>
+      <semiring operations="classical" set="B" type="numerical"/>
+      <monoid genDescrip="enum" genKind="simple" genSort="letters" type="free">
+        <writingData identitySym="1"/>
+        <monGen value="a"/>
+        <monGen value="b"/>
+      </monoid>
+    </valueType>
+    <automatonStruct>
+      <states>
+        <state id="s0" name="s0">
+          <geometricData x="166.0" y="213.0"/>
+        </state>
+        <state id="s1" name="s1">
+          <geometricData x="223.0" y="219.0"/>
+        </state>
+        <state id="s2" name="s2">
+          <geometricData x="324.0" y="228.0"/>
+        </state>
+        <state id="s3" name="s3">
+          <geometricData x="285.0" y="165.0"/>
+        </state>
+        <state id="s4" name="s4">
+          <geometricData x="225.0" y="272.0"/>
+        </state>
+        <state id="s5" name="s5">
+          <geometricData x="225.0" y="165.0"/>
+        </state>
+      </states>
+      <transitions/>
+    </automatonStruct>
+  </automaton>
+</fsmxml>

@@ -1,0 +1,92 @@
+<fsmxml xmlns="http://vaucanson.lrde.epita.fr" version="1.0">
+  <automaton>
+    <valueType>
+      <writingData closePar=")" openPar="(" plusSym="+" spacesSym=" " starSym="*" timesSym="." weightClosing="}" weightOpening="{" zeroSym="0"/>
+      <semiring operations="classical" set="B" type="numerical"/>
+      <monoid genDescrip="enum" genKind="simple" genSort="letters" type="free">
+        <writingData identitySym="1"/>
+        <monGen value=""/>
+      </monoid>
+    </valueType>
+    <automatonStruct>
+      <states>
+        <state id="s0" name="s0">
+          <geometricData x="85.0" y="75.0"/>
+        </state>
+        <state id="s1" name="s1">
+          <geometricData x="195.0" y="75.0"/>
+        </state>
+        <state id="s2" name="s2">
+          <geometricData x="305.0" y="75.0"/>
+        </state>
+        <state id="s3" name="s3">
+          <geometricData x="405.0" y="75.0"/>
+        </state>
+        <state id="s4" name="s4">
+          <geometricData x="505.0" y="75.0"/>
+        </state>
+        <state id="s5" name="s5">
+          <geometricData x="85.0" y="165.0"/>
+        </state>
+        <state id="s6" name="s6">
+          <geometricData x="195.0" y="165.0"/>
+        </state>
+        <state id="s7" name="s7">
+          <geometricData x="305.0" y="165.0"/>
+        </state>
+        <state id="s8" name="s8">
+          <geometricData x="405.0" y="165.0"/>
+        </state>
+        <state id="s9" name="s9">
+          <geometricData x="505.0" y="165.0"/>
+        </state>
+        <state id="s10" name="s10">
+          <geometricData x="85.0" y="255.0"/>
+        </state>
+        <state id="s11" name="s11">
+          <geometricData x="195.0" y="255.0"/>
+        </state>
+        <state id="s12" name="s12">
+          <geometricData x="305.0" y="255.0"/>
+        </state>
+        <state id="s13" name="s13">
+          <geometricData x="405.0" y="255.0"/>
+        </state>
+        <state id="s14" name="s14">
+          <geometricData x="505.0" y="255.0"/>
+        </state>
+        <state id="s15" name="s15">
+          <geometricData x="85.0" y="345.0"/>
+        </state>
+        <state id="s16" name="s16">
+          <geometricData x="195.0" y="345.0"/>
+        </state>
+        <state id="s17" name="s17">
+          <geometricData x="305.0" y="345.0"/>
+        </state>
+        <state id="s18" name="s18">
+          <geometricData x="405.0" y="345.0"/>
+        </state>
+        <state id="s19" name="s19">
+          <geometricData x="505.0" y="345.0"/>
+        </state>
+        <state id="s20" name="s20">
+          <geometricData x="85.0" y="435.0"/>
+        </state>
+        <state id="s21" name="s21">
+          <geometricData x="195.0" y="435.0"/>
+        </state>
+        <state id="s22" name="s22">
+          <geometricData x="305.0" y="435.0"/>
+        </state>
+        <state id="s23" name="s23">
+          <geometricData x="405.0" y="435.0"/>
+        </state>
+        <state id="s24" name="s24">
+          <geometricData x="505.0" y="435.0"/>
+        </state>
+      </states>
+      <transitions/>
+    </automatonStruct>
+  </automaton>
+</fsmxml>

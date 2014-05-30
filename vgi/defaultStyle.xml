@@ -1,0 +1,7 @@
+<defaultStyles>
+  <stateDrawingData fillColor="#94F7F7" strokeColor="#990066" strokeWidth="2.0"/>
+  <stateGeometricData stateWidth="50.0" stateHeight="50.0" stateShape="ellipse"/>
+  <transitionDrawingData strokeColor="#6482B9" strokeWidth="2.0" startArrow="none" endArrow="classic"/>
+  <initialGeometricData direction="3.141592653589793" lengthRatio="0.5" labelPos="0.0" labelDist="0.0" labelOffsetx="0.0" labelOffsety="0.0"/>
+  <finalGeometricData direction="0.0" lengthRatio="0.5" labelPos="0.0" labelDist="0.0" labelOffsetx="0.0" labelOffsety="0.0"/>
+</defaultStyles>

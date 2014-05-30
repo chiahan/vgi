@@ -1,0 +1,179 @@
+
+<fsmxml xmlns="http://vaucanson.lrde.epita.fr" version="1.0">
+
+  <automaton>
+    <valueType>
+      <writingData closePar=")" openPar="(" plusSym="+" spacesSym=" " starSym="*" timesSym="." weightClosing="}" weightOpening="{" zeroSym="0">
+        <writingData closePar=")" openPar="(" plusSym="+" spacesSym=" " starSym="*" timesSym="." weightClosing="}" weightOpening="{" zeroSym="0"/>
+        <writingData closePar=")" openPar="(" plusSym="+" spacesSym=" " starSym="*" timesSym="." weightClosing="}" weightOpening="{" zeroSym="0"/>
+      </writingData>
+      <semiring operations="classical" set="B" type="numerical"/>
+      <monoid prodDim="2" type="product">
+        <writingData identitySym="1"/>
+        <monoid genDescrip="enum" genKind="simple" genSort="letters" type="free">
+          <writingData identitySym="1"/>
+          <monGen value="a"/>
+          <monGen value="b"/>
+        </monoid>
+        <monoid genDescrip="enum" genKind="simple" genSort="letters" type="free">
+          <writingData identitySym="1"/>
+          <monGen value="a"/>
+          <monGen value="b"/>
+        </monoid>
+      </monoid>
+    </valueType>
+    <automatonStruct>
+      <states>
+        <state id="s0">
+                    <geometricData x="50.0" y="150.0"/>
+                </state>
+        <state id="s1">
+                    <geometricData x="79.28932189941406" y="220.71067810058594"/>
+                </state>
+        <state id="s2">
+                    <geometricData x="150.0" y="250.0"/>
+                </state>
+        <state id="s3">
+                    <geometricData x="220.71067810058594" y="220.71067810058594"/>
+                </state>
+        <state id="s4">
+                    <geometricData x="250.0" y="150.0"/>
+                </state>
+        <state id="s5">
+                    <geometricData x="220.71067810058594" y="79.28932189941406"/>
+                </state>
+        <state id="s6">
+                    <geometricData x="150.0" y="50.0"/>
+                </state>
+        <state id="s7">
+                    <geometricData x="79.28932189941406" y="79.28932189941406"/>
+                </state>
+      </states>
+      <transitions>
+        <transition source="s3" target="s1">
+          <label>
+            <monElmt>
+              <one/>
+              <monElmt>
+                <monGen value="b"/>
+              </monElmt>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s0" target="s6">
+          <label>
+            <monElmt>
+              <monElmt>
+                <monGen value="a"/>
+              </monElmt>
+              <monElmt>
+                <monGen value="a"/>
+              </monElmt>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s1" target="s0">
+          <label>
+            <monElmt>
+              <monElmt>
+                <monGen value="b"/>
+              </monElmt>
+              <one/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s2" target="s1">
+          <label>
+            <monElmt>
+              <monElmt>
+                <monGen value="b"/>
+              </monElmt>
+              <one/>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s0" target="s0">
+          <label>
+            <monElmt>
+              <monElmt>
+                <monGen value="a"/>
+              </monElmt>
+              <monElmt>
+                <monGen value="a"/>
+              </monElmt>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s1" target="s7">
+          <label>
+            <monElmt>
+              <monElmt>
+                <monGen value="a"/>
+              </monElmt>
+              <monElmt>
+                <monGen value="a"/>
+              </monElmt>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s2" target="s2">
+          <label>
+            <monElmt>
+              <monElmt>
+                <monGen value="b"/>
+              </monElmt>
+              <monElmt>
+                <monGen value="b"/>
+              </monElmt>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s4" target="s5">
+          <label>
+            <monElmt>
+              <one/>
+              <monElmt>
+                <monGen value="b"/>
+              </monElmt>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s5" target="s2">
+          <label>
+            <monElmt>
+              <one/>
+              <monElmt>
+                <monGen value="b"/>
+              </monElmt>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s6" target="s1">
+          <label>
+            <monElmt>
+              <one/>
+              <monElmt>
+                <monGen value="b"/>
+              </monElmt>
+            </monElmt>
+          </label>
+        </transition>
+        <transition source="s7" target="s2">
+          <label>
+            <monElmt>
+              <one/>
+              <monElmt>
+                <monGen value="a"/>
+              </monElmt>
+            </monElmt>
+          </label>
+        </transition>
+        <initial state="s0"/>
+        <initial state="s3"/>
+        <initial state="s4"/>
+        <final state="s0"/>
+      </transitions>
+    </automatonStruct>
+  </automaton>
+
+</fsmxml>
