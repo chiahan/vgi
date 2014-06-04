@@ -50,10 +50,9 @@ public class CircularLayoutAutomata {
          */
         bound=automata.computeBox(allVertexList);
         System.out.println("box: "+bound);
-        
-        
-        center=new Point2D.Double(bound.getCenterX(),bound.getCenterY());  
-        
+        bound.x = bound.x+1;
+
+       center=new Point2D.Double(bound.getCenterX(),bound.getCenterY());  
         radius =findProperRadius();
         theta=findProperTheta();//Math.PI*2/vertexNum;
          
@@ -70,8 +69,7 @@ public class CircularLayoutAutomata {
         setSortedVerticesLocation();
             
         adjustEdgeCurves(true);    
-            
-            
+
             
 //            if(boundY<0) moveWholeBound();
             
@@ -91,6 +89,7 @@ public class CircularLayoutAutomata {
         
         bound=automata.computeBox(allVertexList);
         System.out.println("box: "+bound);
+        bound.x = bound.x+1;
         
         center=new Point2D.Double(bound.getCenterX(),bound.getCenterY());  
         
@@ -140,8 +139,12 @@ public class CircularLayoutAutomata {
             sum+=automata.getStateGeometricData(state).getWidth();
         }
         double rad=sum/Math.PI;
-        if(center.getY()+rad>bound.y) center.setLocation(center.getX(), bound.y-rad);
-         if(center.getY()-rad<bound.x) center.setLocation(bound.x+rad,center.getY());
+        if(center.getY()+rad>bound.y+bound.getHeight()) center.setLocation(center.getX(), bound.y+bound.getHeight()-rad);
+         if(center.getX()-rad<bound.x) center.setLocation(bound.x+rad,center.getY());
+         double temp = center.getY()+rad;
+         System.out.println("center.getY()+rad:"+temp+"bound.y:"+bound.y);
+         System.out.println("ellie_x:"+center.getX()+"ellie_y:"+center.getY());
+         
         
         return rad;
         

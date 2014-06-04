@@ -144,7 +144,7 @@ public class LinearLayoutAutomata {
         vertexMapList = sccdfs.getExpandedListWithSCC();
         System.out.println("vertexMapList:"+vertexMapList);
                     
-        /*
+        
         setSortedVerticesLocation();
             
 
@@ -152,7 +152,7 @@ public class LinearLayoutAutomata {
         adjustEdgeCurves(true);
             
         if(upboundY>bound.getMaxY()) 
-            moveWholeBound();*/
+            moveWholeBound();
   
        System.out.println("~~~There is group~~~");
         
