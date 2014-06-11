@@ -71,13 +71,11 @@ public class CircularLayoutAutomata {
          */
         bound=automata.computeBox(allVertexList);
         System.out.println("box: "+bound);
-        bound.x = bound.x+1;
+        
 
         center=new Point2D.Double(bound.getCenterX(),bound.getCenterY());  
-        radius =findProperRadius();
-        theta=findProperTheta();//Math.PI*2/vertexNum;
          
-        System.out.println("center= "+center.getX()+" , "+center.getY()+" radius= "+radius);
+
         
         //graph.getModel().beginUpdate();
         //    try{
@@ -105,6 +103,7 @@ public class CircularLayoutAutomata {
                GroupStructure[GID][0] = (double)GID+1;
                Rectangle boundtmp;
                boundtmp = automata.computeBox(state);
+               
                GroupStructure[GID][1] = boundtmp.getX();
                GroupStructure[GID][2] = boundtmp.getY();
                GroupStructure[GID][3] = boundtmp.getWidth();
@@ -124,11 +123,12 @@ public class CircularLayoutAutomata {
         vertexMapList=sccdfs.getExpandedListWithSCC();
         System.out.println("vertexMapList:"+vertexMapList);
             //vertexMapList=this.sortVertices(automata_);
-        
-        //TO ELLIE~
-        //setSortedVerticesLocation();
+        radius =group_findProperRadius();
+        theta=group_findProperTheta();//Math.PI*2/vertexNum;
+        System.out.println("center= "+center.getX()+" , "+center.getY()+" radius= "+radius);
+        setSortedVerticesLocation();
             
-        //adjustEdgeCurves(true);    
+        adjustEdgeCurves(true);    
 
   
         System.out.println("~~~There is group~~~");
@@ -146,9 +146,8 @@ public class CircularLayoutAutomata {
          */
         bound=automata.computeBox(allVertexList);
         System.out.println("box: "+bound);
-        bound.x = bound.x+1;
 
-       center=new Point2D.Double(bound.getCenterX(),bound.getCenterY());  
+        center=new Point2D.Double(bound.getCenterX(),bound.getCenterY());  
         radius =findProperRadius();
         theta=findProperTheta();//Math.PI*2/vertexNum;
          
@@ -234,7 +233,6 @@ public class CircularLayoutAutomata {
         
         bound=automata.computeBox(allVertexList);
         System.out.println("box: "+bound);
-        bound.x = bound.x+1;
         
         center=new Point2D.Double(bound.getCenterX(),bound.getCenterY());  
         
@@ -245,6 +243,7 @@ public class CircularLayoutAutomata {
        
         SccDfs sccdfs=new SccDfs(allVertexList);
         vertexMapList=sccdfs.getExpandedListWithSCC();
+
         setSortedVerticesLocation();
             
 //        replaceAutomata.expandStatesToVertexGroups();
@@ -284,13 +283,16 @@ public class CircularLayoutAutomata {
             sum+=automata.getStateGeometricData(state).getWidth();
         }
         double rad=sum/Math.PI;
-        if(center.getY()+rad>bound.y+bound.getHeight()) center.setLocation(center.getX(), bound.y+bound.getHeight()-rad);
-         if(center.getX()-rad<bound.x) center.setLocation(bound.x+rad,center.getY());
-         double temp = center.getY()+rad;
-         System.out.println("center.getY()+rad:"+temp+"bound.y:"+bound.y);
-         System.out.println("ellie_x:"+center.getX()+"ellie_y:"+center.getY());
+        if(center.getY()+rad>bound.y+bound.getHeight()) 
+        {
+            center.setLocation(center.getX(), bound.y+bound.getHeight()-rad);
+        }
+        if(center.getX()-rad<bound.x) 
+        {
+            center.setLocation(bound.x+rad,center.getY());
+        }
+        System.out.println("center_x:"+center.getX()+"center_y:"+center.getY());
          
-        
         return rad;
         
     }
@@ -306,6 +308,94 @@ public class CircularLayoutAutomata {
         double partition=0;
         for(State state:allVertexList){
             double t=automata.getStateGeometricData(state).getWidth();
+            partition+=t/minWidth;
+        }
+        
+        return 2*Math.PI/partition;
+    }
+    private double group_findProperRadius(){
+        double sum=0;
+        for(State state:vertexMapList){
+            boolean isGroup = false;
+            int gid = 0;
+            int state_gid = 0;
+            for (List<State> state_list: groupList) {
+                if(state_list.size() > 1) {                 
+                    if(state == state_list.get(0)) {
+                        state_gid = gid;
+                        isGroup = true;
+                    }
+                    gid = gid + 1;
+                }
+            }     
+            if(isGroup) sum+=GroupStructure[state_gid][3];
+            else sum+=automata.getStateGeometricData(state).getWidth();
+        }
+        double rad=sum/Math.PI;
+        if(center.getY()+rad>bound.y+bound.getHeight()) center.setLocation(center.getX(), bound.y+bound.getHeight()-rad);
+        if(center.getX()-rad<bound.x) center.setLocation(bound.x+rad,center.getY());
+
+        System.out.println("center_x:"+center.getX()+"center_y:"+center.getY());
+         
+        return rad;       
+    }
+    private double group_findProperTheta(){
+    
+        //find the min width state
+        State first_state = vertexMapList.get(0);
+        boolean isGroup = false;
+        int gid = 0;
+        int state_gid = 0;
+        for (List<State> state_list: groupList) {
+            if(state_list.size() > 1) {                 
+                if(first_state == state_list.get(0)) {
+                    state_gid = gid;
+                    isGroup = true;
+                }
+                gid = gid + 1;
+            }
+        }    
+        double minWidth;
+        if(isGroup) minWidth = GroupStructure[state_gid][3];
+        else  minWidth=automata.getStateGeometricData(vertexMapList.get(0)).getWidth();
+        //double minWidth=automata.getStateGeometricData(allVertexList.get(0)).getWidth();
+        for(State state:vertexMapList){
+            isGroup = false;
+            gid = 0;
+            state_gid = 0;
+            for (List<State> state_list: groupList) {
+                if(state_list.size() > 1) {                 
+                    if(state == state_list.get(0)) {
+                        state_gid = gid;
+                        isGroup = true;
+                    }
+                    gid = gid + 1;
+                }
+            }    
+            double t;
+            if(isGroup) t=GroupStructure[state_gid][3];
+            else t=automata.getStateGeometricData(state).getWidth();
+            if(t<minWidth) minWidth=t;
+        }
+        
+        double partition=0;
+        for(State state:vertexMapList){
+            //double t=automata.getStateGeometricData(state).getWidth();
+                        isGroup = false;
+            gid = 0;
+            state_gid = 0;
+            for (List<State> state_list: groupList) {
+                if(state_list.size() > 1) {                 
+                    if(state == state_list.get(0)) {
+                        state_gid = gid;
+                        isGroup = true;
+                    }
+                    gid = gid + 1;
+                }
+            }    
+            double t;
+            if(isGroup) t=GroupStructure[state_gid][3];
+            else t=automata.getStateGeometricData(state).getWidth();
             partition+=t/minWidth;
         }
         
@@ -331,52 +421,100 @@ public class CircularLayoutAutomata {
 //    }
 
     private void setSortedVerticesLocation(){
-//         double x=bound.x;
-//         double distance=bound.getWidth()/vertexNum;
-        
-        //find the min width state
-        double minWidth=automata.getStateGeometricData(allVertexList.get(0)).getWidth();
-        for(State state:allVertexList){
-            double t=automata.getStateGeometricData(state).getWidth();
-            if(t<minWidth) minWidth=t;
-        }
-         
+         List<State> sorted_vertexMapList = vertexMapList;
+         List<State> return_vertexMapList = new ArrayList<State>(); 
+         int g_vertexNum = sorted_vertexMapList.size();
+         //find the min width state
+         double minWidth=automata.getStateGeometricData(vertexMapList.get(0)).getWidth();
          double tmptheta=0;
+         for(State state:vertexMapList){
+             //judge whether the state is in a group
+             boolean isGroup = false;
+             int gid = 0;
+             int state_gid = 0;
+             for (List<State> state_list: groupList) {
+                 if(state_list.size() > 1) {                 
+                     if(state == state_list.get(0)) {
+                         state_gid = gid;
+                         isGroup = true;
+                     }
+                     gid = gid + 1;
+                 }
+             }     
+             double t;
+             if(isGroup) {
+                 t=GroupStructure[state_gid][3];
+             }
+             else {
+                 t=automata.getStateGeometricData(state).getWidth();
+             }
+             if(t<minWidth) minWidth=t;
+         }   
+
+         //assign each state a new position
+         for(int i = 0; i<g_vertexNum; ++i) {
+                State state=vertexMapList.get(i);
+                List<State> state_group  = new ArrayList<State>();
+                boolean isGroup = false;
+                int gid = 0;
+                int state_gid = 0;
+                //judge whether the state is in a group
+                for (List<State> state_list: groupList)
+                {
+                    if(state_list.size() > 1)
+                    {
+                        if(state == state_list.get(0))
+                        {
+                            state_gid = gid;
+                            state_group = state_list;
+                            isGroup = true;
+                        }
+                        gid = gid + 1;
+                    }
+                }     
+                double tt;
+                double newx;
+                double newy;
+                if(isGroup) { 
+                    //Point2D state_geodata = new Point2D.Double(x+GroupStructure[state_gid][3]/2+(distance+GroupStructure[state_gid][3]/2)*0.3,lineY);
+                    tt = GroupStructure[state_gid][3]/minWidth*theta;
+                    tmptheta += tt/2;
+                    newx=center.getX()+radius*Math.cos(tmptheta);
+                    newy=center.getY()+radius*Math.sin(tmptheta);
+                    Point2D state_geodata = new Point2D.Double(newx, newy);
                  
-         for(int i = 0; i<vertexNum; ++i){
-                    //mxCell cell=vertexMapList.get(i);
-                    //mxGeometry geo=cell.getGeometry();
-                    State state=vertexMapList.get(i);
-                    //StateGeometricData geodata=state.getGeometricData();
+                    double dis_x = state_geodata.getX() - (GroupStructure[state_gid][1]+GroupStructure[state_gid][3]/2);
+                    double dis_y = state_geodata.getY() - (GroupStructure[state_gid][2]+GroupStructure[state_gid][4]/2); 
+                    //automata.setStateGeometricData(state, geodata);
+                    for(State g_state: state_group)
+                    {                    
+                        return_vertexMapList.add(g_state);
+                        StateGeometricData geodata = automata.getStateGeometricData(g_state);
+                        geodata.setLocation(new Point2D.Double(geodata.getX()+dis_x,geodata.getY()+dis_y));
+                        automata.setStateGeometricData(g_state, geodata);
+                    }
+                    tmptheta+=tt/2;
+                    
+                }
+                else {
+                    return_vertexMapList.add(state);
                     StateGeometricData geodata=automata.getStateGeometricData(state);
-                    
-//                    double distance=geodata.getWidth();
-//                    
-//                    if(i>0){
-//                        State lastState=vertexMapList.get(i-1);
-////                        distance+=lastState.getGeometricData().getWidth();
-//                        distance+=automata.getStateGeometricData(lastState).getWidth();
-//                    }else distance*=2;
                           
-                   double tt=geodata.getWidth()/minWidth*theta;
-                   
-//                  
-                   tmptheta+=tt/2;
-//                   double newx=center.getX()+radius*Math.cos(theta*i);
-//                   double newy=center.getY()+radius*Math.sin(theta*i);
-                   double newx=center.getX()+radius*Math.cos(tmptheta);
-                   double newy=center.getY()+radius*Math.sin(tmptheta);
+                    tt=geodata.getWidth()/minWidth*theta;            
+                    tmptheta += tt/2;
+                    newx=center.getX()+radius*Math.cos(tmptheta);
+                    newy=center.getY()+radius*Math.sin(tmptheta);
                     
-                   tmptheta+=tt/2;
                     geodata.setLocation(new Point2D.Double(newx,newy));
                     automata.setStateGeometricData(state, geodata);
-                    //x=state.getGeometricData().getX()+state.getGeometricData().getWidth();
+                    tmptheta+=tt/2;
+                    
                     geodata=automata.getStateGeometricData(state);
-                    
-                    
                     System.out.println("set location: "+state.getName()+" "+geodata.getX()+","+geodata.getY()+" theta= "+tmptheta);
-                    
+                }
+                
          }
+         vertexMapList = return_vertexMapList;
     }
     
     public void adjustEdgeCurves(boolean ignoreStateInGroups){

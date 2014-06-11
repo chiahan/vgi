@@ -303,7 +303,7 @@ public class LinearLayoutAutomata {
          List<State> sorted_vertexMapList = vertexMapList;
          List<State> return_vertexMapList = new ArrayList<State>(); //.add()
          double x = bound.x;
-         double distance = 0;
+         double distance;
          int g_vertexNum = sorted_vertexMapList.size();
          
          State first_state = sorted_vertexMapList.get(0); 
@@ -312,6 +312,7 @@ public class LinearLayoutAutomata {
          boolean isGroup = false;
          int gid = 0;
          int first_gid = 0;
+         //judge whether the first state is in a group
          for (List<State> state_list: groupList)
          {
              if(state_list.size() > 1)
@@ -325,7 +326,7 @@ public class LinearLayoutAutomata {
                  gid = gid + 1;
              }
          }
-
+         //assign first state(group) a new position
          if(isGroup) //first_state is a group
          {
                 //StateGeometricData first_geodata = automata.getStateGeometricData(first_state);
@@ -363,6 +364,7 @@ public class LinearLayoutAutomata {
                 //distance=first_geodata.getWidth()/2;
                 distance=first_geodata.getWidth();
          }
+         //assign each state a new position
          for(int i = 1; i<g_vertexNum; ++i)
          {
              //mxCell cell=vertexMapList.get(i);
@@ -373,6 +375,7 @@ public class LinearLayoutAutomata {
              isGroup = false;
              gid = 0;
              int state_gid = 0;
+             //judge whether the state is in a group
              for (List<State> state_list: groupList)
              {
                  if(state_list.size() > 1)
