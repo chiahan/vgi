@@ -18,11 +18,17 @@ public class TransitionGeometricData {
     public Point2D.Double labelPosAndDist;
     public Point2D.Double labelOffset;
     public List<Point2D> controlPoints;
+    public Boolean selfLoop;
+    public double selfLoopAngle;
+    public double selfLoopLengthRatio;
 
     public TransitionGeometricData() {
             this.labelPosAndDist = null;
             this.labelOffset = null;
             this.controlPoints = new ArrayList<Point2D>();
+            this.selfLoop = false; // set selfLoop flag false as default
+            this.selfLoopAngle = 0.0;
+            this.selfLoopLengthRatio = 0.0;
     }
     public void addControlPoint(Point2D point,boolean reverse){
         controlPoints.add(point);

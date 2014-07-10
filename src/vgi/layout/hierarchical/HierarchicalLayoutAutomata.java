@@ -138,7 +138,7 @@ public class HierarchicalLayoutAutomata {
     }
     
     public void xCoordinationAssignment() {
-        assignment = graph.xCoordinateAssignment_BK(layer2);
+        assignment = graph.xCoordinateAssignment_BK_balanced(layer2);
     }
     
     public void postProcessing() {
@@ -212,7 +212,7 @@ public class HierarchicalLayoutAutomata {
         //calculate yPos
         for (int i = 0; i < layer.size(); ++i) {
             if (i == 0) {
-                yPos.add(upmost - 2.0*yHeight.get(0));
+                yPos.add(upmost - 0.5*yHeight.get(0));
             }
             else {
                 yPos.add(yPos.get(i-1) - 2.0*yHeight.get(i-1) - 2.0*yHeight.get(i));
@@ -222,7 +222,8 @@ public class HierarchicalLayoutAutomata {
         //calculate xPos
         for (int i = 0; i < xWidth.size(); ++i) {
             if (i == 0) {
-                xPos.add(leftmost + 0.7*xWidth.get(0));
+                //xPos.add(leftmost + 0.7*xWidth.get(0));
+                xPos.add(leftmost);
             }
             else {
                 xPos.add(xPos.get(i-1) + 0.7*xWidth.get(i-1) + 0.7*xWidth.get(i));

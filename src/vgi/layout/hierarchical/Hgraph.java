@@ -246,7 +246,7 @@ public class Hgraph {
             List<Object> r = vertexOrdering_ESK_twoLayer(new_layer.get(i), new_layer.get(i+1));
             new_layer.set(i+1, r);
         }       
-        
+        edgePositionAdjusting(new_layer);
         //return the new layering
         return new_layer;
     }
@@ -347,10 +347,180 @@ public class Hgraph {
         }
         return m;
     }
+
+    /**
+     * After calculating vertex ordering, 
+     * we try to change the position of edge long edge of smallest length
+     * by testing all possible position.
+     * We choose the position yielding the smallest number of crossing.
+     * @param layer
+     */
+    public void edgePositionAdjusting(List<List<Object>> layer) {
+        Collection<Object> finished = new ArrayList<Object>();
+        for (int i = 1; i < layer.size()-1; ++i) {
+            for (int j = 0; j < layer.get(i).size(); ++j) {
+                if (layer.get(i).get(j) instanceof Hedge && !finished.contains(layer.get(i).get(j))) {
+                    Hedge ej = (Hedge)(layer.get(i).get(j));
+                    if (layer.get(i-1).contains(ej.source()) && layer.get(i+1).contains(ej.target())) {
+                        findBestPosition(layer, i, j);
+                        --j;
+                        finished.add(ej);
+                    }
+                }
+            }
+        }
+    }
+    
+    public void findBestPosition(List<List<Object>> layer, int i, int j) {
+        int best_pos = j;
+        int best_crossing = 9999999;
+        Hedge ej = (Hedge)(layer.get(i).get(j));
+        layer.get(i).remove(j);
+        for (int s = 0; s <= layer.get(i).size(); ++s) {
+            layer.get(i).add(s, ej);
+            int crossing = crossingCal(layer, i, s);
+            if (crossing < best_crossing) {
+                best_pos = s;
+                best_crossing = crossing;
+            }
+            layer.get(i).remove(s);
+        }
+        layer.get(i).add(best_pos, ej);
+    }
+ 
+    public int crossingCal(List<List<Object>> layer, int i, int j) {
+        Hedge ej = (Hedge)(layer.get(i).get(j));
+        int crossing = 0;
+        for (int s = 0; s < layer.get(i-1).size(); ++s) {
+            Object obj = layer.get(i-1).get(s);
+            if (obj instanceof Hedge) {
+                Hedge e = (Hedge)obj;
+                if (layer.get(i).contains(obj)) {
+                    if ((layer.get(i).indexOf(obj)-j)*(s-layer.get(i-1).indexOf(ej.source())) < 0) {
+                        ++crossing;
+                    }
+                }
+                else {
+                    if ((layer.get(i).indexOf(e.target())-j)*(s-layer.get(i-1).indexOf(ej.source())) < 0) {
+                        ++crossing;
+                    }
+                }
+            }
+            else if (obj instanceof Hvertex) {
+                Hvertex v = (Hvertex)obj;
+                for (int ss = 0; ss < v.outDeg(); ++ss) {
+                    if (layer.get(i).contains(v.outAdj(ss))) {
+                        if ((layer.get(i).indexOf(v.outAdj(ss))-j)*(s-layer.get(i-1).indexOf(ej.source())) < 0) {
+                            ++crossing;
+                        }
+                    }
+                    else if (layer.get(i).contains(v.outEdge(ss))) {
+                        if ((layer.get(i).indexOf(v.outEdge(ss))-j)*(s-layer.get(i-1).indexOf(ej.source())) < 0) {
+                            ++crossing;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int s = 0; s < layer.get(i+1).size(); ++s) {
+            Object obj = layer.get(i+1).get(s);
+            if (obj instanceof Hedge) {
+                Hedge e = (Hedge)obj;
+                if (layer.get(i).contains(obj)) {
+                    if ((layer.get(i).indexOf(obj)-j)*(s-layer.get(i+1).indexOf(ej.target())) < 0) {
+                        ++crossing;
+                    }
+                }
+                else {
+                    if ((layer.get(i).indexOf(e.source())-j)*(s-layer.get(i+1).indexOf(ej.target())) < 0) {
+                        ++crossing;
+                    }
+                }
+            }
+            else if (obj instanceof Hvertex) {
+                Hvertex v = (Hvertex)obj;
+                for (int ss = 0; ss < v.inDeg(); ++ss) {
+                    if (layer.get(i).contains(v.inAdj(ss))) {
+                        if ((layer.get(i).indexOf(v.inAdj(ss))-j)*(s-layer.get(i+1).indexOf(ej.target())) < 0) {
+                            ++crossing;
+                        }
+                    }
+                    else if (layer.get(i).contains(v.inEdge(ss))) {
+                        if ((layer.get(i).indexOf(v.inEdge(ss))-j)*(s-layer.get(i+1).indexOf(ej.target())) < 0) {
+                            ++crossing;
+                        }
+                    }
+                }
+            }
+        }
+        return crossing;
+    }
     
     /*///////////////////////////////////////////////
      *   x-coordinate assignment
      *///////////////////////////////////////////////
+
+     /**
+     * xCoordinateAssignment procedure: 
+     * Balanced version of xCoordinateAssignment_BK
+     * @param layer
+     * @return assignment (a map associating each object to an integer)
+     */
+    public Map<Object, Integer> xCoordinateAssignment_BK_balanced(List<List<Object>> layer) {
+        Map<Object, Integer> assignment_ul = xCoordinateAssignment_BK(layer);
+        
+        List<List<Object>> layer2 = layerReversing(layer);
+        Map<Object, Integer> assignment_ur = xCoordinateAssignment_BK(layer2);
+        assignment_ur = assignmentReversing(assignment_ur);
+        return assignmentAveraging(assignment_ul, assignment_ur);
+    }
+    
+    public List<List<Object>> layerReversing(List<List<Object>> layer) {
+        List<List<Object>> layer2 = new ArrayList<List<Object>>();
+        for (int i = 0; i < layer.size(); ++i) {
+            layer2.add(new ArrayList<Object>());
+            for (int j = layer.get(i).size()-1; j>=0; --j) {
+                layer2.get(i).add(layer.get(i).get(j));
+            }
+        }
+        return layer2;
+    }
+    
+    public Map<Object, Integer> assignmentReversing(Map<Object, Integer> assignment) {
+        Map<Object, Integer> assignment2 = new HashMap<Object, Integer>();
+        int max = 0; 
+        Collection<Integer> s = assignment.values();
+        for (Integer i : s) {
+            if (max < i) {
+                max = i;
+            }
+        } 
+        for (Hvertex v: vertexList) {
+            int a = assignment.get(v);
+            assignment2.put(v, max-a);
+        }
+        for (Hedge e: inEdgeList) {
+            if (assignment.containsKey(e)) {
+                int a = assignment.get(e);
+                assignment2.put(e, max-a);
+            }
+        }
+        return assignment2;
+    }
+
+    public Map<Object, Integer> assignmentAveraging(Map<Object, Integer> a1, Map<Object, Integer> a2) {
+        Map<Object, Integer> assignment = new HashMap<Object, Integer>();
+        for (Hvertex v: vertexList) {
+            assignment.put(v, (a1.get(v)+a2.get(v))/2);
+        }
+        for (Hedge e: inEdgeList) {
+            if (a1.containsKey(e)) {
+                assignment.put(e, (a1.get(e)+a2.get(e))/2);
+            }
+        }
+        return assignment;
+    } 
 
      /**
      * xCoordinateAssignment procedure: 
@@ -420,7 +590,9 @@ public class Hgraph {
                     }
                 }
             }
-            if (conflict) continue;
+            if (conflict) {
+                continue;
+            }
             //if there's no conflict, update alignment
             Halignment a = alignmentMap.get(l1.get(m));
             alignmentMap.put(l2.get(i2) , a);

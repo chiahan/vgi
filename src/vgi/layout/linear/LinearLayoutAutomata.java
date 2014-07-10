@@ -37,7 +37,7 @@ public class LinearLayoutAutomata {
     
     List<List<State>> groupList;
     String[][] Group;
-    
+    double [][] GroupStructure;
     ////// if there's fixed vertex groups
     boolean useVertexGroup=false;
     
@@ -100,7 +100,7 @@ public class LinearLayoutAutomata {
             }
         }
         int GID = 0;
-        double [][] GroupStructure = new double[groupSize][5];
+        GroupStructure = new double[groupSize][5];
         for (List<State> state: groupList) 
         {
             if(state.size() > 1)//if there is a group
@@ -144,7 +144,7 @@ public class LinearLayoutAutomata {
         vertexMapList = sccdfs.getExpandedListWithSCC();
         System.out.println("vertexMapList:"+vertexMapList);
                     
-        /*
+        
         setSortedVerticesLocation();
             
 
@@ -152,7 +152,7 @@ public class LinearLayoutAutomata {
         adjustEdgeCurves(true);
             
         if(upboundY>bound.getMaxY()) 
-            moveWholeBound();*/
+            moveWholeBound();
   
        System.out.println("~~~There is group~~~");
         
@@ -298,52 +298,144 @@ public class LinearLayoutAutomata {
           return automata.getSelectedStates();
     }
 
-    
-    private void setSortedVerticesLocation()
+      private void setSortedVerticesLocation()
     {
-         double x=bound.x;
-         //if(x<0) x=0;
-//         double distance=bound.getWidth()/vertexNum;
-         double distance=0;
-         //ellie
-         State first_state = vertexMapList.get(0);
-         StateGeometricData first_geodata = automata.getStateGeometricData(first_state);
-         first_geodata.setLocation(new Point2D.Double(x+first_geodata.getWidth()/2,lineY));
-         automata.setStateGeometricData(first_state, first_geodata);
-         first_geodata=automata.getStateGeometricData(first_state);
-         x=first_geodata.getX()+first_geodata.getWidth()/2;
-         distance=first_geodata.getWidth()/2;//ellie
-         for(int i = 1; i<vertexNum; ++i){
-                    //mxCell cell=vertexMapList.get(i);
-                    //mxGeometry geo=cell.getGeometry();
-                    State state=vertexMapList.get(i);
-                    //StateGeometricData geodata=state.getGeometricData();
-                    StateGeometricData geodata=automata.getStateGeometricData(state);
-                    
-                    //double distance=geodata.getWidth()/2;
-                    
-//                    if(i>0){
-//                        State lastState=vertexMapList.get(i-1);
-////                        distance+=lastState.getGeometricData().getWidth();
-//                        distance+=automata.getStateGeometricData(lastState).getWidth()/2;
-//                    }else{
-//                        State nextState=vertexMapList.get(i+1);
-//                        distance+=automata.getStateGeometricData(nextState).getWidth()/2;
-//                    }
-                          
-                    
-                    //setVertexLocation(state,x+distance*0.4,lineY-geodata.getHeight()/2);
-//                    automata.moveState(state, new Point2D.Double(x+distance*0.3,lineY));
-                    geodata.setLocation(new Point2D.Double(x+geodata.getWidth()/2+(distance+geodata.getWidth()/2)*0.3,lineY));
-                    automata.setStateGeometricData(state, geodata);
-                    //x=state.getGeometricData().getX()+state.getGeometricData().getWidth();
-                    geodata=automata.getStateGeometricData(state);
-                    x=geodata.getX()+geodata.getWidth()/2;
-                    distance=geodata.getWidth()/2;
-                    System.out.println("set location: "+state.getName()+" "+geodata.getX()+","+geodata.getY());
-                    
+         List<State> sorted_vertexMapList = vertexMapList;
+         List<State> return_vertexMapList = new ArrayList<State>(); //.add()
+         double x = bound.x;
+         double distance;
+         int g_vertexNum = sorted_vertexMapList.size();
+         
+         State first_state = sorted_vertexMapList.get(0); 
+         return_vertexMapList.add(first_state);
+         List<State> first_group  = new ArrayList<State>();
+         boolean isGroup = false;
+         int gid = 0;
+         int first_gid = 0;
+         //judge whether the first state is in a group
+         for (List<State> state_list: groupList)
+         {
+             if(state_list.size() > 1)
+             {
+                 if(first_state == state_list.get(0))
+                 {
+                     first_gid = gid;
+                     first_group = state_list;
+                     isGroup = true;
+                 }
+                 gid = gid + 1;
+             }
          }
+         //assign first state(group) a new position
+         if(isGroup) //first_state is a group
+         {
+                //StateGeometricData first_geodata = automata.getStateGeometricData(first_state);
+                //first_geodata.setLocation(new Point2D.Double(x+first_geodata.getWidth()/2,lineY));
+                Point2D first_geodata = new Point2D.Double(x+GroupStructure[first_gid][3]/2,lineY);
+                
+                double dis_x = first_geodata.getX() - (GroupStructure[first_gid][1]+GroupStructure[first_gid][3]/2);
+                double dis_y = first_geodata.getY() - (GroupStructure[first_gid][2]+GroupStructure[first_gid][4]/2);
+                System.out.println("GroupStructure_X:"+GroupStructure[first_gid][1]+" ,first_geo_x:"+first_geodata.getX()+" ,dis_x:"+dis_x);
+                System.out.println("GroupStructure_Y:"+GroupStructure[first_gid][2]+" ,first_geo_y:"+first_geodata.getY()+" ,dis_y:"+dis_y);
+                //automata.setStateGeometricData(first_state, first_geodata);
+                return_vertexMapList.remove(return_vertexMapList.size()-1);
+                for(State state: first_group)
+                {                    
+                    return_vertexMapList.add(state);
+                    StateGeometricData state_geodata = automata.getStateGeometricData(state);
+                    state_geodata.setLocation(new Point2D.Double(state_geodata.getX()+dis_x, state_geodata.getY()+dis_y));
+                    automata.setStateGeometricData(state, state_geodata);
+                }
+                    
+                //first_geodata=automata.getStateGeometricData(first_state);
+                x=first_geodata.getX()+GroupStructure[first_gid][3]/2;
+                //distance=GroupStructure[gid][3]/2;
+                distance=GroupStructure[first_gid][3];
+                
+         } 
+         else
+         {
+                StateGeometricData first_geodata = automata.getStateGeometricData(first_state);
+                 
+                first_geodata.setLocation(new Point2D.Double(x+first_geodata.getWidth()/2,lineY));
+                automata.setStateGeometricData(first_state, first_geodata);
+                first_geodata=automata.getStateGeometricData(first_state);
+                x=first_geodata.getX()+first_geodata.getWidth()/2;
+                //distance=first_geodata.getWidth()/2;
+                distance=first_geodata.getWidth();
+         }
+         //assign each state a new position
+         for(int i = 1; i<g_vertexNum; ++i)
+         {
+             //mxCell cell=vertexMapList.get(i);
+             //mxGeometry geo=cell.getGeometry();
+             State state=sorted_vertexMapList.get(i);
+             return_vertexMapList.add(state);
+             List<State> state_group  = new ArrayList<State>();
+             isGroup = false;
+             gid = 0;
+             int state_gid = 0;
+             //judge whether the state is in a group
+             for (List<State> state_list: groupList)
+             {
+                 if(state_list.size() > 1)
+                 {
+                     if(state == state_list.get(0))
+                     {
+                         state_gid = gid;
+                         state_group = state_list;
+                         isGroup = true;
+                     }
+                     gid = gid + 1;
+                 }
+             }             
+             if(isGroup) //state is a group
+             {
+                 //StateGeometricData geodata=automata.getStateGeometricData(state);
+                 //geodata.setLocation(new Point2D.Double(x+geodata.getWidth()/2+(distance+geodata.getWidth()/2)*0.3,lineY));
+                 Point2D state_geodata = new Point2D.Double(x+GroupStructure[state_gid][3]/2+(distance+GroupStructure[state_gid][3]/2)*0.3,lineY);
+                 
+                 double dis_x = state_geodata.getX() - (GroupStructure[state_gid][1]+GroupStructure[state_gid][3]/2);
+                 double dis_y = state_geodata.getY() - (GroupStructure[state_gid][2]+GroupStructure[state_gid][4]/2); 
+                 //automata.setStateGeometricData(state, geodata);
+                 return_vertexMapList.remove(return_vertexMapList.size()-1);
+                 for(State g_state: state_group)
+                 {                    
+                     return_vertexMapList.add(g_state);
+                     StateGeometricData geodata = automata.getStateGeometricData(g_state);
+                     geodata.setLocation(new Point2D.Double(geodata.getX()+dis_x,geodata.getY()+dis_y));
+                     automata.setStateGeometricData(g_state, geodata);
+                 }
+                 
+                 //geodata=automata.getStateGeometricData(state);
+                 //x=geodata.getX()+geodata.getWidth()/2;
+                 x=state_geodata.getX()+GroupStructure[state_gid][3]/2;
+                 
+                 //distance=geodata.getWidth()/2;
+                 distance = GroupStructure[state_gid][3];
+                 //System.out.println("set location: "+state.getName()+" "+geodata.getX()+","+geodata.getY());
+             }
+             else
+             {
+    //StateGeometricData geodata=state.getGeometricData();
+                 StateGeometricData geodata=automata.getStateGeometricData(state);
+
+                //setVertexLocation(state,x+distance*0.4,lineY-geodata.getHeight()/2);
+    //                    automata.moveState(state, new Point2D.Double(x+distance*0.3,lineY));
+                 geodata.setLocation(new Point2D.Double(x+geodata.getWidth()/2+(distance+geodata.getWidth()/2)*0.3,lineY));
+                 automata.setStateGeometricData(state, geodata);
+                 //x=state.getGeometricData().getX()+state.getGeometricData().getWidth();
+                 geodata=automata.getStateGeometricData(state);
+                 x=geodata.getX()+geodata.getWidth()/2;
+                 //distance=geodata.getWidth()/2;
+                 distance=geodata.getWidth();
+                 System.out.println("set location: "+state.getName()+" "+geodata.getX()+","+geodata.getY());
+             }
+         }
+         vertexMapList = return_vertexMapList;
+         //System.out.println("vertexMapList " + vertexMapList);
     }
+    
     
     public void adjustEdgeCurves(boolean ignoreStateInGroups){
             decideEdgesGoUpDown(ignoreStateInGroups);
@@ -401,17 +493,17 @@ public class LinearLayoutAutomata {
                     
 //                    System.out.println(state+" y= "+state.getGeometricData().getY());
                     int phase=0;
-                    if(state.getGeometricData().getY()>lineY){
-                        phase=1;
+//                    if(state.getGeometricData().getY()>lineY){
+//                        phase=1;
+//                        upPhaseList.add(state);
+//                    }
+//                    else if(state.getGeometricData().getY()<lineY){
+//                        phase=-1;
+//                        downPhaseList.add(state);
+//                    }else{
                         upPhaseList.add(state);
-                    }
-                    else if(state.getGeometricData().getY()<lineY){
-                        phase=-1;
                         downPhaseList.add(state);
-                    }else{
-                        upPhaseList.add(state);
-                        downPhaseList.add(state);
-                    }
+//                    }
                     
                     if(ignoreStateInGroups){
                         int id=state.getGroupID();
@@ -872,8 +964,8 @@ public class LinearLayoutAutomata {
             int b=targetInd;
             int middleInd=(int)((float)(a+b)/2);
             
-            double sin_deg = Math.sin(30.0/180.0*Math.PI);  //sin 30度
-            double cos_deg = Math.cos(30.0/180.0*Math.PI);  //cos 30度
+            double sin_deg = Math.sin(30.0/180.0*Math.PI);  //sin 30摨�
+            double cos_deg = Math.cos(30.0/180.0*Math.PI);  //cos 30摨�
             double Radius = 0.0;
             double CenterX = 0.0;
             double CenterY = 0.0;
@@ -1339,8 +1431,8 @@ public class LinearLayoutAutomata {
                 //target<-source
                 //if(phaseList.get(targetInd).getGeometricData().getX() < phaseList.get(sourceInd).getGeometricData().getX())
                 //{
-                    //sin_deg = Math.sin(60.0/180.0*Math.PI);  //sin 30度
-                    //cos_deg = Math.cos(60.0/180.0*Math.PI);  //cos 30度
+                    //sin_deg = Math.sin(60.0/180.0*Math.PI);  //sin 30摨�
+                    //cos_deg = Math.cos(60.0/180.0*Math.PI);  //cos 30摨�
                 if((phaseList.get(targetInd).getGeometricData().getY()-phaseList.get(targetInd).getGeometricData().getHeight()/2) < Newy)
                 {
                     //double diff_x = phaseList.get(targetInd).getGeometricData().getX()-CenterX;
@@ -1371,8 +1463,8 @@ public class LinearLayoutAutomata {
            
                 /*else //source->target
                 {
-                    //sin_deg = Math.sin(60.0/180.0*Math.PI);  //sin 30度
-                    //cos_deg = Math.cos(60.0/180.0*Math.PI);  //cos 30度
+                    //sin_deg = Math.sin(60.0/180.0*Math.PI);  //sin 30摨�
+                    //cos_deg = Math.cos(60.0/180.0*Math.PI);  //cos 30摨�
                     if((phaseList.get(targetInd).getGeometricData().getY()-phaseList.get(targetInd).getGeometricData().getHeight()/2) < Newy)
                     {
                         double diff_x = phaseList.get(targetInd).getGeometricData().getX()-CenterX;
