@@ -71,13 +71,11 @@ public class CircularLayoutAutomata {
          */
         bound=automata.computeBox(allVertexList);
         System.out.println("box: "+bound);
-        bound.x = bound.x+1;
+        
 
         center=new Point2D.Double(bound.getCenterX(),bound.getCenterY());  
-        radius =findProperRadius();
-        theta=findProperTheta();//Math.PI*2/vertexNum;
          
-        System.out.println("center= "+center.getX()+" , "+center.getY()+" radius= "+radius);
+
         
         //graph.getModel().beginUpdate();
         //    try{
@@ -105,6 +103,7 @@ public class CircularLayoutAutomata {
                GroupStructure[GID][0] = (double)GID+1;
                Rectangle boundtmp;
                boundtmp = automata.computeBox(state);
+               
                GroupStructure[GID][1] = boundtmp.getX();
                GroupStructure[GID][2] = boundtmp.getY();
                GroupStructure[GID][3] = boundtmp.getWidth();
@@ -124,11 +123,12 @@ public class CircularLayoutAutomata {
         vertexMapList=sccdfs.getExpandedListWithSCC();
         System.out.println("vertexMapList:"+vertexMapList);
             //vertexMapList=this.sortVertices(automata_);
-        
-        //TO ELLIE~
-        //setSortedVerticesLocation();
+        radius =group_findProperRadius();
+        theta=group_findProperTheta();//Math.PI*2/vertexNum;
+        System.out.println("center= "+center.getX()+" , "+center.getY()+" radius= "+radius);
+        setSortedVerticesLocation();
             
-        //adjustEdgeCurves(true);    
+        adjustEdgeCurves(true);    
 
   
         System.out.println("~~~There is group~~~");
@@ -146,9 +146,8 @@ public class CircularLayoutAutomata {
          */
         bound=automata.computeBox(allVertexList);
         System.out.println("box: "+bound);
-        bound.x = bound.x+1;
 
-       center=new Point2D.Double(bound.getCenterX(),bound.getCenterY());  
+        center=new Point2D.Double(bound.getCenterX(),bound.getCenterY());  
         radius =findProperRadius();
         theta=findProperTheta();//Math.PI*2/vertexNum;
          
@@ -163,7 +162,7 @@ public class CircularLayoutAutomata {
         
             //vertexMapList=this.sortVertices(automata_);
         setSortedVerticesLocation();
-            
+        System.out.println("vertexMapList:"+vertexMapList);
         adjustEdgeCurves(true);    
 
     }
@@ -234,7 +233,6 @@ public class CircularLayoutAutomata {
         
         bound=automata.computeBox(allVertexList);
         System.out.println("box: "+bound);
-        bound.x = bound.x+1;
         
         center=new Point2D.Double(bound.getCenterX(),bound.getCenterY());  
         
@@ -245,10 +243,12 @@ public class CircularLayoutAutomata {
        
         SccDfs sccdfs=new SccDfs(allVertexList);
         vertexMapList=sccdfs.getExpandedListWithSCC();
+
         setSortedVerticesLocation();
             
 //        replaceAutomata.expandStatesToVertexGroups();
         vertexMapList=replaceAutomata.expandStatesToCircularLayout(vertexMapList,center);
+        
         vertexNum=vertexMapList.size();
         
         automata=automata_;
@@ -284,13 +284,16 @@ public class CircularLayoutAutomata {
             sum+=automata.getStateGeometricData(state).getWidth();
         }
         double rad=sum/Math.PI;
-        if(center.getY()+rad>bound.y+bound.getHeight()) center.setLocation(center.getX(), bound.y+bound.getHeight()-rad);
-         if(center.getX()-rad<bound.x) center.setLocation(bound.x+rad,center.getY());
-         double temp = center.getY()+rad;
-         System.out.println("center.getY()+rad:"+temp+"bound.y:"+bound.y);
-         System.out.println("ellie_x:"+center.getX()+"ellie_y:"+center.getY());
+        if(center.getY()+rad>bound.y+bound.getHeight()) 
+        {
+            center.setLocation(center.getX(), bound.y+bound.getHeight()-rad);
+        }
+        if(center.getX()-rad<bound.x) 
+        {
+            center.setLocation(bound.x+rad,center.getY());
+        }
+        System.out.println("center_x:"+center.getX()+"center_y:"+center.getY());
          
-        
         return rad;
         
     }
@@ -306,6 +309,94 @@ public class CircularLayoutAutomata {
         double partition=0;
         for(State state:allVertexList){
             double t=automata.getStateGeometricData(state).getWidth();
+            partition+=t/minWidth;
+        }
+        
+        return 2*Math.PI/partition;
+    }
+    private double group_findProperRadius(){
+        double sum=0;
+        for(State state:vertexMapList){
+            boolean isGroup = false;
+            int gid = 0;
+            int state_gid = 0;
+            for (List<State> state_list: groupList) {
+                if(state_list.size() > 1) {                 
+                    if(state == state_list.get(0)) {
+                        state_gid = gid;
+                        isGroup = true;
+                    }
+                    gid = gid + 1;
+                }
+            }     
+            if(isGroup) sum+=GroupStructure[state_gid][3];
+            else sum+=automata.getStateGeometricData(state).getWidth();
+        }
+        double rad=sum/Math.PI;
+        if(center.getY()+rad>bound.y+bound.getHeight()) center.setLocation(center.getX(), bound.y+bound.getHeight()-rad);
+        if(center.getX()-rad<bound.x) center.setLocation(bound.x+rad,center.getY());
+
+        System.out.println("center_x:"+center.getX()+"center_y:"+center.getY());
+         
+        return rad;       
+    }
+    private double group_findProperTheta(){
+    
+        //find the min width state
+        State first_state = vertexMapList.get(0);
+        boolean isGroup = false;
+        int gid = 0;
+        int state_gid = 0;
+        for (List<State> state_list: groupList) {
+            if(state_list.size() > 1) {                 
+                if(first_state == state_list.get(0)) {
+                    state_gid = gid;
+                    isGroup = true;
+                }
+                gid = gid + 1;
+            }
+        }    
+        double minWidth;
+        if(isGroup) minWidth = GroupStructure[state_gid][3];
+        else  minWidth=automata.getStateGeometricData(vertexMapList.get(0)).getWidth();
+        //double minWidth=automata.getStateGeometricData(allVertexList.get(0)).getWidth();
+        for(State state:vertexMapList){
+            isGroup = false;
+            gid = 0;
+            state_gid = 0;
+            for (List<State> state_list: groupList) {
+                if(state_list.size() > 1) {                 
+                    if(state == state_list.get(0)) {
+                        state_gid = gid;
+                        isGroup = true;
+                    }
+                    gid = gid + 1;
+                }
+            }    
+            double t;
+            if(isGroup) t=GroupStructure[state_gid][3];
+            else t=automata.getStateGeometricData(state).getWidth();
+            if(t<minWidth) minWidth=t;
+        }
+        
+        double partition=0;
+        for(State state:vertexMapList){
+            //double t=automata.getStateGeometricData(state).getWidth();
+                        isGroup = false;
+            gid = 0;
+            state_gid = 0;
+            for (List<State> state_list: groupList) {
+                if(state_list.size() > 1) {                 
+                    if(state == state_list.get(0)) {
+                        state_gid = gid;
+                        isGroup = true;
+                    }
+                    gid = gid + 1;
+                }
+            }    
+            double t;
+            if(isGroup) t=GroupStructure[state_gid][3];
+            else t=automata.getStateGeometricData(state).getWidth();
             partition+=t/minWidth;
         }
         
@@ -331,52 +422,100 @@ public class CircularLayoutAutomata {
 //    }
 
     private void setSortedVerticesLocation(){
-//         double x=bound.x;
-//         double distance=bound.getWidth()/vertexNum;
-        
-        //find the min width state
-        double minWidth=automata.getStateGeometricData(allVertexList.get(0)).getWidth();
-        for(State state:allVertexList){
-            double t=automata.getStateGeometricData(state).getWidth();
-            if(t<minWidth) minWidth=t;
-        }
-         
+         List<State> sorted_vertexMapList = vertexMapList;
+         List<State> return_vertexMapList = new ArrayList<State>(); 
+         int g_vertexNum = sorted_vertexMapList.size();
+         //find the min width state
+         double minWidth=automata.getStateGeometricData(vertexMapList.get(0)).getWidth();
          double tmptheta=0;
+         for(State state:vertexMapList){
+             //judge whether the state is in a group
+             boolean isGroup = false;
+             int gid = 0;
+             int state_gid = 0;
+             for (List<State> state_list: groupList) {
+                 if(state_list.size() > 1) {                 
+                     if(state == state_list.get(0)) {
+                         state_gid = gid;
+                         isGroup = true;
+                     }
+                     gid = gid + 1;
+                 }
+             }     
+             double t;
+             if(isGroup) {
+                 t=GroupStructure[state_gid][3];
+             }
+             else {
+                 t=automata.getStateGeometricData(state).getWidth();
+             }
+             if(t<minWidth) minWidth=t;
+         }   
+
+         //assign each state a new position
+         for(int i = 0; i<g_vertexNum; ++i) {
+                State state=vertexMapList.get(i);
+                List<State> state_group  = new ArrayList<State>();
+                boolean isGroup = false;
+                int gid = 0;
+                int state_gid = 0;
+                //judge whether the state is in a group
+                for (List<State> state_list: groupList)
+                {
+                    if(state_list.size() > 1)
+                    {
+                        if(state == state_list.get(0))
+                        {
+                            state_gid = gid;
+                            state_group = state_list;
+                            isGroup = true;
+                        }
+                        gid = gid + 1;
+                    }
+                }     
+                double tt;
+                double newx;
+                double newy;
+                if(isGroup) { 
+                    //Point2D state_geodata = new Point2D.Double(x+GroupStructure[state_gid][3]/2+(distance+GroupStructure[state_gid][3]/2)*0.3,lineY);
+                    tt = GroupStructure[state_gid][3]/minWidth*theta;
+                    tmptheta += tt/2;
+                    newx=center.getX()+radius*Math.cos(tmptheta);
+                    newy=center.getY()+radius*Math.sin(tmptheta);
+                    Point2D state_geodata = new Point2D.Double(newx, newy);
                  
-         for(int i = 0; i<vertexNum; ++i){
-                    //mxCell cell=vertexMapList.get(i);
-                    //mxGeometry geo=cell.getGeometry();
-                    State state=vertexMapList.get(i);
-                    //StateGeometricData geodata=state.getGeometricData();
+                    double dis_x = state_geodata.getX() - (GroupStructure[state_gid][1]+GroupStructure[state_gid][3]/2);
+                    double dis_y = state_geodata.getY() - (GroupStructure[state_gid][2]+GroupStructure[state_gid][4]/2); 
+                    //automata.setStateGeometricData(state, geodata);
+                    for(State g_state: state_group)
+                    {                    
+                        return_vertexMapList.add(g_state);
+                        StateGeometricData geodata = automata.getStateGeometricData(g_state);
+                        geodata.setLocation(new Point2D.Double(geodata.getX()+dis_x,geodata.getY()+dis_y));
+                        automata.setStateGeometricData(g_state, geodata);
+                    }
+                    tmptheta+=tt/2;
+                    
+                }
+                else {
+                    return_vertexMapList.add(state);
                     StateGeometricData geodata=automata.getStateGeometricData(state);
-                    
-//                    double distance=geodata.getWidth();
-//                    
-//                    if(i>0){
-//                        State lastState=vertexMapList.get(i-1);
-////                        distance+=lastState.getGeometricData().getWidth();
-//                        distance+=automata.getStateGeometricData(lastState).getWidth();
-//                    }else distance*=2;
                           
-                   double tt=geodata.getWidth()/minWidth*theta;
-                   
-//                  
-                   tmptheta+=tt/2;
-//                   double newx=center.getX()+radius*Math.cos(theta*i);
-//                   double newy=center.getY()+radius*Math.sin(theta*i);
-                   double newx=center.getX()+radius*Math.cos(tmptheta);
-                   double newy=center.getY()+radius*Math.sin(tmptheta);
+                    tt=geodata.getWidth()/minWidth*theta;            
+                    tmptheta += tt/2;
+                    newx=center.getX()+radius*Math.cos(tmptheta);
+                    newy=center.getY()+radius*Math.sin(tmptheta);
                     
-                   tmptheta+=tt/2;
                     geodata.setLocation(new Point2D.Double(newx,newy));
                     automata.setStateGeometricData(state, geodata);
-                    //x=state.getGeometricData().getX()+state.getGeometricData().getWidth();
+                    tmptheta+=tt/2;
+                    
                     geodata=automata.getStateGeometricData(state);
-                    
-                    
                     System.out.println("set location: "+state.getName()+" "+geodata.getX()+","+geodata.getY()+" theta= "+tmptheta);
-                    
+                }
+                
          }
+         vertexMapList = return_vertexMapList;
     }
     
     public void adjustEdgeCurves(boolean ignoreStateInGroups){
@@ -539,7 +678,7 @@ public class CircularLayoutAutomata {
                     }
             }
             
-            for(Transition tr:addedTopEdge) System.out.println("top: "+tr.getSourceState()+"->"+tr.getTargetState());
+            for(Transition tr:addedTopEdge) System.out.println("!!!!top: "+tr.getSourceState()+"->"+tr.getTargetState());
             for(Transition tr:addedBottomEdge) System.out.println("bottom: "+tr.getSourceState()+"->"+tr.getTargetState());
             
 
@@ -588,7 +727,8 @@ public class CircularLayoutAutomata {
              }
         }
         
-        for(Transition topEdge:addedTopEdge){
+        for(Transition topEdge:addedTopEdge)
+        {
             int sourceInd=vertexMapList.indexOf(topEdge.getSourceState());
             int targetInd=vertexMapList.indexOf(topEdge.getTargetState());
             
@@ -597,13 +737,15 @@ public class CircularLayoutAutomata {
             if(targetInd<sourceInd){ c=targetInd; d=sourceInd;}
 
 //            if(c<a && d<b && a<d){
-            if(checkTwoEdgeCrossing(a,b,c,d)){
+            if(checkTwoEdgeCrossing(a,b,c,d))
+            {
                 topCrossing++;
                 System.out.println("    top: "+sourceInd+"->"+targetInd);
             }
         }
         
-        for(Transition bottomEdge:addedBottomEdge){
+        for(Transition bottomEdge:addedBottomEdge)
+        {
             int sourceInd=vertexMapList.indexOf(bottomEdge.getSourceState());
             int targetInd=vertexMapList.indexOf(bottomEdge.getTargetState());
             
@@ -641,11 +783,14 @@ public class CircularLayoutAutomata {
     }
     
     
-    private void setEdgesCurveHeight(boolean ignoreStateInGroups){
+    private void setEdgesCurveHeight(boolean ignoreStateInGroups)
+    {
         
-        Collections.sort(addedTopEdge, new Comparator<Transition>(){
+        Collections.sort(addedTopEdge, new Comparator<Transition>()
+        {
                     @Override
-                    public int compare(Transition t, Transition t1) {
+                    public int compare(Transition t, Transition t1) 
+                    {
                             Integer sourceIndex=vertexMapList.indexOf(t.getSourceState());
                             Integer targetIndex=vertexMapList.indexOf(t.getTargetState());
                             Integer sourceIndex1=vertexMapList.indexOf(t1.getSourceState());
@@ -680,8 +825,11 @@ public class CircularLayoutAutomata {
                             
               });
                 int len=addedTopEdge.size();
-                for(int i=0;i<len;++i){
+                /*!!!here*/
+                for(int i=0;i<len;++i)
+                {
                     setEdgeCurveHeight(addedTopEdge.get(i),true);
+                    System.out.println("~~~Annaaddtop:"+addedTopEdge.get(i));
                 }
 
                 len=addedBottomEdge.size();
@@ -696,7 +844,11 @@ public class CircularLayoutAutomata {
      * 
      * TODO: keep all given y coordinates > 0
      */
-    private void setEdgeCurveHeight(Transition edge,boolean isTopEdge){
+    private void setEdgeCurveHeight(Transition edge,boolean isTopEdge)
+    {
+        
+        //for test
+        int flag = 0;
         
         int sourceInd=vertexMapList.indexOf(edge.getSourceState());
         int targetInd=vertexMapList.indexOf(edge.getTargetState());
@@ -721,7 +873,7 @@ public class CircularLayoutAutomata {
             return;
         }
         
-        if(sourceInd==targetInd){  //loop
+      if(sourceInd==targetInd){  //loop
             controlPoint1=new Point2D.Double();
             
             controlPoint1.setLocation(
@@ -731,24 +883,32 @@ public class CircularLayoutAutomata {
             System.out.println("loop"+controlPoint1);
 //            points.add(controlPoint1);
             
-        }else{
+      }
+      
+      /*here!!*/
+      else
+      {
          if(Math.abs(sourceInd-targetInd)==1 || Math.abs(sourceInd-targetInd)==vertexNum-1){
              
             System.out.println("neighbor: "+sourceInd+" , "+targetInd);
             automata.resetTransitionControlPoint(edge);
              // if there is edge from target-source
-             if(automata.hasBackwardTransition(edge)){
+             if(automata.hasBackwardTransition(edge))
+             {
                 controlPoint1=new Point2D.Double();
                  
                 double midtheta=(theta1+theta2)/2;
                 if(Math.max(theta1,theta2)>Math.PI*5/2 && Math.min(theta2,theta1)<Math.PI*3/2){
                     midtheta+=Math.PI;
                 }
-                if(targetInd>sourceInd){ 
+                if(targetInd>sourceInd)
+                { 
                     controlPoint1.setLocation(
                             center.getX()+Math.cos(midtheta)*radius*1.05,
                             center.getY()+Math.sin(midtheta)*radius*1.05);
-                }else{
+                }
+                else
+                {
                     controlPoint1.setLocation(
                             center.getX()+Math.cos(midtheta)*radius*0.95,
                             center.getY()+Math.sin(midtheta)*radius*0.95);
@@ -760,16 +920,24 @@ public class CircularLayoutAutomata {
              }
 //                controlPoint1.setLocation();
              
-         }else{
-             
-            if(!isTopEdge){ //keep bottom edges as straight lines
+         }
+         else
+         {
+            
+            
+            
+            if(!isTopEdge)
+            { //keep bottom edges as straight lines
                 automata.resetTransitionControlPoint(edge);
                 return;
             }
             int a=sourceInd;
             int b=targetInd;
-            if(targetInd>sourceInd){ 
-                a=targetInd; b=sourceInd;
+            
+            if(targetInd>sourceInd)
+            { 
+                a=targetInd; 
+                b=sourceInd;
 //                State tmp=source;
 //                source=target;
 //                target=tmp;
@@ -782,7 +950,8 @@ public class CircularLayoutAutomata {
                 midtheta=Math.PI+midtheta;
                 reverse=true;
             }
-            if(reverse){
+            if(reverse)
+            {
                 a=(a+vertexNum/2)%vertexNum;
                 b=(b+vertexNum/2)%vertexNum;
                 int t=Math.max(a,b);
@@ -806,11 +975,14 @@ public class CircularLayoutAutomata {
                 // find the one has largest height between source and target
                 int middleInd=0;
                 double middleHeight=0;//radius;
-                for(int i=b+1;i<a;++i){
+                for(int i=b+1;i<a;++i)
+                {
 //                    double tmpHeight=vertexMapList.get(i).getGeometricData().getLocation().distance(center)+
 //                            vertexMapList.get(i).getGeometricData().getHeight()/2;
                     double tmpHeight=vertexMapList.get(i).getGeometricData().getHeight()/2;
-                    if(middleHeight<tmpHeight){ 
+      
+                    if(middleHeight<tmpHeight)
+                    { 
                         middleInd=i;
                         middleHeight=tmpHeight;
                     }
@@ -824,7 +996,8 @@ public class CircularLayoutAutomata {
                 double tmpAnglea=0;
                 double tmpAngleb=0;
                 
-                for(int i=0;i<len;++i){
+                for(int i=0;i<len;++i)
+                {
                     
                     Transition tmp=addedTopEdge.get(i);
                     int tmpSourceInd=vertexMapList.indexOf(tmp.getSourceState());
@@ -835,7 +1008,8 @@ public class CircularLayoutAutomata {
                     int d=tmpTargetInd;
                     if(tmpTargetInd>tmpSourceInd){ c=tmpTargetInd; d=tmpSourceInd;}
                     
-                    if(reverse){
+                    if(reverse)
+                    {
                         c=(c+vertexNum/2)%vertexNum;
                         d=(d+vertexNum/2)%vertexNum;
                         int t=Math.max(c,d);
@@ -848,14 +1022,17 @@ public class CircularLayoutAutomata {
                             
                     if((a==c && b==d))continue;
                     
-                      if(a>=c && b<=d){ 
+                      if(a>=c && b<=d)
+                      { 
 //                              (reverse && (a+n2)%vertexNum<=(c+n2)%vertexNum && (b+n2)%vertexNum>=(d+n2)%vertexNum)){
-                        if(tmp.getGeometricData().controlPoints.size()>1){
+                        if(tmp.getGeometricData().controlPoints.size()>1)
+                        {
                             
                             Point2D point=tmp.getGeometricData().controlPoints.get(0);
                             
 //                            double tmpHeight=point.distance(center);
                             double tmpHeight=point.distance(vertexMapList.get(tmpSourceInd).getGeometricData().getLocation());
+                            //ßSystem.out.println("Anna!!!"+vertexMapList.get(tmpSourceInd));
                             System.out.println("---- tmpHeight= "+tmpHeight);
                             if(height<=tmpHeight){
                                     height=tmpHeight*Math.pow((a-b)/(c-d),higher*.1+1); higher++;
@@ -869,7 +1046,8 @@ public class CircularLayoutAutomata {
                             stateLocation=vertexMapList.get(tmpTargetInd).getGeometricData().getLocation();
                             double tmpb=Math.atan2(farpoint.getY()-stateLocation.getY(),farpoint.getX()-stateLocation.getX())+Math.PI*2;
                             
-                            if(tmpSourceInd<tmpTargetInd){
+                            if(tmpSourceInd<tmpTargetInd)
+                            {
                                 double t=tmpa; tmpa=tmpb; tmpb=t;
                             }
                                  
@@ -1072,9 +1250,23 @@ public class CircularLayoutAutomata {
                      }
                 //}
                 System.out.println("    angle= "+tmpAnglea+" "+tmpAngleb+" height= "+(height*1.5));
-//                if(!reverse){     
-                if(sourceInd>targetInd){
+//                if(!reverse){  
+                
+                //!!!here
+                if(sourceInd>targetInd)
+                {
+                    System.out.println("Anna~~source>target~~Anna");
                     
+                    //System.out.println(source.getGeometricData().getX());//center
+                    //System.out.println(source.getGeometricData().getY());
+                    //System.out.println(source.getGeometricData().getHeight());
+                    //System.out.println(source.getGeometricData().getWidth());
+                    double TopRange = source.getGeometricData().getY()+source.getGeometricData().getHeight()/2;
+                    double ButtomRange = source.getGeometricData().getY()-source.getGeometricData().getHeight()/2;
+                    double LeftRange = source.getGeometricData().getX()-source.getGeometricData().getWidth()/2;
+                    double RightRange = source.getGeometricData().getX()+source.getGeometricData().getWidth()/2;
+                    //System.out.println(source.getGeometricData().getX()+source.getGeometricData().getWidth()/2);
+                    //System.out.println(source.getGeometricData().getY()+source.getGeometricData().getHeight()/2);
                     controlPoint1.setLocation(
                                 source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea),
                                 source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
@@ -1082,10 +1274,30 @@ public class CircularLayoutAutomata {
                     controlPoint2.setLocation(
                                 target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb),
                                 target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
-                }else{
+                    
+                    
+                    flag = 3;
+                    System.out.println("Anna~~source>target~~Anna");
+                    //controlPoint1.setLocation(
+                                //source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea),
+                                //source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
+                    //controlPoint2=new Point2D.Double();
+                    //controlPoint2.setLocation(
+                                //target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb),
+                                //target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
+                }
+                else
+                {
+                     System.out.println("Anna~~target>source~~Anna");
+                    System.out.println(source.getGeometricData().getX());
+                    System.out.println(source.getGeometricData().getY());
+                    System.out.println(source.getGeometricData().getHeight());
+                    System.out.println(source.getGeometricData().getWidth());
+                    System.out.println("Anna~~target>source~~Anna");
                     controlPoint1.setLocation(
                                 source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb),
                                 source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
+                    
                     controlPoint2=new Point2D.Double();
                     controlPoint2.setLocation(
                                 target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea),
@@ -1101,9 +1313,13 @@ public class CircularLayoutAutomata {
 //         
      }        
 //            points.clear();
-            if(controlPoint1!=null){
+        //if(flag == 3)//for test now just source>target
+        //{
+            //control point1 close to source
+            if(controlPoint1!=null)
+            {
                 points.add(controlPoint1);
-                    if(controlPoint2!=null) points.add(controlPoint2);
+                    //if(controlPoint2!=null) points.add(controlPoint2);
                 //System.out.println(controlPoint1);
 
                 //edge.getGeometry().setPoints(points);
@@ -1111,6 +1327,22 @@ public class CircularLayoutAutomata {
                 tgd.controlPoints=points;
                 automata.setTransitionGeometricData(edge, tgd);
             }
+            
+            //control point2 close to target
+            if(controlPoint2!=null)
+            {
+                points.add(controlPoint2);
+                    //if(controlPoint2!=null) points.add(controlPoint2);
+                //System.out.println(controlPoint1);
+
+                //edge.getGeometry().setPoints(points);
+                TransitionGeometricData tgd=automata.getTransitionGeometricData(edge);
+                tgd.controlPoints=points;
+                automata.setTransitionGeometricData(edge, tgd);
+            }
+        //}
+
+            
             
 //             placeLableToBound(edge);
         
@@ -1140,3 +1372,4 @@ public class CircularLayoutAutomata {
     }
     
 }
+

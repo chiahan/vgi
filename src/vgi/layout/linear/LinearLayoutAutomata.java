@@ -964,8 +964,8 @@ public class LinearLayoutAutomata {
             int b=targetInd;
             int middleInd=(int)((float)(a+b)/2);
             
-            double sin_deg = Math.sin(30.0/180.0*Math.PI);  //sin 30摨�
-            double cos_deg = Math.cos(30.0/180.0*Math.PI);  //cos 30摨�
+            double sin_deg = Math.sin(30.0/180.0*Math.PI);  //sin 30度
+            double cos_deg = Math.cos(30.0/180.0*Math.PI);  //cos 30度
             double Radius = 0.0;
             double CenterX = 0.0;
             double CenterY = 0.0;
@@ -1431,8 +1431,8 @@ public class LinearLayoutAutomata {
                 //target<-source
                 //if(phaseList.get(targetInd).getGeometricData().getX() < phaseList.get(sourceInd).getGeometricData().getX())
                 //{
-                    //sin_deg = Math.sin(60.0/180.0*Math.PI);  //sin 30摨�
-                    //cos_deg = Math.cos(60.0/180.0*Math.PI);  //cos 30摨�
+                    //sin_deg = Math.sin(60.0/180.0*Math.PI);  //sin 30度
+                    //cos_deg = Math.cos(60.0/180.0*Math.PI);  //cos 30度
                 if((phaseList.get(targetInd).getGeometricData().getY()-phaseList.get(targetInd).getGeometricData().getHeight()/2) < Newy)
                 {
                     //double diff_x = phaseList.get(targetInd).getGeometricData().getX()-CenterX;
@@ -1463,8 +1463,8 @@ public class LinearLayoutAutomata {
            
                 /*else //source->target
                 {
-                    //sin_deg = Math.sin(60.0/180.0*Math.PI);  //sin 30摨�
-                    //cos_deg = Math.cos(60.0/180.0*Math.PI);  //cos 30摨�
+                    //sin_deg = Math.sin(60.0/180.0*Math.PI);  //sin 30度
+                    //cos_deg = Math.cos(60.0/180.0*Math.PI);  //cos 30度
                     if((phaseList.get(targetInd).getGeometricData().getY()-phaseList.get(targetInd).getGeometricData().getHeight()/2) < Newy)
                     {
                         double diff_x = phaseList.get(targetInd).getGeometricData().getX()-CenterX;

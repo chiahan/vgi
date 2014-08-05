@@ -1,14 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package vgi.layout.hierarchical;
 
 import java.awt.geom.Point2D;
 import java.util.*;
 
 /**
- *
+ * The abstract data structure of the given automata
+ * <p>
+ *  <b>Hgraph</b> divides to 
+ * </p>
  * @author x1213
  */
 public class Hgraph {
@@ -247,10 +246,56 @@ public class Hgraph {
             new_layer.set(i+1, r);
         }       
         edgePositionAdjusting(new_layer);
+        new_layer = vertexOrderingReverse_ESK(new_layer);
+        //vertex ordering again
+        for (int i = 0; i < new_layer.size()-1; ++i) {
+            List<Object> r = vertexOrdering_ESK_twoLayer(new_layer.get(i), new_layer.get(i+1));
+            new_layer.set(i+1, r);
+        }
+        edgePositionAdjusting(new_layer);
+        new_layer = vertexOrderingReverse_ESK(new_layer);
+        for (int i = 0; i < new_layer.size()-1; ++i) {
+            List<Object> r = vertexOrdering_ESK_twoLayer(new_layer.get(i), new_layer.get(i+1));
+            new_layer.set(i+1, r);
+        }
+        edgePositionAdjusting(new_layer);
+        new_layer = vertexOrderingReverse_ESK(new_layer);
+        for (int i = 0; i < new_layer.size()-1; ++i) {
+            List<Object> r = vertexOrdering_ESK_twoLayer(new_layer.get(i), new_layer.get(i+1));
+            new_layer.set(i+1, r);
+        }   
+        new_layer = vertexOrderingReverse_ESK(new_layer);
+        //edgePositionAdjusting(new_layer);
         //return the new layering
         return new_layer;
     }
 
+    public void reverseAllEdge() {
+        for (Hedge e : inEdgeList) {
+            e.reverse();
+        }
+    }
+
+    public List<List<Object>> vertexOrderingReverse_ESK(List<List<Object>> layer) {
+        //reverse the layer
+        List<List<Object>> new_layer = new ArrayList<List<Object>>();  
+        for (int i = layer.size()-1; i >= 0; --i) {
+            new_layer.add(layer.get(i));
+        }  
+        //vertex ordering
+        reverseAllEdge();
+        for (int i = 0; i < new_layer.size()-1; ++i) {
+            List<Object> r = vertexOrdering_ESK_twoLayer(new_layer.get(i), new_layer.get(i+1));
+            new_layer.set(i+1, r);
+        }
+        reverseAllEdge();
+        //reverse the layer
+        List<List<Object>> new_layer2 = new ArrayList<List<Object>>();  
+        for (int i = new_layer.size()-1; i >= 0; --i) {
+            new_layer2.add(new_layer.get(i));
+        }  
+        return new_layer2;
+    }
     /**
      * Subroutine of vertexOrdering_ESK
      * Based on sec 3.1 of the paper
@@ -264,6 +309,10 @@ public class Hgraph {
         List<Object> newL2 = new ArrayList<Object>();
         
         //calculate measure of objects in l1
+        for (int i = 0; i < l1.size(); ++i) {
+             measure.put(l1.get(i), (double)i);
+        } 
+        /*
         for (int i = 0; i < l1.size(); ++i) {
             int j = i;
             while (true) {
@@ -280,7 +329,7 @@ public class Hgraph {
             }
             double jj = j;
             measure.put(l1.get(i), jj);
-        }
+        }*/
         
         //calculate measure of objects in l2 (by median heuristic)
         for (int i = 0; i < l2.size(); ++i) {     
@@ -341,10 +390,16 @@ public class Hgraph {
                     measure_list.add(measure.get(v.inEdge(i))); 
                 }
             }
-            m += measure_list.get((measure_list.size()-1)/2);
-            m += measure_list.get(((measure_list.size())/2));
-            m /= 2;
+            for (int i = 0; i < measure_list.size(); ++i) {
+                m += measure_list.get(i);
+            }
+            m /= measure_list.size();
+            if (measure_list.size() == 0) 
+            {
+                m = 0.0;
+            }
         }
+        
         return m;
     }
 
@@ -645,15 +700,44 @@ public class Hgraph {
             Hvertex v = (Hvertex)obj;
             for (int i = 0; i < v.inDeg(); ++i) {
                 if (r.contains(v.inAdj(i))) {
-                    index_list.add(i); 
+                    index_list.add(r.indexOf(v.inAdj(i)));
                 }
                 else if (r.contains(v.inEdge(i))) {
-                    index_list.add(i);
+                    index_list.add(r.indexOf(v.inEdge(i)));
                 }
             }
-            m = index_list.get((index_list.size()-1)/2);
+            //m = index_list.get((index_list.size()-1)/2);
+            m = median(index_list);
         }
         return m;
+    }
+    
+    public int median(List<Integer> s) {
+        if (s.size() == 0) {
+            return -1;
+        }
+        List<Integer> ss = new ArrayList<Integer>();
+        ss.addAll(s);
+        //sorting
+        int min = 999999;
+        int ind = -1;
+        for (int i = 0; i < ss.size(); ++i) {
+            for (int j = i; j < ss.size(); ++j) {
+                if (s.get(j) < min) {
+                    min = s.get(i);
+                    ind = i;
+                }
+            }
+            ss.set(ind, ss.get(0));
+            ss.set(i, min);
+        }
+        //return min
+        if (ss.size() % 2 == 0) {
+            return ss.get(ss.size()/2-1);
+        }
+        else {
+            return ss.get(ss.size()/2);
+        }
     }
 
       /**
