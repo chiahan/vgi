@@ -355,15 +355,11 @@ public class HierarchicalLayoutAutomata {
                     
                     if (y1 > y2) {
                         tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y2+1)));
-                        //tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y2+1)));
                         tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y1-1)));
-                        //tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y1-1)));
                     }
                     else {
                         tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y2-1)));
-                        //tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y2-1)));
                         tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y1+1)));
-                        //tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y1+1)));
                     }
                     /*
                     if (y1 > y2) {

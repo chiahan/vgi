@@ -739,7 +739,7 @@ public class Hgraph {
             return ss.get(ss.size()/2);
         }
     }
-
+    
       /**
      * (Roughly) Alg3 of "Fast and Simple Horizontal Coordinate Assignment"
      * The algorithm in essence is LPA.
