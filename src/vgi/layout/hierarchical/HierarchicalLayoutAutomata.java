@@ -314,6 +314,20 @@ public class HierarchicalLayoutAutomata {
                         continue;
                     }
                     int ex = assignment.get(ee);
+                    
+                    if (y1 > y2) {
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y2+1)));
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y2+1)));
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y1-1)));
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y1-1)));
+                    }
+                    else {
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y2-1)));
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y2-1)));
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y1+1)));
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y1+1)));
+                    }
+                    /*
                     if (y1 > y2) {
                         tgd.controlPoints.add(new Point2D.Double((xPos.get(x2)+xPos.get(ex))/2.0, (yPos.get(y2)+yPos.get(y2+1))/2.0));
                         tgd.controlPoints.add(new Point2D.Double(0.3*xPos.get(x2)+0.7*xPos.get(ex), 0.3*yPos.get(y2)+0.7*yPos.get(y2+1)));
@@ -335,7 +349,7 @@ public class HierarchicalLayoutAutomata {
                         tgd.controlPoints.add(new Point2D.Double(0.05*xPos.get(x1)+0.95*xPos.get(ex), 0.05*yPos.get(y1)+0.95*yPos.get(y1+1)));
                         tgd.controlPoints.add(new Point2D.Double(0.3*xPos.get(x1)+0.7*xPos.get(ex), 0.3*yPos.get(y1)+0.7*yPos.get(y1+1)));
                         tgd.controlPoints.add(new Point2D.Double((xPos.get(x1)+xPos.get(ex))/2.0, (yPos.get(y1)+yPos.get(y1+1))/2.0));
-                    }
+                    }*/
                 }
             }
         }
