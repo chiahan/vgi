@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package vgi.layout.hierarchical;
 
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
@@ -26,8 +22,49 @@ import vgi.geometrictools.Projection;
 import vgi.layout.edgerouting.EdgeRoutingBranchingLayout;
 
 /**
- *
- * @author x1213
+ * Apply hierarchical layout algorithm on the abstracted data structure - 
+ * <i>Hgraph</i>
+ * <p>
+ *  <b>HierarchicalLayoutAutomata</b> class does the following steps
+ * to apply layout algorithm on the target automata.
+ * <ol>
+ *  <li>
+ *      Abstracts the data structures of the target automata as <i>Hgraph</i>
+ *  </li>
+ *  <li>
+ *      Applies the hierarchical layout algorithm on the Hgraph instance via 
+ *      operating both <i>Hvertex</i> and <i>Hedge</i>
+ *  </li>
+ *  <li>
+ *      At last, <i>postProcessing</i> method render the corresponding graph with
+ *      the result Hgraph object
+ *  </li>
+ * </ol>
+ * </p>
+ * 
+ * <p>
+ *  The Hierarchical layout algorithm refers to <i>Fast and Simple 
+ * Horizontal Coordinate Assignment</i>, which is published by <i>Ulrik Brandes
+ * </i> and <i>Boris Köpf</i> in 2002. And the algorithm is based on 
+ * <i>Sugiyama's Framework</i>, which goes with four basic steps
+ * <ol>
+ *  <li>
+ *      cycle removal
+ *  </li>
+ *  <li>
+ *      layout assignment
+ *  </li>
+ *  <li>
+ *      vertex ordering
+ *  </li>
+ *  <li>
+ *      coordination assignment
+ *  </li>
+ * </ol>
+ * </p>
+ * After the above four steps, HierarchicalLayoutAutomata render the automata
+ * with <i>postProcessing()</i> method.
+ * @author Yi-Jun Chang
  */
 public class HierarchicalLayoutAutomata {
     Projection projection;
@@ -138,10 +175,11 @@ public class HierarchicalLayoutAutomata {
     }
     
     public void xCoordinationAssignment() {
-        assignment = graph.xCoordinateAssignment_BK(layer2);
+        assignment = graph.xCoordinateAssignment_BK_balanced(layer2);
     }
     
     public void postProcessing() {
+
         //(x,y) in the drawing algorithm = (xPos[x],yPos[y]) in the drawing
         List<Double> xPos = new ArrayList<Double>();
         List<Double> yPos = new ArrayList<Double>();
@@ -212,7 +250,7 @@ public class HierarchicalLayoutAutomata {
         //calculate yPos
         for (int i = 0; i < layer.size(); ++i) {
             if (i == 0) {
-                yPos.add(upmost - 2.0*yHeight.get(0));
+                yPos.add(upmost - 0.5*yHeight.get(0));
             }
             else {
                 yPos.add(yPos.get(i-1) - 2.0*yHeight.get(i-1) - 2.0*yHeight.get(i));
@@ -222,7 +260,8 @@ public class HierarchicalLayoutAutomata {
         //calculate xPos
         for (int i = 0; i < xWidth.size(); ++i) {
             if (i == 0) {
-                xPos.add(leftmost + 0.7*xWidth.get(0));
+                //xPos.add(leftmost + 0.7*xWidth.get(0));
+                xPos.add(leftmost);
             }
             else {
                 xPos.add(xPos.get(i-1) + 0.7*xWidth.get(i-1) + 0.7*xWidth.get(i));
@@ -259,7 +298,7 @@ public class HierarchicalLayoutAutomata {
              
         //draw transitions
         List<State> StateList = new ArrayList<State>();
-        StateList.addAll(automata.getAllStates());  
+        StateList.addAll(automata.getAllStates());
         for (State s1: StateList) {
             List<Transition> tl = s1.getIncomingTransitions();
             for (Transition t: tl) {
@@ -313,6 +352,16 @@ public class HierarchicalLayoutAutomata {
                         continue;
                     }
                     int ex = assignment.get(ee);
+                    
+                    if (y1 > y2) {
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y2+1)));
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y1-1)));
+                    }
+                    else {
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y2-1)));
+                        tgd.controlPoints.add(new Point2D.Double(xPos.get(ex), yPos.get(y1+1)));
+                    }
+                    /*
                     if (y1 > y2) {
                         tgd.controlPoints.add(new Point2D.Double((xPos.get(x2)+xPos.get(ex))/2.0, (yPos.get(y2)+yPos.get(y2+1))/2.0));
                         tgd.controlPoints.add(new Point2D.Double(0.3*xPos.get(x2)+0.7*xPos.get(ex), 0.3*yPos.get(y2)+0.7*yPos.get(y2+1)));
@@ -334,12 +383,18 @@ public class HierarchicalLayoutAutomata {
                         tgd.controlPoints.add(new Point2D.Double(0.05*xPos.get(x1)+0.95*xPos.get(ex), 0.05*yPos.get(y1)+0.95*yPos.get(y1+1)));
                         tgd.controlPoints.add(new Point2D.Double(0.3*xPos.get(x1)+0.7*xPos.get(ex), 0.3*yPos.get(y1)+0.7*yPos.get(y1+1)));
                         tgd.controlPoints.add(new Point2D.Double((xPos.get(x1)+xPos.get(ex))/2.0, (yPos.get(y1)+yPos.get(y1+1))/2.0));
-                    }
+                    }*/
                 }
             }
         }
     }
 
+    public void adjustEdgeStyle() {
+        List<State> StateList = new ArrayList<State>();
+        StateList.addAll(automata.getAllStates());
+        for (State s1: StateList) {}
+    }
+    
     public void doLayout(Automata automata_){
         automata_.refresh();
         mxGraph _graph = automata_.jgraphAutomata.graph;
@@ -352,6 +407,7 @@ public class HierarchicalLayoutAutomata {
         vertexOrdering();
         xCoordinationAssignment();
         postProcessing();
+        adjustEdgeStyle();
         automata_.refresh();
 
         int i = 6; //break point for debugging.

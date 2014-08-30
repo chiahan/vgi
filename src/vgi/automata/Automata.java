@@ -1939,8 +1939,9 @@ public class Automata implements AutomataInterface {
      * refresh all geometric/draw data in jgraphAutomata
      */
     public void refresh(){
+
         for(State state:pmAllStates){
-//            System.out.println("update: "+state);
+
             mxCell vertex=stateToCell(state);
             jgraphAutomata.updateVertexDrawingData(vertex, getStateDrawingData(state));
             jgraphAutomata.updateVertexGeometricData(vertex, getStateGeometricData(state));
@@ -1949,12 +1950,13 @@ public class Automata implements AutomataInterface {
         
         }
         for(Transition tran:pmAllTransitions){
-//            System.out.println("update: "+tran.getSourceState()+"->"+tran.getTargetState());
+
             jgraphAutomata.updateEdgeDrawingData(transitionToCell(tran), getTransitionDrawingData(tran));
             if (tran.getSourceState()==tran.getTargetState()) continue;
             
             jgraphAutomata.updateEdgeGeometricData(transitionToCell(tran), getTransitionGeometricData(tran));
         }
+
         jgraphAutomata.graph.refresh();
     }
 

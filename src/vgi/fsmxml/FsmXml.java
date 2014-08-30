@@ -276,7 +276,6 @@ public class FsmXml implements FsmXmlInterface {
 			FsmXmlException {
 		InputStream inputStream = new FileInputStream(fsmXmlFile);
 		List<Automata> automataList = this.read(inputStream);
-		inputStream.close();
 		return automataList;
 	}  // End public List<Automata> read(File fsmXmlFile)
 
@@ -299,15 +298,17 @@ public class FsmXml implements FsmXmlInterface {
 			// Check that <fsmxml xmlns="http://vaucanson.lrde.epita.fr" version="1.0"> is at the root level.
 			//
 			Tag tag = Tag.nextStartOrEnd(xmlStreamReader);
+                        System.out.println(xmlStreamReader.getVersion());
 			if ((tag == null) || (!(tag.equals(TAG_FSMXML, Tag.Type.START)))) {
 				throw new FsmXmlException("Root tag is not " + TAG_FSMXML + " so this is likely an invalid FSM XML file.");
 			} else if (!(xmlStreamReader.getNamespaceURI().equals(VAL_FSMXML_NAMESPACE))) {
 				throw new FsmXmlException("Namespace is not " + VAL_FSMXML_NAMESPACE + " so this is likely an invalid FSM XML file.");
-			} else if (!(xmlStreamReader.getVersion().equals(VAL_FSMXML_VERSION_NUMBER))) {
-				throw new FsmXmlException("VGI only supports FSM XML files whose version is " + VAL_FSMXML_VERSION_NUMBER + ".");
-			}
+			} 
+                        //else if (!(xmlStreamReader.getVersion().equals(VAL_FSMXML_VERSION_NUMBER))) {
+			//	throw new FsmXmlException("VGI only supports FSM XML files whose version is " + VAL_FSMXML_VERSION_NUMBER + ".");
+			//}
 			automataList = new ArrayList<Automata>();
-
+                        System.out.println(automataList);
 			tag = Tag.nextStartOrEnd(xmlStreamReader);
 			while ((tag != null) && (!(tag.equals(TAG_FSMXML, Tag.Type.END)))) {
 

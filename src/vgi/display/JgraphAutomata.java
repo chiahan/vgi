@@ -193,29 +193,23 @@ public class JgraphAutomata {
 
         return (mxCell) vertex;
     }
+
     public mxCell createEdge(Transition transition){
         mxCell source = null, target = null;
-//        Enumeration keys = cellTable.keys();
         State sourceState=transition.getSourceState();
         State targetState=transition.getTargetState();
         
        
-//        while (keys.hasMoreElements()) {
-//            mxCell keyCell = (mxCell) keys.nextElement();
-//            if (cellTable.get(keyCell) == sourceState) source = keyCell;
-//            if (cellTable.get(keyCell) == targetState) target = keyCell;
-//            
-//            if ((source != null) && (target != null)) break;
-//        }
+
         source=automata.stateToCell(sourceState);
         target=automata.stateToCell(targetState);
         
-        //System.out.println("jgraph transition:"+source.getValue()+"->"+target.getValue()+": "+transition.getLabel());
-        
         mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(),
                                 null, transition.getLabel(), source, target,
-                                "shape=curve;fontSize="+defaultFontSize+";textShape=default;"));
-        //cellTable.put(edge, transition);
+                                "shape=curve;fontSize="+defaultFontSize+";textShape=default;"));  // orginal one
+                                
+
+
         
         mxGeometry geometry = edge.getGeometry();
         if (geometry == null) {
@@ -257,14 +251,8 @@ public class JgraphAutomata {
                 points.add(new mxPoint(locControlPoint));
             }  // End while (iterateControlPoints.hasNext())
             geometry.setPoints(points);
-            //System.out.println("jgraph pt: "+geometry.getPoints());
         }
 
-        /*if(source==target){
-            addControlPoint(edge,source.getGeometry().getCenterX()+source.getGeometry().getWidth(),
-                                 source.getGeometry().getCenterY());
-        }
-        */
         graph.setSelectionCell(edge);
         TransitionDrawingData drawingdata = automata.getTransitionDrawingData(transition);
         if (drawingdata != null) {
@@ -274,12 +262,6 @@ public class JgraphAutomata {
             graph.setCellStyles("endArrow", drawingdata.getEndArrow());
 
         }
-       
-//        if (this.visibilityGraph != null) {
-//                this.visibilityGraph.addHindrance(edge);
-//        }
-        
-      //  graph.refresh();
         
         return edge;
         
@@ -397,17 +379,20 @@ public class JgraphAutomata {
     }
     
     
-    public void addEdgeControlPoint(mxCell edge,Point2D point,boolean reverse){
+    public void addEdgeControlPoint(mxCell edge, Point2D point, boolean reverse){
         
         
         //\/\/\/\/ use the projection to get coordinate for screen
-        Point2D loc=projection.getLocFromGeo(point);
+        Point2D loc = projection.getLocFromGeo(point);
         
-        List<mxPoint> points =edge.getGeometry().getPoints();
-        if(points==null) points=new ArrayList<mxPoint>();
+        List<mxPoint> points = edge.getGeometry().getPoints();
+
+        if (points==null) {
+            points = new ArrayList<mxPoint>();
+        }
         points.add(new mxPoint(loc));
 
-        //to sort
+        // to sort
         if (points.size() > 1) {
             Collections.sort(points, new Comparator<mxPoint>(){
 
@@ -429,31 +414,14 @@ public class JgraphAutomata {
     public void addEdgeControlPoint(mxCell edge,Point2D point,boolean reverse,int index){
         
         //\/\/\/\/ use the projection to get coordinate for screen
-        Point2D loc=projection.getLocFromGeo(point);
+        Point2D loc = projection.getLocFromGeo(point);
         
-        List<mxPoint> points =edge.getGeometry().getPoints();
-        if(points==null) points=new ArrayList<mxPoint>();
+        List<mxPoint> points = edge.getGeometry().getPoints();
+        if (points==null) points = new ArrayList<mxPoint>();
         points.add(index,new mxPoint(loc));
-        
-        //to sort
-//        if (points.size() > 1) {
-//            Collections.sort(points, new Comparator<mxPoint>(){
-//
-//                @Override
-//                public int compare(mxPoint t, mxPoint t1) {
-//                    int flag =Double.compare(t.getX(),t1.getX());
-//                    if (flag == 0) {
-//                            return Double.compare(t.getY(),t1.getY());
-//                    }else{
-//                            return flag;
-//                    }
-//                }
-//                
-//            });
-//            if(reverse) Collections.reverse(points);
-//        }
+
         edge.getGeometry().setPoints(points);
-//        System.out.println("add cPoints: "+points);
+
     }
     
     public void setEdgeControlPoint(mxCell edge,List<Point2D> points){
@@ -464,7 +432,8 @@ public class JgraphAutomata {
             points_.add(new mxPoint(loc));
         }
         edge.getGeometry().setPoints(points_);
-        //System.out.println("setPoints: "+points_);
+        
+        // update edge style
         graph.refresh();
     }
     
@@ -486,20 +455,7 @@ public class JgraphAutomata {
     
     public void resetControlPoint(mxCell cell) {
         
-//        mxCell source=(mxCell)cell.getSource();
-//        mxCell target=(mxCell)cell.getTarget();
-        
-//        List<mxPoint> points = new ArrayList<mxPoint>();
 
-//
-//        if(source==target){ //loop
-//            mxPoint loopCtrlPt=new mxPoint();
-//            loopCtrlPt.setX(source.getGeometry().getCenterX()+source.getGeometry().getWidth());
-//            loopCtrlPt.setY(source.getGeometry().getCenterY());
-//            points.add(loopCtrlPt);
-//            
-//            
-//        }
         if(cell==null) return;
         if(cell.getGeometry()==null) return;
         if(cell.getGeometry().getPoints()==null) return;
@@ -574,7 +530,6 @@ public class JgraphAutomata {
    }
 
     public void updateEdgeGeometricData(mxCell edge, TransitionGeometricData geodata) {
-        //
         setEdgeControlPoint(edge,geodata.controlPoints);
         
         // TODO: other geodata
@@ -645,7 +600,6 @@ public class JgraphAutomata {
                 edge = (mxCell) edges[j];
                 if (edge.getTerminal(true) == null) {
                     edge.getGeometry().setTerminalPoint(terminalPoint, true);
-//                    System.out.println("initial terminal pt: "+edge.getGeometry().getTerminalPoint(true));
                 } 
             } 
        }else{
@@ -656,12 +610,13 @@ public class JgraphAutomata {
                 edge = (mxCell) edges[j];
                 if (edge.getTerminal(false) == null) {
                     edge.getGeometry().setTerminalPoint(terminalPoint, false);
-//                    System.out.println("final terminal pt: "+edge.getGeometry().getTerminalPoint(false));
                 } 
             } 
        }
         graph.refresh();
     }
+
+
     public Point2D computeInitialFinalTermPoint(mxCell vertex,double direction,double lengthRatio){
         
         Point2D stateSize=new Point2D.Double(vertex.getGeometry().getWidth(),vertex.getGeometry().getHeight());
@@ -735,14 +690,10 @@ public class JgraphAutomata {
     }
     
     public void groupCells(Object[] cells){
-       
-//        mxCell group=(mxCell)graph.groupCells(null, DEFAULT_LABEL_DISTANCE, cells);
-//        graph.setCellStyles("strokeWidth", "3", cells);
         
     }
     public void ungroupCells(Object[] cells){
-        
-//        graph.setCellStyles("strokeWidth","1",cells);
+
     }
 
 }
