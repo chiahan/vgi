@@ -162,7 +162,7 @@ public class CircularLayoutAutomata {
         
             //vertexMapList=this.sortVertices(automata_);
         setSortedVerticesLocation();
-            
+        System.out.println("vertexMapList:"+vertexMapList);
         adjustEdgeCurves(true);    
 
     }
@@ -248,6 +248,7 @@ public class CircularLayoutAutomata {
             
 //        replaceAutomata.expandStatesToVertexGroups();
         vertexMapList=replaceAutomata.expandStatesToCircularLayout(vertexMapList,center);
+        
         vertexNum=vertexMapList.size();
         
         automata=automata_;
@@ -647,7 +648,12 @@ public class CircularLayoutAutomata {
                         State source=edge.getSourceState();
                         
                         //if two end are in same group
-                        if(source.getGroupID()==target.getGroupID() && source.getGroupID()!=-1) continue;
+                        if(source.getGroupID()==target.getGroupID() && source.getGroupID()!=-1)
+                        {
+                            //System.out.println("@@@@anna selfloop");
+                            continue;
+                        }
+                        
                         
                         //if(target!=cell && target!=null){
                         if(target!=null && source!=null){
@@ -677,7 +683,7 @@ public class CircularLayoutAutomata {
                     }
             }
             
-            for(Transition tr:addedTopEdge) System.out.println("top: "+tr.getSourceState()+"->"+tr.getTargetState());
+            for(Transition tr:addedTopEdge) System.out.println("!!!!top: "+tr.getSourceState()+"->"+tr.getTargetState());
             for(Transition tr:addedBottomEdge) System.out.println("bottom: "+tr.getSourceState()+"->"+tr.getTargetState());
             
 
@@ -726,7 +732,8 @@ public class CircularLayoutAutomata {
              }
         }
         
-        for(Transition topEdge:addedTopEdge){
+        for(Transition topEdge:addedTopEdge)
+        {
             int sourceInd=vertexMapList.indexOf(topEdge.getSourceState());
             int targetInd=vertexMapList.indexOf(topEdge.getTargetState());
             
@@ -735,13 +742,15 @@ public class CircularLayoutAutomata {
             if(targetInd<sourceInd){ c=targetInd; d=sourceInd;}
 
 //            if(c<a && d<b && a<d){
-            if(checkTwoEdgeCrossing(a,b,c,d)){
+            if(checkTwoEdgeCrossing(a,b,c,d))
+            {
                 topCrossing++;
                 System.out.println("    top: "+sourceInd+"->"+targetInd);
             }
         }
         
-        for(Transition bottomEdge:addedBottomEdge){
+        for(Transition bottomEdge:addedBottomEdge)
+        {
             int sourceInd=vertexMapList.indexOf(bottomEdge.getSourceState());
             int targetInd=vertexMapList.indexOf(bottomEdge.getTargetState());
             
@@ -779,11 +788,14 @@ public class CircularLayoutAutomata {
     }
     
     
-    private void setEdgesCurveHeight(boolean ignoreStateInGroups){
+    private void setEdgesCurveHeight(boolean ignoreStateInGroups)
+    {
         
-        Collections.sort(addedTopEdge, new Comparator<Transition>(){
+        Collections.sort(addedTopEdge, new Comparator<Transition>()
+        {
                     @Override
-                    public int compare(Transition t, Transition t1) {
+                    public int compare(Transition t, Transition t1) 
+                    {
                             Integer sourceIndex=vertexMapList.indexOf(t.getSourceState());
                             Integer targetIndex=vertexMapList.indexOf(t.getTargetState());
                             Integer sourceIndex1=vertexMapList.indexOf(t1.getSourceState());
@@ -818,8 +830,11 @@ public class CircularLayoutAutomata {
                             
               });
                 int len=addedTopEdge.size();
-                for(int i=0;i<len;++i){
+                /*!!!here*/
+                for(int i=0;i<len;++i)
+                {
                     setEdgeCurveHeight(addedTopEdge.get(i),true);
+                    System.out.println("~~~Annaaddtop:"+addedTopEdge.get(i));
                 }
 
                 len=addedBottomEdge.size();
@@ -834,10 +849,38 @@ public class CircularLayoutAutomata {
      * 
      * TODO: keep all given y coordinates > 0
      */
-    private void setEdgeCurveHeight(Transition edge,boolean isTopEdge){
+    private void setEdgeCurveHeight(Transition edge,boolean isTopEdge)
+    {
+        
+        //for test
+        int flag = 0;
+        int type = 0;
+        /*
+         * 8 types
+         * 
+         * 1:based on right
+         * 2:based on left
+         * 3:based on top
+         * 4:based on buttom
+         * 5:based on right and top
+         * 6:basek on right and buttom
+         * 7:based on left and top
+         * 8:based in left and buttom
+         */
         
         int sourceInd=vertexMapList.indexOf(edge.getSourceState());
         int targetInd=vertexMapList.indexOf(edge.getTargetState());
+        int [] MedianState = new int [50];
+        int MedianStateSize = 0;
+        /*if(targetInd>sourceInd)
+        {
+            MedianStateSize = targetInd-sourceInd;
+        }
+        else
+        {
+            MedianStateSize = sourceInd-targetInd;
+        }*/
+        
         System.out.println("Height of "+edge.getSourceState()+" "+sourceInd+" -> "+edge.getTargetState()+" "+targetInd);
         
         List<Point2D> points=new ArrayList<Point2D>();
@@ -859,34 +902,44 @@ public class CircularLayoutAutomata {
             return;
         }
         
-        if(sourceInd==targetInd){  //loop
+      if(sourceInd==targetInd)
+      {  //loop
             controlPoint1=new Point2D.Double();
             
             controlPoint1.setLocation(
-                    center.getX()+Math.cos(theta1)*radius*1.2,
-                    center.getY()+Math.sin(theta1)*radius*1.2
+                    center.getX()+Math.cos(theta1)*radius*1.28,
+                    center.getY()+Math.sin(theta1)*radius*1.28
                     );
-            System.out.println("loop"+controlPoint1);
+            System.out.println("@@@@@loop"+controlPoint1);
 //            points.add(controlPoint1);
             
-        }else{
-         if(Math.abs(sourceInd-targetInd)==1 || Math.abs(sourceInd-targetInd)==vertexNum-1){
+      }
+      
+      /*here!!*/
+      else
+      {
+         if(Math.abs(sourceInd-targetInd)==1 || Math.abs(sourceInd-targetInd)==vertexNum-1)
+         {
              
             System.out.println("neighbor: "+sourceInd+" , "+targetInd);
             automata.resetTransitionControlPoint(edge);
              // if there is edge from target-source
-             if(automata.hasBackwardTransition(edge)){
+             if(automata.hasBackwardTransition(edge))
+             {
                 controlPoint1=new Point2D.Double();
                  
                 double midtheta=(theta1+theta2)/2;
                 if(Math.max(theta1,theta2)>Math.PI*5/2 && Math.min(theta2,theta1)<Math.PI*3/2){
                     midtheta+=Math.PI;
                 }
-                if(targetInd>sourceInd){ 
+                if(targetInd>sourceInd)
+                { 
                     controlPoint1.setLocation(
                             center.getX()+Math.cos(midtheta)*radius*1.05,
                             center.getY()+Math.sin(midtheta)*radius*1.05);
-                }else{
+                }
+                else
+                {
                     controlPoint1.setLocation(
                             center.getX()+Math.cos(midtheta)*radius*0.95,
                             center.getY()+Math.sin(midtheta)*radius*0.95);
@@ -898,34 +951,66 @@ public class CircularLayoutAutomata {
              }
 //                controlPoint1.setLocation();
              
-         }else{
-             
-            if(!isTopEdge){ //keep bottom edges as straight lines
+         }
+         else
+         {
+         
+            if(!isTopEdge)
+            { //keep bottom edges as straight lines
                 automata.resetTransitionControlPoint(edge);
                 return;
             }
+            System.out.println("====source:"+edge.getSourceState()+" target:"+edge.getTargetState());         
             int a=sourceInd;
             int b=targetInd;
-            if(targetInd>sourceInd){ 
-                a=targetInd; b=sourceInd;
+   
+            if(targetInd>sourceInd)
+            { 
+                a=targetInd; 
+                b=sourceInd;
 //                State tmp=source;
 //                source=target;
 //                target=tmp;
             }
-
+            System.out.println("#######a="+a+"b="+b);
+            
+            /*decide type here*/
+            double Mx = 0;
+            double My = 0;
+            Mx = (edge.getSourceState().getGeometricData().getX()+edge.getTargetState().getGeometricData().getX())/2;
+            My = (edge.getSourceState().getGeometricData().getY()+edge.getTargetState().getGeometricData().getY())/2;
+            if(Math.abs(center.getY()-My)<1 && center.getX() < Mx) type = 1;
+            if(Math.abs(center.getY()-My)<1 && center.getX() > Mx) type = 2;
+            if(Math.abs(center.getX()-Mx)<1 && center.getY() < My) type = 3;
+            if(Math.abs(center.getX()-Mx)<1 && center.getY() > My) type = 4;
+            if(Math.abs(center.getY()-My)>1&&Math.abs(center.getX()-Mx)>1&&center.getX() < Mx && center.getY() < My) type = 5;
+            if(Math.abs(center.getY()-My)>1&&Math.abs(center.getX()-Mx)>1&&center.getX() < Mx && center.getY() > My) type = 6;
+            if(Math.abs(center.getY()-My)>1&&Math.abs(center.getX()-Mx)>1&&center.getX() > Mx && center.getY() < My) type = 7;
+            if(Math.abs(center.getY()-My)>1&&Math.abs(center.getX()-Mx)>1&&center.getX() > Mx && center.getY() > My) type = 8;
+            System.out.println("====type:"+type+"src"+sourceInd+"trg"+targetInd);
             
             double midtheta=(theta1+theta2)/2;
             boolean reverse=false;
-            if((a-b)>Math.abs((a+vertexNum/2)%vertexNum-(b+vertexNum/2)%vertexNum)){
+            int A = a;
+            int B = b;
+            if((a-b)>Math.abs((a+vertexNum/2)%vertexNum-(b+vertexNum/2)%vertexNum))
+            {
                 midtheta=Math.PI+midtheta;
                 reverse=true;
             }
-            if(reverse){
+            if(reverse)
+            {
                 a=(a+vertexNum/2)%vertexNum;
                 b=(b+vertexNum/2)%vertexNum;
                 int t=Math.max(a,b);
                 b=Math.min(a,b); a=t;
             }
+            System.out.println("#######a="+a+"b="+b+"reverse="+reverse);
+            /*here*/
+            //int [] MedianState = new int [50];
+            // int MedianStateSize = 0;
+            
+            
             System.out.println("    theta1= "+theta1+" theta2= "+theta2+" midtheta= "+midtheta+" reverse= "+reverse);
             
                     
@@ -942,13 +1027,158 @@ public class CircularLayoutAutomata {
                 //double height=lineY;
                 
                 // find the one has largest height between source and target
+                
                 int middleInd=0;
                 double middleHeight=0;//radius;
-                for(int i=b+1;i<a;++i){
+                MedianStateSize = a-(b+1)+1;
+                
+                
+                
+                double largestTopHeight = -10000;
+                double largestButtomHeight = -10000;
+                double largestLeftWidth = -10000;
+                double largestRightWidth = -10000;
+                int islarge = 0;
+                /*reverse means across a circle like 1,9(9,0,1)*/
+                if(reverse)
+                {
+                    System.out.println("for loop begin:"+(b)+" "+a);
+                    for(int i=A;i<=B+vertexNum;++i)//b:1 a:9
+                    {
+        //                    double tmpHeight=vertexMapList.get(i).getGeometricData().getLocation().distance(center)+
+        //                            vertexMapList.get(i).getGeometricData().getHeight()/2;
+                        //MedianState[]
+                        int tmpi;
+                        if(i >= vertexNum)
+                        {
+                            tmpi = i%vertexNum;
+                        }
+                        else
+                        {
+                            tmpi = i;
+                        }
+                        System.out.println("$$$$$i="+tmpi);
+                        double regionleftwidth = Math.abs(vertexMapList.get(tmpi).getGeometricData().getX()-vertexMapList.get(tmpi).getGeometricData().getWidth()/2-center.getX());
+                        double regionrightwidth = Math.abs(vertexMapList.get(tmpi).getGeometricData().getX()+vertexMapList.get(tmpi).getGeometricData().getWidth()/2-center.getX());
+                        double regiontopheight = Math.abs(vertexMapList.get(tmpi).getGeometricData().getY()+vertexMapList.get(tmpi).getGeometricData().getHeight()/2-center.getY());
+                        double regionbuttomheight = Math.abs(vertexMapList.get(tmpi).getGeometricData().getY()-vertexMapList.get(tmpi).getGeometricData().getHeight()/2-center.getY());
+                        //double tmpHeight=vertexMapList.get(i).getGeometricData().getHeight()/2;
+                        System.out.println("regionrightwidth:"+regionrightwidth+" "+i);
+                        System.out.println("regionleftwidth:"+regionleftwidth);
+                        System.out.println("regiontopheight:"+regiontopheight);
+                        System.out.println("regionbuttomheight:"+regionbuttomheight);
+                        if(vertexMapList.get(tmpi).getGeometricData().getWidth() > 100
+                             ||vertexMapList.get(tmpi).getGeometricData().getHeight() >100)
+                        {
+                            islarge = 1;
+                        }
+                        if(largestTopHeight < regiontopheight)
+                        {
+                            largestTopHeight = regiontopheight;
+                        }
+                        if(largestButtomHeight < regionbuttomheight)
+                        {
+                            largestButtomHeight = regionbuttomheight;
+                        }
+                        if(largestLeftWidth < regionleftwidth)
+                        {
+                            largestLeftWidth = regionleftwidth;
+                        }
+                        if(largestRightWidth < regionrightwidth)
+                        {
+                            largestRightWidth = regionrightwidth;
+                        }
+                        //if(middleHeight<tmpHeight)
+                        //{ 
+                          //  middleInd=i;
+                            //middleHeight=tmpHeight;
+                        //}
+                    }
+                }
+                else//not reverse
+                {
+                    System.out.println("for loop begin:"+(b)+" "+a);
+                    for(int i=b;i<=a;++i)
+                    {
+        //                    double tmpHeight=vertexMapList.get(i).getGeometricData().getLocation().distance(center)+
+        //                            vertexMapList.get(i).getGeometricData().getHeight()/2;
+                        //MedianState[]
+                        double regionleftwidth = Math.abs(vertexMapList.get(i).getGeometricData().getX()-vertexMapList.get(i).getGeometricData().getWidth()/2-center.getX());
+                        double regionrightwidth = Math.abs(vertexMapList.get(i).getGeometricData().getX()+vertexMapList.get(i).getGeometricData().getWidth()/2-center.getX());
+                        double regiontopheight = Math.abs(vertexMapList.get(i).getGeometricData().getY()+vertexMapList.get(i).getGeometricData().getHeight()/2-center.getY());
+                        double regionbuttomheight = Math.abs(vertexMapList.get(i).getGeometricData().getY()-vertexMapList.get(i).getGeometricData().getHeight()/2-center.getY());
+                        //double tmpHeight=vertexMapList.get(i).getGeometricData().getHeight()/2;
+                        System.out.println("regionrightwidth:"+regionrightwidth+" "+i);
+                        System.out.println("regionleftwidth:"+regionleftwidth);
+                        System.out.println("regiontopheight:"+regiontopheight);
+                        System.out.println("regionbuttomheight:"+regionbuttomheight);
+                        if(vertexMapList.get(i).getGeometricData().getWidth() > 100
+                             ||vertexMapList.get(i).getGeometricData().getHeight() >100)
+                        {
+                                islarge = 1;
+                        }
+                        if(largestTopHeight < regiontopheight)
+                            {
+                            largestTopHeight = regiontopheight;
+                        }
+                        if(largestButtomHeight < regionbuttomheight)
+                        {
+                            largestButtomHeight = regionbuttomheight;
+                        }
+                        if(largestLeftWidth < regionleftwidth)
+                        {
+                            largestLeftWidth = regionleftwidth;
+                        }
+                        if(largestRightWidth < regionrightwidth)
+                        {
+                            largestRightWidth = regionrightwidth;
+                        }
+                        //if(middleHeight<tmpHeight)
+                        //{ 
+                          //  middleInd=i;
+                            //middleHeight=tmpHeight;
+                        //}
+                    }
+                }
+                
+                System.out.println("########islarget="+islarge);
+                for(int i=b+1;i<a;++i)
+                {
 //                    double tmpHeight=vertexMapList.get(i).getGeometricData().getLocation().distance(center)+
 //                            vertexMapList.get(i).getGeometricData().getHeight()/2;
+                    //MedianState[]
+                    //double regionleftwidth = vertexMapList.get(i).getGeometricData().getX()-vertexMapList.get(i).getGeometricData().getWidth()/2;
+                    //double regionrightwidth = vertexMapList.get(i).getGeometricData().getX()+vertexMapList.get(i).getGeometricData().getWidth()/2;
+                    //double regiontopheight = vertexMapList.get(i).getGeometricData().getY()+vertexMapList.get(i).getGeometricData().getHeight()/2;
+                    //double regionbuttomheight = vertexMapList.get(i).getGeometricData().getY()-vertexMapList.get(i).getGeometricData().getHeight()/2;
                     double tmpHeight=vertexMapList.get(i).getGeometricData().getHeight()/2;
-                    if(middleHeight<tmpHeight){ 
+                    //System.out.println("regionrightwidth:"+regionrightwidth+i);
+                    //System.out.println("regionleftwidth:"+regionleftwidth);
+                    //System.out.println("regiontopheight:"+regiontopheight);
+                    //System.out.println("regionbuttomheight:"+regionbuttomheight);
+                    //if(vertexMapList.get(i).getGeometricData().getWidth() > 100
+                        // ||vertexMapList.get(i).getGeometricData().getHeight() >100)
+                    //{
+                       // islarge = 1;
+                    //}
+                    /*if(largestTopHeight < regiontopheight)
+                    {
+                        largestTopHeight = regiontopheight;
+                    }
+                    if(largestButtomHeight > regionbuttomheight)
+                    {
+                        largestButtomHeight = regionbuttomheight;
+                    }
+                    if(largestLeftWidth > regionleftwidth)
+                    {
+                        largestLeftWidth = regionleftwidth;
+                    }
+                    if(largestRightWidth < regionrightwidth)
+                    {
+                        largestRightWidth = regionrightwidth;
+                    }*/
+                    if(middleHeight<tmpHeight)
+                    { 
                         middleInd=i;
                         middleHeight=tmpHeight;
                     }
@@ -962,7 +1192,8 @@ public class CircularLayoutAutomata {
                 double tmpAnglea=0;
                 double tmpAngleb=0;
                 
-                for(int i=0;i<len;++i){
+                for(int i=0;i<len;++i)
+                {
                     
                     Transition tmp=addedTopEdge.get(i);
                     int tmpSourceInd=vertexMapList.indexOf(tmp.getSourceState());
@@ -973,7 +1204,8 @@ public class CircularLayoutAutomata {
                     int d=tmpTargetInd;
                     if(tmpTargetInd>tmpSourceInd){ c=tmpTargetInd; d=tmpSourceInd;}
                     
-                    if(reverse){
+                    if(reverse)
+                    {
                         c=(c+vertexNum/2)%vertexNum;
                         d=(d+vertexNum/2)%vertexNum;
                         int t=Math.max(c,d);
@@ -986,14 +1218,17 @@ public class CircularLayoutAutomata {
                             
                     if((a==c && b==d))continue;
                     
-                      if(a>=c && b<=d){ 
+                      if(a>=c && b<=d)
+                      { 
 //                              (reverse && (a+n2)%vertexNum<=(c+n2)%vertexNum && (b+n2)%vertexNum>=(d+n2)%vertexNum)){
-                        if(tmp.getGeometricData().controlPoints.size()>1){
+                        if(tmp.getGeometricData().controlPoints.size()>1)
+                        {
                             
                             Point2D point=tmp.getGeometricData().controlPoints.get(0);
                             
 //                            double tmpHeight=point.distance(center);
                             double tmpHeight=point.distance(vertexMapList.get(tmpSourceInd).getGeometricData().getLocation());
+                            //ßSystem.out.println("Anna!!!"+vertexMapList.get(tmpSourceInd));
                             System.out.println("---- tmpHeight= "+tmpHeight);
                             if(height<=tmpHeight){
                                     height=tmpHeight*Math.pow((a-b)/(c-d),higher*.1+1); higher++;
@@ -1007,7 +1242,8 @@ public class CircularLayoutAutomata {
                             stateLocation=vertexMapList.get(tmpTargetInd).getGeometricData().getLocation();
                             double tmpb=Math.atan2(farpoint.getY()-stateLocation.getY(),farpoint.getX()-stateLocation.getX())+Math.PI*2;
                             
-                            if(tmpSourceInd<tmpTargetInd){
+                            if(tmpSourceInd<tmpTargetInd)
+                            {
                                 double t=tmpa; tmpa=tmpb; tmpb=t;
                             }
                                  
@@ -1210,24 +1446,737 @@ public class CircularLayoutAutomata {
                      }
                 //}
                 System.out.println("    angle= "+tmpAnglea+" "+tmpAngleb+" height= "+(height*1.5));
-//                if(!reverse){     
-                if(sourceInd>targetInd){
+//                if(!reverse){  
+                
+                //!!!here
+                if(sourceInd>targetInd)
+                {
+                    System.out.println("Anna~~source>target~~Anna");
+                    System.out.println("largestrightwidth:"+largestRightWidth);
+                    System.out.println("largestleftwidth:"+largestLeftWidth);
+                    System.out.println("largesttopheight:"+largestTopHeight);
+                    System.out.println("largestbuttomheight:"+largestButtomHeight);
                     
-                    controlPoint1.setLocation(
-                                source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea),
-                                source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
-                    controlPoint2=new Point2D.Double();
-                    controlPoint2.setLocation(
-                                target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb),
-                                target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
-                }else{
-                    controlPoint1.setLocation(
-                                source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb),
-                                source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
-                    controlPoint2=new Point2D.Double();
-                    controlPoint2.setLocation(
-                                target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea),
-                                target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
+                    if(islarge == 1)//if state enlarge
+                    {
+                        if(type == 1)//right
+                        {
+                            controlPoint1.setLocation(
+                                        source.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea),
+                                        source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(
+                                        target.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb),
+                                        target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
+                        }
+                        else if(type == 2)//left
+                        {
+                            controlPoint1.setLocation(
+                                        source.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea),
+                                        source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(
+                                        target.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb),
+                                        target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
+                        }
+                        else if(type == 3)//top
+                        {
+                            double c1x = source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea);
+                            double c1y = source.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+                            double c2x = target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb);
+                            double c2y = target.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+                            if(Math.abs(c2y - center.getY()) > largestTopHeight*1)
+                            {
+                                System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                double level = Math.abs(c2y- center.getY())/largestTopHeight;
+                                controlPoint1.setLocation(c1x,c1y-(level-1)*largestTopHeight);
+                                controlPoint2=new Point2D.Double();
+                                controlPoint2.setLocation(c2x,c2y-(level-1)*largestTopHeight);
+                            }
+                            else
+                            {
+                                controlPoint1.setLocation(c1x,c1y);
+                                controlPoint2=new Point2D.Double();
+                                controlPoint2.setLocation(c2x,c2y);
+                        
+                            }
+                        }
+                        else if(type == 4)//buttom
+                        {
+                            double c1x = source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea);
+                            double c1y = source.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+                            double c2x = target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb);
+                            double c2y = target.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+                            
+                            if(Math.abs(c1y-center.getY()) > largestButtomHeight*1)
+                            {
+                                System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                
+                                double level = Math.abs(c1y- center.getY())/largestButtomHeight;
+                                controlPoint1.setLocation(c1x,c1y+largestButtomHeight*(level-1));
+                                controlPoint2=new Point2D.Double();
+                                controlPoint2.setLocation(c2x,c2y+largestButtomHeight*(level-1));
+                            }
+                            else
+                            {
+                                controlPoint1.setLocation(c1x,c1y);
+                                controlPoint2=new Point2D.Double();
+                                controlPoint2.setLocation(c2x,c2y);
+                            }
+                        }
+                        else if(type == 5)
+                        {
+                            double c1x = source.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea);
+                            double c1y = source.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+                            double c2x = target.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb);
+                            double c2y = target.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+
+                            if(c1y > c2y)
+                            {
+
+                                if(Math.abs(c1y-center.getY()) > largestTopHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c1y- center.getY())/largestTopHeight;
+                                    //controlPoint1.setLocation(c1x,c1y-largestTopHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y-largestTopHeight*(level-1));
+                                    c1y = c1y-largestTopHeight*(level-1);
+                                    c2y = c2y-largestTopHeight*(level-1);
+                                }
+                                /*else if(Math.abs())
+                                {
+                                    
+                                }*/
+                                else
+                                {
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c2y-center.getY()) > largestTopHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c2y- center.getY())/largestTopHeight;
+                                    //controlPoint1.setLocation(c1x,c1y-largestTopHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y-largestTopHeight*(level-1));
+                                    c1y = c1y-largestTopHeight*(level-1);
+                                    c2y = c2y-largestTopHeight*(level-1);
+                                }
+                                else
+                                {
+                                }
+                            }
+                            if(c1x < c2x)
+                            {
+                                if(Math.abs(c2x-center.getX())>largestRightWidth)
+                                {
+                                    System.out.print("$$$$$annabigband type5 c1x<c2x");
+                                    double level = Math.abs(c2x-center.getX())/largestRightWidth;
+                                    c1x = c1x-largestRightWidth*(level-1);
+                                    c2x = c2x-largestRightWidth*(level-1);
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c1x-center.getX())>largestRightWidth)
+                                {
+                                    System.out.print("$$$$$annabigband type5 c1x>c2x");
+                                    double level = Math.abs(c1x-center.getX())/largestRightWidth;
+                                    c1x = c1x-largestRightWidth*(level-1);
+                                    c2x = c2x-largestRightWidth*(level-1);
+                                }
+                            }
+                            controlPoint1.setLocation(c1x,c1y);
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(c2x,c2y);
+                        }
+                            
+                       
+                        else if(type == 6)
+                        {
+                            double c1x = source.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea);
+                            double c1y = source.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+                            double c2x = target.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb);
+                            double c2y = target.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+                            if(c1y > c2y)
+                            {
+
+                                if(Math.abs(c2y-center.getY()) > largestButtomHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c2y- center.getY())/largestButtomHeight;
+                                    //controlPoint1.setLocation(c1x,c1y+largestButtomHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y+largestButtomHeight*(level-1));
+                                    c1y = c1y+largestButtomHeight*(level-1);
+                                    c2y = c2y+largestButtomHeight*(level-1);
+                                }
+                                else
+                                {
+                                    
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c1y-center.getY()) > largestButtomHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c1y- center.getY())/largestButtomHeight;
+                                    //controlPoint1.setLocation(c1x,c1y+largestButtomHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y+largestButtomHeight*(level-1));
+                                    c1y = c1y+largestButtomHeight*(level-1);
+                                    c2y = c2y+largestButtomHeight*(level-1);
+                                }
+                                else
+                                {
+                                    
+                                }
+                            }
+                            if(c1x <c2x)
+                            {
+                                if(Math.abs(c2x-center.getX())>largestRightWidth)
+                                {
+                                    System.out.println("$$$$$annabugband type6 c1x<c2x");
+                                    double level = Math.abs(c2x-center.getX())/largestRightWidth;
+                                    c1x = c1x-largestRightWidth*(level-1);
+                                    c2x = c2x-largestRightWidth*(level-1);
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c1x-center.getX())>largestRightWidth)
+                                {
+                                    System.out.println("$$$$$annabugband type6 c1x>c2x");
+                                    double level = Math.abs(c1x-center.getX())/largestRightWidth;
+                                    c1x = c1x-largestRightWidth*(level-1);
+                                    c2x = c2x-largestRightWidth*(level-1);
+                                }
+                                
+                            }
+                            controlPoint1.setLocation(c1x,c1y);
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(c2x,c2y);
+                        }
+                        else if(type == 7)
+                        {
+                            double c1x = source.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea);
+                            double c1y = source.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+                            double c2x = target.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb);
+                            double c2y = target.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+                            if(c1y > c2y)
+                            {
+
+                                if(Math.abs(c1y-center.getY()) > largestTopHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c1y- center.getY())/largestTopHeight;
+                                    //controlPoint1.setLocation(c1x,c1y-largestTopHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y-largestTopHeight*(level-1));
+                                   c1y = c1y-largestTopHeight*(level-1);
+                                   c2y = c2y-largestTopHeight*(level-1);
+                                }
+                                else
+                                {
+                                    
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c2y-center.getY()) > largestTopHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c2y- center.getY())/largestTopHeight;
+                                    //controlPoint1.setLocation(c1x,c1y-largestTopHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y-largestTopHeight*(level-1));
+                                    c1y = c1y-largestTopHeight*(level-1);
+                                    c2y = c2y-largestTopHeight*(level-1);
+                                }
+                                else
+                                {
+                                   
+                                }
+                            }
+                            if(c1x < c2x)
+                            {
+                                if(Math.abs(c1x-center.getX())>largestLeftWidth)
+                                {
+                                    System.out.println("$$$$$annabigband type7 c1x<c2x");
+                                    double level = Math.abs(c1x-center.getX())/largestLeftWidth;
+                                    c1x = c1x+largestLeftWidth*(level-1);
+                                    c2x = c2x+largestLeftWidth*(level-1);
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c2x-center.getX())>largestLeftWidth)
+                                {
+                                    System.out.println("$$$$$annabigband type7 c1x>c2x");
+                                    double level = Math.abs(c2x-center.getX())/largestLeftWidth;
+                                    c1x = c1x+largestLeftWidth*(level-1);
+                                    c2x = c2x+largestLeftWidth*(level-1);
+                                }
+                            }
+                            controlPoint1.setLocation(c1x,c1y);
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(c2x,c2y);
+                        }
+                        else//type 8
+                        {
+                            double c1x = source.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea);
+                            double c1y = source.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+                            double c2x = target.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb);
+                            double c2y = target.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+                          
+                            if(c1y > c2y)
+                            {
+
+                                if(Math.abs(c2y-center.getY()) > largestButtomHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c2y- center.getY())/largestButtomHeight;
+                                    //controlPoint1.setLocation(c1x,c1y+largestButtomHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y+largestButtomHeight*(level-1));
+                                   c1y = c1y+largestButtomHeight*(level-1);
+                                   c2y = c2y+largestButtomHeight*(level-1);
+                                }
+                                else
+                                {
+                                    
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c1y-center.getY()) > largestButtomHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c1y- center.getY())/largestButtomHeight;
+                                    //controlPoint1.setLocation(c1x,c1y+largestButtomHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y+largestButtomHeight*(level-1));
+                                    c1y = c1y+largestButtomHeight*(level-1);
+                                    c2y = c2y+largestButtomHeight*(level-1);
+                                }
+                                else
+                                {
+                                    
+                                }
+                            }
+                            if(c1x <c2x)
+                            {
+                                if(Math.abs(c2x-center.getX())>largestLeftWidth)
+                                {
+                                    System.out.println("$$$$$annabgband type8 c1x<c2x");
+                                    double level = Math.abs(c2x-center.getX())/largestLeftWidth;
+                                    c1x = c1x+largestLeftWidth*(level-1);
+                                    c2x = c2x+largestLeftWidth*(level-1);
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c1x-center.getX())>largestLeftWidth)
+                                {
+                                    System.out.println("$$$$$annabgband type8 c1x>c2x");
+                                    double level = Math.abs(c1x-center.getX())/largestLeftWidth;
+                                    c1x = c1x+largestLeftWidth*(level-1);
+                                    c2x = c2x+largestLeftWidth*(level-1);
+                                }
+                                
+                            }
+                            controlPoint1.setLocation(c1x,c1y);
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(c2x,c2y);
+                        }
+                    }
+                    else
+                    {
+                        controlPoint1.setLocation(
+                                    source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea),
+                                    source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
+                        controlPoint2=new Point2D.Double();
+                        controlPoint2.setLocation(
+                                    target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb),
+                                    target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
+                    }
+                    
+                    //flag = 3;
+                    System.out.println("Anna~~source>target~~Anna");
+                    //controlPoint1.setLocation(
+                                //source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea),
+                                //source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
+                    //controlPoint2=new Point2D.Double();
+                    //controlPoint2.setLocation(
+                                //target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb),
+                                //target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
+                }
+                else//if target>source
+                {
+                     System.out.println("Anna~~target>source~~Anna");
+                    System.out.println("largestrightwidth:"+largestRightWidth);
+                    System.out.println("largestleftwidth:"+largestLeftWidth);
+                    System.out.println("largesttopheight:"+largestTopHeight);
+                    System.out.println("largestbuttomheight:"+largestButtomHeight);
+                    System.out.println("Anna~~target>source~~Anna");
+                    
+                    if(islarge == 1)
+                    {
+                        if(type == 1)//right
+                        {
+                            controlPoint1.setLocation(
+                                        source.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb),
+                                        source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(
+                                        target.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea),
+                                        target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
+                        }
+                        else if(type == 2)//left
+                        {
+                            controlPoint1.setLocation(
+                                        source.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb),
+                                        source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(
+                                        target.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea),
+                                        target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
+                        }
+                        else if(type == 3)//top
+                        {
+                            double c1x = source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb);
+                            double c1y = source.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+                            double c2x = target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea);
+                            double c2y = target.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+                            if(Math.abs(c2y - center.getY()) > largestTopHeight*1)
+                            {
+                                System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                double level = Math.abs(c2y- center.getY())/largestTopHeight;
+                                controlPoint1.setLocation(c1x,c1y-(level-1)*largestTopHeight);
+                                controlPoint2=new Point2D.Double();
+                                controlPoint2.setLocation(c2x,c2y-(level-1)*largestTopHeight);
+                            }
+                            else
+                            {
+                                controlPoint1.setLocation(c1x,c1y);
+                                controlPoint2=new Point2D.Double();
+                                controlPoint2.setLocation(c2x,c2y);
+                        
+                            }
+                        }
+                        else if(type == 4)//buttom
+                        {
+                            double c1x = source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb);
+                            double c1y = source.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+                            double c2x = target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea);
+                            double c2y = target.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+                            
+                            if(Math.abs(c1y-center.getY()) > largestButtomHeight*1)
+                            {
+                                System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                
+                                double level = Math.abs(c1y- center.getY())/largestButtomHeight;
+                                controlPoint1.setLocation(c1x,c1y+largestButtomHeight*(level-1));
+                                controlPoint2=new Point2D.Double();
+                                controlPoint2.setLocation(c2x,c2y+largestButtomHeight*(level-1));
+                            }
+                            else
+                            {
+                                controlPoint1.setLocation(c1x,c1y);
+                                controlPoint2=new Point2D.Double();
+                                controlPoint2.setLocation(c2x,c2y);
+                            }
+                        }
+                        else if(type == 5)
+                        {
+                            double c1x = source.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb);
+                            double c1y = source.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+                            double c2x = target.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea);
+                            double c2y = target.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+
+                            if(c1y > c2y)
+                            {
+
+                                if(Math.abs(c1y-center.getY()) > largestTopHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c1y- center.getY())/largestTopHeight;
+                                    //controlPoint1.setLocation(c1x,c1y-largestTopHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y-largestTopHeight*(level-1));
+                                   c1y = c1y-largestTopHeight*(level-1);
+                                   c2y = c2y-largestTopHeight*(level-1);
+                                }
+                                else
+                                {
+                                    //controlPoint1.setLocation(c1x,c1y);
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y);
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c2y-center.getY()) > largestTopHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c2y- center.getY())/largestTopHeight;
+                                    //controlPoint1.setLocation(c1x,c1y-largestTopHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y-largestTopHeight*(level-1));
+                                    c1y = c1y-largestTopHeight*(level-1);
+                                    c2y = c2y-largestTopHeight*(level-1);
+                                }
+                                else
+                                {
+                                    //controlPoint1.setLocation(c1x,c1y);
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y);
+                                }
+                            }
+                            /*fix right and left big band*/
+                            if(c1x < c2x)
+                            {
+                                if(Math.abs(c2x-center.getX()) > largestRightWidth)
+                                {
+                                    System.out.println("$$$$$annabigband type5 c1x<c2x");
+                                    double level = Math.abs(c2x-center.getX())/largestRightWidth;
+                                    c1x = c1x - (level-1)*largestRightWidth;
+                                    c2x = c2x- (level-1)*largestRightWidth;
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c1x-center.getX()) > largestRightWidth)
+                                {
+                                    System.out.println("$$$$$annabidband type5 c1x>c2x");
+                                    double level = Math.abs(c1x-center.getX())/largestRightWidth;
+                                    c1x = c1x - (level-1)*largestRightWidth;
+                                    c2x = c2x- (level-1)*largestRightWidth; 
+                                }
+                            }
+                            controlPoint1.setLocation(c1x,c1y);
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(c2x,c2y);
+                        }
+                            
+                       
+                        else if(type == 6)
+                        {
+                            double c1x = source.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb);
+                            double c1y = source.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+                            double c2x = target.getGeometricData().getX()+Math.abs(largestRightWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea);
+                            double c2y = target.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+                            if(c1y > c2y)
+                            {
+
+                                if(Math.abs(c2y-center.getY()) > largestButtomHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c2y- center.getY())/largestButtomHeight;
+                                    //controlPoint1.setLocation(c1x,c1y+largestButtomHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y+largestButtomHeight*(level-1));
+                                    c1y = c1y+largestButtomHeight*(level-1);
+                                    c2y = c2y+largestButtomHeight*(level-1);
+                                }
+                                
+                            }
+                            else
+                            {
+                                if(Math.abs(c1y-center.getY()) > largestButtomHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c1y- center.getY())/largestButtomHeight;
+                                    //controlPoint1.setLocation(c1x,c1y+largestButtomHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y+largestButtomHeight*(level-1));
+                                    c1y = c1y+largestButtomHeight*(level-1);
+                                    c2y = c2y+largestButtomHeight*(level-1);
+                                }
+                                else
+                                {
+                                    
+                                }
+                                
+                            }
+                            if(c1x > c2x)
+                            {
+                                if(Math.abs(c1x-center.getX())>largestRightWidth)
+                                {
+                                    System.out.println("$$$$$annabigband type6 c1x>c2x");
+                                    double level = Math.abs(c1x-center.getX())/largestRightWidth;
+                                    c1x = c1x - (level-1)*largestRightWidth;
+                                    c2x = c2x - (level-1)*largestRightWidth;
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c2x-center.getX())>largestRightWidth)
+                                {
+                                    System.out.println("$$$$$annabigband type6 c1x<c2x");
+                                    double level = Math.abs(c2x-center.getX())/largestRightWidth;
+                                    c1x = c1x - (level-1)*largestRightWidth;
+                                    c2x = c2x - (level-1)*largestRightWidth;
+                                }
+                            }
+                            controlPoint1.setLocation(c1x,c1y);
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(c2x,c2y);
+                        }
+                        else if(type == 7)
+                        {
+                            double c1x = source.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb);
+                            double c1y = source.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+                            double c2x = target.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea);
+                            double c2y = target.getGeometricData().getY()+Math.abs(largestTopHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+                            if(c1y > c2y)
+                            {
+
+                                if(Math.abs(c1y-center.getY()) > largestTopHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c1y- center.getY())/largestTopHeight;
+                                    //controlPoint1.setLocation(c1x,c1y-largestTopHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y-largestTopHeight*(level-1));
+                                    c1y = c1y-largestTopHeight*(level-1);
+                                    c2y = c2y-largestTopHeight*(level-1);
+                                   
+                                }
+                                else
+                                {
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c2y-center.getY()) > largestTopHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c2y- center.getY())/largestTopHeight;
+                                    //controlPoint1.setLocation(c1x,c2y-largestTopHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y-largestTopHeight*(level-1));
+                                    c1y = c1y-largestTopHeight*(level-1);
+                                    c2y = c2y=largestTopHeight*(level-1);
+                                }
+                                else
+                                {
+                                   
+                                }
+                            }
+                            if(c1x < c2x)
+                            {
+                                if(Math.abs(c1x-center.getX()) > largestLeftWidth)
+                                {
+                                    System.out.println("$$$$$anabigband type7 c1x<c2x");
+                                    double level = Math.abs(c1x-center.getX())/largestLeftWidth;
+                                    c1x = c1x+largestLeftWidth*(level-1);
+                                    c2x = c2x+largestLeftWidth*(level-1);
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c2x-center.getX()) > largestLeftWidth)
+                                {
+                                    System.out.println("$$$$$anabigband type7 c1x>c2x");
+                                    double level = Math.abs(c2x-center.getX())/largestLeftWidth;
+                                    c1x = c1x+largestLeftWidth*(level-1);
+                                    c2x = c2x+largestLeftWidth*(level-1);
+                                }
+                                
+                            }
+                            controlPoint1.setLocation(c1x,c1y);
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(c2x,c2y);
+                        }
+                        else//type 8
+                        {
+                            double c1x = source.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAngleb);
+                            double c1y = source.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAngleb);
+                            double c2x = target.getGeometricData().getX()-Math.abs(largestLeftWidth)*0.5+(height*1.5)*Math.cos(tmpAnglea);
+                            double c2y = target.getGeometricData().getY()-Math.abs(largestButtomHeight)*0.5+(height*1.5)*Math.sin(tmpAnglea);
+                          
+                            if(c1y > c2y)
+                            {
+
+                                if(Math.abs(c2y-center.getY()) > largestButtomHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c2y- center.getY())/largestButtomHeight;
+                                    //controlPoint1.setLocation(c1x,c1y+largestButtomHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y+largestButtomHeight*(level-1));
+                                    c1y = c1y+largestButtomHeight*(level-1);
+                                    c2y = c2y+largestButtomHeight*(level-1);
+                                }
+                                else
+                                {
+                                    
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c1y-center.getY()) > largestButtomHeight*1)
+                                {
+                                    System.out.println("=====AnnaBigBand"+c1x+" "+c1y+" "+c2x+" "+c2y);
+                                    double level = Math.abs(c1y- center.getY())/largestButtomHeight;
+                                    //controlPoint1.setLocation(c1x,c1y+largestButtomHeight*(level-1));
+                                    //controlPoint2=new Point2D.Double();
+                                    //controlPoint2.setLocation(c2x,c2y+largestButtomHeight*(level-1));
+                                    c1y = c1y+largestButtomHeight*(level-1);
+                                    c2y = c2y+largestButtomHeight*(level-1);
+                                }
+                                else
+                                {
+                                }
+                            }
+                            if(c1x <c2x)
+                            {
+                                if(Math.abs(c1x-center.getX()) > largestLeftWidth)
+                                {
+                                    System.out.println("$$$$$annabigband type8 c1x<c2x");
+                                    double level = Math.abs(c1x-center.getX())/largestLeftWidth;
+                                    c1x = c1x+largestLeftWidth*(level-1);
+                                    c2x = c2x+largestLeftWidth*(level-1);
+                                }
+                            }
+                            else
+                            {
+                                if(Math.abs(c2x-center.getX()) > largestLeftWidth)
+                                {
+                                    System.out.println("$$$$$annabigband type8 c1x>c2x");
+                                    double level = Math.abs(c2x-center.getX())/largestLeftWidth;
+                                    c1x = c1x+largestLeftWidth*(level-1);
+                                    c2x = c2x+largestLeftWidth*(level-1);
+                                }
+                            }
+                            controlPoint1.setLocation(c1x,c1y);
+                            controlPoint2=new Point2D.Double();
+                            controlPoint2.setLocation(c2x,c2y);
+                        }
+                    }
+                    else
+                    {
+                        controlPoint1.setLocation(
+                                    source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb),
+                                    source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
+                        controlPoint2=new Point2D.Double();
+                        controlPoint2.setLocation(
+                                    target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea),
+                                    target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
+                    }
+                    
+                    //controlPoint1.setLocation(
+                                //source.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAngleb),
+                                //source.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAngleb));
+                    
+                    //controlPoint2=new Point2D.Double();
+                    //controlPoint2.setLocation(
+                                //target.getGeometricData().getX()+(height*1.5)*Math.cos(tmpAnglea),
+                                //target.getGeometricData().getY()+(height*1.5)*Math.sin(tmpAnglea));
                 
                 }
 //                }
@@ -1239,9 +2188,13 @@ public class CircularLayoutAutomata {
 //         
      }        
 //            points.clear();
-            if(controlPoint1!=null){
+        //if(flag == 3)//for test now just source>target
+        //{
+            //control point1 close to source
+            if(controlPoint1!=null)
+            {
                 points.add(controlPoint1);
-                    if(controlPoint2!=null) points.add(controlPoint2);
+                    //if(controlPoint2!=null) points.add(controlPoint2);
                 //System.out.println(controlPoint1);
 
                 //edge.getGeometry().setPoints(points);
@@ -1249,6 +2202,22 @@ public class CircularLayoutAutomata {
                 tgd.controlPoints=points;
                 automata.setTransitionGeometricData(edge, tgd);
             }
+            
+            //control point2 close to target
+            if(controlPoint2!=null)
+            {
+                points.add(controlPoint2);
+                    //if(controlPoint2!=null) points.add(controlPoint2);
+                //System.out.println(controlPoint1);
+
+                //edge.getGeometry().setPoints(points);
+                TransitionGeometricData tgd=automata.getTransitionGeometricData(edge);
+                tgd.controlPoints=points;
+                automata.setTransitionGeometricData(edge, tgd);
+            }
+        //}
+
+            
             
 //             placeLableToBound(edge);
         
