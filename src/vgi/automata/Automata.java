@@ -5,6 +5,7 @@ package vgi.automata;
  * the editor.
  */
 import com.mxgraph.model.mxCell;
+import com.mxgraph.util.mxConstants;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.*;
@@ -1151,41 +1152,72 @@ public class Automata implements AutomataInterface {
         
        // pmStateGeometricData=geoData;
     }
-    /*
-     *  get global transition drawing data for the automata,
-     *  for undefined attributes, use those defined in vgi default
+
+
+    /**
+     * get global transition drawing data for the automata,
+     * for undefined attributes, use those defined in vgi default
+     * @return 
      */
     @Override
     public TransitionDrawingData getAutomataTransitionDrawingData() {
-       TransitionDrawingData dtdd=jgraphXInternalFrame.vgi.defaultTransitionDrawingData; 
-       
-       String strokeColor=pmTransitionDrawingData.getStrokeColor();
-       if(strokeColor==null) strokeColor=dtdd.getStrokeColor();
-       
-       float strokeWidth=pmTransitionDrawingData.getStrokeWidth();
-       if(strokeWidth<0) strokeWidth=dtdd.getStrokeWidth();
-       
-       String startArrow=pmTransitionDrawingData.getStartArrow();
-       if(startArrow==null) startArrow=dtdd.getStartArrow();
-       
-       String endArrow=pmTransitionDrawingData.getEndArrow();
-       if(endArrow==null) endArrow=dtdd.getEndArrow();
+
+        TransitionDrawingData dtdd = jgraphXInternalFrame.vgi.defaultTransitionDrawingData;
+
+        String strokeColor = pmTransitionDrawingData.getStrokeColor();
+        if ( strokeColor == null ) strokeColor = dtdd.getStrokeColor();
+
+        float strokeWidth = pmTransitionDrawingData.getStrokeWidth();
+        if ( strokeWidth < 0 ) strokeWidth = dtdd.getStrokeWidth();
+
+        String startArrow = pmTransitionDrawingData.getStartArrow();
+        if( startArrow == null ) startArrow = dtdd.getStartArrow();
+
+        String endArrow = pmTransitionDrawingData.getEndArrow();
+        if ( endArrow == null ) endArrow = dtdd.getEndArrow();
+
+        String edgeStyle = pmTransitionDrawingData.getEdgeStyle();
+        if ( edgeStyle == null ) edgeStyle = dtdd.getEdgeStyle();
         
-       return new TransitionDrawingData(strokeColor,strokeWidth,startArrow,endArrow);
+        String shape = pmTransitionDrawingData.getShape();
+        if ( shape == null ) shape = dtdd.getShape();
+
+        return new TransitionDrawingData(strokeColor,
+                                        strokeWidth,
+                                        startArrow,
+                                        endArrow,
+                                        edgeStyle,
+                                        shape);
+
     }
-    /*
-     *  set global transition drawing data for the automata,
-     *  only non-null attributes can be applied 
+
+
+    /**
+     * Set global transition drawing data for the automata,
+     * only non-null attributes can be applied 
+     * @param drawingData 
      */
     @Override
     public void setAutomataTransitionDrawingData(TransitionDrawingData drawingData) {
-        //pmTransitionDrawingData=drawingData;
         
-        if(drawingData.getStrokeColor()!=null) pmTransitionDrawingData.setStrokeColor(drawingData.getStrokeColor());
-        if(drawingData.getStrokeWidth()>0) pmTransitionDrawingData.setStrokeWidth(drawingData.getStrokeWidth());
-        
-        if(drawingData.getStartArrow()!=null) pmTransitionDrawingData.setStartArrow(drawingData.getStartArrow());
-        if(drawingData.getEndArrow()!=null) pmTransitionDrawingData.setEndArrow(drawingData.getEndArrow());
+        if ( drawingData.getStrokeColor() != null ) {
+            pmTransitionDrawingData.setStrokeColor(drawingData.getStrokeColor());
+        }
+        if ( drawingData.getStrokeWidth() > 0 ) {
+            pmTransitionDrawingData.setStrokeWidth(drawingData.getStrokeWidth());
+        }
+        if ( drawingData.getStartArrow() != null ) {
+            pmTransitionDrawingData.setStartArrow(drawingData.getStartArrow());
+        }
+        if ( drawingData.getEndArrow() != null ) {
+            pmTransitionDrawingData.setEndArrow(drawingData.getEndArrow());
+        }
+        if ( drawingData.getEdgeStyle() != null ) {
+            pmTransitionDrawingData.setEdgeStyle(drawingData.getEdgeStyle());
+        }
+        if ( drawingData.getEdgeStyle() != null ) {
+            pmTransitionDrawingData.setShape(drawingData.getShape());
+        }
         
     }
 
@@ -1265,31 +1297,59 @@ public class Automata implements AutomataInterface {
         state.setGeometricData(geodata);
         jgraphAutomata.updateVertexGeometricData(stateToCell(state),getStateGeometricData(state));
     }
-    
-    /*
-     *  get single state drawing data
-     *  for undefined attributes, use those defined in automata
+
+
+    /**
+     * Get single state drawing data
+     * for undefined attributes, use those defined in automata
+     * @param transition
+     * @return 
      */
-    public TransitionDrawingData getTransitionDrawingData(Transition transition){
+    public TransitionDrawingData getTransitionDrawingData(Transition transition) {
         
-        TransitionDrawingData tdd=transition.getDrawingData();
-        TransitionDrawingData atdd=getAutomataTransitionDrawingData();
+        TransitionDrawingData tdd = transition.getDrawingData();
+        TransitionDrawingData atdd = getAutomataTransitionDrawingData();
             
-        String strokeColor=tdd.getStrokeColor();
-        if(strokeColor==null) strokeColor=atdd.getStrokeColor();
+        String strokeColor = tdd.getStrokeColor();
+        if ( strokeColor == null ) {
+            strokeColor = atdd.getStrokeColor();
+        }
         
-        float strokeWidth=tdd.getStrokeWidth();
-        if(strokeWidth<0) strokeWidth=atdd.getStrokeWidth();
+        float strokeWidth = tdd.getStrokeWidth();
+        if ( strokeWidth < 0 ) {
+            strokeWidth = atdd.getStrokeWidth();
+        }
         
-        String startArrow=tdd.getStartArrow();
-        if(startArrow==null) startArrow=atdd.getStartArrow();
+        String startArrow = tdd.getStartArrow();
+        if ( startArrow == null) {
+            startArrow = atdd.getStartArrow();
+        }
         
-        String endArrow=tdd.getEndArrow();
-        if(endArrow==null) endArrow=atdd.getEndArrow();
+        String endArrow = tdd.getEndArrow();
+        if ( endArrow == null ) {
+            endArrow = atdd.getEndArrow();
+        }
+
+        String edgeStyle = tdd.getEdgeStyle();
+        if ( edgeStyle == null ) {
+            edgeStyle = atdd.getEdgeStyle();
+        }
         
-        return new TransitionDrawingData(strokeColor,strokeWidth,startArrow,endArrow);
-      
+        String shape = tdd.getShape();
+        if ( shape == null ) {
+            shape = atdd.getShape();
+        }
+        
+        return new TransitionDrawingData(strokeColor,
+                                        strokeWidth,
+                                        startArrow,
+                                        endArrow,
+                                        edgeStyle,
+                                        shape);
+
     }
+
+
     public TransitionGeometricData getTransitionGeometricData(Transition transition){
         TransitionGeometricData tgd=transition.getGeometricData();
         
@@ -1297,10 +1357,24 @@ public class Automata implements AutomataInterface {
         
         return tgd;
     }
-    public void setTransitionDrawingData(Transition transition,TransitionDrawingData drawingdata){
+
+
+    /**
+     * Set up the given transition drawing data, with given drawing data
+     * @param transition
+     * @param drawingdata
+     */
+    public void setTransitionDrawingData(Transition transition,
+                                        TransitionDrawingData drawingdata) {
+
         transition.setDrawingData(drawingdata);
-        jgraphAutomata.updateEdgeDrawingData(transitionToCell(transition),getTransitionDrawingData(transition));
+        jgraphAutomata.updateEdgeDrawingData(transitionToCell(transition),
+                                            getTransitionDrawingData(transition));
+
+
     }
+
+    
     public void setTransitionGeometricData(Transition transition, TransitionGeometricData geodata){
         transition.setGeometricData(geodata);
         jgraphAutomata.updateEdgeGeometricData(transitionToCell(transition),getTransitionGeometricData(transition));
@@ -1938,7 +2012,7 @@ public class Automata implements AutomataInterface {
     /*
      * refresh all geometric/draw data in jgraphAutomata
      */
-    public void refresh(){
+    public void refresh() {
 
         for(State state:pmAllStates){
 
@@ -1949,9 +2023,12 @@ public class Automata implements AutomataInterface {
             if(state.getFinal()!=null) jgraphAutomata.setIniFinGeometricData(vertex,getIniFinGeometricData(state, false), false);
         
         }
+
         for(Transition tran:pmAllTransitions){
 
             jgraphAutomata.updateEdgeDrawingData(transitionToCell(tran), getTransitionDrawingData(tran));
+            System.out.println("edgeStyle: "
+                    + transitionToCell(tran).getStyle());
             if (tran.getSourceState()==tran.getTargetState()) continue;
             
             jgraphAutomata.updateEdgeGeometricData(transitionToCell(tran), getTransitionGeometricData(tran));
@@ -2172,169 +2249,272 @@ public class Automata implements AutomataInterface {
 
             setIniFinGeometricData(state,ifgd,isIni);
         }
+
+
+        /**
+         * (What) is this class for?
+         * get the initial or final geometric data, with given state
+         * @param state
+         * @param isIni
+         * @return 
+         */
         public IniFinGeometricData getIniFinGeometricData(State state, boolean isIni){
-            
-            // TODO: compare with default style!
-            if(isIni){
+
+
+            if ( isIni ) {
                 
-                if(state.getInitial()==null) return null;
+                if ( state.getInitial() == null ) return null;
                 
-                IniFinGeometricData igd=new IniFinGeometricData();
-                IniFinGeometricData sigd=state.getInitial().geodata;
-                IniFinGeometricData aigd=getAutomataIniFinGeometricData(true);
+                IniFinGeometricData igd = new IniFinGeometricData();
+                IniFinGeometricData sigd = state.getInitial().geodata;
+                IniFinGeometricData aigd = getAutomataIniFinGeometricData(true);
                 
-                //if(sigd==null) return aigd;
+
+                if( sigd.direction == null) {
+                    igd.direction = aigd.direction;
+                } else {
+                    igd.direction = sigd.direction;
+                }
                 
+                if ( sigd.lengthRatio == null) {
+                    igd.lengthRatio = aigd.lengthRatio;
+                } else {
+                    igd.lengthRatio = sigd.lengthRatio;
+                }
                 
-                if(sigd.direction==null) igd.direction=aigd.direction;
-                else igd.direction=sigd.direction;
+                if ( sigd.labelOffset == null) {
+                    igd.labelOffset = aigd.labelOffset;
+                } else {
+                    igd.labelOffset = sigd.labelOffset;
+                }
                 
-                if(sigd.lengthRatio==null) igd.lengthRatio=aigd.lengthRatio;
-                else igd.lengthRatio=sigd.lengthRatio;
-                
-                if(sigd.labelOffset==null) igd.labelOffset=aigd.labelOffset;
-                else igd.labelOffset=sigd.labelOffset;
-                
-                if(sigd.labelPosAndDist==null) igd.labelPosAndDist=aigd.labelPosAndDist;
-                else igd.labelPosAndDist=sigd.labelPosAndDist;
+                if ( sigd.labelPosAndDist == null ) {
+                    igd.labelPosAndDist = aigd.labelPosAndDist;
+                }
+                else {
+                    igd.labelPosAndDist = sigd.labelPosAndDist;
+                }
                 
                 return igd;
-            }else{
+
+            } else {
                 
-                if(state.getFinal()==null) return null;
-                IniFinGeometricData fgd=new IniFinGeometricData();
-                IniFinGeometricData sfgd=state.getFinal().geodata;
-                IniFinGeometricData afgd=getAutomataIniFinGeometricData(false);
+                if ( state.getFinal() == null ) return null;
+                IniFinGeometricData fgd = new IniFinGeometricData();
+                IniFinGeometricData sfgd = state.getFinal().geodata;
+                IniFinGeometricData afgd = getAutomataIniFinGeometricData(false);
                 
-                //if(sfgd==null) return afgd;
                 
-                if(sfgd.direction==null) fgd.direction=afgd.direction;
-                else fgd.direction=sfgd.direction;
+                if ( sfgd.direction == null ) {
+                    fgd.direction = afgd.direction;
+                } else {
+                    fgd.direction = sfgd.direction;
+                }
                 
-                if(sfgd.lengthRatio==null) fgd.lengthRatio=afgd.lengthRatio;
-                else fgd.lengthRatio=sfgd.lengthRatio;
+                if ( sfgd.lengthRatio == null ) {
+                    fgd.lengthRatio = afgd.lengthRatio;
+                } else {
+                    fgd.lengthRatio = sfgd.lengthRatio;
+                }
                 
-                if(sfgd.labelOffset==null) fgd.labelOffset=afgd.labelOffset;
-                else fgd.labelOffset=sfgd.labelOffset;
+                if ( sfgd.labelOffset == null ) {
+                    fgd.labelOffset = afgd.labelOffset;
+                } else {
+                    fgd.labelOffset = sfgd.labelOffset;
+                }
                 
-                if(sfgd.labelPosAndDist==null) fgd.labelPosAndDist=afgd.labelPosAndDist;
-                else fgd.labelPosAndDist=sfgd.labelPosAndDist;
+                if ( sfgd.labelPosAndDist == null ) {
+                    fgd.labelPosAndDist = afgd.labelPosAndDist;
+                } else {
+                    fgd.labelPosAndDist = sfgd.labelPosAndDist;
+                }
                 
                 return fgd;
+
             }
+
         }
+
+
+        /**
+         * (What) is this class for?
+         * get the initial or final geometric data, without given state
+         * @param isIni
+         * @return IniFinGeometricData fgd
+         */
         public IniFinGeometricData getAutomataIniFinGeometricData(boolean isIni){
             
-            IniFinGeometricData fgd=new IniFinGeometricData();
+            IniFinGeometricData fgd = new IniFinGeometricData();
             IniFinGeometricData afgd;
             IniFinGeometricData ffgd;
                         
-            if(isIni){
-                afgd=this.pmInitialGeometricData;
-                ffgd=jgraphXInternalFrame.vgi.defaultInitialGeometricData;
-            }else{
-                afgd=this.pmFinalGeometricData;
-                ffgd=jgraphXInternalFrame.vgi.defaultFinalGeometricData;
+            if ( isIni ) {
+
+                afgd = this.pmInitialGeometricData;
+                ffgd = jgraphXInternalFrame.vgi.defaultInitialGeometricData;
+
+            } else {
+                
+                afgd = this.pmFinalGeometricData;
+                ffgd = jgraphXInternalFrame.vgi.defaultFinalGeometricData;
             }
-            if(afgd.direction!=null) fgd.direction=afgd.direction;
-            else fgd.direction=ffgd.direction;
 
-            if(afgd.lengthRatio!=null) fgd.lengthRatio=afgd.lengthRatio;
-            else fgd.lengthRatio=ffgd.lengthRatio;
+            if ( afgd.direction != null ) {
+                fgd.direction = afgd.direction;
+            } else {
+                fgd.direction = ffgd.direction;
+            }
 
-            if(afgd.labelOffset!=null) fgd.labelOffset=afgd.labelOffset;
-            else fgd.labelOffset=ffgd.labelOffset;
+            if ( afgd.lengthRatio != null) {
+                fgd.lengthRatio = afgd.lengthRatio;
+            } else {
+                fgd.lengthRatio = ffgd.lengthRatio;
+            }
 
-            if(afgd.labelPosAndDist!=null) fgd.labelPosAndDist=afgd.labelPosAndDist;
-            else fgd.labelPosAndDist=ffgd.labelPosAndDist;
+            if ( afgd.labelOffset != null ) {
+                fgd.labelOffset = afgd.labelOffset;
+            } else {
+                fgd.labelOffset = ffgd.labelOffset;
+            }
+
+            if ( afgd.labelPosAndDist != null) {
+                fgd.labelPosAndDist = afgd.labelPosAndDist;
+            } else {
+                fgd.labelPosAndDist = ffgd.labelPosAndDist;
+            }
 
             return fgd;
            
         }
-        public TransitionDrawingData getIniFinDrawingData(State state, boolean isIni){
+
+
+        /**
+         * get initial or final transition drawing attributes (data), with given
+         * state
+         * @param state
+         * @param isIni
+         * @return 
+         */
+        public TransitionDrawingData getIniFinDrawingData(State state,
+                                                        boolean isIni) {
+
+
+            TransitionDrawingData tdd;
+            TransitionDrawingData atdd;
             
-            if(isIni){
+            if ( isIni ) {
                 
-                if(state.getInitial()==null) return null;
+                if ( state.getInitial() == null ) return null;
 
-                TransitionDrawingData tdd=state.getInitial().drawdata;
-                TransitionDrawingData atdd=getAutomataIniFinDrawingData(true);
+                tdd = state.getInitial().drawdata;
+                atdd = getAutomataIniFinDrawingData(true);
             
-                String strokeColor=tdd.getStrokeColor();
-                if(strokeColor==null) strokeColor=atdd.getStrokeColor();
-
-                float strokeWidth=tdd.getStrokeWidth();
-                if(strokeWidth<0) strokeWidth=atdd.getStrokeWidth();
-
-                String startArrow=tdd.getStartArrow();
-                if(startArrow==null) startArrow=atdd.getStartArrow();
-
-                String endArrow=tdd.getEndArrow();
-                if(endArrow==null) endArrow=atdd.getEndArrow();
-
-                return new TransitionDrawingData(strokeColor,strokeWidth,startArrow,endArrow);
+                
               
-            }else{
+            } else {
                 
-                if(state.getFinal()==null) return null;
+                if ( state.getFinal() == null ) return null;
                  
-                TransitionDrawingData tdd=state.getFinal().drawdata;
-                TransitionDrawingData atdd=getAutomataIniFinDrawingData(false);
-            
-                String strokeColor=tdd.getStrokeColor();
-                if(strokeColor==null) strokeColor=atdd.getStrokeColor();
+                tdd = state.getFinal().drawdata;
+                atdd = getAutomataIniFinDrawingData(false);
 
-                float strokeWidth=tdd.getStrokeWidth();
-                if(strokeWidth<0) strokeWidth=atdd.getStrokeWidth();
-
-                String startArrow=tdd.getStartArrow();
-                if(startArrow==null) startArrow=atdd.getStartArrow();
-
-                String endArrow=tdd.getEndArrow();
-                if(endArrow==null) endArrow=atdd.getEndArrow();
-
-                return new TransitionDrawingData(strokeColor,strokeWidth,startArrow,endArrow);
             }
+            
+            String strokeColor = tdd.getStrokeColor();
+            if ( strokeColor == null ) strokeColor = atdd.getStrokeColor();
+
+            float strokeWidth = tdd.getStrokeWidth();
+            if ( strokeWidth < 0 ) strokeWidth = atdd.getStrokeWidth();
+
+            String startArrow=tdd.getStartArrow();
+            if ( startArrow == null ) startArrow = atdd.getStartArrow();
+
+            String endArrow = tdd.getEndArrow();
+            if ( endArrow == null ) endArrow = atdd.getEndArrow();
+
+            String edgeStyle = tdd.getEdgeStyle();
+            if ( edgeStyle == null ) edgeStyle = atdd.getEdgeStyle();
+            
+            String shape = tdd.getShape();
+            if ( shape == null ) shape = atdd.getShape();
+
+            return new TransitionDrawingData(strokeColor,
+                                            strokeWidth,
+                                            startArrow,
+                                            endArrow,
+                                            edgeStyle,
+                                            shape);
+
         }
-        public TransitionDrawingData getAutomataIniFinDrawingData(boolean isIni){
-            if(isIni)
-                return new TransitionDrawingData("#FF0000",2,"none","open");
-            else
-                return new TransitionDrawingData("#FF0000",2,"open","none");
+
+
+        /**
+         * get initial or final transition drawing attributes (data), without 
+         * given state
+         * @param isIni
+         * @return 
+         */
+        public TransitionDrawingData getAutomataIniFinDrawingData(boolean isIni) {
+
+            if ( isIni ) {
+
+                return new TransitionDrawingData("#FF0000",
+                                                2,
+                                                "none",
+                                                "open",
+                                                mxConstants.EDGESTYLE_TOPTOBOTTOM,
+                                                mxConstants.SHAPE_CURVE);
+
+            } else {
+
+                return new TransitionDrawingData("#FF0000",
+                                                2,
+                                                "open",
+                                                "none",
+                                                mxConstants.EDGESTYLE_TOPTOBOTTOM,
+                                                mxConstants.SHAPE_CURVE);
+
+            }
             
         }
-        public Rectangle computeBox(List<State> states)
-        {
+
+        /**
+         * (What) is this class for? Compute the bounding box of the states?
+         * @param states
+         * @return 
+         */
+        public Rectangle computeBox(List<State> states) {
             
-            if(states.isEmpty()) return null;
+            if ( states.isEmpty() ) return null;
             
-            double left,top;
-            double right=0,bottom=0;
-            StateGeometricData sgd=this.getStateGeometricData(states.get(0));
-            left=sgd.getX()-sgd.getWidth()/2; 
-            top=sgd.getY()-sgd.getHeight()/2;
-            right=left+sgd.getWidth()/2; 
-            bottom=top+sgd.getHeight()/2;
+            double left, top;
+            double right = 0, bottom = 0;
+            StateGeometricData sgd = this.getStateGeometricData(states.get(0));
 
-            int len=states.size();
+            left   = sgd.getX() - sgd.getWidth() / 2; 
+            top    = sgd.getY() - sgd.getHeight() / 2;
+            right  = left + sgd.getWidth() / 2;
+            bottom = top + sgd.getHeight() / 2;
 
-            for(int i=0;i<len;++i)
-            {
-                State state=states.get(i);
-                sgd=this.getStateGeometricData(state);
+            int len = states.size();
 
-    //            System.out.println("box: "+left+" "+right+" "+bottom+" "+top);
-    //            System.out.println("add state: "+sgd.getX()+" "+sgd.getY()+" "+sgd.getWidth()+" "+sgd.getHeight());
+            for (int i = 0; i < len; ++i) {
 
-                left=Math.min(left,sgd.getX()-sgd.getWidth()/2);
-                top=Math.min(top,sgd.getY()-sgd.getHeight()/2);
+                State state = states.get(i);
+                sgd = this.getStateGeometricData(state);
 
-                right=Math.max(right,sgd.getX()+sgd.getWidth()/2);
-                bottom=Math.max(bottom,sgd.getY()+sgd.getHeight()/2);
+                left   = Math.min( left, sgd.getX()-sgd.getWidth()/2 );
+                top    = Math.min( top, sgd.getY()-sgd.getHeight()/2 );
+                right  = Math.max( right, sgd.getX()+sgd.getWidth()/2 );
+                bottom = Math.max( bottom, sgd.getY()+sgd.getHeight()/2 );
 
             }
         
-            return new Rectangle((int)left,(int)top,(int)(right-left),(int)(bottom-top));
+            return new Rectangle((int)left,
+                                (int)top,
+                                (int)( right-left ),
+                                (int)( bottom-top ) );
+
         }
         
         
@@ -2346,25 +2526,24 @@ public class Automata implements AutomataInterface {
             group.groupObjs(objs);
             setSelectedObjs(group.retrieveSelectedObjs(objs));
         }
+
+        
         public void unGroupObjects(List<Object> objs){
             group.unGroupObjs(objs);
             setSelectedObjs(group.retrieveSelectedObjs(objs));
-        }    
-        /*
+        }
+
+        /**
          * put states into a layout group, 
          * when applying global layouts, local layouts are preserved
+         * @param states 
          */
         public void groupVertices(List<State> states){
+
             
-            
-            // TODO: check if the selected state is already in some vertex group
-            
-            
-            int len=states.size();
-//            Object[] cells=new Object[len];
-            List<State> statesToAdd=new ArrayList<State>();
-            for(int i=0;i<len;++i){
-//                cells[i]=stateToCell(states.get(i));
+            int len = states.size();
+            List<State> statesToAdd = new ArrayList<State>();
+            for (int i = 0; i < len; ++i) {
                 statesToAdd.add(states.get(i));
             }
             
@@ -2392,113 +2571,120 @@ public class Automata implements AutomataInterface {
             
             // set vertexgroup style
             vg.setLayoutType(style);
-            
-            
-//            jgraphAutomata.groupCells(cells); // do nothing for now
+
             jgraphAutomata.graph.clearSelection();
             setSelectedStates(states);
         }
-        
+
+        /**
+         * Do the ungroup operation on the current automata
+         * @param states 
+         */
         public void ungroupVertices(List<State> states){
             
             // find the vertexGroup and delete it!
-            if(groupList==null) return;
-            for(VertexGroup vgit:groupList){
-                if(vgit.getStateList()==states){
-                   groupList.remove(vgit); break;
+            if ( groupList == null ) return;
+
+            for (VertexGroup vgit: groupList) {
+
+                if (vgit.getStateList() == states) {
+                    groupList.remove(vgit);
+                    break;
                 }
+
             }
                         
             //remove 3 stroke width 
-            for(State state:states){
-                StateDrawingData dd=state.getDrawingData();
-                dd.setStrokeWidth(dd.getStrokeWidth()-3);
+            for (State state: states) {
+
+                StateDrawingData dd = state.getDrawingData();
+                dd.setStrokeWidth( dd.getStrokeWidth() - 3 );
                 setStateDrawingData(state,dd);
-                
+
                 // reset groupID
                 state.setGroupID(-1);
+
             }
-//            jgraphAutomata.ungroupCells(cells); // do nothing for now
-            
             
         }
-        
-//        public List<State> getReplaceStateList(){
-//            GroupReplacedAutomata replaceAutomata=new GroupReplacedAutomata(this);
-//            List<State> replaceList=replaceAutomata.getRepresentStateList();
-//            System.out.println("--- in group:");
-//            for(State st:replaceList){
-//                System.out.println(st.getName());
-//                List<Transition> trans=st.getTransitions();
-//                for(Transition tr:trans){
-//                    System.out.println("   "+tr.getSourceState().getName()+" -> "+tr.getTargetState().getName());
-//                }
-//            }
-//            return replaceList;
-//        }
+
+
+        /**
+         * 
+         * @return 
+         */
         public boolean selectedStatesContainVertexGroup() {
+
            return false;
-           //automatically set to false
-           //2014/1/18
-           
-           
-//            if(groupList==null) return false;
-//            else return true;
-            /*
-            boolean thereisgroup=false;
-            boolean thereisnongroup=false;
-            for(State state:selectedStates){
-                if(state.getGroupID()>-1) thereisgroup=true;
-                if(state.getGroupID()==-1) thereisnongroup=true;
-            }
-            if(thereisgroup && thereisnongroup)
-                return true;
-            
-            return false;
-            */
+
         }
+
+
+        /**
+         * Get the list of group
+         * @return groupList
+         */
         public List<VertexGroup> getGroupList(){
-            if(groupList!=null)
-                for(VertexGroup vg:groupList){
-                    System.out.println("group: "+vg.getStateList());
+            if ( groupList != null ) {
+                for (VertexGroup vg: groupList ) {
+                    System.out.println("group: "+ vg.getStateList());
                 }
+            }
             return groupList;
         }
         
-        /*
-         * generate states randomly for experiments
+        /**
+         * Generate states randomly for experiments
+         * @param num
          */
-        public void randomGenerateStates(int num){
-            for(int i=0;i<num;++i){
-                addState(new Point2D.Double((i)*50,0));
-            }
-            int edgeNum=(int)(Math.random()*(double)num*(num-1)/4)+num;
-            int stateNum=pmAllStates.size();
-            for(int i=0;i<edgeNum;++i){
-                State s;State t;
+        public void randomGenerateStates(int num) {
+
+
+            for (int i = 0; i < num; ++i) {
                 
-                    s=pmAllStates.get((int)(Math.random()*(double)stateNum));
-                    t=pmAllStates.get((int)(Math.random()*(double)stateNum));
-                    if(t==s) t=pmAllStates.get((int)(Math.random()*(double)stateNum));
-                    
-                    boolean exist=false;
-                    for(Transition tr: pmAllTransitions){
-                        if(tr.getSourceState()==s && tr.getTargetState()==t){
-                            exist=true;break;
+                addState( new Point2D.Double((i)*50, 0) );
+            }
+
+            int edgeNum = (int)(Math.random()*(double)num*(num-1)/4) + num;
+            int stateNum = pmAllStates.size();
+
+            for (int i = 0; i < edgeNum; ++i) {
+
+                State s;
+                State t;
+                
+                s = pmAllStates.get((int)(Math.random()*(double)stateNum));
+                t = pmAllStates.get((int)(Math.random()*(double)stateNum));
+                if ( t == s ) {
+                    t = pmAllStates.get((int)(Math.random()*(double)stateNum));
+                }
+
+                boolean exist = false;
+
+                for (Transition tr: pmAllTransitions) {
+                    if (tr.getSourceState()==s && tr.getTargetState()==t) {
+                        exist=true;
+                        break;
                     }
                 }
-                if(!exist)
+
+                if ( !exist ) {
                     addTransition(s,t);
+                }
             
             }
+
             // check if there are non-connected states
-            for(State st:pmAllStates){
-                if(st.getTransitions().size()==0){
-                    State t=pmAllStates.get((int)(Math.random()*(double)stateNum));
-                    if(t==st) t=pmAllStates.get((int)(Math.random()*(double)stateNum));
+            for (State st: pmAllStates) {
+                if (st.getTransitions().size() == 0) {
+                    State t = pmAllStates.get((int)(Math.random()*(double)stateNum));
+                    if ( t == st) {
+                        t = pmAllStates.get((int)(Math.random()*(double)stateNum));
+                    }
                     addTransition(st,t);
                 }
             }
+
         }
         
 }  // End public class Automata implements AutomataInterface

@@ -204,9 +204,12 @@ public class JgraphAutomata {
         source=automata.stateToCell(sourceState);
         target=automata.stateToCell(targetState);
         
+        String style = "";
+        
         mxCell edge = (mxCell) (this.graph.insertEdge(graph.getDefaultParent(),
                                 null, transition.getLabel(), source, target,
                                 "shape=curve;fontSize="+defaultFontSize+";textShape=default;"));  // orginal one
+                                //"fontSize="+defaultFontSize+";textShape=default;"));
                                 
 
 
@@ -260,6 +263,8 @@ public class JgraphAutomata {
             graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.getStrokeWidth()));
             graph.setCellStyles("startArrow", drawingdata.getStartArrow());
             graph.setCellStyles("endArrow", drawingdata.getEndArrow());
+            graph.setCellStyles("edgeStyle", drawingdata.getEdgeStyle());
+            graph.setCellStyles("shape", drawingdata.getShape());
 
         }
         
@@ -369,12 +374,22 @@ public class JgraphAutomata {
 
     }
 
-    public void updateEdgeDrawingData(mxCell edge, TransitionDrawingData drawingdata) {
+
+    /**
+     * update the edge drawing attributes with given drawing data
+     * @param edge
+     * @param drawingdata 
+     */
+    public void updateEdgeDrawingData(mxCell edge,
+                                    TransitionDrawingData drawingdata) {
+
         graph.setSelectionCell(edge);
         graph.setCellStyles("strokeColor", drawingdata.getStrokeColor());
         graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.getStrokeWidth()));
         graph.setCellStyles("startArrow", drawingdata.getStartArrow());
         graph.setCellStyles("endArrow", drawingdata.getEndArrow());
+        graph.setCellStyles("edgeStyle", drawingdata.getEdgeStyle());
+        graph.setCellStyles("shape", drawingdata.getShape());
 
     }
     
@@ -664,7 +679,9 @@ public class JgraphAutomata {
                     graph.setCellStyles("strokeColor", drawingdata.getStrokeColor());
                     graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.getStrokeWidth()));
                     graph.setCellStyles("startArrow", drawingdata.getStartArrow());
-                    graph.setCellStyles("endArrow", drawingdata.getEndArrow());      
+                    graph.setCellStyles("endArrow", drawingdata.getEndArrow());
+                    graph.setCellStyles("edgeStyle", drawingdata.getEdgeStyle());
+                    graph.setCellStyles("shape", drawingdata.getShape());
                 } 
             } 
        }else{
@@ -678,7 +695,9 @@ public class JgraphAutomata {
                     graph.setCellStyles("strokeColor", drawingdata.getStrokeColor());
                     graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.getStrokeWidth()));
                     graph.setCellStyles("startArrow", drawingdata.getStartArrow());
-                    graph.setCellStyles("endArrow", drawingdata.getEndArrow());      
+                    graph.setCellStyles("endArrow", drawingdata.getEndArrow());
+                    graph.setCellStyles("edgeStyle", drawingdata.getEdgeStyle());
+                    graph.setCellStyles("shape", drawingdata.getShape());
                 } 
             } 
        }

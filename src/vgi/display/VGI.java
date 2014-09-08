@@ -1640,33 +1640,52 @@ public class VGI extends javax.swing.JFrame {
             JgraphXInternalFrame selected = (JgraphXInternalFrame) mainDesktopPane.getSelectedFrame();
             selected.addStateFlag=true;//ellie
     }//GEN-LAST:event_addStateButtonActionPerformed
-    /*
-     * update default state & transition drawing & geometric data when preferences are modified
+
+
+    /**
+     * updateAllDefaultDGData do the following tasks
+     * <ul>
+     *  <li>update default state</li>
+     *  <li>transition drawing</li>
+     *  <li>geometric data</li>
+     * </ul>
+     * when preferences are modified
      */
-    public void updateAllDefaultDGData(){
+    public void updateAllDefaultDGData() {
+
         try {
-            PreferenceStyleXml psx=new PreferenceStyleXml();
-            Object[] data=psx.readAllData(new File("defaultStyle.xml"));
-            defaultStateDrawingData=(StateDrawingData)data[0];
-            defaultStateGeometricData=(StateGeometricData)data[1];
-            defaultTransitionDrawingData=(TransitionDrawingData)data[2];
-            defaultInitialGeometricData=(IniFinGeometricData)data[3];
-            defaultFinalGeometricData=(IniFinGeometricData)data[4];
+
+            PreferenceStyleXml psx = new PreferenceStyleXml();
+            Object[] data = psx.readAllData( new File( "defaultStyle.xml" ) );
+
+            defaultStateDrawingData = (StateDrawingData)data[0];
+            defaultStateGeometricData = (StateGeometricData)data[1];
+            defaultTransitionDrawingData = (TransitionDrawingData)data[2];
+            defaultInitialGeometricData = (IniFinGeometricData)data[3];
+            defaultFinalGeometricData = (IniFinGeometricData)data[4];
            
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(JgraphXInternalFrame.class.getName()).log(Level.SEVERE, null, ex);
+
+            Logger.getLogger(JgraphXInternalFrame.class.getName())
+                    .log(Level.SEVERE, null, ex);
+
         } catch (FsmXmlException ex) {
-            Logger.getLogger(JgraphXInternalFrame.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JgraphXInternalFrame.class.getName())
+                    .log(Level.SEVERE, null, ex);
         }
-        
+
+
         JInternalFrame allframe[]= mainDesktopPane.getAllFrames();
-           for(JInternalFrame frame: allframe){
-               if (frame instanceof JgraphXInternalFrame){
-                    JgraphXInternalFrame jgraphXframe=(JgraphXInternalFrame)frame;
-                    jgraphXframe.updateAllGDData();
-                    
-               }
-           }
+        for (JInternalFrame frame: allframe) {
+
+            if (frame instanceof JgraphXInternalFrame){
+
+                 JgraphXInternalFrame jgraphXframe = (JgraphXInternalFrame)frame;
+                 jgraphXframe.updateAllGDData();
+
+            }
+        }
+
     }
 //    /* update default state drawing data when default style is modified
 //     * 

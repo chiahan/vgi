@@ -4,6 +4,7 @@
  */
 package vgi.display;
 
+import com.mxgraph.util.mxConstants;
 import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.logging.Level;
@@ -41,6 +42,8 @@ public class PreferenceStyleXml {
     private static final String ATR_STROKE_WIDTH = "strokeWidth";
     private static final String ATR_START_ARROW = "startArrow";
     private static final String ATR_END_ARROW = "endArrow";
+    private static final String ATR_EDGE_STYLE = "edgeStyle";
+    private static final String ATR_SHAPE = "shape";
     private static final String ATR_STATE_WIDTH="stateWidth";
     private static final String ATR_STATE_HEIGHT="stateHeight";
     private static final String ATR_STATE_SHAPE="stateShape";
@@ -367,22 +370,53 @@ public class PreferenceStyleXml {
         sgd.setHeight(height);
         return sgd;
     }
-    public TransitionDrawingData parseTransitionDrawingData(XMLStreamReader xmlStreamReader) throws XMLStreamException{
-        
-        while (xmlStreamReader.hasNext()) {
+
+
+    /**
+     * Parse transition drawing attributes from given default style xml file
+     * @param xmlStreamReader
+     * @return
+     * @throws XMLStreamException 
+     */
+    public TransitionDrawingData parseTransitionDrawingData(XMLStreamReader xmlStreamReader)
+            throws XMLStreamException {
+
+        // keep getting xmlstream till end of xml file
+        while ( xmlStreamReader.hasNext() ) {
+
             int eventType = xmlStreamReader.next();
             if (eventType == XMLStreamReader.START_ELEMENT) {
-                    if(xmlStreamReader.getLocalName()==TAG_TRANSITION_DRAWING_DATA) break;
+                    if (xmlStreamReader.getLocalName() == TAG_TRANSITION_DRAWING_DATA) {
+                        break;
+                    }
             }
+
         }
-        String strokecolor=xmlStreamReader.getAttributeValue(null, ATR_STROKE_COLOR);
-        float strokewidth=Float.valueOf(xmlStreamReader.getAttributeValue(null, ATR_STROKE_WIDTH));
-        String startarrow=xmlStreamReader.getAttributeValue(null, ATR_START_ARROW);
-        String endarrow=xmlStreamReader.getAttributeValue(null, ATR_END_ARROW);
+
+        String strokeColor = xmlStreamReader.getAttributeValue(null,
+                                                            ATR_STROKE_COLOR);
+        float strokeWidth = Float.valueOf(xmlStreamReader.getAttributeValue(null,
+                                                            ATR_STROKE_WIDTH));
+        String startArrow = xmlStreamReader.getAttributeValue(null,
+                                                            ATR_START_ARROW);
+        String endArrow = xmlStreamReader.getAttributeValue(null,
+                                                            ATR_END_ARROW);
+        String edgeStyle = xmlStreamReader.getAttributeValue(null,
+                                                            ATR_EDGE_STYLE);
+        String shape = xmlStreamReader.getAttributeValue(null,
+                                                            ATR_SHAPE);
         
-        TransitionDrawingData tdd=new TransitionDrawingData(strokecolor,strokewidth,startarrow,endarrow);
+        TransitionDrawingData tdd = new TransitionDrawingData(strokeColor,
+                                                            strokeWidth,
+                                                            startArrow,
+                                                            endArrow,
+                                                            edgeStyle,
+                                                            shape);
         return tdd;
+
     }
+
+
     IniFinGeometricData parseIniFinGeometricData(XMLStreamReader xmlStreamReader,boolean isIni) throws XMLStreamException{
         if(isIni){
         while (xmlStreamReader.hasNext()) {
@@ -411,38 +445,77 @@ public class PreferenceStyleXml {
                 
         return igd;
     }
-    public static void main(String args[]) throws FileNotFoundException, FsmXmlException{
-        File defaultStyle=new File("defaultStyle.xml");
-        File testDefaultStyle=new File("testdefaultStyle.xml");
+
+
+    /**
+     * The main execution method of PreferenceStyleXml class
+     * @param args
+     * @throws FileNotFoundException
+     * @throws vgi.fsmxml.FsmXmlInterface.FsmXmlException 
+     */
+    public static void main(String args[]) throws FileNotFoundException,
+                                                    FsmXmlException {
+
+        File defaultStyle = new File( "defaultStyle.xml" );
+        File testDefaultStyle = new File( "testdefaultStyle.xml" );
         
-        StateDrawingData sdd=new StateDrawingData("#C3D9FF","#6482B9",1);
-        StateGeometricData sgd=new StateGeometricData();
-        sgd.setSize(new Point2D.Double(50,50));
-        sgd.setShape("ellipse");
-        TransitionDrawingData tdd=new TransitionDrawingData("#6482B9",1,"none","classic");
+        StateDrawingData sdd = new StateDrawingData("#C3D9FF","#6482B9",1);
+        StateGeometricData sgd = new StateGeometricData();
+        sgd.setSize( new Point2D.Double(50, 50) );
+        sgd.setShape( "ellipse" );
+
+        TransitionDrawingData tdd = new TransitionDrawingData("#6482B9",
+                                                            1,
+                                                            "none",
+                                                            "classic",
+                                                            mxConstants.EDGESTYLE_LOOP,
+                                                            mxConstants.SHAPE_CURVE);
         
-        IniFinGeometricData igd=new IniFinGeometricData(Math.PI,0.5,new Point2D.Double(0,0),new Point2D.Double(0,0));
-        IniFinGeometricData fgd=new IniFinGeometricData(0,0.5,new Point2D.Double(0,0),new Point2D.Double(0,0));
+        IniFinGeometricData igd = new IniFinGeometricData(Math.PI,
+                                                        0.5,
+                                                        new Point2D.Double(0, 0),
+                                                        new Point2D.Double(0, 0));
+        IniFinGeometricData fgd = new IniFinGeometricData(0,
+                                                        0.5,
+                                                        new Point2D.Double(0, 0),
+                                                        new Point2D.Double(0, 0));
         
-        PreferenceStyleXml psx=new PreferenceStyleXml();
+        PreferenceStyleXml psx = new PreferenceStyleXml();
+
         try {
-                
-            ///psx.write(sdd,defaultStyle);
-            psx.write(sdd,sgd,tdd,igd,fgd,defaultStyle);
+
+            psx.write(sdd, sgd, tdd, igd, fgd, defaultStyle);
             
-                
         } catch (IOException ex) {
-            Logger.getLogger(PreferenceStyleXml.class.getName()).log(Level.SEVERE, null, ex);
+
+            Logger.getLogger(PreferenceStyleXml.class.getName())
+                    .log(Level.SEVERE, null, ex);
+
         } catch (FsmXmlException ex) {
-            Logger.getLogger(PreferenceStyleXml.class.getName()).log(Level.SEVERE, null, ex);
+
+            Logger.getLogger(PreferenceStyleXml.class.getName())
+                    .log(Level.SEVERE, null, ex);
+
         }
         
-       // StateDrawingData rsdd=psx.read(defaultStyle);
-       // System.out.println("read: "+rsdd.getFillColor()+" "+rsdd.getStrokeColor()+" "+rsdd.getStrokeWidth());
-       Object[] data=psx.readAllData(defaultStyle);
-       StateDrawingData rsdd=(StateDrawingData)data[0];
-       System.out.println("read: "+rsdd.getFillColor()+" "+rsdd.getStrokeColor()+" "+rsdd.getStrokeWidth());
-       StateGeometricData rsgd=(StateGeometricData)data[1];
-       System.out.println("read: "+rsgd.getShape()+" "+rsgd.getLocation()+" "+rsgd.getSize());
+
+        /* Dealing with state geometric and drawing data */
+        Object[] data = psx.readAllData(defaultStyle);
+        StateDrawingData rsdd = (StateDrawingData)data[0];
+        System.out.println("read: "
+                + rsdd.getFillColor()
+                + " "
+                + rsdd.getStrokeColor()
+                + " "
+                + rsdd.getStrokeWidth());
+        StateGeometricData rsgd = (StateGeometricData)data[1];
+        System.out.println("read: "
+                + rsgd.getShape()
+                + " "
+                + rsgd.getLocation()
+                + " "
+                + rsgd.getSize());
+
     }
+
 }
