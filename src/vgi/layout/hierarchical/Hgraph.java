@@ -245,26 +245,33 @@ public class Hgraph {
             List<Object> r = vertexOrdering_ESK_twoLayer(new_layer.get(i), new_layer.get(i+1));
             new_layer.set(i+1, r);
         }       
-        edgePositionAdjusting(new_layer);
+        while (true) {
+            if (!edgePositionAdjusting(new_layer)) {
+                break;
+            }
+        }
         new_layer = vertexOrderingReverse_ESK(new_layer);
         //vertex ordering again
         for (int i = 0; i < new_layer.size()-1; ++i) {
             List<Object> r = vertexOrdering_ESK_twoLayer(new_layer.get(i), new_layer.get(i+1));
             new_layer.set(i+1, r);
         }
-        edgePositionAdjusting(new_layer);
-        new_layer = vertexOrderingReverse_ESK(new_layer);
-        for (int i = 0; i < new_layer.size()-1; ++i) {
-            List<Object> r = vertexOrdering_ESK_twoLayer(new_layer.get(i), new_layer.get(i+1));
-            new_layer.set(i+1, r);
+        while (true) {
+            if (!edgePositionAdjusting(new_layer)) {
+                break;
+            }
         }
-        edgePositionAdjusting(new_layer);
         new_layer = vertexOrderingReverse_ESK(new_layer);
         for (int i = 0; i < new_layer.size()-1; ++i) {
             List<Object> r = vertexOrdering_ESK_twoLayer(new_layer.get(i), new_layer.get(i+1));
             new_layer.set(i+1, r);
         }   
         new_layer = vertexOrderingReverse_ESK(new_layer);
+        while (true) {
+            if (!edgePositionAdjusting(new_layer)) {
+                break;
+            }
+        }
         //edgePositionAdjusting(new_layer);
         //return the new layering
         return new_layer;
@@ -405,35 +412,57 @@ public class Hgraph {
 
     /**
      * After calculating vertex ordering, 
-     * we try to change the position of edge long edge of smallest length
+     * we try to change the position of long edge of smallest length
      * by testing all possible position.
      * We choose the position yielding the smallest number of crossing.
      * @param layer
      */
-    public void edgePositionAdjusting(List<List<Object>> layer) {
+    public boolean edgePositionAdjusting(List<List<Object>> layer) {
+        boolean changed = false;
         Collection<Object> finished = new ArrayList<Object>();
-        for (int i = 1; i < layer.size()-1; ++i) {
+        for (int i = 0; i < layer.size(); ++i) {
+            finished.clear();
             for (int j = 0; j < layer.get(i).size(); ++j) {
-                if (layer.get(i).get(j) instanceof Hedge && !finished.contains(layer.get(i).get(j))) {
+                if (finished.contains(layer.get(i).get(j))) {
+                    continue;
+                }
+                else if (layer.get(i).get(j) instanceof Hvertex) {
+                    Object obj = layer.get(i).get(j);
+                    if (findBestPosition(layer, i, j)) {
+                        changed = true;
+                    }
+                    finished.add(obj);
+                    --j;            
+                }
+                else if (layer.get(i).get(j) instanceof Hedge) {
                     Hedge ej = (Hedge)(layer.get(i).get(j));
                     if (layer.get(i-1).contains(ej.source()) && layer.get(i+1).contains(ej.target())) {
-                        findBestPosition(layer, i, j);
+                        if (findBestPosition(layer, i, j)) {
+                            changed = true;
+                        }
                         --j;
                         finished.add(ej);
                     }
                 }
             }
         }
+        return changed;
     }
     
-    public void findBestPosition(List<List<Object>> layer, int i, int j) {
+    //j is the object in the i th layer that we want to change position.
+    //in this procedure, we find the best position for that object in layer i.
+    //and then move it to that position.
+    //if position changes after the procedure, return true;
+    //else, return false.
+    public boolean findBestPosition(List<List<Object>> layer, int i, int j) {
+        boolean changed = false;
         int best_pos = j;
-        int best_crossing = 9999999;
-        Hedge ej = (Hedge)(layer.get(i).get(j));
+        int best_crossing = numCrossingLayer(layer, i);
+        Object ej = layer.get(i).get(j);
         layer.get(i).remove(j);
         for (int s = 0; s <= layer.get(i).size(); ++s) {
             layer.get(i).add(s, ej);
-            int crossing = crossingCal(layer, i, s);
+            int crossing = numCrossingLayer(layer, i);
             if (crossing < best_crossing) {
                 best_pos = s;
                 best_crossing = crossing;
@@ -441,75 +470,87 @@ public class Hgraph {
             layer.get(i).remove(s);
         }
         layer.get(i).add(best_pos, ej);
-    }
- 
-    public int crossingCal(List<List<Object>> layer, int i, int j) {
-        Hedge ej = (Hedge)(layer.get(i).get(j));
-        int crossing = 0;
-        for (int s = 0; s < layer.get(i-1).size(); ++s) {
-            Object obj = layer.get(i-1).get(s);
-            if (obj instanceof Hedge) {
-                Hedge e = (Hedge)obj;
-                if (layer.get(i).contains(obj)) {
-                    if ((layer.get(i).indexOf(obj)-j)*(s-layer.get(i-1).indexOf(ej.source())) < 0) {
-                        ++crossing;
-                    }
-                }
-                else {
-                    if ((layer.get(i).indexOf(e.target())-j)*(s-layer.get(i-1).indexOf(ej.source())) < 0) {
-                        ++crossing;
-                    }
-                }
-            }
-            else if (obj instanceof Hvertex) {
-                Hvertex v = (Hvertex)obj;
-                for (int ss = 0; ss < v.outDeg(); ++ss) {
-                    if (layer.get(i).contains(v.outAdj(ss))) {
-                        if ((layer.get(i).indexOf(v.outAdj(ss))-j)*(s-layer.get(i-1).indexOf(ej.source())) < 0) {
-                            ++crossing;
-                        }
-                    }
-                    else if (layer.get(i).contains(v.outEdge(ss))) {
-                        if ((layer.get(i).indexOf(v.outEdge(ss))-j)*(s-layer.get(i-1).indexOf(ej.source())) < 0) {
-                            ++crossing;
-                        }
-                    }
-                }
-            }
+        if (best_pos != j) {
+            changed = true;
         }
+        return changed;
+    }
 
-        for (int s = 0; s < layer.get(i+1).size(); ++s) {
-            Object obj = layer.get(i+1).get(s);
-            if (obj instanceof Hedge) {
-                Hedge e = (Hedge)obj;
-                if (layer.get(i).contains(obj)) {
-                    if ((layer.get(i).indexOf(obj)-j)*(s-layer.get(i+1).indexOf(ej.target())) < 0) {
-                        ++crossing;
-                    }
-                }
-                else {
-                    if ((layer.get(i).indexOf(e.source())-j)*(s-layer.get(i+1).indexOf(ej.target())) < 0) {
-                        ++crossing;
-                    }
-                }
-            }
-            else if (obj instanceof Hvertex) {
-                Hvertex v = (Hvertex)obj;
-                for (int ss = 0; ss < v.inDeg(); ++ss) {
-                    if (layer.get(i).contains(v.inAdj(ss))) {
-                        if ((layer.get(i).indexOf(v.inAdj(ss))-j)*(s-layer.get(i+1).indexOf(ej.target())) < 0) {
-                            ++crossing;
-                        }
-                    }
-                    else if (layer.get(i).contains(v.inEdge(ss))) {
-                        if ((layer.get(i).indexOf(v.inEdge(ss))-j)*(s-layer.get(i+1).indexOf(ej.target())) < 0) {
-                            ++crossing;
-                        }
-                    }
-                }
-            }
+    //caculate the number of crossing around layer(i)
+    //i.e. beween layers i-1, i and between layers i, i+1
+    public int numCrossingLayer(List<List<Object>> layer, int i) {
+        int crossing = 0;
+        if (i != 0) {
+            crossing += numCrossing2Layer(layer.get(i-1), layer.get(i));
+        }
+        if (i != layer.size()-1) {
+            crossing += numCrossing2Layer(layer.get(i), layer.get(i+1));
         }
         return crossing;
+    }
+    
+    //l2 is the next layer of l1.
+    //calculate the number of crossing between these two neighboring layers.
+    public int numCrossing2Layer(List<Object> l1, List<Object> l2) {
+        int crossing = 0;
+        //(start[i], end[i]), 0<=i<=size(start) 
+        //stores all links between these two layers.
+        List<Integer> start = new ArrayList<Integer>();
+        List<Integer> end = new ArrayList<Integer>();
+        for (int i = 0; i < l1.size(); ++i) {
+            Object obj = l1.get(i);
+            if (obj instanceof Hedge) {
+                Hedge e = (Hedge)obj;
+                int j1 = l2.indexOf(e.target());
+                int j2 = l2.indexOf(e);
+                if (j1 != -1) {
+                    start.add(i); end.add(j1);
+                }
+                if (j2 != -1) {
+                    start.add(i); end.add(j2);
+                }
+            }
+            if (obj instanceof Hvertex) {
+                Hvertex v = (Hvertex)obj;
+                for (int j = 0; j < v.outDeg(); ++j) {
+                    int j1 = l2.indexOf(v.outAdj(j));
+                    int j2 = l2.indexOf(v.outEdge(j));
+                    if (j1 != -1) {
+                        start.add(i); end.add(j1);
+                    }
+                    if (j2 != -1) {
+                        start.add(i); end.add(j2);
+                    }
+                }
+            }          
+        }
+        //finished constructing start, end.
+        //let's start calculating number of crossing.
+        for (int i = 0; i < start.size(); ++i) {
+            for (int j = i+1; j < start.size(); ++j) {
+                if (isCrossing(start.get(i), end.get(i), start.get(j), end.get(j))) {
+                    ++crossing;
+                }
+            }
+        }
+        //return the result;
+        return crossing;
+    }
+ 
+    //(i1, j1), (i2, j2) are two links between layer i, j
+    //i1,i2 are the indexes of these links in layer i.
+    //j1,j2 are the indexes of these links in layer j.
+    //determine if these two links cross.
+    public boolean isCrossing(int i1, int j1, int i2, int j2) {
+        if (j1 > j2 && i2 > i1) {
+            return true;
+        }
+        else if (j1 < j2 && i2 < i1) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     
     /*///////////////////////////////////////////////
@@ -531,6 +572,7 @@ public class Hgraph {
         return assignmentAveraging(assignment_ul, assignment_ur);
     }
     
+    //reverse the layering.
     public List<List<Object>> layerReversing(List<List<Object>> layer) {
         List<List<Object>> layer2 = new ArrayList<List<Object>>();
         for (int i = 0; i < layer.size(); ++i) {
@@ -542,6 +584,8 @@ public class Hgraph {
         return layer2;
     }
     
+    //reverse the result of coordinate assignment
+    //i.e. inverse the drawing w.r.t horizontal line
     public Map<Object, Integer> assignmentReversing(Map<Object, Integer> assignment) {
         Map<Object, Integer> assignment2 = new HashMap<Object, Integer>();
         int max = 0; 
@@ -564,6 +608,8 @@ public class Hgraph {
         return assignment2;
     }
 
+    //averaging the two coordinat assignment.
+    //save the result as the new assignment (which is the assignment returned)
     public Map<Object, Integer> assignmentAveraging(Map<Object, Integer> a1, Map<Object, Integer> a2) {
         Map<Object, Integer> assignment = new HashMap<Object, Integer>();
         for (Hvertex v: vertexList) {
@@ -712,6 +758,7 @@ public class Hgraph {
         return m;
     }
     
+    //find the median of the list s
     public int median(List<Integer> s) {
         if (s.size() == 0) {
             return -1;
@@ -739,7 +786,7 @@ public class Hgraph {
             return ss.get(ss.size()/2);
         }
     }
-    
+
       /**
      * (Roughly) Alg3 of "Fast and Simple Horizontal Coordinate Assignment"
      * The algorithm in essence is LPA.
