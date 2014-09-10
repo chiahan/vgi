@@ -35,7 +35,7 @@ public class TransitionDrawingData {
         this.startArrow = null;
         this.endArrow = null;
         this.edgeStyle = null;
-        this.shape = null;
+        this.shape = "curve";
 
     }
 

@@ -1,9 +1,6 @@
 package vgi.automata;
 
-/*
- * To change this template, choose Tools | Templates and open the template in
- * the editor.
- */
+
 import com.mxgraph.model.mxCell;
 import com.mxgraph.util.mxConstants;
 import java.awt.Rectangle;
@@ -19,204 +16,381 @@ import vgi.layout.helperclass.GroupReplacedAutomata;
 import vgi.layout.helperclass.VertexGroup;
 import vgi.layout.linear.LinearLayoutAutomata;
 
+
+/**
+ * Create an automata object which implement AutomataInterface
+ * 
+ * Automata class is created with specified states and transitions, and
+ * 1. geometric data is for the location of the specific cell
+ * 2. drawing data if for the style of the specific cell
+ * 
+ * @author lucas
+ */
 public class Automata implements AutomataInterface {
 
-	@Override
-	public String getName() {
-		return this.pmName;
-	}
 
-	@Override
-	public void setName(String name) {
-		this.pmName = name;
-	}
+    @Override
+    public String getName() {
+        return this.pmName;
+    }
 
-	/**
-	 * @return the Type
-	 */
-	@Override
-	public WritingData getWritingData() {
-		return this.pmWritingData;
-	}
+    @Override
+    public void setName(String name) {
+        this.pmName = name;
+    }
 
-	@Override
-	public void setWritingData(WritingData writingData) {
-		this.pmWritingData = writingData;
-	}
+    @Override
+    public WritingData getWritingData() {
+        return this.pmWritingData;
+    }
 
-	@Override
-	public Weight getWeight() {
-		return this.pmWeight;
-	}
+    @Override
+    public void setWritingData(WritingData writingData) {
+        this.pmWritingData = writingData;
+    }
 
-	@Override
-	public void setWeight(Weight weight) {
-		this.pmWeight = weight;
-	}
+    @Override
+    public Weight getWeight() {
+        return this.pmWeight;
+    }
 
-	@Override
-	public Alphabet getAlphabet() {
-		return this.pmAlphabet;
-	}
+    @Override
+    public void setWeight(Weight weight) {
+        this.pmWeight = weight;
+    }
 
-	@Override
-	public void setAlphabet(Alphabet alphabet) {
-		this.pmAlphabet = alphabet;
-	}
+    @Override
+    public Alphabet getAlphabet() {
+        return this.pmAlphabet;
+    }
 
-	@Override
-	public Alphabet getOutputAlphabet() {
-		return this.pmOutputAlphabet;
-	}
+    @Override
+    public void setAlphabet(Alphabet alphabet) {
+        this.pmAlphabet = alphabet;
+    }
 
-	@Override
-	public void setOutputAlphabet(Alphabet alphabet) {
-		this.pmOutputAlphabet = alphabet;
-	}
+    @Override
+    public Alphabet getOutputAlphabet() {
+        return this.pmOutputAlphabet;
+    }
 
-	/**
-	 * @return the states
-	 */
-	@Override
-	public List<State> getAllStates() {
-		return this.pmAllStates;
-	}
+    @Override
+    public void setOutputAlphabet(Alphabet alphabet) {
+        this.pmOutputAlphabet = alphabet;
+    }
 
-	/**
-	 * @param states the states to set
-	 */
-	@Override
-	public void setAllStates(List<State> allStates) {
-		this.pmAllStates = allStates;
-	}
 
-	@Override
-	public void addState(State state) { // private
-		pmAllStates.add(state);
-		String name = state.getName();
-		if (name == null) {
-			state.setName("s" + Integer.toString(counter));
-		}
-                counter++;
-               createJgraphState(state);
-               
-	}   
-       private State addState(String name,StateGeometricData geoData,StateDrawingData drawData){ // private
-		State state=new State();
-                state.setGeometricData(geoData);
-                state.setDrawingData(drawData);
-            
-                pmAllStates.add(state);
-		//String name = state.getName();
-		if (name == null) {
-			state.setName("s" + Integer.toString(counter));
-		}else
-                    state.setName(name);
-                counter++;
-                
-                createJgraphState(state);
-                
-                
-                
-                return state;
-                
-	}
-        public State addState(){
-            // TODO 
-            State state=null;
-            
-            return state;
+
+    /*-------------------------------------*\
+        #STATE
+    \*-------------------------------------*/
+
+    /**
+     * @return all the states that the automata has
+     */
+    @Override
+    public List<State> getAllStates() {
+        return this.pmAllStates;
+    }
+
+    /**
+     * @param states that will replace all the origin states
+     */
+    @Override
+    public void setAllStates(List<State> allStates) {
+        this.pmAllStates = allStates;
+    }
+
+    /**
+     * add specified state to the automata
+     * 
+     * 1. add state to list of all states
+     * 2. get the name of the state
+     * 3. (in case there's no name of the state) set the state name with counter
+     * 4. create cell via corresponding jgraphAutomata
+     * 
+     * @param state 
+     */
+    @Override
+    public void addState(State state) {
+
+        pmAllStates.add(state);
+
+        String name = state.getName();
+
+        if (name == null) {
+            state.setName("s" + Integer.toString(counter));
         }
-        public State addState(Point2D location){
+
+        counter++;
+
+        createJgraphState(state);
+
+    }
+
+
+    /**
+     * privately add state with specified name, geometric data, and drawing data
+     * 
+     * 1. set up a new State object with name, geodata and drawdata
+     * 2. add state object to list of states
+     * 3. give name to the state
+     * 4. increment global `counter` variable
+     * 5. create cell via corresponding jgraphAutomata
+     * 
+     * @param name
+     * @param geoData
+     * @param drawData
+     * @return state
+     */
+    private State addState(String name,
+                           StateGeometricData geoData,
+                           StateDrawingData drawData) {
+
+        State state = new State();
+
+        state.setGeometricData(geoData);
+        state.setDrawingData(drawData);
             
-            System.out.println("add state in automata: "+location);
-            //State state=new State();
-            StateGeometricData geoData=new StateGeometricData();
-            //geoData.setLocation(location);
-            geoData.setX(location.getX());
-            geoData.setY(location.getY());
-            
-            StateDrawingData drawData=new StateDrawingData();
-            
-            State state=addState(null,geoData,drawData);
-            
-            return state;
-        }
-        private void createJgraphState(State state){
-            mxCell cell=jgraphAutomata.createVertex(state);
-            cellTable.put(state, cell);
+        pmAllStates.add(state);
+
+        if (name == null) {
+            state.setName("s" + Integer.toString(counter));
+        } else {
+            state.setName(name);
         }
         
-	/**
-	 * @return the transitions
-	 */
-	@Override
-	public List<Transition> getAllTransitions() {
-		return this.pmAllTransitions;
-	}
-
-	/**
-	 * @param transitions the transitions to set
-	 */
-	@Override
-	public void setAllTransitions(List<Transition> transitions) {
-		this.pmAllTransitions = transitions;
-	}
-
-	@Override
-	public void addTransition(Transition transition) {
-		pmAllTransitions.add(transition);
+        counter++;
                 
-                State source=transition.getSourceState();
-                State target=transition.getTargetState();
-                source.addTransition(transition);
-                if(!target.equals(source)) target.addTransition(transition);
+        createJgraphState(state);
+
+        return state;
+
+    }
+
+
+    /**
+     * Default add null state with no parameters
+     * 
+     * @return state
+     */
+    public State addState() {
+
+        State state = null;
+
+        return state;
+
+    }
+
+
+    /**
+     * Add state with specified geometric data
+     * 
+     * 1. get geometric data from pass in location
+     * 2. set drawing data to default style
+     * 3. add state with addState()
+     * 
+     * @param location
+     * @return state
+     */
+    public State addState(Point2D location) {
+
+        System.out.println("add state in automata: "+location);
+        StateGeometricData geoData = new StateGeometricData();
+        geoData.setX(location.getX());
+        geoData.setY(location.getY());
+
+        StateDrawingData drawData = new StateDrawingData();
+
+        State state = addState(null, geoData, drawData);
+
+        return state;
+    }
+
+
+    /**
+     * Create specific jGraph state via jgraphAutomata built-in method in case
+     * of abstraction
+     * 
+     * 1. create cell with jgraphAutomata createVertex()
+     * 2. put the declared cell into cell table
+     * 
+     * 
+     * @param state 
+     */
+    private void createJgraphState(State state) {
+
+        mxCell cell = jgraphAutomata.createVertex(state);
+
+        cellTable.put(state, cell);
+    }
+
+
+
+
+
+    /*-------------------------------------*\
+        #Transition
+    \*-------------------------------------*/
+
+    /**
+     * @return all the transitions that the automata has
+     */
+    @Override
+    public List<Transition> getAllTransitions() {
+
+        return this.pmAllTransitions;
+
+    }
+
+
+    /**
+     * @param transitions that will replace all the origin transitions
+     */
+    @Override
+    public void setAllTransitions(List<Transition> transitions) {
+
+        this.pmAllTransitions = transitions;
+
+    }
+
+
+    /**
+     * add specified transition to the automata
+     * 
+     * 1. add the transition to list of all transition
+     * 2. get the source and target state of the transition
+     * 3. add the transition to source state
+     * 4. if the target is not equal to source, add the transition to
+     *    target state
+     * 5. create cell via corresponding jgraphAutomata
+     * 
+     * @param transition
+     */
+    @Override
+    public void addTransition(Transition transition) {
+
+        pmAllTransitions.add(transition);
+
+        State source = transition.getSourceState();
+        State target = transition.getTargetState();
+
+        source.addTransition(transition);
+
+        if ( !target.equals(source) ) {
+            target.addTransition(transition);
+        }
+
+        createJgraphTransition(transition);
+
+        System.out.println("add transition: "
+                           + transition.getSourceState().getName()
+                           + "->"
+                           + transition.getTargetState().getName());
+
+    }
+
+
+    /**
+     * add specified transition to the automata with created cell
+     * 
+     * 1. add transition to transition list
+     * 2. put edge to cell table
+     * 
+     * @param transition
+     * @param edge 
+     */
+    public void addTransition(Transition transition, mxCell edge) {
+
+        pmAllTransitions.add(transition);
+
+        cellTable.put(transition, edge);
+
+    }
+
+
+    /**
+     * add transition with specified source, target, geodata, and drawdata
+     * 
+     * 1. create new Transition object
+     * 2. set the transition object with given source, target, geodata
+     *    and drawdata
+     * 3. create default expression of the label
+     * 4. set up the label of the transition
+     * 5. add transition to the list of the transition list
+     * 6. add the transition to source state
+     * 7. if the target is not equal to source, add the transition to
+     *    target state
+     * 8. create cell via corresponding jgraphAutomata
+     * 
+     * @param source
+     * @param target
+     * @param geo
+     * @param draw
+     * @return transition
+     */
+    private Transition addTransition(State source,
+                                     State target,
+                                     TransitionGeometricData geo,
+                                     TransitionDrawingData draw) {
+
+        Transition transition = new Transition();
+
+        transition.setSourceState(source);
+        transition.setTargetState(target);
+        transition.setDrawingData(draw);
+        transition.setGeometricData(geo);
+
+        WeightedRegularExpression.Atomic expression
+                = WeightedRegularExpression.Atomic.createAtomic(this);
+        expression.setSymbol( expression.getAlphabet().allSymbols.get(0) );
+
+
+        transition.setLabel(expression);
+
+        pmAllTransitions.add(transition);
+
         
-                //addTransition(transition.getSourceState(),transition.getTargetState(),transition.getGeometricData(),transition.getDrawingData());
-                createJgraphTransition(transition);
-                
-                System.out.println("add transition: "+transition.getSourceState().getName()+"->"+transition.getTargetState().getName());
-               
-	}
-        //
-        // TODO: for initial/final in DisplayUtil
-        //
-        public void addTransition(Transition transition, mxCell edge){
-            pmAllTransitions.add(transition);
-            cellTable.put(transition, edge);
+        source.addTransition(transition);
+
+        if ( !target.equals(source) ) {
+            target.addTransition(transition);
         }
-        private Transition addTransition(State source,State target,TransitionGeometricData geo,TransitionDrawingData draw){
-            
-            Transition transition=new Transition();
-            transition.setSourceState(source);
-            transition.setTargetState(target);
-            transition.setDrawingData(draw);
-            transition.setGeometricData(geo);
-            
-            
-            WeightedRegularExpression.Atomic expression = WeightedRegularExpression.Atomic.createAtomic(this);
-            expression.setSymbol(expression.getAlphabet().allSymbols.get(0));
-            transition.setLabel(expression);
-        
-            pmAllTransitions.add(transition);
-		
-            source.addTransition(transition);
-            if(!target.equals(source)) target.addTransition(transition);
-            
-            createJgraphTransition(transition);
-            
-            return transition;
-        }
-        public Transition addTransition(State source,State target){
-            
-            return addTransition(source,target,new TransitionGeometricData(),new TransitionDrawingData());
-            
-        }
-        private void createJgraphTransition(Transition transition){
-            mxCell edge=jgraphAutomata.createEdge(transition);
-            cellTable.put(transition, edge);
-            
-        }
+
+        createJgraphTransition(transition);
+
+        return transition;
+
+    }
+
+
+    /**
+     * add transition with specified source and target
+     * 
+     * call addTransition()
+     * 
+     * @param source
+     * @param target
+     * @return transition from addTransition()
+     */
+    public Transition addTransition(State source,
+                                    State target) {
+
+        return addTransition(source,
+                             target,
+                             new TransitionGeometricData(),
+                             new TransitionDrawingData());
+
+    }
+
+
+    private void createJgraphTransition(Transition transition) {
+
+        mxCell edge = jgraphAutomata.createEdge(transition);
+
+        cellTable.put(transition, edge);
+
+    }
 	@Override
 	public List<State> getInitialStates() {
 		ArrayList<State> arrayList = new ArrayList<State>();
@@ -1177,7 +1351,10 @@ public class Automata implements AutomataInterface {
         if ( endArrow == null ) endArrow = dtdd.getEndArrow();
 
         String edgeStyle = pmTransitionDrawingData.getEdgeStyle();
-        if ( edgeStyle == null ) edgeStyle = dtdd.getEdgeStyle();
+        if ( edgeStyle == null ) {
+            // edgeStyle = dtdd.getEdgeStyle();
+            
+        }
         
         String shape = pmTransitionDrawingData.getShape();
         if ( shape == null ) shape = dtdd.getShape();
@@ -1215,7 +1392,7 @@ public class Automata implements AutomataInterface {
         if ( drawingData.getEdgeStyle() != null ) {
             pmTransitionDrawingData.setEdgeStyle(drawingData.getEdgeStyle());
         }
-        if ( drawingData.getEdgeStyle() != null ) {
+        if ( drawingData.getShape() != null ) {
             pmTransitionDrawingData.setShape(drawingData.getShape());
         }
         
@@ -1314,12 +1491,12 @@ public class Automata implements AutomataInterface {
         if ( strokeColor == null ) {
             strokeColor = atdd.getStrokeColor();
         }
-        
+
         float strokeWidth = tdd.getStrokeWidth();
         if ( strokeWidth < 0 ) {
             strokeWidth = atdd.getStrokeWidth();
         }
-        
+
         String startArrow = tdd.getStartArrow();
         if ( startArrow == null) {
             startArrow = atdd.getStartArrow();
@@ -1337,7 +1514,7 @@ public class Automata implements AutomataInterface {
         
         String shape = tdd.getShape();
         if ( shape == null ) {
-            shape = atdd.getShape();
+            //shape = atdd.getShape();
         }
         
         return new TransitionDrawingData(strokeColor,

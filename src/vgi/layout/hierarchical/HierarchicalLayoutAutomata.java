@@ -417,16 +417,14 @@ public class HierarchicalLayoutAutomata {
 
             List<Transition> tl = s.getIncomingTransitions();
 
-            /*
+            
             for (Transition t: tl) {
-                System.out.println("transition: " + t);
+                System.out.println("transition: " + t.getDrawingData().getShape());
                 TransitionDrawingData td = t.getDrawingData();
-                td.setShape(mxConstants.SHAPE_LINE);
-                td.setEdgeStyle(mxConstants.SHAPE_LINE);
-                System.out.println("after transition: " + t);
+                td.setShape(null);
                 automata_.setTransitionDrawingData(t, td);
+                System.out.println("after transition: " + t.getDrawingData().getShape());
             }
-            */
 
         }
 

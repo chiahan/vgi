@@ -194,7 +194,7 @@ public class JgraphAutomata {
         return (mxCell) vertex;
     }
 
-    public mxCell createEdge(Transition transition){
+    public mxCell createEdge(Transition transition) {
         mxCell source = null, target = null;
         State sourceState=transition.getSourceState();
         State targetState=transition.getTargetState();
@@ -210,10 +210,8 @@ public class JgraphAutomata {
                                 null, transition.getLabel(), source, target,
                                 "shape=curve;fontSize="+defaultFontSize+";textShape=default;"));  // orginal one
                                 //"fontSize="+defaultFontSize+";textShape=default;"));
-                                
 
 
-        
         mxGeometry geometry = edge.getGeometry();
         if (geometry == null) {
             geometry = new mxGeometry();
@@ -258,6 +256,9 @@ public class JgraphAutomata {
 
         graph.setSelectionCell(edge);
         TransitionDrawingData drawingdata = automata.getTransitionDrawingData(transition);
+        System.out.println("edge style while creating edge");
+        System.out.println(drawingdata.getEdgeStyle());
+        
         if (drawingdata != null) {
             graph.setCellStyles("strokeColor", drawingdata.getStrokeColor());
             graph.setCellStyles("strokeWidth", String.valueOf(drawingdata.getStrokeWidth()));
@@ -267,6 +268,9 @@ public class JgraphAutomata {
             graph.setCellStyles("shape", drawingdata.getShape());
 
         }
+        
+        System.out.println("create edge");
+        System.out.println(edge.getStyle());
         
         return edge;
         
