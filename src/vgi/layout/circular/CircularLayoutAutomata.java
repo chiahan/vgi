@@ -220,6 +220,11 @@ public class CircularLayoutAutomata {
        // }finally{
            // graph.getModel().endUpdate();
        // }
+        
+        /* Adjust the edge style in linear layout */
+        adjustEdgeStyle(automata);
+        automata.refresh();
+
     }
     
     public void doLayout(Automata automata_,GroupReplacedAutomata replaceAutomata){
@@ -2245,6 +2250,33 @@ public class CircularLayoutAutomata {
     public void setRouteTwoPhase(boolean t){
         routeTwoPhase=t;
     }
+
     
+    /**
+     * Adjust edge style corresponds to the circular layout: curve
+     * @param automata_ 
+     */
+    public void adjustEdgeStyle(Automata automata_) {
+        
+        System.out.println("current: " + automata_);
+
+        List<State> StateList = new ArrayList<State>();
+        StateList.addAll(automata_.getAllStates());
+        for (State s: StateList) {
+
+            List<Transition> tl = s.getIncomingTransitions();
+
+            
+            for (Transition t: tl) {
+                System.out.println("transition: " + t.getDrawingData().getShape());
+                TransitionDrawingData td = t.getDrawingData();
+                td.setShape("curve");
+                automata_.setTransitionDrawingData(t, td);
+                System.out.println("after transition: " + t.getDrawingData().getShape());
+            }
+
+        }
+
+    }
 }
 

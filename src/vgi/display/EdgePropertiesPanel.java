@@ -74,7 +74,10 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
            labelTextField.setText(String.valueOf(initial.getWeight()));
        if(finall!=null)
            labelTextField.setText(String.valueOf(finall.getWeight()));
-        
+       if(source!=null)
+           StartTextField.setText(String.valueOf(source));
+       if(target!=null)
+           EndTextField.setText(String.valueOf(target));
     }
     
     private void showGeoAndDrawingData(){
@@ -325,6 +328,10 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         strokeColorButton = new javax.swing.JButton();
         strokeWidthBox = new javax.swing.JComboBox();
         curveLabelCheckBox = new javax.swing.JCheckBox();
+        StartLabel = new javax.swing.JLabel();
+        EndLabel = new javax.swing.JLabel();
+        StartTextField = new javax.swing.JTextField();
+        EndTextField = new javax.swing.JTextField();
 
         jLabel3.setText("jLabel3");
 
@@ -480,10 +487,28 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         stylePanel.add(curveLabelCheckBox, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         add(stylePanel, gridBagConstraints);
+
+        StartLabel.setText("Start State :  ");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 8;
+        add(StartLabel, gridBagConstraints);
+
+        EndLabel.setText("End State :   ");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 9;
+        add(EndLabel, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(StartTextField, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(EndTextField, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void startStyleComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startStyleComboBoxActionPerformed
@@ -784,6 +809,10 @@ public class EdgePropertiesPanel extends javax.swing.JPanel {
         
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel EndLabel;
+    private javax.swing.JTextField EndTextField;
+    private javax.swing.JLabel StartLabel;
+    private javax.swing.JTextField StartTextField;
     private javax.swing.JLabel angleLabel;
     private javax.swing.JTextField angleTextField;
     private javax.swing.JCheckBox curveLabelCheckBox;

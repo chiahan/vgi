@@ -219,6 +219,12 @@ public class LinearLayoutAutomata
         {
             NonGroupProcess(automata);
         }
+
+
+        /* Adjust the edge style in linear layout */
+        adjustEdgeStyle(automata);
+        automata.refresh();
+        
     }
 
     // if there is vertexGroup
@@ -1068,5 +1074,33 @@ public class LinearLayoutAutomata
         
         automata.moveStates(vertexMapList, new Point2D.Double(0,-offsetx));
         System.out.println("move all vertices: "+offsetx);
+    }
+
+
+    /**
+     * Adjust edge style corresponds to the linear layout: curve
+     * @param automata_ 
+     */
+    public void adjustEdgeStyle(Automata automata_) {
+        
+        System.out.println("current: " + automata_);
+
+        List<State> StateList = new ArrayList<State>();
+        StateList.addAll(automata_.getAllStates());
+        for (State s: StateList) {
+
+            List<Transition> tl = s.getIncomingTransitions();
+
+            
+            for (Transition t: tl) {
+                System.out.println("transition: " + t.getDrawingData().getShape());
+                TransitionDrawingData td = t.getDrawingData();
+                td.setShape("curve");
+                automata_.setTransitionDrawingData(t, td);
+                System.out.println("after transition: " + t.getDrawingData().getShape());
+            }
+
+        }
+
     }
 }
