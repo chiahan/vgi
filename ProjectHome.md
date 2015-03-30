@@ -1,0 +1,1 @@
+A graphical user interface for the finite state machine manipulation platform, Vaucanson (available from http://www.lrde.epita.fr/cgi-bin/twiki/view/Vaucanson/).
